@@ -56,7 +56,6 @@ export function StatusBar({ gs }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <div><span className="t-dim t-xs">CR </span><span className="t-gold t-sm">{gs.credits.toLocaleString()}</span></div>
         <div><span className="t-dim t-xs">FUEL </span><span className="t-cyan t-sm">{gs.fuel}/{gs.maxFuel}</span></div>
-        <div><span className="t-dim t-xs">REP </span><span className="t-sm">{gs.reputation}</span></div>
         <div><span className="t-dim t-xs">JOUR </span><span className="t-sm">{gs.day}</span></div>
       </div>
 

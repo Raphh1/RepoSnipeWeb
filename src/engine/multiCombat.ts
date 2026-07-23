@@ -1,6 +1,7 @@
 import type { Enemy, GameState, CombatLogEntry, CombatOutcome } from '../types'
 import { rollWeaponForTier } from '../data/weapons'
 import { rollArmorForTier } from '../data/armors'
+import { TIER_LOW, TIER_MID, TIER_HIGH } from '../data/enemies'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const roll = (chance: number) => Math.random() * 100 < chance
@@ -291,7 +292,6 @@ function resolveMultiVictory(gs: GameState, squad: SquadMember[]) {
 
 // Préparer des groupes d'ennemis typiques
 export function buildSquad(danger: number, day: number): Enemy[] {
-  const { TIER_LOW, TIER_MID, TIER_HIGH } = require('../data/enemies')
   const pool = danger >= 3 ? TIER_HIGH : danger >= 2 ? TIER_MID : TIER_LOW
   const size = danger >= 2 ? rng(2, 4) : rng(2, 3)
   const squad: Enemy[] = []

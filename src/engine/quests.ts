@@ -1,5 +1,5 @@
 import type { GameState, Quest, QuestType } from '../types'
-import { getAccessibleStations } from '../data/stations'
+import { getAccessibleStations, getStation } from '../data/stations'
 import { getRunQuestRewardMult } from '../data/runModifiers'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
@@ -21,6 +21,44 @@ const DELIVERY_ITEMS = [
   'Données classifiées','Composants électroniques','Munitions',
   'Implants','Eau purifiée','Rations militaires','Cristaux énergétiques',
 ]
+
+// ── QUÊTE TUTORIELLE (5.1) ────────────────────────────────────────────────────
+// Auto-assignée au jour 1. Un PNJ de la station de départ demande une livraison
+// vers la station proche la moins chère. Guide le joueur : acheter → voyager →
+// livrer → revenir. Récompense : crédits + révélation du tracker Nexus.
+export const TUTORIAL_QUEST_ID = 'tutorial-delivery'
+
+export function buildTutorialQuest(startStation: string): Quest {
+  const accessible = getAccessibleStations(startStation)
+  // Cible : la station accessible la moins chère en carburant (la plus proche)
+  const target = accessible.length > 0
+    ? accessible.reduce((best, s) =>
+        (s.fuelCostFrom[startStation] ?? 99) < (best.fuelCostFrom[startStation] ?? 99) ? s : best
+      )
+    : null
+  const targetName = target?.name ?? startStation
+  // Item vendu sur place mais PAS dans la cargaison de départ (Médicaments) :
+  // force le joueur à passer par le marché pour apprendre l'achat.
+  const startGoods = getStation(startStation).goods
+  const item = startGoods.find(g => g !== 'Médicaments') ?? startGoods[0] ?? 'Médicaments'
+
+  return {
+    id: TUTORIAL_QUEST_ID,
+    title: `Première course : ${item}`,
+    giver: 'Vieux Doss',
+    giverStation: startStation,
+    type: 'delivery',
+    description:
+      `Vieux Doss, un mécano usé qui traîne sur ${startStation}, t'arrête. "Première fois dans le secteur, hein ? `
+      + `Écoute : mon contact à ${targetName} crève sans ses ${item}. Passe au marché ici, achète-en une caisse, `
+      + `prends ton vaisseau jusqu'à ${targetName} et livre-les en main propre. Il te paiera bien — et il a un vieux `
+      + `datapad pour toi. Crois-moi, ce qu'il y a dessus vaut plus que les crédits."`,
+    targetStation: targetName,
+    targetItem: item,
+    creditReward: 800,
+    repReward: 15,
+  }
+}
 
 const HEIST_ITEMS = [
   'Données classifiées','Implants','Cristaux énergétiques',
@@ -417,6 +455,11 @@ export function completeQuest(gs: GameState, quest: Quest): Partial<GameState> {
     cargo: newCargo,
   }
 
+  // Quête tutorielle : révèle le tracker Nexus + bonus de bienvenue
+  if (quest.id === TUTORIAL_QUEST_ID) {
+    result.nexusTrackerUnlocked = true
+  }
+
   if (quest.factionId && quest.factionId === gs.faction) {
     result.factionMissions = (gs.factionMissions ?? 0) + 1
   }
@@ -626,7 +669,6 @@ export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string
 
   const descriptions: Record<QuestType, string> = {
     delivery:   `${npcName} ${profile.flavor}. Porter ${item ?? 'un colis'} jusqu'à ${target.name}. Paiement à l'arrivée.`,
-    info:       `${npcName} ${profile.flavor}. Aller sur ${target.name} et revenir avec une situation précise. Pas de rumeurs — des faits.`,
     revenge:    `${npcName} ${profile.flavor}. Des gens sur ${target.name} ont fait quelque chose qu'ils n'auraient pas dû. Y aller et le faire comprendre.`,
     kill:       `${npcName} ${profile.flavor}. Neutraliser une cible sur ${target.name}. Pas de questions sur les méthodes.`,
     patrol:     `${npcName} ${profile.flavor}. Passer sur ${target.name} et s'assurer que tout est en ordre. Rapport au retour.`,

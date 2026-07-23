@@ -550,11 +550,13 @@ export const BOSS_STATIONS: Record<string, string> = {
 }
 
 // BFS — chemin le plus court (en nombre de sauts) entre deux stations
-export function findPath(from: string, to: string): string[] {
+export function findPath(from: string, to: string, excluded?: Set<string>): string[] {
   if (from === to) return [from]
   const adj: Record<string, string[]> = {}
   for (const s of STATIONS) {
+    if (excluded && excluded.has(s.name) && s.name !== to) continue
     for (const src of Object.keys(s.fuelCostFrom)) {
+      if (excluded && excluded.has(src) && src !== from) continue
       if (!adj[src]) adj[src] = []
       adj[src].push(s.name)
     }

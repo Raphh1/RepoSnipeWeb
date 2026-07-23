@@ -119,13 +119,12 @@ export function getStationItemMult(stationType: string, item: string): number {
 export function getFullBuyMult(gs: GameState, stationType: string, item: string): number {
   const typeMult  = getStationItemMult(stationType, item)
   const pillarDisc = getPillarDiscount(gs)
-  return Math.max(0.30, typeMult * (1 - pillarDisc))
+  const sellMult = getFullSellMult(gs, stationType, item)
+  return Math.max(sellMult + 0.10, typeMult * (1 - pillarDisc))
 }
 
-export function getFullSellMult(gs: GameState, stationType: string, item: string): number {
-  // Vente : inverse du profil (si l'item est rare ici, tu le vends plus cher)
+export function getFullSellMult(_gs: GameState, stationType: string, item: string): number {
   const typeMult = getStationItemMult(stationType, item)
-  // Prix de vente = 60-90% du prix de base modulé par le profil
   return Math.max(0.40, typeMult * 0.75)
 }
 

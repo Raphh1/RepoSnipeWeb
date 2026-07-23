@@ -45,6 +45,28 @@ export function WanderResultPanel({ gs, wanderEvent, dangerLevel, onReturn, star
     return parts.length > 0 ? ` · [${parts.join(', ')}]` : ''
   }
 
+  function previewDeltas(c: WanderEvent['choices'][number]): string | null {
+    if (c.hint) return c.hint
+    try {
+      const savedRandom = Math.random
+      let called = false
+      Math.random = () => { called = true; return 0.5 }
+      const res = c.result(gs)
+      Math.random = savedRandom
+      if (called || !res.gs) return null
+      const u = res.gs as Partial<GameState>
+      const parts: string[] = []
+      if (u.credits !== undefined) { const d = u.credits - gs.credits; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} cr`) }
+      if (u.reputation !== undefined) { const d = u.reputation - gs.reputation; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} rép`) }
+      if (u.playerHp !== undefined) { const d = u.playerHp - gs.playerHp; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} PV`) }
+      if (u.fuel !== undefined) { const d = u.fuel - gs.fuel; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} fuel`) }
+      if (u.isImprisoned) parts.push('prison')
+      return parts.length > 0 ? parts.join(', ') : null
+    } catch {
+      return null
+    }
+  }
+
   function handleChoice(c: WanderEvent['choices'][number]) {
     const res = c.result(gs)
     if (res.type === 'combat') {
@@ -86,9 +108,15 @@ export function WanderResultPanel({ gs, wanderEvent, dangerLevel, onReturn, star
           : <div className="col gap4">
               {wanderEvent.choices
                 .filter(c => !c.available || c.available(gs))
-                .map((c, i) => (
-                  <button key={i} className="px-btn" onClick={() => handleChoice(c)}>{c.label}</button>
-                ))}
+                .map((c, i) => {
+                  const delta = previewDeltas(c)
+                  return (
+                    <div key={i}>
+                      <button className="px-btn" style={{ width: '100%' }} onClick={() => handleChoice(c)}>{c.label}</button>
+                      {delta && <div className="t-xs t-dim" style={{ paddingLeft: '8px', marginTop: '2px', fontStyle: 'italic' }}>{delta}</div>}
+                    </div>
+                  )
+                })}
             </div>
         }
       </div>

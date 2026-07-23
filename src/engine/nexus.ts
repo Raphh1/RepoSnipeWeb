@@ -67,6 +67,25 @@ export interface NexusResult {
   spawnsBounty?: boolean
 }
 
+export function getActionSuccessChance(idx: number, action: NexusAction): number | null {
+  if (action === 'manipulate') return [40, 35, 30, 40][idx] ?? null
+  if (action === 'legendary') return 55
+  if (action === 'war') return 60
+  if (action === 'betray') return 100
+  if (action === 'force') return 100
+  if (action === 'pay') return idx === 2 ? 0 : 100
+  if (action === 'alliance') return 100
+  return null
+}
+
+export function getChanceLabel(pct: number): { label: string; color: string } {
+  if (pct <= 0) return { label: 'Impossible', color: 'var(--red)' }
+  if (pct <= 25) return { label: 'Très risqué', color: 'var(--red)' }
+  if (pct <= 40) return { label: 'Risqué', color: 'var(--orange)' }
+  if (pct <= 60) return { label: 'Probable', color: 'var(--cyan)' }
+  return { label: 'Quasi certain', color: 'var(--green)' }
+}
+
 // ── HELPERS INTERNES ──────────────────────────────────────────────────────────
 
 function getStanding(gs: GameState, pillar: string): number {

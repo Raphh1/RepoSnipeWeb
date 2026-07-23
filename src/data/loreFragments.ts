@@ -383,6 +383,8 @@ export const LORE_FRAGMENTS: LoreFragment[] = [
   },
 ]
 
+export const LORE_TOTAL = LORE_FRAGMENTS.length
+
 export function getFragment(id: string): LoreFragment | undefined {
   return LORE_FRAGMENTS.find(f => f.id === id)
 }

@@ -4,7 +4,7 @@ import type { CombatAction } from '../../engine/combat'
 import type { CombatLogEntry } from '../../types'
 import { HackSequence } from '../minigames/HackSequence'
 import { useFloatingNumbers, FloatingNumbersLayer } from '../ui/FloatingNumber'
-import { playHit, playCrit, playHeal, playFlee, playClick, playVictory, playDeath } from '../../engine/sfx'
+import { playHit, playCrit, playHeal, playFlee, playClick, playVictory, playDeath, playFinisher } from '../../engine/sfx'
 
 type NegotiateCondition = {
   id: string
@@ -49,6 +49,7 @@ export function CombatScreen() {
   const [negotiateConditions, setNegotiateConditions] = useState<NegotiateCondition[] | null>(null)
   const [enemyDamaged, setEnemyDamaged]       = useState(false)
   const [playerDamaged, setPlayerDamaged]     = useState(false)
+  const [critShake, setCritShake]             = useState(false)
   const prevEnemyHp  = useRef(cs.enemyHp)
   const prevPlayerHp = useRef(gs.playerHp)
   const isAnimating = queue.length > 0
@@ -97,6 +98,14 @@ export function CombatScreen() {
   useEffect(() => {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight
   }, [visibleLog])
+
+  useEffect(() => {
+    if (cs.log.some(e => e.type === 'crit')) {
+      setCritShake(true)
+      const t = setTimeout(() => setCritShake(false), 500)
+      return () => clearTimeout(t)
+    }
+  }, [cs.log])
 
   // Shake + SFX + chiffres flottants quand les HP changent
   useEffect(() => {
@@ -254,7 +263,7 @@ export function CombatScreen() {
   }
 
   return (
-    <div className="layout">
+    <div className={`layout ${critShake ? 'crit-shake' : ''}`}>
       {/* Overlay mort ennemi */}
       {victoryPending && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
@@ -390,7 +399,7 @@ export function CombatScreen() {
         <div className="t-xs t-dim mb8">{isAnimating ? '...' : 'ACTION :'}</div>
         <div className="col gap4">
           {cs.momentum >= 3 && (
-            <button className="px-btn px-btn--primary" disabled={isAnimating} onClick={() => act({ type: 'finisher' })}>
+            <button className="px-btn px-btn--primary momentum-pulse" disabled={isAnimating} onClick={() => { playFinisher(); act({ type: 'finisher' }) }}>
               ★ FINISHER · <span className="t-gold">{dmgRange(3)} dmg</span> · reset momentum
             </button>
           )}
@@ -524,10 +533,13 @@ export function CombatScreen() {
               🥃 Alcools exotiques +60 Sta · l'ennemi attaque · ×{gs.cargo['Alcools exotiques']}
             </button>
           )}
-          {gs.fuel > 0 && (
+          {gs.fuel > 0 && cs.fleeAttempts < 2 && (
             <button className="px-btn px-btn--danger" disabled={isAnimating} onClick={flee}>
               🏃 Fuir · {50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)}% succès · -1 carburant
             </button>
+          )}
+          {cs.fleeAttempts >= 2 && (
+            <div className="t-xs t-red" style={{ padding: '4px 0' }}>Fuite impossible — trop de tentatives ratées</div>
           )}
         </div>
       </div>

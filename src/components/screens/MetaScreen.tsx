@@ -86,12 +86,15 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
                     <div className="row" style={{ alignItems: 'flex-start', gap: '12px' }}>
                       <div style={{ flex: 1 }}>
                         <div className="row" style={{ gap: '8px', alignItems: 'center' }}>
-                          <span className="t-sm" style={{ color: owned && (activeThisRun || !isPreRun) ? color : 'var(--text-bright)' }}>
-                            {owned && (activeThisRun || !isPreRun) ? '✓ ' : ''}{unlock.name}
+                          <span className="t-sm" style={{ color: owned && (activeThisRun || !isPreRun) ? color : !reqMet ? 'var(--dim)' : 'var(--text-bright)' }}>
+                            {owned ? '✓ ' : !reqMet ? '🔒 ' : canBuy ? '○ ' : ''}{unlock.name}
+                          </span>
+                          <span className="tag t-xs" style={{ borderColor: owned ? color : !reqMet ? 'var(--border-dim)' : 'var(--border)', color: owned ? color : 'var(--dim)' }}>
+                            {owned ? 'DÉBLOQUÉ' : !reqMet ? 'VERROUILLÉ' : canBuy ? 'DISPONIBLE' : `${unlock.cost} pts`}
                           </span>
                           {reqName && !owned && (
-                            <span className="tag t-xs" style={{ borderColor: 'var(--border-dim)', color: 'var(--text-dim)' }}>
-                              nécessite : {reqName}
+                            <span className="t-xs t-dim">
+                              (requiert : {reqName})
                             </span>
                           )}
                         </div>

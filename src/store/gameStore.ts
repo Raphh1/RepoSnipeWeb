@@ -6,9 +6,10 @@ import { initCombat, processCombatAction, type CombatAction } from '../engine/co
 import { getArenaEnemyForRound } from '../data/enemies'
 import { initMultiCombat, processMultiAction, type MultiCombatAction } from '../engine/multiCombat'
 import { checkObjectives } from '../engine/objectives'
-import { checkQuestsOnArrival, completeQuest, generateChainQuest } from '../engine/quests'
+import { checkQuestsOnArrival, completeQuest, generateChainQuest, buildTutorialQuest, TUTORIAL_QUEST_ID } from '../engine/quests'
 import { checkMajorQuestAdvancement } from '../engine/majorQuests'
 import { applyClassTravelEffects, rollTravelEvent, spendAction } from '../engine/travelEvents'
+import { rollPillarRumor } from '../engine/pillarRumors'
 import { checkArcTriggers, ARC_DEFINITIONS, advanceArc } from '../engine/narrativeArcs'
 import { maybeRivalEncounter } from '../engine/npcTracker'
 import { checkStalkerTrigger, rollStalkerEvent, escalateStalker } from '../engine/stalker'
@@ -54,7 +55,7 @@ function buildInitialState(playerClass: PlayerClass): GameState {
     cargo: playerClass.medicBonus
       ? { 'Médicaments': 4 }
       : { 'Médicaments': 2 },
-    activeQuests: [],
+    activeQuests: [buildTutorialQuest(playerClass.startStation)],
     completedQuestIds: [],
     completedObjectives: [],
     faction: 'none',
@@ -92,6 +93,8 @@ function buildInitialState(playerClass: PlayerClass): GameState {
     nexusPath: {},
     nexusWars: [],
     nexusAngered: [],
+    nexusTrackerUnlocked: false,
+    pillarRumorsSeen: [],
     stalker: undefined,
     pendingArrival: false,
     pendingDaySummary: null,
@@ -223,7 +226,10 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     set({ gs: { ...gs, screen: 'intro' as Screen } })
   },
 
-  goTo: (screen) => set(s => s.gs ? { gs: { ...s.gs, screen, pendingCombatOutcome: null, pendingMessage: null } } : s),
+  goTo: (screen) => {
+    import('../engine/sfx').then(m => m.playNavigate())
+    set(s => s.gs ? { gs: { ...s.gs, screen, pendingCombatOutcome: null, pendingMessage: null } } : s)
+  },
 
   travel: (station, fuelCost) => {
     const { gs } = get()
@@ -244,6 +250,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       explorationFightsDone: 0,
       tournamentRound: 0,
       usedLocalActivities: [],
+      scavengedThisVisit: false,
       visitedStations: Array.from(new Set([...gs.visitedStations, station])),
       screen: 'station-arrival',
       pendingCombatOutcome: null,
@@ -345,9 +352,9 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       newGs = { ...newGs, activeArcs: [...newGs.activeArcs, ...newArcs] }
     }
 
-    // Rival encounter — trigger combat si rencontre
+    // Rival encounter — trigger combat si rencontre (skip si escort en cours)
     const rival = maybeRivalEncounter(newGs)
-    if (rival.triggered && rival.rival) {
+    if (rival.triggered && rival.rival && newGs.screen !== 'escort-minigame') {
       const rivalEnemy = {
         name: rival.rival.name,
         maxHp: 55 + Math.min(80, Math.abs(rival.rival.repDelta) * 2),
@@ -503,6 +510,13 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     // Journal — entrée de voyage
     const travelJournal = addJournal(gs, `J'ai quitté ${gs.currentStation} en direction de ${station}.`, 'travel')
     newGs = { ...newGs, journal: travelJournal }
+
+    // ── SEEDING PILIERS — rumeurs jours 3-8 (5.2) ────────────────────────────
+    const rumor = rollPillarRumor(newGs)
+    if (rumor) {
+      newGs = { ...newGs, pillarRumorsSeen: [...(newGs.pillarRumorsSeen ?? []), rumor.rumorId] }
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + rumor.text
+    }
 
     set({ gs: newGs, travelEventMessage: travelMsg, objectivePopup: objMsg, questCompletionMsg: questMsg, ...(chainNotif ? { chainEventNotification: chainNotif } : {}), ...(newWorldEvent ? { worldEventPopup: newWorldEvent } : {}) })
   },
@@ -701,7 +715,10 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
     newGs = { ...newGs, ...objGs }
     const objMsg = newlyCompleted.length > 0 ? `★ OBJECTIF : ${newlyCompleted.map(o => o.name).join(', ')}` : null
-    const questMsg = `★ ${quest.title}\n+${quest.creditReward.toLocaleString()} cr · +${quest.repReward} rép${chain ? '\n📋 Suite disponible — voir Chercher du travail' : ''}`
+    const tutorialSuffix = quest.id === TUTORIAL_QUEST_ID
+      ? `\n\n◈ Le contact te remet le datapad promis. Il s'allume : "Le vide cache quatre Fragments du Nexus. Réunis-les et le secteur est à toi." — TRACKER NEXUS RÉVÉLÉ.`
+      : ''
+    const questMsg = `★ ${quest.title}\n+${quest.creditReward.toLocaleString()} cr · +${quest.repReward} rép${chain ? '\n📋 Suite disponible — voir Chercher du travail' : ''}${tutorialSuffix}`
     set({ gs: newGs, objectivePopup: objMsg, questCompletionMsg: questMsg })
   },
 
@@ -714,7 +731,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       return
     }
     if (won) {
-      let newGs = { ...gs, ...completeQuest(gs, quest), pendingEscortQuestId: undefined, screen: 'station-hub' as Screen }
+      let newGs: GameState = { ...gs, ...completeQuest(gs, quest), pendingEscortQuestId: undefined, screen: 'station-hub' as Screen }
       const chain = generateChainQuest(quest, newGs)
       if (chain) newGs = { ...newGs, pendingChainQuests: [...(newGs.pendingChainQuests ?? []), chain] }
       const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
@@ -814,7 +831,21 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
   } : s),
 }), {
   name: 'snipeweb-save',
+  version: 2,
   partialize: (state) => ({ gs: state.gs }),
+  migrate: (persisted: unknown, version: number) => {
+    const state = persisted as { gs: GameState | null }
+    if (version < 1 && state.gs) {
+      state.gs.arcPerduClues = state.gs.arcPerduClues ?? []
+      state.gs.scavengedThisVisit = state.gs.scavengedThisVisit ?? false
+    }
+    if (version < 2 && state.gs) {
+      // Les saves existantes ont déjà passé le tutoriel : tracker visible d'office
+      state.gs.nexusTrackerUnlocked = state.gs.nexusTrackerUnlocked ?? true
+      state.gs.pillarRumorsSeen = state.gs.pillarRumorsSeen ?? []
+    }
+    return state
+  },
 }))
 
 function handleCombatOutcome(
@@ -824,7 +855,7 @@ function handleCombatOutcome(
   set: (partial: Partial<Store>) => void,
   reward?: { loot: number; weaponName?: string; armorName?: string; isBossKill: boolean }
 ) {
-  let newGs = { ...gs, combatState: cs }
+  let newGs: GameState = { ...gs, combatState: cs }
 
   // ── TOURNOI : victoire en round intermédiaire ou finale ──────────────────
   if (outcome === 'victory' && gs.tournamentRound > 0) {

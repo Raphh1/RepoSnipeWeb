@@ -234,6 +234,52 @@ const COLD_GREETINGS = [
   "Je t'ai pas invité.",
 ]
 
+// ── CALLBACKS PILIERS (5.3) ────────────────────────────────────────────────
+// Les PNJ réagissent aux décisions piliers du joueur : un détenteur rendu
+// ennemi inspire la peur, un allié puissant le respect, une trahison la méfiance.
+const PILLAR_DISPLAY: Record<string, string> = {
+  cesarion: 'Cesarion', raphazarus: 'Raphazarus', eliotis: 'Eliotis',
+  maxance: 'Maxance', alanossa: 'Alanossa', scotty: 'Scotty',
+}
+
+function getPillarCallback(npc: PersistentNpc, gs: GameState): string | null {
+  const standing = (gs.pillarStanding ?? {}) as Record<string, number>
+  const angered = gs.nexusAngered ?? []
+
+  // 1. Le joueur a fait d'un détenteur son ennemi → les PNJ le craignent
+  if (angered.length > 0) {
+    const name = PILLAR_DISPLAY[angered[0]] ?? angered[0]
+    const fearLines = [
+      `${npc.name} se fige une seconde. "On dit que ${name} a juré ta perte. Les gens comme moi évitent les gens comme toi."`,
+      `"Tu es celui qui a défié ${name}," souffle ${npc.name}, sans te regarder en face. "Fais vite ce que tu as à faire et pars."`,
+      `${npc.name} recule d'un pas. "Je veux pas d'ennui avec ${name}. Et toi, t'en es un ambulant."`,
+    ]
+    return pick(fearLines)
+  }
+
+  // 2. Trahison d'Alanossa (standing très bas) → méfiance ouverte
+  if ((standing.alanossa ?? 0) <= -25) {
+    const betrayLines = [
+      `${npc.name} te dévisage froidement. "Alanossa raconte partout que tu l'as trahie. Ici, sa parole pèse lourd."`,
+      `"On m'a dit de pas te faire confiance," lâche ${npc.name}. "Quelqu'un proche d'Alanossa. Tu vois le genre."`,
+    ]
+    return pick(betrayLines)
+  }
+
+  // 3. Allié puissant d'un détenteur → respect
+  const topPillar = Object.entries(standing).sort((a, b) => b[1] - a[1])[0]
+  if (topPillar && topPillar[1] >= 60) {
+    const name = PILLAR_DISPLAY[topPillar[0]] ?? topPillar[0]
+    const respectLines = [
+      `${npc.name} hoche la tête avec déférence. "On murmure que ${name} te tient en haute estime. Ça ouvre des portes, par ici."`,
+      `"T'es proche de ${name}, pas vrai ?" ${npc.name} baisse d'un ton, presque respectueux. "Ça change tout."`,
+    ]
+    return pick(respectLines)
+  }
+
+  return null
+}
+
 export function getNpcGreeting(npc: PersistentNpc, reaction: NpcReaction, gs?: GameState): string {
   // Lignes contextuelles — priorité sur la réaction générique
   if (gs && reaction !== 'hostile') {
@@ -271,6 +317,9 @@ export function getNpcGreeting(npc: PersistentNpc, reaction: NpcReaction, gs?: G
     if ((gs.runModifiers ?? []).includes('traque')) {
       return `${npc.name} remarque quelque chose. "Tu regardes derrière toi depuis que t'es entré. C'est quoi ton problème ?"`
     }
+    // ── CALLBACKS DÉCISIONS PILIERS (5.3) ──────────────────────────────────
+    const pillarLine = getPillarCallback(npc, gs)
+    if (pillarLine) return pillarLine
     if (npc.timesMet >= 6) {
       const regularLines = [
         `${npc.name} lève les yeux sans surprise. "T'es encore là. Tu fais partie des meubles maintenant."`,

@@ -20,11 +20,12 @@ export type ExploreResult =
   | { type: 'loot'; credits: number; description: string; loreFragmentId?: string }
   | { type: 'item'; item: string; qty: number; description: string; loreFragmentId?: string }
   | { type: 'fuel'; amount: number; description: string; loreFragmentId?: string }
-  | { type: 'event'; description: string; choices: ExploreChoice[]; loreFragmentId?: string }
+  | { type: 'event'; description: string; choices: ExploreChoice[]; loreFragmentId?: string; rare?: boolean }
   | { type: 'nothing'; description: string; loreFragmentId?: string }
 
 export interface ExploreChoice {
   label: string
+  hint?: string
   result: (gs: GameState) => { gs: Partial<GameState>; message: string; minigame?: 'lockpick'; minigameReward?: Partial<GameState> }
   available?: (gs: GameState) => boolean
 }
@@ -293,16 +294,119 @@ const SCENES_SCIENTIFIC: Array<() => ExploreResult> = [
   () => ({ type: 'combat', depth: 0 }),
 ]
 
+function pillarShift(gs: GameState, shifts: [string, number][]): Partial<GameState> {
+  const cur = gs.pillarStanding ?? { cesarion: 0, raphazarus: 0, eliotis: 0, maxance: 0, alanossa: 0, scotty: 0 }
+  const updated = { ...cur }
+  for (const [key, delta] of shifts) {
+    const k = key as keyof typeof cur
+    updated[k] = Math.max(-100, Math.min(100, (updated[k] ?? 0) + delta))
+  }
+  return { pillarStanding: updated }
+}
+
+const SCENES_PILLAR_DILEMMAS: Array<() => ExploreResult> = [
+  () => ({
+    type: 'event',
+    rare: true,
+    description: "Un messager portant les couleurs de Cesarion te tends un paquet. 'Dépose ça au dépôt de Raphazarus. Il ne doit pas savoir que ça vient de nous.' Le paquet est scellé.",
+    choices: [
+      {
+        label: "Livrer discrètement",
+        hint: "+10 Cesarion, -5 Raphazarus",
+        result: (gs) => ({ gs: pillarShift(gs, [['cesarion', 10], ['raphazarus', -5]]), message: "Livré. Cesarion te considère de confiance. Raphazarus... ne sait rien. Pour l'instant." }),
+      },
+      {
+        label: "Prévenir Raphazarus",
+        hint: "+10 Raphazarus, -10 Cesarion",
+        result: (gs) => ({ gs: pillarShift(gs, [['raphazarus', 10], ['cesarion', -10]]), message: "Raphazarus apprécie ta loyauté. Le messager de Cesarion ne reviendra pas." }),
+      },
+      { label: "Refuser — pas tes affaires", result: () => ({ gs: {}, message: "Tu passes. Le messager disparaît dans la foule." }) },
+    ],
+  }),
+  () => ({
+    type: 'event',
+    rare: true,
+    description: "Eliotis a laissé des données de recherche dans un terminal ouvert. Maxance les cherche — il veut les détruire avant qu'elles ne circulent.",
+    choices: [
+      {
+        label: "Copier les données pour Eliotis",
+        hint: "+8 Eliotis, -8 Maxance",
+        result: (gs) => ({ gs: pillarShift(gs, [['eliotis', 8], ['maxance', -8]]), message: "Tu sécurises les données. Eliotis saura que tu les as protégées." }),
+      },
+      {
+        label: "Les donner à Maxance",
+        hint: "+8 Maxance, -8 Eliotis",
+        result: (gs) => ({ gs: pillarShift(gs, [['maxance', 8], ['eliotis', -8]]), message: "Maxance hoche la tête. Les données disparaissent. Eliotis ne saura jamais." }),
+      },
+      { label: "Les détruire — danger trop grand", hint: "-3 Eliotis, -3 Maxance", result: (gs) => ({ gs: pillarShift(gs, [['eliotis', -3], ['maxance', -3]]), message: "Personne n'aura rien. Ni merci, ni rancune." }) },
+    ],
+  }),
+  () => ({
+    type: 'event',
+    rare: true,
+    description: "Alanossa et Scotty se disputent le contrôle d'un couloir marchand. Chacun veut que tu témoignes en sa faveur devant le conseil de station.",
+    choices: [
+      {
+        label: "Soutenir Alanossa",
+        hint: "+12 Alanossa, -6 Scotty, +5 rép",
+        result: (gs) => ({ gs: { ...pillarShift(gs, [['alanossa', 12], ['scotty', -6]]), reputation: gs.reputation + 5 }, message: "Alanossa remporte le vote. Scotty te lance un regard glacial. +5 rép." }),
+      },
+      {
+        label: "Soutenir Scotty",
+        hint: "+12 Scotty, -6 Alanossa, +5 rép",
+        result: (gs) => ({ gs: { ...pillarShift(gs, [['scotty', 12], ['alanossa', -6]]), reputation: gs.reputation + 5 }, message: "Scotty contrôle le couloir. Alanossa n'oubliera pas. +5 rép." }),
+      },
+      { label: "Refuser de témoigner", hint: "-3 rép", result: (gs) => ({ gs: { reputation: gs.reputation - 3 }, message: "Les deux te trouvent lâche. -3 rép." }) },
+    ],
+  }),
+  () => ({
+    type: 'event',
+    rare: true,
+    description: "Un agent de Raphazarus te propose un contrat : saboter une livraison destinée à Alanossa. Paiement généreux.",
+    choices: [
+      {
+        label: "Accepter le sabotage",
+        hint: "+8 Raphazarus, -10 Alanossa, +400 cr",
+        result: (gs) => ({ gs: { ...pillarShift(gs, [['raphazarus', 8], ['alanossa', -10]]), credits: gs.credits + 400 }, message: "La livraison n'arrivera jamais. +400 cr. Raphazarus est satisfait." }),
+      },
+      {
+        label: "Prévenir Alanossa",
+        hint: "+10 Alanossa, -8 Raphazarus",
+        result: (gs) => ({ gs: pillarShift(gs, [['alanossa', 10], ['raphazarus', -8]]), message: "Alanossa renforce sa sécurité. Raphazarus perd un agent — et un peu de confiance en toi." }),
+      },
+      { label: "Ignorer les deux", result: () => ({ gs: {}, message: "Pas ton problème. La livraison suit son cours. Ou pas." }) },
+    ],
+  }),
+  () => ({
+    type: 'event',
+    rare: true,
+    description: "Tu surprends une conversation entre un lieutenant de Maxance et un contact de Cesarion. Un échange d'information clandestin. Ils ne t'ont pas vu.",
+    choices: [
+      {
+        label: "Vendre l'info à Eliotis",
+        hint: "+10 Eliotis, -5 Maxance, -5 Cesarion, +200 cr",
+        result: (gs) => ({ gs: { ...pillarShift(gs, [['eliotis', 10], ['maxance', -5], ['cesarion', -5]]), credits: gs.credits + 200 }, message: "Eliotis paie bien pour ce genre de renseignement. +200 cr." }),
+      },
+      {
+        label: "Faire chanter les deux",
+        hint: "+500 cr, -5 Maxance, -5 Cesarion",
+        result: (gs) => ({ gs: { ...pillarShift(gs, [['maxance', -5], ['cesarion', -5]]), credits: gs.credits + 500 }, message: "Ils paient. Cher. Mais ils ne t'oublieront pas." }),
+      },
+      { label: "Fermer les yeux", result: () => ({ gs: {}, message: "Tu n'as rien vu. C'est mieux comme ça." }) },
+    ],
+  }),
+]
+
 function getScenesForZone(type: string): Array<() => ExploreResult> {
   switch (type) {
-    case 'dangerous': return [...SCENES_DANGEROUS, ...JSON_EXPLORE_DANGEROUS, ...JSON_EXPLORE_GENERIC]
-    case 'peaceful':  return [...SCENES_PEACEFUL,  ...JSON_EXPLORE_PEACEFUL,  ...JSON_EXPLORE_GENERIC]
-    case 'industrial':return [...SCENES_INDUSTRIAL,...JSON_EXPLORE_INDUSTRIAL,...JSON_EXPLORE_GENERIC]
-    case 'ruins':     return [...SCENES_RUINS,     ...JSON_EXPLORE_RUINS,     ...JSON_EXPLORE_GENERIC]
-    case 'military':  return [...SCENES_MILITARY,  ...JSON_EXPLORE_MILITARY,  ...JSON_EXPLORE_GENERIC]
-    case 'luxury':    return [...SCENES_LUXURY,    ...JSON_EXPLORE_LUXURY,    ...JSON_EXPLORE_GENERIC]
-    case 'scientific':return [...SCENES_SCIENTIFIC,...JSON_EXPLORE_SCIENTIFIC,...JSON_EXPLORE_GENERIC]
-    default:          return [...SCENES_DANGEROUS, ...JSON_EXPLORE_DANGEROUS, ...JSON_EXPLORE_GENERIC]
+    case 'dangerous': return [...SCENES_DANGEROUS, ...JSON_EXPLORE_DANGEROUS, ...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    case 'peaceful':  return [...SCENES_PEACEFUL,  ...JSON_EXPLORE_PEACEFUL,  ...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    case 'industrial':return [...SCENES_INDUSTRIAL,...JSON_EXPLORE_INDUSTRIAL,...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    case 'ruins':     return [...SCENES_RUINS,     ...JSON_EXPLORE_RUINS,     ...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    case 'military':  return [...SCENES_MILITARY,  ...JSON_EXPLORE_MILITARY,  ...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    case 'luxury':    return [...SCENES_LUXURY,    ...JSON_EXPLORE_LUXURY,    ...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    case 'scientific':return [...SCENES_SCIENTIFIC,...JSON_EXPLORE_SCIENTIFIC,...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
+    default:          return [...SCENES_DANGEROUS, ...JSON_EXPLORE_DANGEROUS, ...JSON_EXPLORE_GENERIC, ...SCENES_PILLAR_DILEMMAS]
   }
 }
 
@@ -989,7 +1093,8 @@ function rollContextAwareEvent(gs: GameState): WanderEvent | null {
 
 export interface WanderChoice {
   label: string
-  result: (gs?: GameState) => { gs?: Partial<GameState>; message: string; type?: 'combat' | 'negotiation' | 'navigation'; quest?: import('../types').Quest }
+  hint?: string
+  result: (gs: GameState) => { gs?: Partial<GameState>; message: string; type?: 'combat' | 'negotiation' | 'navigation'; quest?: import('../types').Quest }
   available?: (gs: GameState) => boolean
 }
 

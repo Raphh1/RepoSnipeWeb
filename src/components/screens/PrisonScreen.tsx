@@ -210,7 +210,9 @@ export function PrisonScreen() {
       credits: finalCr,
       pillarStanding: newStanding,
       activeQuests: survivingQuests,
-      factionStanding: Math.max(0, (gs.factionStanding ?? 100) - factionStandingLoss),
+      factionReputation: gs.faction !== 'none'
+        ? { ...gs.factionReputation, [gs.faction]: Math.max(0, gs.factionReputation[gs.faction] - factionStandingLoss) }
+        : gs.factionReputation,
       journal: addJournal(gs, journalText, 'prison'),
       ...itemPatch,
     })

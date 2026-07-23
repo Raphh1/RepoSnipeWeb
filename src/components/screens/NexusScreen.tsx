@@ -6,6 +6,7 @@ import {
   NEXUS_FRAGMENTS, attemptNexusFragment, canAttempt,
   isFragmentAvailable, getPillarStandingLabel, getWarAvailableFragments,
   HOLDER_BOUNTY_HUNTERS, ARC_PERDU_CLUES,
+  getActionSuccessChance, getChanceLabel,
   type NexusAction
 } from '../../engine/nexus'
 import { BOSS_STATIONS } from '../../data/stations'
@@ -72,6 +73,7 @@ export function NexusScreen() {
   const [selected, setSelected] = useState<number>(0)
   const [msg, setMsg]         = useState<string | null>(null)
   const [msgOk, setMsgOk]     = useState(false)
+  const [goldFlash, setGoldFlash] = useState(false)
 
   const collected = gs.nexusFragments ?? []
   const nexusPath = gs.nexusPath ?? {}
@@ -141,6 +143,8 @@ export function NexusScreen() {
     patch({ nexusPath: { ...nexusPath, [idx]: action } })
     setMsg(result.message)
     setMsgOk(true)
+    setGoldFlash(true)
+    setTimeout(() => setGoldFlash(false), 800)
   }
 
   // ── VUE DÉTAIL ───────────────────────────────────────────────────────────
@@ -156,7 +160,7 @@ export function NexusScreen() {
     const actions = ACTIONS_BY_FRAGMENT[selected] ?? []
 
     return (
-      <div className="layout">
+      <div className={`layout ${goldFlash ? 'gold-flash' : ''}`}>
         <div className="row" style={{ gap: '12px', alignItems: 'center' }}>
           <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => { setView('list'); setMsg(null) }}>
             ← RETOUR
@@ -308,6 +312,8 @@ export function NexusScreen() {
               const check = canAttempt(gs, selected, action)
               const dangerColor = ACTION_DANGER[action]
               const isDanger = action === 'force' || !!dangerColor
+              const chance = getActionSuccessChance(selected, action)
+              const chanceInfo = chance !== null ? getChanceLabel(chance) : null
               return (
                 <div key={action}>
                   <button
@@ -319,7 +325,10 @@ export function NexusScreen() {
                     }}
                     onClick={() => attempt(selected, action)}
                   >
-                    {ACTION_LABELS[action]}
+                    <span>{ACTION_LABELS[action]}</span>
+                    {chanceInfo && chance !== null && chance < 100 && (
+                      <span className="t-xs" style={{ marginLeft: '8px', color: chanceInfo.color }}>{chance}% — {chanceInfo.label}</span>
+                    )}
                     {isDanger && action !== 'force' && <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>⚠ conséquences permanentes</span>}
                   </button>
                   {!check.ok && check.reason && (

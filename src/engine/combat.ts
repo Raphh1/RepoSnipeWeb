@@ -17,7 +17,7 @@ export function initCombat(enemy: Enemy): CombatState {
     enemyBurnDmg: 0,
     enemyBurnTurns: 0,
     enemyBlinded: false,
-    playerFled: false,
+    playerFled: false,  
     immunityUsed: false,
     playerStance: 'normal',
     momentum: 0,
@@ -38,6 +38,7 @@ export function initCombat(enemy: Enemy): CombatState {
     turnCount: 0,
     subBossShadowHits: 0,
     subBossDefenseStacks: 0,
+    fleeAttempts: 0,
     log: [],
   }
 }
@@ -73,7 +74,7 @@ function generateIntent(enemy: Enemy, cs: CombatState): EnemyIntent {
     if (r < 34) return 'heavy'
     if (r < 46) return 'defend'
     if (r < 58) return 'charge'
-    if (r < 68) return 'disarm'
+    if (r < 68) return 'disarm' 
     if (r < 78) return 'blood_rage'
     if (r < 88) return 'execution'
     return 'weaken'
@@ -433,13 +434,18 @@ export function processCombatAction(
       break
     }
     case 'flee': {
+      if (cs.fleeAttempts >= 2) {
+        addLog('Impossible de fuir — trop de tentatives ratées. Il faut se battre.', 'warning')
+        break
+      }
       const chance = 50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)
       if (roll(chance)) {
         newGs.fuel = Math.max(0, gs.fuel - 1)
         newCs.playerFled = true
         addLog('Tu t\'échappes. -1 carburant.', 'info')
       } else {
-        addLog(`${enemy.name} te coupe la route.`, 'enemy')
+        newCs.fleeAttempts = cs.fleeAttempts + 1
+        addLog(`${enemy.name} te coupe la route. (${2 - newCs.fleeAttempts} tentative${2 - newCs.fleeAttempts > 1 ? 's' : ''} restante${2 - newCs.fleeAttempts > 1 ? 's' : ''})`, 'enemy')
       }
       break
     }
@@ -1008,7 +1014,8 @@ export function processCombatAction(
 
     // Le Maréchal Osseux — sa rage augmente ses dégâts d'ennemi
     if (enemy.name === 'Le Maréchal Osseux' && (newCs.subBossDefenseStacks ?? 0) > 0) {
-      const bonusDmg = Math.floor(enemyDmg * (newCs.subBossDefenseStacks ?? 0) / 100)
+      const baseDmg = rng(enemy.damageMin, enemy.damageMax)
+      const bonusDmg = Math.floor(baseDmg * (newCs.subBossDefenseStacks ?? 0) / 100)
       playerHp = Math.max(0, playerHp - bonusDmg)
       if (bonusDmg > 0) addLog(`💀 Rage du Maréchal — +${bonusDmg} dégâts supplémentaires ! PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
     }

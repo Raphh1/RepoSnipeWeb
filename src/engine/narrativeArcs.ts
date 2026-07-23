@@ -38,7 +38,6 @@ const ARC_ALANOSSA: ArcDefinition = {
     reputation: gs.reputation + 150,
     bossesDefeated: gs.bossesDefeated + 1,
     stationBossesBeaten: [...gs.stationBossesBeaten, 'Arc Ouest Apocalypse'],
-    stationPiecesRallied: gs.stationPiecesRallied + 1,
   }),
   steps: [
     {
@@ -133,7 +132,6 @@ const ARC_RAPHAZARUS: ArcDefinition = {
   completionReward: gs => ({
     credits: gs.credits + (gs.pastDecisions?.includes('raphazarus_joined') ? 4000 : 1500),
     reputation: gs.reputation + (gs.pastDecisions?.includes('raphazarus_joined') ? 80 : 20),
-    stationPiecesRallied: gs.stationPiecesRallied + 1,
   }),
   steps: [
     {
@@ -247,7 +245,6 @@ const ARC_VAEL: ArcDefinition = {
   completionReward: gs => ({
     credits: gs.credits + 5000,
     reputation: gs.reputation + 80,
-    stationPiecesRallied: gs.stationPiecesRallied + 1,
   }),
   steps: [
     {
@@ -347,7 +344,6 @@ const ARC_FACTIONWAR: ArcDefinition = {
   completionReward: gs => ({
     credits: gs.credits + 10000,
     reputation: gs.reputation + 200,
-    stationPiecesRallied: gs.stationPiecesRallied + 1,
     isFactionLeader: true,
   }),
   steps: [

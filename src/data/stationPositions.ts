@@ -81,8 +81,4 @@ export const STATION_POSITIONS: Record<string, StationPos> = {
   'Les Abysses de Velkor':     { x: 742, y: 498 },
   'Station Quarantaine':       { x: 702, y: 562 },
   "L'Arc Perdu":               { x: 792, y: 538 },
-
-  // ── PILIERS / ZONES SPÉCIALES ────────────────────────────────────────────
-  'Paradoxa Eterna':           { x: 308, y: 548 },
-  'La Tribosphère':            { x: 782, y: 172 },
 }

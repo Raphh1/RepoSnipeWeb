@@ -28,6 +28,7 @@ export type Screen =
   | 'crafting'
   | 'interrogation'
   | 'journal'
+  | 'lore'
   | 'escort-minigame'
   | 'map'
 
@@ -187,6 +188,7 @@ export interface CombatState {
   turnCount: number            // compteur de tours pour mécaniques de sous-boss
   subBossShadowHits: number    // Le Maître des Ombres — coups encaissés par l'ombre (se brise après 3)
   subBossDefenseStacks: number
+  fleeAttempts: number
   log: CombatLogEntry[]
 }
 
@@ -460,6 +462,10 @@ export interface GameState {
   nexusPath: Partial<Record<number, 'force' | 'pay' | 'alliance' | 'legendary' | 'gamble' | 'steal' | 'lore' | 'war' | 'betray' | 'manipulate'>>
   nexusWars: NexusWar[]
   nexusAngered: string[]  // pillar keys des détenteurs rendus ennemis permanents
+  // Tracker Nexus révélé après la quête tutorielle (5.1)
+  nexusTrackerUnlocked?: boolean
+  // Rumeurs piliers déjà entendues (5.2) — pour ne pas répéter
+  pillarRumorsSeen?: string[]
   pendingCombatArcId: string | null
   // Stalker system
   stalker: import('../engine/stalker').StalkerState | undefined
@@ -522,7 +528,8 @@ export interface GameState {
   // Services exclusifs des stations
   implantsBought: string[]         // identifiants implants achetés ce run
   usedFreeRestStations: string[]   // stations où le repos gratuit a été utilisé ce run
-  usedLocalActivities: string[]    // activités locales déjà faites (stationName-eventId), vidé à chaque voyage
+  usedLocalActivities: string[]
+  scavengedThisVisit?: boolean
   // Quêtes enchaînées
   pendingChainQuests: Quest[]
   // États dynamiques des stations

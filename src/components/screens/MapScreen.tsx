@@ -67,10 +67,17 @@ export function MapScreen() {
     ? PEACEFUL_STATIONS
     : new Set<string>()
 
+  const excludedStations = useMemo(() => {
+    const ex = new Set(closedStations)
+    if (!gs.arcPerduUnlocked) ex.add("L'Arc Perdu")
+    for (const s of bannedNow) ex.add(s)
+    return ex
+  }, [closedStations, gs.arcPerduUnlocked, bannedNow])
+
   const waypoint    = gs.waypoint ?? null
   const waypointPath = useMemo(
-    () => waypoint ? findPath(gs.currentStation, waypoint) : [],
-    [gs.currentStation, waypoint]
+    () => waypoint ? findPath(gs.currentStation, waypoint, excludedStations) : [],
+    [gs.currentStation, waypoint, excludedStations]
   )
   const pathSet = new Set(waypointPath)
 

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { getAccessibleStations, getFuelCost, getStation, findPath } from '../../data/stations'
+import { getAccessibleStations, getFuelCost, getStation, findPath, PEACEFUL_STATIONS } from '../../data/stations'
 import { getWorldEventFuelBonus, getClosedStations, getActiveEvents } from '../../engine/worldEvents'
 import { getEnemyByTier, scaleEnemy } from '../../data/enemies'
 import { AsteroidDodge } from '../minigames/AsteroidDodge'
@@ -40,20 +40,23 @@ export function TravelScreen() {
     s.name !== "L'Arc Perdu" || gs.arcPerduUnlocked
   )
 
-  const waypoint     = gs.waypoint ?? null
-  const waypointPath = useMemo(
-    () => waypoint ? findPath(gs.currentStation, waypoint) : [],
-    [gs.currentStation, waypoint]
-  )
-  // Prochaine étape sur le chemin (index 1 = juste après la station courante)
-  const nextOnPath = waypointPath.length >= 2 ? waypointPath[1] : null
-
-  // Seigneur de guerre banni des stations paisibles
-  const PEACEFUL = new Set(['Port Méridien', 'Colonie Perséphone', 'Star Quest', 'Scotty Golden North'])
-
   const events = getActiveEvents(gs)
   const fuelBonus = getWorldEventFuelBonus(events)
   const closedByEvent = getClosedStations(events)
+
+  const excludedStations = useMemo(() => {
+    const ex = new Set(closedByEvent)
+    if (!gs.arcPerduUnlocked) ex.add("L'Arc Perdu")
+    if (gs.class.peacefulBan) for (const s of PEACEFUL_STATIONS) ex.add(s)
+    return ex
+  }, [closedByEvent, gs.arcPerduUnlocked, gs.class.peacefulBan])
+
+  const waypoint     = gs.waypoint ?? null
+  const waypointPath = useMemo(
+    () => waypoint ? findPath(gs.currentStation, waypoint, excludedStations) : [],
+    [gs.currentStation, waypoint, excludedStations]
+  )
+  const nextOnPath = waypointPath.length >= 2 ? waypointPath[1] : null
 
   // Mini-jeu astéroïdes — déclenché à 30%
   if (pending) {
@@ -143,7 +146,7 @@ export function TravelScreen() {
         {accessible.map(station => {
           const baseCost = getFuelCost(gs.currentStation, station.name)
           const cost = baseCost + fuelBonus
-          const banned = gs.class.peacefulBan && PEACEFUL.has(station.name)
+          const banned = gs.class.peacefulBan && PEACEFUL_STATIONS.has(station.name)
           const isClosed = closedByEvent.has(station.name)
           const canGo = cost <= gs.fuel && !banned && !isClosed
 

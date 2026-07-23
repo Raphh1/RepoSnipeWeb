@@ -3,7 +3,7 @@ import { TypewriterText } from '../ui/TypewriterText'
 import type { GameState, WeaponData } from '../../types'
 import { useGameStore } from '../../store/gameStore'
 import { StatusBar } from '../ui/StatusBar'
-import { getStation, BOSS_STATIONS, FUEL_STATIONS } from '../../data/stations'
+import { getStation, BOSS_STATIONS, FUEL_STATIONS, getAccessibleStations, getFuelCost } from '../../data/stations'
 import { getEnemyForStation, scaleEnemy, TIER_BOSS } from '../../data/enemies'
 import { rollExplorationEvent, rollWanderEvent, type WanderEvent } from '../../engine/exploration'
 import type { ExploreResult } from '../../engine/exploration'
@@ -19,7 +19,7 @@ import { CardGame } from '../minigames/CardGame'
 import { ScenarioGame } from '../minigames/ScenarioGame'
 import { CustomsGame } from '../minigames/CustomsGame'
 import { stalkerToEnemy, getStalkerAmbushChance, getStalkerPresenceText } from '../../engine/stalker'
-import { isFactionBlockedAtStation, getStationFactionName } from '../../engine/factionRep'
+import { isFactionBlockedAtStation, getStationFactionName, STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getArrivalSituation, type ArrivalSituation } from '../../engine/arrivalSituations'
 import { RUN_MODIFIERS } from '../../data/runModifiers'
 import { getRunObjective } from '../../data/runObjectives'
@@ -28,6 +28,7 @@ import { getAvailableClues, canCollectClue, collectClue } from '../../engine/nex
 import { getDailyExpenses, getDailyExpenseBreakdown } from '../../engine/expenses'
 import { getActiveEvents } from '../../engine/worldEvents'
 import { getQuestsAtStation, canStartQuest, completeQuest, type EquipmentQuest } from '../../data/equipmentQuests'
+import { LORE_TOTAL } from '../../data/loreFragments'
 import { ExploreResultPanel } from './hub/ExploreResultPanel'
 import { WanderResultPanel } from './hub/WanderResultPanel'
 import { QuestOfferPanel } from './hub/QuestOfferPanel'
@@ -96,6 +97,12 @@ export function StationHub() {
   const [hoveredQuest, setHoveredQuest]     = useState<string | null>(null)
 
   const station      = getStation(gs.currentStation)
+  const reachableCount = getAccessibleStations(gs.currentStation).filter(s => getFuelCost(gs.currentStation, s.name) <= gs.fuel).length
+  const fuelStranded = reachableCount === 0 && gs.fuel > 0
+  // Soupape de sécurité : on autorise la recherche de carburant dès l'état critique
+  // (0 ou 1 destination accessible) sur une station qui n'en vend pas, et pas
+  // seulement une fois totalement à sec — sinon on peut rester coincé sans recours.
+  const canScavengeFuel = (gs.fuel <= 0 || reachableCount <= 1) && !FUEL_STATIONS.has(gs.currentStation)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ambianceText = useMemo(() => getAmbiance(gs.currentStation), [gs.currentStation])
   const factionBlocked     = isFactionBlockedAtStation(gs, gs.currentStation)
@@ -778,31 +785,7 @@ export function StationHub() {
         </div>
       )}
 
-      {/* ── RÉSUMÉ FIN DE JOURNÉE ──────────────────────────────────────────── */}
-      {gs.pendingDaySummary && (
-        <div className="px-box" style={{ borderColor: 'var(--dim)', background: 'rgba(0,0,0,0.5)' }}>
-          <div className="t-xs t-dim mb4" style={{ letterSpacing: '2px' }}>JOUR {gs.pendingDaySummary.prevDay} TERMINÉ</div>
-          <div className="t-sm t-bright mb4">
-            {gs.pendingDaySummary.actionsUsed >= 3
-              ? '★ Journée pleine — 3 actions effectuées.'
-              : gs.pendingDaySummary.actionsUsed > 0
-              ? `${gs.pendingDaySummary.actionsUsed}/3 actions effectuées sur ${gs.pendingDaySummary.station}.`
-              : `Aucune action à ${gs.pendingDaySummary.station}. Le vide n'attend pas.`}
-          </div>
-          <div className="t-xs t-dim mb8">
-            {gs.day <= 3 ? 'Le secteur te teste encore. Continue d\'avancer.' :
-             gs.day <= 7 ? 'Tu trouves ton rythme dans le vide.' :
-             gs.day <= 14 ? 'Les routes deviennent familières. Les dangers, moins.' :
-             'Le Nexus attend. Chaque jour compte.'}
-          </div>
-          <button className="px-btn px-btn--sm" style={{ width: 'auto' }}
-            onClick={() => patch({ pendingDaySummary: null })}>
-            Jour {gs.day} → Continuer
-          </button>
-        </div>
-      )}
-
-      {/* ── SITUATION D'ARRIVÉE ─────────────────────────────────────────────── */}
+      {/* ── SITUATION D'ARRIVÉE (interactive — reste séparée) ──────────────── */}
       {arrivalSit && !arrivalResult && (
         <div className="px-box" style={{ borderColor: 'var(--orange)', background: 'rgba(20,10,0,0.7)' }}>
           <div className="t-xs mb4" style={{ color: 'var(--orange)', letterSpacing: '2px' }}>◆ ARRIVÉE — {gs.currentStation.toUpperCase()}</div>
@@ -846,62 +829,82 @@ export function StationHub() {
         </div>
       )}
 
-      {/* ── BRIEFING D'ARRIVÉE : une seule carte à la fois ─────────────────── */}
-      {!arrivalSit && !arrivalResult && worldEventPopup ? (
-        <div className="px-box" style={{ borderColor: worldEventPopup.color, background: 'rgba(0,0,0,0.6)', boxShadow: `0 0 24px ${worldEventPopup.color}33` }}>
-          <div className="t-xs mb4" style={{ color: worldEventPopup.color, letterSpacing: '3px' }}>⚠ NOUVEL ÉVÉNEMENT MONDIAL</div>
-          <div className="t-sm t-bright mb8" style={{ color: worldEventPopup.color }}>{worldEventPopup.title}</div>
-          <div className="t-xs" style={{ lineHeight: '2', marginBottom: '12px' }}>{worldEventPopup.description}</div>
-          <div className="px-box" style={{ borderColor: 'var(--border)', background: 'rgba(0,0,0,0.3)', marginBottom: '12px', padding: '8px 12px' }}>
-            <div className="t-xs t-dim mb4">EFFETS</div>
-            <div className="t-xs" style={{ color: worldEventPopup.color }}>{worldEventPopup.shortDesc}</div>
-            <div className="t-xs t-dim mt4">Durée : {worldEventPopup.duration} jours (J{worldEventPopup.startDay}–J{worldEventPopup.startDay + worldEventPopup.duration})</div>
-          </div>
-          <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: worldEventPopup.color, color: worldEventPopup.color }} onClick={dismissWorldEvent}>
-            Continuer →
-          </button>
-        </div>
-      ) : chainEvent ? (
-        <div className="px-box" style={{ borderColor: chainEvent.color, background: 'rgba(0,0,0,0.5)' }}>
-          <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-            <div className="t-xs" style={{ color: chainEvent.color, letterSpacing: '2px' }}>
-              {chainEvent.type === 'reward' ? '★ CONSÉQUENCE' : chainEvent.type === 'threat' ? '⚠ REPRÉSAILLE' : chainEvent.type === 'mystery' ? '◆ MYSTÈRE' : chainEvent.type === 'consequence' ? '▼ CONSÉQUENCE' : '◆ INFORMATION'}
-            </div>
-            <div className="t-xs" style={{ color: chainEvent.color }}>{chainEvent.title}</div>
-          </div>
-          <div className="t-xs" style={{ lineHeight: '2.2', color: 'var(--text)', marginBottom: '10px' }}>
-            {chainEvent.description}
-          </div>
-          <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: chainEvent.color, color: chainEvent.color }} onClick={dismissChain}>
-            Continuer →
-          </button>
-        </div>
-      ) : travelMsg ? (
-        <div className="px-box" style={{ borderColor: 'var(--cyan)' }}>
-          <div className="t-xs t-cyan mb4">ÉVÉNEMENT DE VOYAGE</div>
-          <div className="t-xs">{travelMsg}</div>
-          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={dismissTravel}>Continuer →</button>
-        </div>
-      ) : questPopup ? (
-        <div className="px-box" style={{ borderColor: 'var(--green)', background: '#0a1a0a' }}>
-          <div className="t-xs t-green mb8">QUÊTE ACCOMPLIE</div>
-          {questPopup.split('\n\n').map((block, i) => {
-            const lines = block.split('\n')
-            return (
-              <div key={i} style={{ marginBottom: i < questPopup.split('\n\n').length - 1 ? '10px' : 0 }}>
-                <div className="t-xs t-bright">{lines[1]}</div>
-                <div className="t-xs t-green mt4">{lines[2]}</div>
+      {/* ── BRIEFING UNIFIÉ — toutes les notifications d'arrivée en un bloc ── */}
+      {!arrivalSit && !arrivalResult && (gs.pendingDaySummary || worldEventPopup || chainEvent || travelMsg || questPopup || objPopup) ? (
+        <div className="px-box" style={{ borderColor: 'var(--cyan)', background: 'rgba(0,0,0,0.5)' }}>
+          <div className="t-xs mb8" style={{ color: 'var(--cyan)', letterSpacing: '2px' }}>◆ BRIEFING — JOUR {gs.day}</div>
+
+          {gs.pendingDaySummary && (
+            <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border-dim)' }}>
+              <div className="t-xs t-dim" style={{ letterSpacing: '1px' }}>JOUR {gs.pendingDaySummary.prevDay} TERMINÉ</div>
+              <div className="t-xs t-bright mt2">
+                {gs.pendingDaySummary.actionsUsed >= 3
+                  ? '★ Journée pleine — 3 actions effectuées.'
+                  : gs.pendingDaySummary.actionsUsed > 0
+                  ? `${gs.pendingDaySummary.actionsUsed}/3 actions effectuées sur ${gs.pendingDaySummary.station}.`
+                  : `Aucune action à ${gs.pendingDaySummary.station}.`}
               </div>
-            )
-          })}
-          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto', borderColor: 'var(--green)', color: 'var(--green)' }} onClick={dismissQuest}>Continuer →</button>
+            </div>
+          )}
+
+          {worldEventPopup && (
+            <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border-dim)' }}>
+              <div className="t-xs" style={{ color: worldEventPopup.color, letterSpacing: '1px' }}>⚠ {worldEventPopup.title}</div>
+              <div className="t-xs mt2" style={{ lineHeight: '1.8' }}>{worldEventPopup.shortDesc}</div>
+              <div className="t-xs t-dim mt2">Durée : {worldEventPopup.duration} jours (J{worldEventPopup.startDay}–J{worldEventPopup.startDay + worldEventPopup.duration})</div>
+            </div>
+          )}
+
+          {chainEvent && (
+            <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border-dim)' }}>
+              <div className="t-xs" style={{ color: chainEvent.color, letterSpacing: '1px' }}>
+                {chainEvent.type === 'reward' ? '★' : chainEvent.type === 'threat' ? '⚠' : '◆'} {chainEvent.title}
+              </div>
+              <div className="t-xs mt2" style={{ lineHeight: '1.8' }}>{chainEvent.description}</div>
+            </div>
+          )}
+
+          {travelMsg && (
+            <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border-dim)' }}>
+              <div className="t-xs t-cyan" style={{ letterSpacing: '1px' }}>ÉVÉNEMENT DE VOYAGE</div>
+              <div className="t-xs mt2">{travelMsg}</div>
+            </div>
+          )}
+
+          {questPopup && (
+            <div style={{ marginBottom: '10px', paddingBottom: '8px', borderBottom: '1px solid var(--border-dim)' }}>
+              <div className="t-xs t-green" style={{ letterSpacing: '1px' }}>QUÊTE ACCOMPLIE</div>
+              {questPopup.split('\n\n').map((block, i) => {
+                const lines = block.split('\n')
+                return (
+                  <div key={i} style={{ marginTop: '4px' }}>
+                    <div className="t-xs t-bright">{lines[1]}</div>
+                    <div className="t-xs t-green">{lines[2]}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {objPopup && (
+            <div style={{ marginBottom: '10px' }}>
+              <div className="t-xs t-gold">{objPopup}</div>
+            </div>
+          )}
+
+          <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: 'var(--cyan)', color: 'var(--cyan)' }}
+            onClick={() => {
+              if (gs.pendingDaySummary) patch({ pendingDaySummary: null })
+              if (worldEventPopup) dismissWorldEvent()
+              if (chainEvent) dismissChain()
+              if (travelMsg) dismissTravel()
+              if (questPopup) dismissQuest()
+              if (objPopup) dismissObj()
+            }}>
+            Continuer →
+          </button>
         </div>
-      ) : objPopup ? (
-        <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
-          <div className="t-xs t-gold">{objPopup}</div>
-          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={dismissObj}>Continuer →</button>
-        </div>
-      ) : newArcsCount > 0 ? (
+      ) : !arrivalSit && !arrivalResult && newArcsCount > 0 ? (
         <div className="px-box" style={{ borderColor: 'var(--purple)' }}>
           <div className="t-xs t-purple mb4">NOUVEAU ARC NARRATIF — {availableArcs.slice(0, newArcsCount).map(a => a.title).join(', ')}</div>
           <button className="px-btn px-btn--sm" style={{ width: 'auto', color: 'var(--purple)' }}
@@ -1003,23 +1006,34 @@ export function StationHub() {
           {gs.equippedWeapon && <> · <span className="t-orange">{gs.equippedWeapon.name}</span></>}
           {gs.equippedArmor  && <> · <span style={{ color: 'var(--blue)' }}>{gs.equippedArmor.name}</span></>}
         </div>
-        {/* Tracker Nexus permanent */}
-        <div className="row mt4" style={{ gap: '6px', alignItems: 'center' }}>
-          {[0, 1, 2, 3].map(i => {
-            const collected = (gs.nexusFragments ?? []).includes(i)
-            return (
-              <span key={i} style={{
-                fontSize: '16px',
-                color: collected ? 'var(--gold)' : 'var(--border)',
-                textShadow: collected ? '0 0 8px var(--gold)' : 'none',
-                transition: 'all 0.3s',
-              }}>◈</span>
-            )
-          })}
-          <span className="t-xs" style={{ color: (gs.nexusFragments?.length ?? 0) >= 4 ? 'var(--gold)' : 'var(--dim)' }}>
-            {gs.nexusFragments?.length ?? 0}/4 Nexus
-          </span>
-        </div>
+        {/* Tracker Nexus permanent — révélé après la quête tutorielle */}
+        {gs.nexusTrackerUnlocked === false ? (
+          <div className="row mt4" style={{ gap: '6px', alignItems: 'center' }}>
+            <span className="t-xs t-dim" style={{ fontStyle: 'italic' }}>
+              ◈ Termine ta première mission pour révéler ce que cache le vide…
+            </span>
+          </div>
+        ) : (
+          <div className="row mt4" style={{ gap: '6px', alignItems: 'center' }}>
+            {[0, 1, 2, 3].map(i => {
+              const collected = (gs.nexusFragments ?? []).includes(i)
+              return (
+                <span key={i} style={{
+                  fontSize: '16px',
+                  color: collected ? 'var(--gold)' : 'var(--border)',
+                  textShadow: collected ? '0 0 8px var(--gold)' : 'none',
+                  transition: 'all 0.3s',
+                }}>◈</span>
+              )
+            })}
+            <span className="t-xs" style={{ color: (gs.nexusFragments?.length ?? 0) >= 4 ? 'var(--gold)' : 'var(--dim)' }}>
+              {gs.nexusFragments?.length ?? 0}/4 Nexus
+            </span>
+            <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>
+              {(gs.discoveredLore ?? []).length}/{LORE_TOTAL} lore
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Alerte de station (world event) */}
@@ -1092,9 +1106,18 @@ export function StationHub() {
                     Voyager{gs.fuel <= 0 ? ' (plus de carburant)' : ` — ${gs.fuel} carburant`}
                   </button>
                 )}
-                {gs.fuel < 6 && !FUEL_STATIONS.has(gs.currentStation) && (
+                {reachableCount <= 1 && reachableCount > 0 && !FUEL_STATIONS.has(gs.currentStation) && (
+                  <div className="t-xs t-red" style={{ padding: '4px 8px', background: 'rgba(255,0,0,0.08)', border: '1px solid var(--red)' }}>
+                    ⚠ CARBURANT CRITIQUE — {reachableCount} destination{reachableCount > 1 ? 's' : ''} accessible{reachableCount > 1 ? 's' : ''}
+                  </div>
+                )}
+                {canScavengeFuel && (
                   <button className="px-btn px-btn--danger" onClick={() => { setFuelScavResult(null); setMode('fuel-scavenge') }}>
-                    {gs.fuel <= 0 ? '⚠ RÉSERVOIR À SEC — Chercher du carburant' : `⚠ Carburant critique (${gs.fuel}) — Chercher du carburant`}
+                    {gs.fuel <= 0
+                      ? '⚠ RÉSERVOIR À SEC — Chercher du carburant'
+                      : fuelStranded
+                        ? '⚠ BLOQUÉ — Aucune destination accessible — Chercher du carburant'
+                        : '⚠ CARBURANT CRITIQUE — Chercher du carburant'}
                   </button>
                 )}
                 <button className="px-btn" onClick={() => goTo('market')}>
@@ -1113,7 +1136,28 @@ export function StationHub() {
               </div>
 
               <div className="px-box col" style={{ gap: '8px' }}>
-                <div className="section-header">◆ ACTIONS <span style={{ color: gs.actionsToday >= 3 ? 'var(--red)' : 'var(--cyan)' }}>({gs.actionsToday}/3)</span></div>
+                <div className="section-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  ◆ ACTIONS
+                  <span style={{ display: 'flex', gap: '4px' }}>
+                    {[0, 1, 2].map(i => (
+                      <span key={i} style={{
+                        display: 'inline-block', width: '10px', height: '10px',
+                        transform: 'rotate(45deg)',
+                        background: i < gs.actionsToday ? 'var(--red)' : 'var(--cyan)',
+                        opacity: i < gs.actionsToday ? 0.4 : 1,
+                        border: `1px solid ${i < gs.actionsToday ? 'var(--red)' : 'var(--cyan)'}`,
+                      }} />
+                    ))}
+                  </span>
+                  <span className="t-xs" style={{ color: gs.actionsToday >= 3 ? 'var(--red)' : 'var(--dim)' }}>
+                    {3 - gs.actionsToday} restante{3 - gs.actionsToday > 1 ? 's' : ''}
+                  </span>
+                </div>
+                {gs.actionsToday >= 3 && (
+                  <div style={{ padding: '8px 12px', background: 'rgba(255,215,0,0.06)', border: '1px solid rgba(255,215,0,0.3)', marginBottom: '4px' }}>
+                    <div className="t-xs" style={{ color: '#ffd700' }}>Fin de journée — bon moment pour voyager ou se reposer.</div>
+                  </div>
+                )}
                 <button className="px-btn" onClick={explore}>
                   Explorer la zone (profondeur {gs.zoneDepth + 1})
                 </button>

@@ -97,3 +97,26 @@ export function playEquip() {
   tone(330, 0.06, 'sine', 0.1)
   tone(440, 0.08, 'sine', 0.14, 0.06)
 }
+
+export function playNavigate() {
+  tone(350, 0.05, 'sine', 0.08)
+  tone(500, 0.06, 'sine', 0.06, 0.04)
+}
+
+export function playMenuOpen() {
+  tone(440, 0.04, 'sine', 0.06)
+  tone(660, 0.06, 'sine', 0.08, 0.03)
+}
+
+export function playCollectClue() {
+  tone(660, 0.08, 'sine', 0.12)
+  tone(880, 0.08, 'sine', 0.10, 0.08)
+  tone(1100, 0.12, 'sine', 0.14, 0.16)
+}
+
+export function playFinisher() {
+  tone(200, 0.06, 'sawtooth', 0.18)
+  tone(400, 0.08, 'sawtooth', 0.2, 0.05)
+  tone(800, 0.12, 'square', 0.22, 0.1)
+  tone(1200, 0.15, 'sine', 0.16, 0.18)
+}

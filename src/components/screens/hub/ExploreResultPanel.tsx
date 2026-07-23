@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { TypewriterText } from '../../ui/TypewriterText'
 import type { GameState } from '../../../types'
 import type { ExploreResult, ExploreChoice } from '../../../engine/exploration'
-import { getFragment, FRAGMENT_TYPE_LABELS, FRAGMENT_TYPE_COLORS } from '../../../data/loreFragments'
+import { getFragment, FRAGMENT_TYPE_LABELS, FRAGMENT_TYPE_COLORS, LORE_TOTAL } from '../../../data/loreFragments'
+import { playCollectClue } from '../../../engine/sfx'
 
 interface Props {
   gs: GameState
@@ -38,6 +39,29 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
     return parts.length > 0 ? ` · [${parts.join(', ')}]` : ''
   }
 
+  function previewDeltas(choice: ExploreChoice): string | null {
+    if (choice.hint) return choice.hint
+    try {
+      const savedRandom = Math.random
+      let called = false
+      Math.random = () => { called = true; return 0.5 }
+      const result = choice.result(gs)
+      Math.random = savedRandom
+      if (called) return null
+      const parts: string[] = []
+      const u = result.gs
+      if (u.credits !== undefined) { const d = u.credits - gs.credits; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} cr`) }
+      if (u.reputation !== undefined) { const d = u.reputation - gs.reputation; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} rép`) }
+      if (u.playerHp !== undefined) { const d = u.playerHp - gs.playerHp; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} PV`) }
+      if (u.fuel !== undefined) { const d = u.fuel - gs.fuel; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} fuel`) }
+      if (u.isImprisoned) parts.push('prison')
+      if ((u as Record<string, unknown>).screen === 'interrogation') parts.push('interrogation')
+      return parts.length > 0 ? parts.join(', ') : null
+    } catch {
+      return null
+    }
+  }
+
   function applyChoice(choice: ExploreChoice) {
     const result = choice.result(gs)
     if (result.minigame === 'lockpick') {
@@ -53,7 +77,10 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
       <div className="t-xs t-dim t-center">— EXPLORATION — Profondeur {gs.zoneDepth} —</div>
 
       {'description' in exploreResult && (
-        <div className="px-box">
+        <div className={`px-box ${'rare' in exploreResult && exploreResult.rare ? 'rare-event' : ''}`}>
+          {'rare' in exploreResult && exploreResult.rare && (
+            <div className="t-xs mb4" style={{ color: 'var(--gold)', letterSpacing: '2px' }}>★ ÉVÉNEMENT RARE</div>
+          )}
           <div className="t-sm t-gold mb8">
             <TypewriterText text={exploreResult.description} speed={14} />
           </div>
@@ -94,9 +121,15 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
             <div className="col gap4 mt8">
               {(exploreResult as Extract<ExploreResult, { type: 'event' }>).choices
                 .filter((c: ExploreChoice) => !c.available || c.available(gs))
-                .map((c: ExploreChoice, i: number) => (
-                  <button key={i} className="px-btn" onClick={() => applyChoice(c)}>{c.label}</button>
-                ))
+                .map((c: ExploreChoice, i: number) => {
+                  const delta = previewDeltas(c)
+                  return (
+                    <div key={i}>
+                      <button className="px-btn" style={{ width: '100%' }} onClick={() => applyChoice(c)}>{c.label}</button>
+                      {delta && <div className="t-xs t-dim" style={{ paddingLeft: '8px', marginTop: '2px', fontStyle: 'italic' }}>{delta}</div>}
+                    </div>
+                  )
+                })
               }
             </div>
           )}
@@ -123,9 +156,19 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
                     className="px-btn px-btn--sm mt8"
                     style={{ width: 'auto', color: FRAGMENT_TYPE_COLORS[frag.type], borderColor: FRAGMENT_TYPE_COLORS[frag.type] }}
                     onClick={() => {
+                      playCollectClue()
+                      const newLore = [...(gs.discoveredLore ?? []), frag.id]
                       const cur = gs.pillarStanding ?? { cesarion: 0, raphazarus: 0, eliotis: 0, maxance: 0, alanossa: 0, scotty: 0 }
+                      const bonus: Partial<GameState> = {}
+                      const pct = newLore.length / LORE_TOTAL
+                      const prevPct = (gs.discoveredLore ?? []).length / LORE_TOTAL
+                      if (pct >= 0.25 && prevPct < 0.25) { bonus.credits = (gs.credits ?? 0) + 500; bonus.reputation = (gs.reputation ?? 0) + 10 }
+                      else if (pct >= 0.50 && prevPct < 0.50) { bonus.credits = (gs.credits ?? 0) + 1000; bonus.reputation = (gs.reputation ?? 0) + 20 }
+                      else if (pct >= 0.75 && prevPct < 0.75) { bonus.credits = (gs.credits ?? 0) + 2000; bonus.reputation = (gs.reputation ?? 0) + 30 }
+                      else if (pct >= 1.0 && prevPct < 1.0) { bonus.credits = (gs.credits ?? 0) + 5000; bonus.reputation = (gs.reputation ?? 0) + 50 }
                       patch({
-                        discoveredLore: [...(gs.discoveredLore ?? []), frag.id],
+                        ...bonus,
+                        discoveredLore: newLore,
                         pillarStanding: { ...cur, eliotis: Math.min(100, (cur.eliotis ?? 0) + 2) },
                       })
                     }}
