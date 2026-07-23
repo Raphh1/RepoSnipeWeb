@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { STATIONS, getAccessibleStations, PEACEFUL_STATIONS, findPath } from '../../data/stations'
+import { STATIONS, getAccessibleStations, PEACEFUL_STATIONS, findPath, FUEL_STATIONS } from '../../data/stations'
 import { STATION_POSITIONS } from '../../data/stationPositions'
 import { STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getClosedStations, getWorldEventFuelBonus, getActiveEvents } from '../../engine/worldEvents'
@@ -150,6 +150,7 @@ export function MapScreen() {
           {Object.entries(TYPE_COLORS).map(([t, c]) => (
             <span key={t} style={{ fontSize: '8px', color: c, letterSpacing: '1px' }}>● {t}</span>
           ))}
+          <span style={{ fontSize: '8px', color: '#40ff80', letterSpacing: '1px' }}>⛽ carburant</span>
         </div>
       </div>
 
@@ -301,6 +302,10 @@ export function MapScreen() {
                 {hasQuest && (
                   <text x={pos.x + r - 2} y={pos.y - r + 2} fontSize="8" fill="#ffd700" textAnchor="middle" style={{ pointerEvents: 'none' }}>★</text>
                 )}
+                {/* Pompe à carburant : station qui VEND du carburant */}
+                {FUEL_STATIONS.has(station.name) && (
+                  <text x={pos.x - r - 1} y={pos.y - r + 3} fontSize="8" textAnchor="middle" style={{ pointerEvents: 'none' }}>⛽</text>
+                )}
                 {/* Label station */}
                 <text
                   x={pos.x} y={pos.y + r + 11}
@@ -361,6 +366,9 @@ export function MapScreen() {
             <div style={{ fontSize: '8px', color: 'var(--cyan)', marginBottom: '4px' }}>
               ⛽ {(hovStation.fuelCostFrom[gs.currentStation] ?? 0) + fuelBonus} carburant depuis ici
             </div>
+          )}
+          {FUEL_STATIONS.has(hovStation.name) && (
+            <div style={{ fontSize: '8px', color: '#40ff80', marginBottom: '4px' }}>⛽ VEND DU CARBURANT (ravitaillement possible)</div>
           )}
           {hovStation.goods.length > 0 && (
             <div style={{ fontSize: '8px', color: 'var(--dim)', borderTop: '1px solid var(--border)', paddingTop: '6px', marginTop: '4px' }}>

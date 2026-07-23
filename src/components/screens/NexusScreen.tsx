@@ -9,9 +9,10 @@ import {
   getActionSuccessChance, getChanceLabel,
   type NexusAction
 } from '../../engine/nexus'
-import { BOSS_STATIONS } from '../../data/stations'
+import { BOSS_STATIONS, STATIONS } from '../../data/stations'
 import { TIER_BOSS } from '../../data/enemies'
-import { getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar } from '../../data/subBosses'
+import { getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar, getLieutenantClueText } from '../../data/subBosses'
+import type { SubBossData } from '../../types'
 
 type ViewState = 'list' | 'detail'
 
@@ -74,9 +75,23 @@ export function NexusScreen() {
   const [msg, setMsg]         = useState<string | null>(null)
   const [msgOk, setMsgOk]     = useState(false)
   const [goldFlash, setGoldFlash] = useState(false)
+  const [guessInput, setGuessInput] = useState<Record<string, string>>({})
+  const [wrongGuessId, setWrongGuessId] = useState<string | null>(null)
 
   const collected = gs.nexusFragments ?? []
   const nexusPath = gs.nexusPath ?? {}
+
+  function submitLieutenantGuess(sb: SubBossData) {
+    const guess = guessInput[sb.id]
+    if (!guess) return
+    setGuessInput(prev => ({ ...prev, [sb.id]: '' }))
+    if (guess === sb.station) {
+      patch({ lieutenantLocationsKnown: [...(gs.lieutenantLocationsKnown ?? []), sb.id] })
+      setWrongGuessId(null)
+    } else {
+      setWrongGuessId(sb.id)
+    }
+  }
 
   function attempt(idx: number, action: NexusAction) {
     const result = attemptNexusFragment(gs, idx, action)
@@ -203,21 +218,50 @@ export function NexusScreen() {
           const sbProg = getSubBossProgress(gs.subBossesDefeated ?? {}, f.pillar)
           const sbCleared = arePillarSubBossesCleared(gs.subBossesDefeated ?? {}, f.pillar)
           const subs = getSubBossesForPillar(f.pillar)
+          const pillarDefeated = gs.subBossesDefeated?.[f.pillar] ?? []
+          const locationsKnown = gs.lieutenantLocationsKnown ?? []
+          const clueLevels = gs.lieutenantClueLevels ?? {}
+          const nextSb = subs.find(sb => !pillarDefeated.includes(sb.id))
           return (
             <div className="px-box" style={{ borderColor: sbCleared ? 'var(--green)' : 'var(--orange)' }}>
               <div className="t-xs mb4" style={{ color: sbCleared ? 'var(--green)' : 'var(--orange)', letterSpacing: '1px' }}>
                 ⚔ LIEUTENANTS ({sbProg.done}/{sbProg.total})
               </div>
               {subs.map(sb => {
-                const done = (gs.subBossesDefeated?.[f.pillar] ?? []).includes(sb.id)
+                const done = pillarDefeated.includes(sb.id)
+                const known = done || locationsKnown.includes(sb.id)
                 return (
-                  <div key={sb.id} className="t-xs" style={{ color: done ? 'var(--green)' : 'var(--dim)', lineHeight: 2 }}>
-                    {done ? '✓' : '○'} {sb.name} — {sb.station}
+                  <div key={sb.id} className="col gap4" style={{ marginBottom: '4px' }}>
+                    <div className="t-xs" style={{ color: done ? 'var(--green)' : 'var(--dim)', lineHeight: 2 }}>
+                      {done ? '✓' : '○'} {sb.order}. {known ? sb.name : '???'} — {known ? sb.station : 'Lieu inconnu'}
+                    </div>
+                    {!done && sb.id === nextSb?.id && !known && (clueLevels[sb.id] ?? 0) > 0 && (
+                      <div className="t-xs" style={{ color: 'var(--cyan)', lineHeight: 1.6, marginLeft: '14px' }}>
+                        Indice : {getLieutenantClueText(sb, clueLevels[sb.id] ?? 0)}
+                      </div>
+                    )}
+                    {!done && sb.id === nextSb?.id && !known && (
+                      <div className="row gap4" style={{ marginLeft: '14px', alignItems: 'center' }}>
+                        <select
+                          className="t-xs"
+                          style={{ background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--border)', padding: '2px 4px' }}
+                          value={guessInput[sb.id] ?? ''}
+                          onChange={e => setGuessInput(prev => ({ ...prev, [sb.id]: e.target.value }))}
+                        >
+                          <option value="">Deviner la station…</option>
+                          {STATIONS.map(st => <option key={st.name} value={st.name}>{st.name}</option>)}
+                        </select>
+                        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => submitLieutenantGuess(sb)}>
+                          🔍 Deviner
+                        </button>
+                        {wrongGuessId === sb.id && <span className="t-xs t-red">Pas là.</span>}
+                      </div>
+                    )}
                   </div>
                 )
               })}
               {!sbCleared && (
-                <div className="t-xs t-red mt4">⛔ Tu dois vaincre tous les lieutenants avant d'accéder au fragment</div>
+                <div className="t-xs t-red mt4">⛔ Ordre obligatoire — vaincre le lieutenant 1, puis le 2, etc. Impossible d'accéder à un lieutenant tant que le précédent n'est pas battu.</div>
               )}
             </div>
           )

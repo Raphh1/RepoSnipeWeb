@@ -3,6 +3,11 @@ import { useGameStore } from '../../store/gameStore'
 import type { CombatAction } from '../../engine/combat'
 import type { CombatLogEntry } from '../../types'
 import { HackSequence } from '../minigames/HackSequence'
+import { StopTheBar } from '../minigames/StopTheBar'
+import { QuickDraw } from '../minigames/QuickDraw'
+import { ReactFlash } from '../minigames/ReactFlash'
+import { getSubBossMinigame } from '../../data/subBosses'
+import type { SubBossMinigameKind } from '../../data/subBosses'
 import { useFloatingNumbers, FloatingNumbersLayer } from '../ui/FloatingNumber'
 import { playHit, playCrit, playHeal, playFlee, playClick, playVictory, playDeath, playFinisher } from '../../engine/sfx'
 
@@ -46,6 +51,8 @@ export function CombatScreen() {
   const [queue, setQueue]                     = useState<CombatLogEntry[]>([])
   const [frozenHp, setFrozenHp]               = useState<{ player: number; enemy: number } | null>(null)
   const [hackOpen, setHackOpen]               = useState(false)
+  // Coup ciblé sous-boss : mini-jeu en attente + l'action à résoudre à sa fin
+  const [sbGame, setSbGame]                   = useState<{ kind: SubBossMinigameKind; difficulty: 1 | 2 | 3; action: CombatAction } | null>(null)
   const [negotiateConditions, setNegotiateConditions] = useState<NegotiateCondition[] | null>(null)
   const [enemyDamaged, setEnemyDamaged]       = useState(false)
   const [playerDamaged, setPlayerDamaged]     = useState(false)
@@ -150,8 +157,27 @@ export function CombatScreen() {
   const phPct  = (shownPlayerHp / gs.playerMaxHp) * 100
   const staPct = (gs.stamina    / gs.maxStamina)  * 100
 
+  // Actions qui portent un coup → soumises au mini-jeu de coup ciblé vs sous-boss
+  const DAMAGE_ACTIONS = new Set(['attack', 'offensive', 'defensive', 'dodge', 'focused', 'special', 'finisher'])
+
   function act(action: CombatAction) {
     if (isAnimating || victoryPending) return
+    // Sous-boss : chaque coup passe d'abord par un mini-jeu qui module les dégâts.
+    // On saute si l'action porte déjà un precisionMult (rebond post-mini-jeu).
+    if (enemy.isSubBoss && DAMAGE_ACTIONS.has(action.type) && !('precisionMult' in action)) {
+      const mg = getSubBossMinigame(enemy.name)
+      if (mg) { setSbGame({ ...mg, action }); return }
+    }
+    setFrozenHp({ player: gs.playerHp, enemy: cs.enemyHp })
+    playClick()
+    submit(action)
+  }
+
+  // Fin du mini-jeu de coup ciblé : applique le multiplicateur puis résout l'action.
+  function resolveSubBossGame(mult: number) {
+    if (!sbGame) return
+    const action = { ...sbGame.action, precisionMult: mult }
+    setSbGame(null)
     setFrozenHp({ player: gs.playerHp, enemy: cs.enemyHp })
     playClick()
     submit(action)
@@ -316,6 +342,40 @@ export function CombatScreen() {
         </div>
       )}
 
+      {sbGame && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ maxWidth: '600px', width: '100%' }}>
+            {sbGame.kind === 'stop' && (
+              <StopTheBar
+                difficulty={sbGame.difficulty}
+                label={`COUP CIBLÉ — ${enemy.name}`}
+                onResult={(r) => resolveSubBossGame(r === 'perfect' ? 1.8 : r === 'good' ? 1.15 : 0.4)}
+              />
+            )}
+            {sbGame.kind === 'hack' && (
+              <HackSequence
+                difficulty={sbGame.difficulty}
+                onResult={(success) => resolveSubBossGame(success ? 1.6 : 0.5)}
+              />
+            )}
+            {sbGame.kind === 'draw' && (
+              <QuickDraw
+                difficulty={sbGame.difficulty}
+                label={`COUP CIBLÉ — ${enemy.name}`}
+                onResult={(mult) => resolveSubBossGame(mult)}
+              />
+            )}
+            {sbGame.kind === 'react' && (
+              <ReactFlash
+                difficulty={sbGame.difficulty}
+                label={`COUP CIBLÉ — ${enemy.name}`}
+                onResult={(mult) => resolveSubBossGame(mult)}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="t-center t-dim t-xs">— COMBAT —</div>
 
@@ -397,6 +457,11 @@ export function CombatScreen() {
       {/* Actions */}
       <div className="px-box">
         <div className="t-xs t-dim mb8">{isAnimating ? '...' : 'ACTION :'}</div>
+        {enemy.isSubBoss && getSubBossMinigame(enemy.name) && !isAnimating && (
+          <div className="t-xs t-cyan mb8" style={{ opacity: 0.8 }}>
+            ◆ SOUS-BOSS — chaque coup porté déclenche un défi de précision. Réussis-le pour frapper fort.
+          </div>
+        )}
         <div className="col gap4">
           {cs.momentum >= 3 && (
             <button className="px-btn px-btn--primary momentum-pulse" disabled={isAnimating} onClick={() => { playFinisher(); act({ type: 'finisher' }) }}>
@@ -436,7 +501,7 @@ export function CombatScreen() {
           {gs.moralTags.includes('cannibal') && gs.stamina >= 25 && (
             <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'bite' })}
               style={{ color: 'var(--red)', borderColor: 'var(--red)' }}>
-              🩸 Morsure · ignore armure · -15 folie · -25 sta
+              🩸 Morsure · faibles dégâts, te soigne · -20 folie · -25 sta
               {(gs.folieLevel ?? 0) >= 50 ? ` · folie ${gs.folieLevel}` : ''}
             </button>
           )}
@@ -535,7 +600,7 @@ export function CombatScreen() {
           )}
           {gs.fuel > 0 && cs.fleeAttempts < 2 && (
             <button className="px-btn px-btn--danger" disabled={isAnimating} onClick={flee}>
-              🏃 Fuir · {50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)}% succès · -1 carburant
+              🏃 Fuir · {gs.class.name === 'Rayane' ? '🪙 50' : 50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)}% succès · {gs.class.name === 'Rayane' ? 'gratuit si pile, coup gratuit encaissé si face' : '-1 carburant'}
             </button>
           )}
           {cs.fleeAttempts >= 2 && (
@@ -569,6 +634,10 @@ function ClassAction({ gs, onAct, disabled }: { gs: ReturnType<typeof useGameSto
     case 'Vagabond':
       return <button className="px-btn" style={{ color: 'var(--cyan)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
         [VAGABOND] Coup bas · ignore armure, dégâts élevés · -10 rép · 1×/combat
+      </button>
+    case 'Rayane':
+      return <button className="px-btn" style={{ color: 'var(--gold)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
+        [RAYANE] 🪙 Pile ou face · pile : ×4 dégâts (armure ignorée) · face : -30% PV max, étourdi · 1×/combat
       </button>
     default: return null
   }

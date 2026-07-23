@@ -33,7 +33,7 @@ export type Screen =
   | 'map'
 
 export type PlayerClassName =
-  | 'Vagabond' | 'Ferrailleur' | 'Endetté' | 'Accro' | 'Maudit'
+  | 'Vagabond' | 'Ferrailleur' | 'Endetté' | 'Accro' | 'Maudit' | 'Rayane'
   | 'Marchand' | 'Mécanicien' | 'Explorateur' | 'Médecin'
   | 'Contrebandier' | 'Vétéran' | 'Héritier' | 'Hackeur' | 'Seigneur de guerre'
 
@@ -544,6 +544,18 @@ export interface GameState {
   waypoint?: string
   // Sous-boss vaincus par pilier { pillarKey: subBossId[] }
   subBossesDefeated: Record<string, string[]>
+  // Indices de localisation des lieutenants { subBossId: niveau d'indice reçu (0 = aucun) }
+  lieutenantClueLevels?: Record<string, number>
+  // Lieutenants dont la station a été découverte (devinée ou visitée)
+  lieutenantLocationsKnown?: string[]
+  // Dernier palier de quêtes complétées ayant donné un indice (pour ne pas répéter)
+  lieutenantClueMilestone?: number
+  // Rayane — récompense de quête en attente, que le joueur peut choisir de rejouer
+  // à pile ou face (doubler) ou garder telle quelle. Somme si plusieurs quêtes
+  // se complètent d'un coup (ex : arrivée en station).
+  rayaneGambleOffer?: number
+  // Rayane — sursis de mort à pile ou face, utilisable une seule fois par run
+  rayaneDeathFlipUsed?: boolean
   // Quêtes d'équipement complétées
   completedEquipmentQuests: string[]
   conquestMode?: boolean

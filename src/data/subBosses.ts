@@ -1,8 +1,11 @@
-import type { SubBossData, Enemy } from '../types'
+import type { SubBossData, Enemy, GameState } from '../types'
+import { getStation } from './stations'
 
 function makeEnemy(name: string, hp: number, dMin: number, dMax: number, lootMin: number, lootMax: number, desc: string, role: Enemy['role'] = 'normal'): Enemy {
   return { name, maxHp: hp, damageMin: dMin, damageMax: dMax, lootMin, lootMax, description: desc, captureChance: 5, killChance: 15, isBoss: true, role, isSubBoss: true }
 }
+
+const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
 
 // ── ALANOSSA — Faucons Noirs ────────────────────────────────────────────────
 const ALANOSSA_SUBS: SubBossData[] = [
@@ -267,6 +270,48 @@ export const SUB_BOSSES: SubBossData[] = [
   ...SCOTTY_SUBS,
 ]
 
+// ── MINI-JEU DE COUP CIBLÉ (obligatoire à chaque coup contre un sous-boss) ───
+// 4 types selon le profil du lieutenant :
+//   hack  — tech/info/réseau (HackSequence — mémoire séquentielle)
+//   draw  — furtif/précision (QuickDraw — cibles surgissantes)
+//   react — militaire/agressif (ReactFlash — mémoriser la couleur)
+//   stop  — tank/méthodique (StopTheBar — arrêter la barre)
+const HACK_SUBBOSSES = new Set([
+  "Le Ravitailleur de l'Ombre",   // drones logistiques
+  "L'Archiviste sans Visage",     // analyse tactique
+  'Le Directeur Fantôme',         // directive réseau
+  'Le Maître des Ombres',         // espion info-broker
+  'Oracle de la Singularité',     // prédiction algorithmique
+])
+const DRAW_SUBBOSSES = new Set([
+  'Le Fantôme des Ombres',        // invisibilité / frappe fantôme
+  'Le Spectre du 7e',             // phase spectrale / renseignement
+  'Le Roi de Nuit',               // combat dans l\'obscurité
+  'Directeur Pale',               // calme absolu / précision clinique
+])
+const REACT_SUBBOSSES = new Set([
+  'Le Vigie Immortel',            // tir préventif / réaction instantanée
+  'La Faucon',                    // stances changeantes / adaptation
+  'Le Sergent Cendré',            // cadence militaire / double attaque
+  'Le Passeur Sanguinaire',       // agressif / combat contre la montre
+])
+// Tout le reste → StopTheBar (Marchande de Mort, Veuve de Fer, Maréchal Osseux)
+
+// Difficulté croissante selon l'ordre du sous-boss dans son pilier (1→4).
+const ORDER_DIFFICULTY: Record<number, 1 | 2 | 3> = { 1: 1, 2: 2, 3: 2, 4: 3 }
+
+export type SubBossMinigameKind = 'stop' | 'hack' | 'draw' | 'react'
+
+export function getSubBossMinigame(enemyName: string): { kind: SubBossMinigameKind; difficulty: 1 | 2 | 3 } | null {
+  const sb = SUB_BOSSES.find(s => s.name === enemyName)
+  if (!sb) return null
+  const kind: SubBossMinigameKind =
+    HACK_SUBBOSSES.has(enemyName)  ? 'hack'  :
+    DRAW_SUBBOSSES.has(enemyName)  ? 'draw'  :
+    REACT_SUBBOSSES.has(enemyName) ? 'react' : 'stop'
+  return { kind, difficulty: ORDER_DIFFICULTY[sb.order] ?? 2 }
+}
+
 export function getSubBossesForPillar(pillar: string): SubBossData[] {
   return SUB_BOSSES.filter(sb => sb.pillar === pillar).sort((a, b) => a.order - b.order)
 }
@@ -283,6 +328,76 @@ export function arePillarSubBossesCleared(defeated: Record<string, string[]>, pi
   const subs = getSubBossesForPillar(pillar)
   const pillarDefeated = defeated[pillar] ?? []
   return subs.every(sb => pillarDefeated.includes(sb.id))
+}
+
+// ── INDICES DE LOCALISATION DES LIEUTENANTS ──────────────────────────────────
+// Après plusieurs quêtes complétées, un informateur croisé en exploration
+// donne un indice sur où trouver le prochain lieutenant à affronter. Le
+// premier indice réutilise la description propre de la station cible —
+// assez concrète pour qu'un joueur attentif la reconnaisse immédiatement,
+// sans jamais nommer la station. Le second indice, s'il n'a pas encore été
+// trouvé, la révèle explicitement.
+const CLUE_PILLARS = ['alanossa', 'cesarion', 'raphazarus', 'scotty']
+export const LIEUTENANT_CLUE_QUEST_INTERVAL = 5
+export const LIEUTENANT_CLUE_REVEAL_LEVEL = 2
+
+const INFORMANT_LINES = [
+  "Un inconnu t'aborde entre deux couloirs. \"J'ai entendu parler de ce que tu cherches,\" dit-il à voix basse, avant de disparaître dans la foule.",
+  "Une silhouette encapuchonnée te glisse un mot rapide, presque un murmure, puis s'évapore avant que tu puisses réagir.",
+  "Quelqu'un reconnaît ton insigne et t'attire dans un coin. \"Tu traques un lieutenant, pas vrai ? J'ai peut-être quelque chose pour toi.\"",
+  "Un ancien contact refait surface, comme sorti de nulle part. \"Toujours après ce lieutenant ? Écoute bien, je ne le répéterai pas.\"",
+]
+
+// Le prochain lieutenant "actif" d'un pilier : le premier non vaincu, dans l'ordre.
+export function getNextLieutenant(defeated: Record<string, string[]>, pillar: string): SubBossData | undefined {
+  return getSubBossesForPillar(pillar).find(sb => !(defeated[pillar] ?? []).includes(sb.id))
+}
+
+// Choisit, parmi tous les piliers actifs, un lieutenant "prochain" dont la
+// position n'est pas encore connue — cible pour un nouvel indice.
+export function pickLieutenantForClue(defeated: Record<string, string[]>, locationsKnown: string[]): SubBossData | undefined {
+  const candidates = CLUE_PILLARS
+    .map(p => getNextLieutenant(defeated, p))
+    .filter((sb): sb is SubBossData => !!sb && !locationsKnown.includes(sb.id))
+  if (candidates.length === 0) return undefined
+  return pick(candidates)
+}
+
+export function getLieutenantClueText(sb: SubBossData, level: number): string {
+  if (level < LIEUTENANT_CLUE_REVEAL_LEVEL) {
+    const station = getStation(sb.station)
+    return station.description
+  }
+  return `${sb.name} se trouve à ${sb.station}.`
+}
+
+export interface LieutenantClueEvent {
+  subBoss: SubBossData
+  level: number
+  npcLine: string
+  clueText: string
+}
+
+// Détermine si l'exploration en cours doit déclencher un indice de lieutenant.
+// Se base sur des paliers de quêtes complétées (tous les 5) pour rester
+// prévisible plutôt que purement aléatoire.
+export function rollLieutenantClueEvent(gs: GameState): { event: LieutenantClueEvent | null; newMilestone: number | null } {
+  const completed = gs.completedQuestIds.length
+  const milestone = gs.lieutenantClueMilestone ?? 0
+  if (completed < milestone + LIEUTENANT_CLUE_QUEST_INTERVAL) return { event: null, newMilestone: null }
+
+  const newMilestone = Math.floor(completed / LIEUTENANT_CLUE_QUEST_INTERVAL) * LIEUTENANT_CLUE_QUEST_INTERVAL
+  const defeated = gs.subBossesDefeated ?? {}
+  const locationsKnown = gs.lieutenantLocationsKnown ?? []
+  const sb = pickLieutenantForClue(defeated, locationsKnown)
+  if (!sb) return { event: null, newMilestone }
+
+  const currentLevel = (gs.lieutenantClueLevels ?? {})[sb.id] ?? 0
+  const nextLevel = currentLevel + 1
+  return {
+    event: { subBoss: sb, level: nextLevel, npcLine: pick(INFORMANT_LINES), clueText: getLieutenantClueText(sb, nextLevel) },
+    newMilestone,
+  }
 }
 
 export function getNextSubBoss(defeated: Record<string, string[]>, pillar: string): SubBossData | undefined {

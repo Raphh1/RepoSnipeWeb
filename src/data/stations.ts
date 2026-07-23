@@ -62,7 +62,7 @@ export const STATIONS: StationData[] = [
   {
     name: 'Fort Ossian',
     description: "Forteresse des confins. Soldats en rotation, ambiance de front. Rien n'entre facilement.",
-    danger: 1, type: 'military',
+    danger: 2, type: 'military',
     goods: ['Rations', 'Armures', 'Munitions lourdes'],
     fuelCostFrom: { 'Le Purgatoire': 2, 'Nexus Aldara': 4, 'Colonie Perséphone': 3, 'Poste Vigie': 1, "L'Oasis de Fer": 3 },
   },

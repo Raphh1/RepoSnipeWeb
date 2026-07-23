@@ -10,6 +10,17 @@ function log(text: string, type: CombatLogEntry['type']): CombatLogEntry {
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const roll = (chance: number) => Math.random() * 100 < chance
 
+// Rayane — sursis de mort à pile ou face, une seule fois par run. Face = pas
+// de miracle, la résolution normale (mort/capture/assommé) suit son cours.
+function tryDeathFlip(gs: GameState, addLog: (t: string, type: CombatLogEntry['type']) => void): { survived: boolean; usedFlip: boolean } {
+  if (gs.class.name !== 'Rayane' || gs.rayaneDeathFlipUsed) return { survived: false, usedFlip: false }
+  const heads = roll(50)
+  addLog(heads
+    ? '🪙 PILE — un sursis improbable. Tu te relèves, à peine.'
+    : '🪙 FACE — pas de miracle cette fois.', heads ? 'crit' : 'warning')
+  return { survived: heads, usedFlip: true }
+}
+
 export function initCombat(enemy: Enemy): CombatState {
   return {
     enemyHp: enemy.maxHp,
@@ -110,14 +121,16 @@ function calcBareDamage(className: PlayerClassName, critBonus = 0): { dmg: numbe
   return { dmg: Math.max(1, base), crit }
 }
 
+// precisionMult : multiplicateur de dégâts injecté par le mini-jeu de coup ciblé
+// contre un sous-boss (StopTheBar / HackSequence). Absent = 1 (combat normal).
 export type CombatAction =
-  | { type: 'attack' }
-  | { type: 'offensive' }
-  | { type: 'defensive' }
-  | { type: 'dodge' }
-  | { type: 'focused' }
-  | { type: 'special' }
-  | { type: 'finisher' }
+  | { type: 'attack';    precisionMult?: number }
+  | { type: 'offensive'; precisionMult?: number }
+  | { type: 'defensive'; precisionMult?: number }
+  | { type: 'dodge';     precisionMult?: number }
+  | { type: 'focused';   precisionMult?: number }
+  | { type: 'special';   precisionMult?: number }
+  | { type: 'finisher';  precisionMult?: number }
   | { type: 'class' }
   | { type: 'flee' }
   | { type: 'negotiate' }
@@ -164,17 +177,33 @@ export function processCombatAction(
     newCs.log.push(log(text, type))
   }
 
+  // ── FOLIE — la faim monte à chaque tour si le cannibale ne se nourrit pas.
+  // Seule la Morsure fait redescendre la jauge : ignorer la faim en combat
+  // a un coût, même si mordre ne fait presque plus de dégâts.
+  if (gs.moralTags.includes('cannibal') && action.type !== 'bite') {
+    newGs.folieLevel = Math.min(100, (gs.folieLevel ?? 0) + 10)
+  }
+
   // ── SUB-BOSS PRE-ATTACK — Le Vigie Immortel attaque en premier ────────
   if (isSubBoss && enemy.name === 'Le Vigie Immortel') {
     const preStrikeDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 0.4)
     playerHp = Math.max(0, playerHp - preStrikeDmg)
     addLog(`⚡ TIR PRÉVENTIF — Le Vigie frappe en premier ! ${preStrikeDmg} dégâts. PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
     if (playerHp <= 0) {
-      const r2 = Math.random() * 100
-      let outcome2: CombatOutcome = 'stunned'
-      if (r2 < enemy.killChance) outcome2 = 'dead'
-      else if (r2 < enemy.killChance + enemy.captureChance) outcome2 = 'captured'
-      return { newGs: { ...newGs, playerHp: outcome2 === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome: outcome2 }
+      const flip = tryDeathFlip(gs, addLog)
+      if (flip.survived) {
+        playerHp = 1
+        newGs.rayaneDeathFlipUsed = true
+      } else {
+        const r2 = Math.random() * 100
+        let outcome2: CombatOutcome = 'stunned'
+        if (r2 < enemy.killChance) outcome2 = 'dead'
+        else if (r2 < enemy.killChance + enemy.captureChance) outcome2 = 'captured'
+        return {
+          newGs: { ...newGs, ...(flip.usedFlip ? { rayaneDeathFlipUsed: true } : {}), playerHp: outcome2 === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0, stamina, credits, reputation, equippedWeapon, cargo },
+          newCs, outcome: outcome2,
+        }
+      }
     }
   }
 
@@ -201,13 +230,22 @@ export function processCombatAction(
       }
     }
     if (playerHp <= 0) {
-      addLog(`Tu tombes. ${enemy.name} se penche sur toi...`, 'enemy')
-      const r2 = Math.random() * 100
-      let outcome2: CombatOutcome = 'stunned'
-      if (r2 < enemy.killChance) outcome2 = 'dead'
-      else if (r2 < enemy.killChance + enemy.captureChance) outcome2 = 'captured'
-      const survivedHp = outcome2 === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
-      return { newGs: { ...newGs, playerHp: survivedHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome: outcome2 }
+      const flip = tryDeathFlip(gs, addLog)
+      if (flip.survived) {
+        playerHp = 1
+        newGs.rayaneDeathFlipUsed = true
+      } else {
+        addLog(`Tu tombes. ${enemy.name} se penche sur toi...`, 'enemy')
+        const r2 = Math.random() * 100
+        let outcome2: CombatOutcome = 'stunned'
+        if (r2 < enemy.killChance) outcome2 = 'dead'
+        else if (r2 < enemy.killChance + enemy.captureChance) outcome2 = 'captured'
+        const survivedHp = outcome2 === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
+        return {
+          newGs: { ...newGs, ...(flip.usedFlip ? { rayaneDeathFlipUsed: true } : {}), playerHp: survivedHp, stamina, credits, reputation, equippedWeapon, cargo },
+          newCs, outcome: outcome2,
+        }
+      }
     }
     return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
   }
@@ -216,6 +254,9 @@ export function processCombatAction(
 
   newCs.lastPlayerDmg = 0
   newCs.playerStance = 'normal'
+
+  // Coup ciblé sous-boss : le mini-jeu module les dégâts du coup (1 = neutre).
+  const precisionMult = (action as { precisionMult?: number }).precisionMult ?? 1
 
   function dealPlayerDamage(mult = 1.0, useSpecial = false, ignoreArmor = false, stance: CombatStance = 'normal') {
     const critBonus = gs.class.combatCritBonus ?? 0
@@ -228,12 +269,14 @@ export function processCombatAction(
     }
     const folie = gs.folieLevel ?? 0
     const isCannibal = gs.moralTags.includes('cannibal')
-    const folieMult = folie >= 80 ? 0.78 : folie >= 50 ? 0.90 : (isCannibal ? 1.15 : 1.0)
+    const folieMult = folie >= 90 ? 0.60 : folie >= 70 ? 0.78 : folie >= 40 ? 0.90 : (isCannibal ? 1.15 : 1.0)
     const weakenMult = newCs.playerWeakenedTurns > 0 ? 0.65 : 1.0
     const coupDeGrace = (gs.class.coupDeGraceBonus ?? 0) > 0 && newCs.enemyHp < enemy.maxHp * 0.25
       ? 1 + (gs.class.coupDeGraceBonus ?? 0) / 100
       : 1.0
-    let dmg = Math.floor(result.dmg * mult * attackMult * folieMult * weakenMult * coupDeGrace)
+    let dmg = Math.floor(result.dmg * mult * attackMult * folieMult * weakenMult * coupDeGrace * precisionMult)
+    if (precisionMult >= 1.5) addLog('★ Coup parfaitement placé !', 'crit')
+    else if (precisionMult <= 0.6) addLog('Coup mal ajusté — tu manques ta cible.', 'warning')
     if (result.crit) addLog('COUP CRITIQUE !', 'crit')
     newCs.enemyHp = Math.max(0, newCs.enemyHp - dmg)
     newCs.lastPlayerDmg = dmg
@@ -430,6 +473,23 @@ export function processCombatAction(
           addLog(`Coup bas — ${dmg} dégâts (armure ignorée). -10 réputation.`, 'player')
           break
         }
+        case 'Rayane': {
+          if (roll(50)) {
+            const critDmg = weapon
+              ? Math.floor(rng(weapon.damageMin, weapon.damageMax) * 4)
+              : Math.floor(rng(5, 18) * 4)
+            newCs.enemyHp = Math.max(0, newCs.enemyHp - critDmg)
+            newCs.lastPlayerDmg = critDmg
+            newCs.playerStance = 'offensive'
+            addLog(`🪙 PILE — coup dévastateur, armure ignorée ! ${critDmg} dégâts. ${enemy.name} : ${newCs.enemyHp}/${enemy.maxHp} PV`, 'crit')
+          } else {
+            const selfDmg = Math.floor(gs.playerMaxHp * 0.3)
+            playerHp = Math.max(1, playerHp - selfDmg)
+            newCs.playerStunnedTurns = Math.max(newCs.playerStunnedTurns, 1)
+            addLog(`🪙 FACE — ça se retourne contre lui. -${selfDmg} PV, étourdi le prochain tour.`, 'warning')
+          }
+          break
+        }
       }
       break
     }
@@ -438,11 +498,17 @@ export function processCombatAction(
         addLog('Impossible de fuir — trop de tentatives ratées. Il faut se battre.', 'warning')
         break
       }
-      const chance = 50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)
+      const isRayane = gs.class.name === 'Rayane'
+      const chance = isRayane ? 50 : 50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)
       if (roll(chance)) {
-        newGs.fuel = Math.max(0, gs.fuel - 1)
+        if (!isRayane) newGs.fuel = Math.max(0, gs.fuel - 1)
         newCs.playerFled = true
-        addLog('Tu t\'échappes. -1 carburant.', 'info')
+        addLog(isRayane ? '🪙 PILE — tu t\'échappes, sans même perdre de carburant.' : 'Tu t\'échappes. -1 carburant.', 'info')
+      } else if (isRayane) {
+        newCs.fleeAttempts = cs.fleeAttempts + 1
+        const freeDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 0.6)
+        playerHp = Math.max(0, playerHp - freeDmg)
+        addLog(`🪙 FACE — tu restes coincé. ${enemy.name} en profite : ${freeDmg} dégâts gratuits. PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
       } else {
         newCs.fleeAttempts = cs.fleeAttempts + 1
         addLog(`${enemy.name} te coupe la route. (${2 - newCs.fleeAttempts} tentative${2 - newCs.fleeAttempts > 1 ? 's' : ''} restante${2 - newCs.fleeAttempts > 1 ? 's' : ''})`, 'enemy')
@@ -493,14 +559,17 @@ export function processCombatAction(
     }
     case 'bite': {
       stamina -= 25
-      const biteDmg = rng(18, 45) + Math.floor((gs.folieLevel ?? 0) * 0.3)
-      // Ignore 30% de l'armure — appliqué directement sur enemyHp
+      // Morsure = presque pas d'offensif. Elle sert à se nourrir : la faim
+      // redescend et le joueur régénère un peu de PV — pas à gagner le combat.
+      const biteDmg = rng(4, 12)
       newCs.enemyHp = Math.max(0, newCs.enemyHp - biteDmg)
       newCs.lastPlayerDmg = biteDmg
       newCs.playerStance = 'offensive'
-      addLog(`MORSURE — ${biteDmg} dégâts (ignore armure). ${enemy.name} : ${newCs.enemyHp}/${enemy.maxHp} PV`, 'crit')
-      // Réduit la folie
-      newGs.folieLevel = Math.max(0, (gs.folieLevel ?? 0) - 15)
+      const biteHeal = Math.min(gs.playerMaxHp - playerHp, rng(15, 28))
+      playerHp += biteHeal
+      addLog(`MORSURE — ${biteDmg} dégâts (faible). Tu te nourris : +${biteHeal} PV. ${enemy.name} : ${newCs.enemyHp}/${enemy.maxHp} PV`, 'crit')
+      // Réduit la folie — nette, car elle écrase la hausse déjà appliquée ce tour
+      newGs.folieLevel = Math.max(0, (gs.folieLevel ?? 0) - 20)
       newGs.folieConsumedThisTurn = true
       break
     }
@@ -969,13 +1038,22 @@ export function processCombatAction(
     newCs.playerBurnTurns--
     addLog(`☠ Toxine de Paradoxa — ${newCs.playerBurnDmg} dégâts. (${newCs.playerBurnTurns} tour${newCs.playerBurnTurns !== 1 ? 's' : ''} restant${newCs.playerBurnTurns !== 1 ? 's' : ''}). PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
     if (playerHp <= 0) {
-      addLog(`Le poison t'a emporté. Tu tombes.`, 'enemy')
-      const rp = Math.random() * 100
-      let outcomeP: CombatOutcome = 'stunned'
-      if (rp < enemy.killChance) outcomeP = 'dead'
-      else if (rp < enemy.killChance + enemy.captureChance) outcomeP = 'captured'
-      const survivedHpP = outcomeP === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
-      return { newGs: { ...newGs, playerHp: survivedHpP, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome: outcomeP }
+      const flip = tryDeathFlip(gs, addLog)
+      if (flip.survived) {
+        playerHp = 1
+        newGs.rayaneDeathFlipUsed = true
+      } else {
+        addLog(`Le poison t'a emporté. Tu tombes.`, 'enemy')
+        const rp = Math.random() * 100
+        let outcomeP: CombatOutcome = 'stunned'
+        if (rp < enemy.killChance) outcomeP = 'dead'
+        else if (rp < enemy.killChance + enemy.captureChance) outcomeP = 'captured'
+        const survivedHpP = outcomeP === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
+        return {
+          newGs: { ...newGs, ...(flip.usedFlip ? { rayaneDeathFlipUsed: true } : {}), playerHp: survivedHpP, stamina, credits, reputation, equippedWeapon, cargo },
+          newCs, outcome: outcomeP,
+        }
+      }
     }
   }
 
@@ -1053,13 +1131,22 @@ export function processCombatAction(
   }
 
   if (playerHp <= 0) {
-    addLog(`Tu tombes. ${enemy.name} se penche sur toi...`, 'enemy')
-    const r = Math.random() * 100
-    let outcome: CombatOutcome = 'stunned'
-    if (r < enemy.killChance) outcome = 'dead'
-    else if (r < enemy.killChance + enemy.captureChance) outcome = 'captured'
-    const survivedHpFinal = outcome === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
-    return { newGs: { ...newGs, playerHp: survivedHpFinal, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome }
+    const flip = tryDeathFlip(gs, addLog)
+    if (flip.survived) {
+      playerHp = 1
+      newGs.rayaneDeathFlipUsed = true
+    } else {
+      addLog(`Tu tombes. ${enemy.name} se penche sur toi...`, 'enemy')
+      const r = Math.random() * 100
+      let outcome: CombatOutcome = 'stunned'
+      if (r < enemy.killChance) outcome = 'dead'
+      else if (r < enemy.killChance + enemy.captureChance) outcome = 'captured'
+      const survivedHpFinal = outcome === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
+      return {
+        newGs: { ...newGs, ...(flip.usedFlip ? { rayaneDeathFlipUsed: true } : {}), playerHp: survivedHpFinal, stamina, credits, reputation, equippedWeapon, cargo },
+        newCs, outcome,
+      }
+    }
   }
 
   return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }

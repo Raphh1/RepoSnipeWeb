@@ -1,7 +1,8 @@
 import { useGameStore } from '../../store/gameStore'
 import { NAMED_NPCS } from '../../engine/npcTracker'
-import { getStationsSellingItem } from '../../data/stations'
-import type { MajorQuestCondition } from '../../types'
+import { getStationsSellingItem, getStation } from '../../data/stations'
+import { BOSS_TRIGGER_TYPES } from '../../engine/quests'
+import type { MajorQuestCondition, QuestType, GameState } from '../../types'
 
 function stageDestination(cond: MajorQuestCondition): string | null {
   switch (cond.type) {
@@ -40,14 +41,57 @@ const TYPE_CLASS: Record<string, string> = {
 
 const TYPE_COMPLETE_HINT: Record<string, string> = {
   delivery:   'Arriver à destination avec l\'item en cargo',
-  kill:       'Vaincre le boss à destination',
-  revenge:    'Gagner un combat à destination',
+  kill:       'Vaincre le chef de la station cible (voir le guide ci-dessous)',
+  revenge:    'Vaincre le chef de la station cible (voir le guide ci-dessous)',
   escort:     'Arriver à destination avec le passager',
-  sabotage:   'Gagner un combat à destination',
+  sabotage:   'Vaincre le chef de la station cible (voir le guide ci-dessous)',
   heist:      'Arriver à destination avec l\'item acquis sur place',
   extraction: 'Ramener l\'item ici depuis la destination',
-  bounty:     'Vaincre la cible à destination',
+  bounty:     'Vaincre le chef de la station cible (voir le guide ci-dessous)',
   patrol:     'Arriver à destination',
+}
+
+function bossGuidance(q: { type: QuestType; targetStation: string }, gs: GameState, isAtTarget: boolean) {
+  if (!BOSS_TRIGGER_TYPES.includes(q.type)) return null
+  const station = getStation(q.targetStation)
+  const tooSafe = station.danger < 2
+
+  if (!isAtTarget) {
+    return (
+      <div className="t-xs" style={{ color: 'var(--cyan)', lineHeight: 1.8 }}>
+        ◆ Guide : une fois sur place, reste sur cette station et clique plusieurs fois sur <span className="t-bright">EXPLORER</span> (pas "Errer") sans voyager ailleurs. Le combat contre le chef se déclenche seul après un certain nombre d'explorations.
+      </div>
+    )
+  }
+
+  if (tooSafe) {
+    return (
+      <div className="t-xs t-red" style={{ lineHeight: 1.8 }}>
+        ⚠ Cette station est trop calme (danger {station.danger}/3) — aucun combat de chef ne peut s'y déclencher. Cette quête est impossible à compléter ici ; abandonne-la ou laisse-la expirer.
+      </div>
+    )
+  }
+
+  const depth = gs.zoneDepth ?? 0
+  const fights = gs.explorationFightsDone ?? 0
+  const depthReady = depth >= 7
+  const fightsReady = fights >= 3
+  return (
+    <div className="t-xs" style={{ lineHeight: 1.8 }}>
+      <div style={{ color: 'var(--cyan)' }}>
+        ◆ Guide : clique sur <span className="t-bright">EXPLORER</span> (pas "Errer") plusieurs fois d'affilée, sans voyager ailleurs — le chef finit par apparaître.
+      </div>
+      <div style={{ color: depthReady ? 'var(--green)' : 'var(--orange)' }}>
+        Profondeur d'exploration : {depth}/7{depthReady ? ' ✓' : ' — continue d\'explorer'}
+      </div>
+      <div style={{ color: fightsReady ? 'var(--green)' : 'var(--orange)' }}>
+        Combats déclenchés ici : {fights}/3{fightsReady ? ' ✓' : ' — il en faut plus'}
+      </div>
+      {depthReady && fightsReady && (
+        <div className="t-green">Conditions réunies — chaque exploration a maintenant une chance de faire apparaître le chef.</div>
+      )}
+    </div>
+  )
 }
 
 export function QuestsScreen() {
@@ -187,6 +231,7 @@ export function QuestsScreen() {
                 <div className="t-dim" style={{ fontStyle: 'italic', fontSize: '7px' }}>
                   {TYPE_COMPLETE_HINT[q.type]}
                 </div>
+                {bossGuidance(q, gs, isAtTarget)}
                 {q.targetItem && q.type !== 'extraction' && (() => {
                   const sellers = !hasItem && q.type !== 'escort' ? getStationsSellingItem(q.targetItem!) : []
                   return (

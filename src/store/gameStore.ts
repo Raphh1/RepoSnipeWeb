@@ -29,6 +29,9 @@ import { shouldRaphazarusStrike, getRaphazarusWarrior } from '../engine/raphazar
 import { getSubBossAtStation } from '../data/subBosses'
 import { getDailyExpenses } from '../engine/expenses'
 
+const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+
+
 function buildInitialState(playerClass: PlayerClass): GameState {
   return {
     screen: 'station-hub',
@@ -174,6 +177,7 @@ interface Store {
   addQuest: (quest: Quest) => void
   manualCompleteQuest: (questId: string) => void
   completeEscortQuest: (won: boolean) => void
+  resolveRayaneGamble: (gamble: boolean) => void
   spendAction: () => void
   joinFaction: (factionId: string) => void
   collectNexusFragment: (index: number) => void
@@ -284,7 +288,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       folieLevel = hadCredits ? Math.max(0, folieLevel - 10) : Math.min(100, folieLevel + 20)
     }
     if (gs.moralTags.includes('cannibal') && !gs.folieConsumedThisTurn) {
-      folieLevel = Math.min(100, folieLevel + 20)
+      folieLevel = Math.min(100, folieLevel + 25)
     }
     newGs = { ...newGs, folieLevel, folieConsumedThisTurn: false }
 
@@ -322,9 +326,13 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     const { completed } = checkQuestsOnArrival(newGs)
     const escortCompleted = completed.filter(q => q.type === 'escort')
     const nonEscortCompleted = completed.filter(q => q.type !== 'escort')
+    let rayaneGambleSum = gs.class.name === 'Rayane' ? (newGs.rayaneGambleOffer ?? 0) : 0
     for (const q of nonEscortCompleted) {
-      newGs = { ...newGs, ...completeQuest(newGs, q) }
+      const questPatch = completeQuest(newGs, q)
+      newGs = { ...newGs, ...questPatch }
+      if (questPatch.rayaneGambleOffer) rayaneGambleSum += questPatch.rayaneGambleOffer
     }
+    if (rayaneGambleSum > 0) newGs = { ...newGs, rayaneGambleOffer: rayaneGambleSum }
     // Escorte → mini-jeu avant complétion
     if (escortCompleted.length > 0) {
       newGs = { ...newGs, pendingEscortQuestId: escortCompleted[0].id, screen: 'escort-minigame' }
@@ -518,6 +526,41 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       travelMsg = (travelMsg ? travelMsg + ' | ' : '') + rumor.text
     }
 
+    // ── CRISE DE FOLIE — la faim incontrôlée a un vrai coût narratif ────────
+    // Ne se déclenche que si rien d'autre n'a déjà pris l'écran (combat/escorte).
+    if (newGs.moralTags.includes('cannibal') && (newGs.folieLevel ?? 0) >= 70
+      && newGs.screen === 'station-arrival') {
+      const crisisChance = (newGs.folieLevel ?? 0) >= 90 ? 0.45 : 0.22
+      if (Math.random() < crisisChance) {
+        const r = Math.random()
+        if (r < 0.4) {
+          const lost = Math.min(newGs.credits, rng(80, 250))
+          newGs = {
+            ...newGs,
+            credits: newGs.credits - lost,
+            reputation: newGs.reputation - 6,
+            journal: addJournal(newGs, "Trou noir. Je me suis réveillé ailleurs, du sang qui n'est pas le mien sur les mains. Des crédits ont disparu.", 'decision'),
+          }
+          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `🩸 CRISE — trou noir mental. -${lost} cr · -6 rép.`
+        } else if (r < 0.75) {
+          const dmg = rng(10, 28)
+          newGs = {
+            ...newGs,
+            playerHp: Math.max(1, newGs.playerHp - dmg),
+            journal: addJournal(newGs, "La faim a pris le dessus avant que je puisse me nourrir proprement. Je me suis fait mal en reprenant le contrôle.", 'decision'),
+          }
+          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `🩸 CRISE — la faim l'emporte. -${dmg} PV.`
+        } else {
+          newGs = {
+            ...newGs,
+            reputation: newGs.reputation - 10,
+            journal: addJournal(newGs, "Quelqu'un m'a vu — le regard qu'on a eu pour moi ne s'oublie pas.", 'decision'),
+          }
+          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `🩸 CRISE — on a remarqué quelque chose d'étrange chez toi. -10 rép.`
+        }
+      }
+    }
+
     set({ gs: newGs, travelEventMessage: travelMsg, objectivePopup: objMsg, questCompletionMsg: questMsg, ...(chainNotif ? { chainEventNotification: chainNotif } : {}), ...(newWorldEvent ? { worldEventPopup: newWorldEvent } : {}) })
   },
 
@@ -565,12 +608,29 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
 
   scroungeFuel: () => set(s => {
     if (!s.gs) return s
-    const station = getStation(s.gs.currentStation)
+    const gs = s.gs
+    const changes = spendAction(gs)
+
+    // Rayane — même le ravitaillement se joue à pile ou face.
+    if (gs.class.name === 'Rayane') {
+      const heads = Math.random() < 0.5
+      return {
+        gs: {
+          ...gs,
+          ...changes,
+          fuel: heads ? Math.min(gs.maxFuel, gs.fuel + 2) : gs.fuel,
+          playerHp: heads ? gs.playerHp : Math.max(1, gs.playerHp - 5),
+          pendingMessage: heads
+            ? "🪙 PILE — +2 carburant trouvé d'un coup."
+            : '🪙 FACE — rien trouvé, et une chute dans les débris. -5 PV.',
+        }
+      }
+    }
+
+    const station = getStation(gs.currentStation)
     const chance = station.danger >= 2 ? 0.60 : station.danger >= 1 ? 0.45 : 0.30
     const found = Math.random() < chance
     const amount = found ? (Math.random() < 0.3 ? 2 : 1) : 0
-    const gs = s.gs
-    const changes = spendAction(gs)
     return {
       gs: {
         ...gs,
@@ -707,7 +767,9 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     if (!gs) return
     const quest = gs.activeQuests.find(q => q.id === questId)
     if (!quest) return
-    let newGs = { ...gs, ...completeQuest(gs, quest) }
+    const questPatch = completeQuest(gs, quest)
+    let newGs = { ...gs, ...questPatch }
+    if (questPatch.rayaneGambleOffer) newGs = { ...newGs, rayaneGambleOffer: (gs.rayaneGambleOffer ?? 0) + questPatch.rayaneGambleOffer }
     const chain = generateChainQuest(quest, newGs)
     if (chain) {
       newGs = { ...newGs, pendingChainQuests: [...(newGs.pendingChainQuests ?? []), chain] }
@@ -731,7 +793,9 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       return
     }
     if (won) {
-      let newGs: GameState = { ...gs, ...completeQuest(gs, quest), pendingEscortQuestId: undefined, screen: 'station-hub' as Screen }
+      const questPatch = completeQuest(gs, quest)
+      let newGs: GameState = { ...gs, ...questPatch, pendingEscortQuestId: undefined, screen: 'station-hub' as Screen }
+      if (questPatch.rayaneGambleOffer) newGs = { ...newGs, rayaneGambleOffer: (gs.rayaneGambleOffer ?? 0) + questPatch.rayaneGambleOffer }
       const chain = generateChainQuest(quest, newGs)
       if (chain) newGs = { ...newGs, pendingChainQuests: [...(newGs.pendingChainQuests ?? []), chain] }
       const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
@@ -756,6 +820,29 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       set({ gs: newGs })
     }
   },
+
+  // Rayane — le joueur choisit de rejouer sa récompense de quête en attente
+  // à pile ou face (doubler ou tout perdre), ou de la garder telle quelle.
+  resolveRayaneGamble: (gamble) => set(s => {
+    if (!s.gs) return s
+    const gs = s.gs
+    const amount = gs.rayaneGambleOffer ?? 0
+    if (amount <= 0) return { gs: { ...gs, rayaneGambleOffer: undefined } }
+    if (!gamble) {
+      return { gs: { ...gs, rayaneGambleOffer: undefined } }
+    }
+    const heads = Math.random() < 0.5
+    return {
+      gs: {
+        ...gs,
+        credits: heads ? gs.credits + amount : Math.max(0, gs.credits - amount),
+        rayaneGambleOffer: undefined,
+        pendingMessage: heads
+          ? `🪙 PILE — récompense doublée, +${amount.toLocaleString()} cr supplémentaires !`
+          : `🪙 FACE — récompense perdue, -${amount.toLocaleString()} cr.`,
+      }
+    }
+  }),
 
   spendAction: () => set(s => {
     if (!s.gs) return s
@@ -901,7 +988,11 @@ function handleCombatOutcome(
   }
 
   if (outcome === 'victory') {
-    const beaten = gs.stationBossesBeaten.includes(gs.currentStation)
+    // On ne marque "boss de station battu" QUE si l'ennemi vaincu est réellement
+    // un boss ou sous-boss — tuer un mob aléatoire (ex : Garde corrompu) ne doit
+    // PAS valider une quête kill/bounty qui vise le chef de la station.
+    const beatBoss = !!(gs.combatEnemy?.isBoss || gs.combatEnemy?.isSubBoss)
+    const beaten = (!beatBoss || gs.stationBossesBeaten.includes(gs.currentStation))
       ? gs.stationBossesBeaten
       : [...gs.stationBossesBeaten, gs.currentStation]
     newGs = {
@@ -940,11 +1031,15 @@ function handleCombatOutcome(
     }
     // Compléter les quêtes de combat (vengeance, kill, bounty, sabotage) après victoire
     const { completed: combatQuests } = checkQuestsOnArrival(newGs)
+    let combatRayaneGambleSum = gs.class.name === 'Rayane' ? (newGs.rayaneGambleOffer ?? 0) : 0
     for (const q of combatQuests) {
-      newGs = { ...newGs, ...completeQuest(newGs, q) }
+      const questPatch = completeQuest(newGs, q)
+      newGs = { ...newGs, ...questPatch }
+      if (questPatch.rayaneGambleOffer) combatRayaneGambleSum += questPatch.rayaneGambleOffer
       const chain = generateChainQuest(q, newGs)
       if (chain) newGs = { ...newGs, pendingChainQuests: [...(newGs.pendingChainQuests ?? []), chain] }
     }
+    if (combatRayaneGambleSum > 0) newGs = { ...newGs, rayaneGambleOffer: combatRayaneGambleSum }
     const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
     const { newGs: majorGs, messages: majorMsgs } = checkMajorQuestAdvancement(newGs)
     newGs = { ...newGs, ...objGs, ...majorGs, combatState: cs, combatRewardData: reward ?? null, screen: 'combat-result' as Screen }

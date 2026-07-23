@@ -210,6 +210,11 @@ const ALL_TYPES: QuestType[] = [
   'escort','sabotage','heist','extraction','bounty','patrol',
 ]
 
+// Types dont la complétion exige de vaincre le chef de la station cible —
+// ce combat ne peut se déclencher (via exploration) que si danger >= 2.
+// Une station trop calme rendrait la quête littéralement impossible.
+export const BOSS_TRIGGER_TYPES: QuestType[] = ['kill', 'revenge', 'sabotage', 'bounty']
+
 // Poids par type pour le tirage (rare = plus intéressant)
 const TYPE_WEIGHTS: Record<QuestType, number> = {
   delivery:   20, revenge:   15, kill:      12,
@@ -243,8 +248,9 @@ export function generateQuest(gs: GameState): Quest | null {
   const giver = pick(GIVER_NAMES)
   const id    = Math.random().toString(36).slice(2, 8)
 
-  const availableTypes = ALL_TYPES.filter(t => !usedCombos.has(`${t}:${target.name}`))
-  const types = availableTypes.length > 0 ? availableTypes : ALL_TYPES
+  const typesForTarget = target.danger < 2 ? ALL_TYPES.filter(t => !BOSS_TRIGGER_TYPES.includes(t)) : ALL_TYPES
+  const availableTypes = typesForTarget.filter(t => !usedCombos.has(`${t}:${target.name}`))
+  const types = availableTypes.length > 0 ? availableTypes : typesForTarget
   const type  = pickWeightedType(types)
 
   const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
@@ -353,7 +359,9 @@ export function generateChainQuest(completed: Quest, gs: GameState): Quest | nul
 
   const accessible = getAccessibleStations(gs.currentStation).filter(s => s.name !== gs.currentStation)
   if (accessible.length === 0) return null
-  const target = accessible[Math.floor(Math.random() * accessible.length)]
+  const targetPool = BOSS_TRIGGER_TYPES.includes(newType) ? accessible.filter(s => s.danger >= 2) : accessible
+  if (targetPool.length === 0) return null
+  const target = targetPool[Math.floor(Math.random() * targetPool.length)]
 
   const id = Math.random().toString(36).slice(2, 8)
   const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
@@ -447,12 +455,16 @@ export function completeQuest(gs: GameState, quest: Quest): Partial<GameState> {
   }
 
   const rewardMult = getRunQuestRewardMult(gs)
+  const baseReward = Math.floor(quest.creditReward * rewardMult)
+
   const result: Partial<GameState> = {
-    credits: gs.credits + Math.floor(quest.creditReward * rewardMult),
+    credits: gs.credits + baseReward,
     reputation: gs.reputation + quest.repReward,
     activeQuests: gs.activeQuests.filter(q => q.id !== quest.id),
     completedQuestIds: [...gs.completedQuestIds, quest.id],
     cargo: newCargo,
+    // Rayane — libre de rejouer cette récompense à pile ou face, ou de la garder.
+    ...(gs.class.name === 'Rayane' ? { rayaneGambleOffer: baseReward } : {}),
   }
 
   // Quête tutorielle : révèle le tracker Nexus + bonus de bienvenue

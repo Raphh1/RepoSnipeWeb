@@ -96,6 +96,18 @@ function hasMetHolder(gs: GameState, pillar: string): boolean {
   return (gs.pastDecisions ?? []).some(d => d === `met-${pillar}` || d === `alliance-${pillar}`)
 }
 
+// Rivalités d'alliance (relation SYMÉTRIQUE). S'allier à un détenteur devient
+// impossible tant qu'une alliance active existe avec l'un de ses rivaux : on ne
+// peut pas être l'ami de tout le monde. Trahir le rival rouvre la voie.
+const ALLIANCE_RIVALS: Record<string, string[]> = {
+  alanossa:   ['cesarion', 'raphazarus'],
+  cesarion:   ['alanossa', 'scotty', 'raphazarus'],
+  raphazarus: ['alanossa', 'cesarion', 'scotty'],
+  scotty:     ['cesarion', 'raphazarus'],
+}
+
+const capPillar = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
+
 // ── CONDITIONS PAR FRAGMENT ───────────────────────────────────────────────────
 
 export function canAttempt(gs: GameState, idx: number, action: NexusAction): { ok: boolean; reason?: string } {
@@ -117,6 +129,15 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
 
   if (pillar && angered.includes(pillar) && action !== 'force')
     return { ok: false, reason: `${pillar.charAt(0).toUpperCase() + pillar.slice(1)} est ton ennemi juré — seul le combat est possible` }
+
+  // Exclusivité d'alliance : un détenteur refuse de s'allier si tu es déjà l'allié
+  // (non trahi) de l'un de ses rivaux. Impossible de rallier tout le monde.
+  if (pillar && action === 'alliance') {
+    const alliedRival = (ALLIANCE_RIVALS[pillar] ?? []).find(r =>
+      decisions.includes(`alliance-${r}`) && !decisions.includes(`betrayed-${r}`))
+    if (alliedRival)
+      return { ok: false, reason: `${capPillar(pillar)} refuse : tu es déjà allié à ${capPillar(alliedRival)}, son rival. Trahis-le d'abord, ou choisis ton camp.` }
+  }
 
   switch (idx) {
 

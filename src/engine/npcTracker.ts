@@ -242,6 +242,20 @@ const PILLAR_DISPLAY: Record<string, string> = {
   maxance: 'Maxance', alanossa: 'Alanossa', scotty: 'Scotty',
 }
 
+// ── CALLBACK FOLIE — le cannibalisme laisse des traces que les PNJ remarquent
+function getFolieCallback(npc: PersistentNpc, gs: GameState): string | null {
+  if (!gs.moralTags.includes('cannibal')) return null
+  const folie = gs.folieLevel ?? 0
+  if (folie < 70) return null
+  const lines = [
+    `${npc.name} recule d'un pas en te voyant approcher. "T'as... du sang séché. Là, sur la mâchoire." Il évite ton regard le reste de la conversation.`,
+    `${npc.name} renifle l'air, mal à l'aise. "Ça sent quoi, cette odeur..." Il ne finit pas sa phrase.`,
+    `"Les gens racontent des trucs sur toi," dit ${npc.name} à voix basse. "Le genre de trucs qu'on préfère pas croire. Sauf que là, en te regardant..."`,
+    `${npc.name} garde ses distances, mains visibles. "Je vais pas te poser de questions. Fais juste vite."`,
+  ]
+  return pick(lines)
+}
+
 function getPillarCallback(npc: PersistentNpc, gs: GameState): string | null {
   const standing = (gs.pillarStanding ?? {}) as Record<string, number>
   const angered = gs.nexusAngered ?? []
@@ -317,6 +331,9 @@ export function getNpcGreeting(npc: PersistentNpc, reaction: NpcReaction, gs?: G
     if ((gs.runModifiers ?? []).includes('traque')) {
       return `${npc.name} remarque quelque chose. "Tu regardes derrière toi depuis que t'es entré. C'est quoi ton problème ?"`
     }
+    // ── CALLBACK FOLIE — priorité sur les piliers : plus immédiat, plus visible
+    const folieLine = getFolieCallback(npc, gs)
+    if (folieLine) return folieLine
     // ── CALLBACKS DÉCISIONS PILIERS (5.3) ──────────────────────────────────
     const pillarLine = getPillarCallback(npc, gs)
     if (pillarLine) return pillarLine

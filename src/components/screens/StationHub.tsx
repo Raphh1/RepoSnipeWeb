@@ -23,7 +23,8 @@ import { isFactionBlockedAtStation, getStationFactionName, STATION_FACTION_CONTR
 import { getArrivalSituation, type ArrivalSituation } from '../../engine/arrivalSituations'
 import { RUN_MODIFIERS } from '../../data/runModifiers'
 import { getRunObjective } from '../../data/runObjectives'
-import { getSubBossAtStation, isSubBossDefeated, getSubBossProgress, arePillarSubBossesCleared } from '../../data/subBosses'
+import { getSubBossAtStation, isSubBossDefeated, getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar, rollLieutenantClueEvent, LIEUTENANT_CLUE_REVEAL_LEVEL, type LieutenantClueEvent } from '../../data/subBosses'
+import { canResolveSubBoss, resolveSubBoss, RESOLUTION_META } from '../../engine/subBossResolutions'
 import { getAvailableClues, canCollectClue, collectClue } from '../../engine/nexus'
 import { getDailyExpenses, getDailyExpenseBreakdown } from '../../engine/expenses'
 import { getActiveEvents } from '../../engine/worldEvents'
@@ -38,7 +39,7 @@ import { NpcEncounterPanel } from './hub/NpcEncounterPanel'
 const DANGER_LABEL = ['◆ SÉCURISÉE', '◆ RISQUÉE', '◆ DANGEREUSE', '◆ ZONE DE GUERRE']
 const DANGER_CLS   = ['danger-0', 'danger-1', 'danger-2', 'danger-3']
 
-type HubMode = 'menu' | 'explore-result' | 'wander-result' | 'quest-offer' | 'station-event' | 'npc-encounter' | 'lockpick-game' | 'card-game' | 'fuel-scavenge' | 'delivery-event' | 'negotiation' | 'navigation-minigame' | 'customs'
+type HubMode = 'menu' | 'explore-result' | 'wander-result' | 'quest-offer' | 'station-event' | 'npc-encounter' | 'lockpick-game' | 'card-game' | 'fuel-scavenge' | 'delivery-event' | 'negotiation' | 'navigation-minigame' | 'customs' | 'lieutenant-clue'
 
 export function StationHub() {
   const gs           = useGameStore(s => s.gs!)
@@ -47,6 +48,7 @@ export function StationHub() {
   const patch        = useGameStore(s => s.patch)
   const addQuest     = useGameStore(s => s.addQuest)
   const manualCompleteQuest = useGameStore(s => s.manualCompleteQuest)
+  const resolveRayaneGamble = useGameStore(s => s.resolveRayaneGamble)
 
   function tickPatrolProgress() {
     const q = gs.activeQuests.find(aq => aq.type === 'patrol' && aq.targetStation === gs.currentStation)
@@ -85,6 +87,8 @@ export function StationHub() {
   const [dealConditions, setDealConditions] = useState<DealCondition[] | null>(null)
   const [confirmRestart, setConfirmRestart] = useState(false)
   const [clueMsg, setClueMsg] = useState<string | null>(null)
+  const [subBossResult, setSubBossResult] = useState<{ message: string; success: boolean } | null>(null)
+  const [lieutenantClueEvent, setLieutenantClueEvent] = useState<LieutenantClueEvent | null>(null)
   const [arrivalSit, setArrivalSit] = useState<ArrivalSituation | null>(null)
   const [arrivalResult, setArrivalResult] = useState<string | null>(null)
   const [pendingDeliveryQuest, setPendingDeliveryQuest] = useState<ReturnType<typeof generateQuest>>(null)
@@ -97,12 +101,20 @@ export function StationHub() {
   const [hoveredQuest, setHoveredQuest]     = useState<string | null>(null)
 
   const station      = getStation(gs.currentStation)
-  const reachableCount = getAccessibleStations(gs.currentStation).filter(s => getFuelCost(gs.currentStation, s.name) <= gs.fuel).length
-  const fuelStranded = reachableCount === 0 && gs.fuel > 0
-  // Soupape de sécurité : on autorise la recherche de carburant dès l'état critique
-  // (0 ou 1 destination accessible) sur une station qui n'en vend pas, et pas
-  // seulement une fois totalement à sec — sinon on peut rester coincé sans recours.
-  const canScavengeFuel = (gs.fuel <= 0 || reachableCount <= 1) && !FUEL_STATIONS.has(gs.currentStation)
+  const accessibleStations = getAccessibleStations(gs.currentStation)
+  const reachableCount = accessibleStations.filter(s => getFuelCost(gs.currentStation, s.name) <= gs.fuel).length
+  // Le carburant n'est le VRAI facteur limitant que si une destination deviendrait
+  // atteignable avec plus de carburant (coût > fuel actuel mais <= réservoir max).
+  // Sinon (ex : réservoir plein, station peu connectée), pas d'alerte carburant.
+  const fuelWouldHelp = accessibleStations.some(s => {
+    const c = getFuelCost(gs.currentStation, s.name)
+    return c > gs.fuel && c <= gs.maxFuel
+  })
+  const fuelStranded = reachableCount === 0 && gs.fuel > 0 && fuelWouldHelp
+  // Soupape de sécurité : chercher du carburant est proposé quand on est à sec, ou
+  // en état critique ET que du carburant supplémentaire débloquerait une route.
+  const fuelCritical = reachableCount <= 1 && fuelWouldHelp
+  const canScavengeFuel = (gs.fuel <= 0 || fuelCritical) && !FUEL_STATIONS.has(gs.currentStation)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ambianceText = useMemo(() => getAmbiance(gs.currentStation), [gs.currentStation])
   const factionBlocked     = isFactionBlockedAtStation(gs, gs.currentStation)
@@ -124,6 +136,18 @@ export function StationHub() {
       else patch({ pendingArrival: false })
     }
   }, [])
+
+  // Réinitialise le résultat de résolution de lieutenant au changement de station.
+  useEffect(() => { setSubBossResult(null) }, [gs.currentStation])
+
+  // Arriver physiquement à la station d'un lieutenant le révèle automatiquement —
+  // pas besoin d'indice si le joueur l'a trouvé tout seul.
+  useEffect(() => {
+    const sb = getSubBossAtStation(gs.currentStation)
+    if (sb && !(gs.lieutenantLocationsKnown ?? []).includes(sb.id) && !isSubBossDefeated(gs.subBossesDefeated ?? {}, sb.id)) {
+      patch({ lieutenantLocationsKnown: [...(gs.lieutenantLocationsKnown ?? []), sb.id] })
+    }
+  }, [gs.currentStation])
 
   // Contrôle douanier auto sur stations militaires (une fois par visite de station/jour)
   useEffect(() => {
@@ -148,6 +172,27 @@ export function StationHub() {
       startCombat(stalkerToEnemy(gs.stalker))
       return
     }
+
+    const clueRoll = rollLieutenantClueEvent(gs)
+    if (clueRoll.event) {
+      const sb = clueRoll.event.subBoss
+      const levels = { ...(gs.lieutenantClueLevels ?? {}), [sb.id]: clueRoll.event.level }
+      const known = clueRoll.event.level >= LIEUTENANT_CLUE_REVEAL_LEVEL
+        ? [...(gs.lieutenantLocationsKnown ?? []), sb.id]
+        : (gs.lieutenantLocationsKnown ?? [])
+      patch({
+        lieutenantClueLevels: levels,
+        lieutenantLocationsKnown: known,
+        ...(clueRoll.newMilestone !== null ? { lieutenantClueMilestone: clueRoll.newMilestone } : {}),
+      })
+      setLieutenantClueEvent(clueRoll.event)
+      setMode('lieutenant-clue')
+      return
+    }
+    if (clueRoll.newMilestone !== null) {
+      patch({ lieutenantClueMilestone: clueRoll.newMilestone })
+    }
+
     const depth = gs.zoneDepth + 1
     const result = rollExplorationEvent({ ...gs, zoneDepth: depth })
     if (result.type === 'combat') {
@@ -211,6 +256,30 @@ export function StationHub() {
   }
 
   // ── MODES ────────────────────────────────────────────────────────────────
+
+  if (mode === 'lieutenant-clue' && lieutenantClueEvent) {
+    const revealed = lieutenantClueEvent.level >= LIEUTENANT_CLUE_REVEAL_LEVEL
+    return (
+      <div className="layout">
+        <div className="px-box" style={{ borderColor: 'var(--purple)' }}>
+          <div className="t-xs mb8" style={{ color: 'var(--purple)', letterSpacing: '2px' }}>◆ INFORMATEUR</div>
+          <div className="t-xs mb8" style={{ lineHeight: 1.8 }}>{lieutenantClueEvent.npcLine}</div>
+          <div className="px-box" style={{ borderColor: 'var(--gold)', background: 'rgba(30,20,0,0.15)' }}>
+            <div className="t-xs t-gold mb4" style={{ letterSpacing: '1px' }}>
+              INDICE — {lieutenantClueEvent.subBoss.name} ({lieutenantClueEvent.subBoss.pillar.charAt(0).toUpperCase() + lieutenantClueEvent.subBoss.pillar.slice(1)})
+            </div>
+            <div className="t-xs" style={{ lineHeight: 1.8 }}>{lieutenantClueEvent.clueText}</div>
+          </div>
+          {revealed ? (
+            <div className="t-xs t-green mt8">★ Localisation confirmée — visible dans le Nexus.</div>
+          ) : (
+            <div className="t-xs t-dim mt8">Un joueur attentif reconnaîtra peut-être déjà l'endroit. Sinon, un autre indice viendra plus tard — consultable dans le Nexus.</div>
+          )}
+          <button className="px-btn mt8" onClick={() => { setLieutenantClueEvent(null); setMode('menu') }}>Continuer</button>
+        </div>
+      </div>
+    )
+  }
 
   if (mode === 'explore-result' && exploreResult) {
     return (
@@ -830,7 +899,7 @@ export function StationHub() {
       )}
 
       {/* ── BRIEFING UNIFIÉ — toutes les notifications d'arrivée en un bloc ── */}
-      {!arrivalSit && !arrivalResult && (gs.pendingDaySummary || worldEventPopup || chainEvent || travelMsg || questPopup || objPopup) ? (
+      {!arrivalSit && !arrivalResult && (gs.pendingDaySummary || worldEventPopup || chainEvent || travelMsg || questPopup || objPopup || gs.rayaneGambleOffer) ? (
         <div className="px-box" style={{ borderColor: 'var(--cyan)', background: 'rgba(0,0,0,0.5)' }}>
           <div className="t-xs mb8" style={{ color: 'var(--cyan)', letterSpacing: '2px' }}>◆ BRIEFING — JOUR {gs.day}</div>
 
@@ -892,6 +961,22 @@ export function StationHub() {
             </div>
           )}
 
+          {!!gs.rayaneGambleOffer && (
+            <div className="px-box" style={{ borderColor: 'var(--gold)', background: 'rgba(30,20,0,0.15)', marginBottom: '10px' }}>
+              <div className="t-xs t-gold mb4" style={{ letterSpacing: '1px' }}>🪙 RAYANE — {gs.rayaneGambleOffer.toLocaleString()} cr en poche</div>
+              <div className="t-xs t-dim mb8">Les garder, ou les rejouer à pile ou face — double ou rien ?</div>
+              <div className="row gap8">
+                <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: 'var(--gold)', color: 'var(--gold)' }}
+                  onClick={() => resolveRayaneGamble(true)}>
+                  🪙 Jouer — doubler ou tout perdre
+                </button>
+                <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => resolveRayaneGamble(false)}>
+                  Garder
+                </button>
+              </div>
+            </div>
+          )}
+
           <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: 'var(--cyan)', color: 'var(--cyan)' }}
             onClick={() => {
               if (gs.pendingDaySummary) patch({ pendingDaySummary: null })
@@ -900,6 +985,7 @@ export function StationHub() {
               if (travelMsg) dismissTravel()
               if (questPopup) dismissQuest()
               if (objPopup) dismissObj()
+              if (gs.rayaneGambleOffer) resolveRayaneGamble(false)
             }}>
             Continuer →
           </button>
@@ -1106,7 +1192,7 @@ export function StationHub() {
                     Voyager{gs.fuel <= 0 ? ' (plus de carburant)' : ` — ${gs.fuel} carburant`}
                   </button>
                 )}
-                {reachableCount <= 1 && reachableCount > 0 && !FUEL_STATIONS.has(gs.currentStation) && (
+                {fuelCritical && reachableCount > 0 && !FUEL_STATIONS.has(gs.currentStation) && (
                   <div className="t-xs t-red" style={{ padding: '4px 8px', background: 'rgba(255,0,0,0.08)', border: '1px solid var(--red)' }}>
                     ⚠ CARBURANT CRITIQUE — {reachableCount} destination{reachableCount > 1 ? 's' : ''} accessible{reachableCount > 1 ? 's' : ''}
                   </div>
@@ -1205,11 +1291,9 @@ export function StationHub() {
         const defeated = gs.subBossesDefeated ?? {}
         const alreadyDone = isSubBossDefeated(defeated, subBoss.id)
         const progress = getSubBossProgress(defeated, subBoss.pillar)
-        const prevDone = subBoss.order === 1 || (() => {
-          const pillarSubs = defeated[subBoss.pillar] ?? []
-          const prevId = `${subBoss.id.split('-')[0]}-${subBoss.order - 1}`
-          return pillarSubs.includes(prevId)
-        })()
+        const pillarSubs = defeated[subBoss.pillar] ?? []
+        const prevSubBoss = subBoss.order === 1 ? null : getSubBossesForPillar(subBoss.pillar).find(sb => sb.order === subBoss.order - 1)
+        const prevDone = subBoss.order === 1 || (prevSubBoss ? pillarSubs.includes(prevSubBoss.id) : true)
         const pName = subBoss.pillar.charAt(0).toUpperCase() + subBoss.pillar.slice(1)
         return (
           <div className="px-box" style={{ borderColor: alreadyDone ? 'var(--green)' : 'var(--red)', background: 'rgba(40,0,0,0.2)' }}>
@@ -1223,51 +1307,40 @@ export function StationHub() {
             {alreadyDone ? (
               <div className="t-xs t-green">✓ VAINCU</div>
             ) : !prevDone ? (
-              <div className="t-xs t-red">⛔ Vaincre d'abord les lieutenants précédents</div>
+              <div className="t-xs t-red">⛔ Ordre obligatoire — vaincre d'abord le lieutenant {subBoss.order - 1} : {prevSubBoss?.name} à {prevSubBoss?.station}</div>
+            ) : subBossResult ? (
+              <div className="px-box" style={{ borderColor: subBossResult.success ? 'var(--green)' : 'var(--red)' }}>
+                <div className="t-xs" style={{ color: subBossResult.success ? 'var(--green)' : 'var(--orange)', lineHeight: 2 }}>
+                  {subBossResult.message}
+                </div>
+                <button className="px-btn px-btn--sm mt4" style={{ width: 'auto' }} onClick={() => setSubBossResult(null)}>Continuer</button>
+              </div>
             ) : (
               <div className="col gap4">
                 <button className="px-btn" style={{ borderColor: 'var(--red)', color: 'var(--red)' }}
                   onClick={() => startCombat(subBoss.enemy)}>
-                  ⚔ Affronter {subBoss.name}
+                  ⚔ Affronter {subBoss.name} — combat
                 </button>
-                {subBoss.resolutions.includes('negotiate') && (
-                  <button className="px-btn" style={{ borderColor: 'var(--cyan)' }}
-                    disabled={gs.reputation < 30}
-                    onClick={() => {
-                      const newDefeated = { ...defeated, [subBoss.pillar]: [...(defeated[subBoss.pillar] ?? []), subBoss.id] }
-                      patch({ subBossesDefeated: newDefeated, reputation: gs.reputation + 10 })
-                    }}>
-                    🗣 Négocier {gs.reputation < 30 ? '(rép. 30 requise)' : ''}
-                  </button>
-                )}
-                {subBoss.resolutions.includes('manipulate') && (
-                  <button className="px-btn" style={{ borderColor: 'var(--orange)' }}
-                    disabled={gs.credits < 2000}
-                    onClick={() => {
-                      const ok = Math.random() < 0.5
-                      if (ok) {
-                        const newDefeated = { ...defeated, [subBoss.pillar]: [...(defeated[subBoss.pillar] ?? []), subBoss.id] }
-                        patch({ subBossesDefeated: newDefeated, credits: gs.credits - 2000 })
-                      } else {
-                        patch({ credits: gs.credits - 2000, playerHp: Math.max(1, gs.playerHp - 30) })
-                      }
-                    }}>
-                    🎭 Manipuler (-2000 cr, 50% succès)
-                  </button>
-                )}
-                {subBoss.resolutions.includes('sabotage') && (
-                  <button className="px-btn" style={{ borderColor: 'var(--text-dim)' }}
-                    disabled={!gs.cargo['Composants électroniques'] || gs.cargo['Composants électroniques'] < 2}
-                    onClick={() => {
-                      const newCargo = { ...gs.cargo }
-                      newCargo['Composants électroniques'] = (newCargo['Composants électroniques'] ?? 0) - 2
-                      if (newCargo['Composants électroniques'] <= 0) delete newCargo['Composants électroniques']
-                      const newDefeated = { ...defeated, [subBoss.pillar]: [...(defeated[subBoss.pillar] ?? []), subBoss.id] }
-                      patch({ subBossesDefeated: newDefeated, cargo: newCargo })
-                    }}>
-                    💣 Saboter (2× Composants électroniques)
-                  </button>
-                )}
+                {subBoss.resolutions.filter(a => a !== 'kill').map(action => {
+                  const meta = RESOLUTION_META[action]
+                  const check = canResolveSubBoss(gs, subBoss, action)
+                  return (
+                    <button key={action} className="px-btn" style={{ borderColor: 'var(--cyan)', textAlign: 'left' }}
+                      disabled={!check.ok}
+                      onClick={() => {
+                        const res = resolveSubBoss(gs, subBoss, action)
+                        patch(res.patch)
+                        if (res.triggerCombat) {
+                          startCombat(subBoss.enemy)
+                        } else {
+                          setSubBossResult({ message: res.message, success: res.success })
+                        }
+                      }}>
+                      <div className="t-xs t-bright">{meta.icon} {meta.label}</div>
+                      <div className="t-xs t-dim mt2">{check.ok ? check.hint : check.reason}</div>
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>

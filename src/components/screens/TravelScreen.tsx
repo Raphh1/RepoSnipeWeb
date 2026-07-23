@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { getAccessibleStations, getFuelCost, getStation, findPath, PEACEFUL_STATIONS } from '../../data/stations'
+import { getAccessibleStations, getFuelCost, getStation, findPath, PEACEFUL_STATIONS, FUEL_STATIONS } from '../../data/stations'
 import { getWorldEventFuelBonus, getClosedStations, getActiveEvents } from '../../engine/worldEvents'
 import { getEnemyByTier, scaleEnemy } from '../../data/enemies'
 import { AsteroidDodge } from '../minigames/AsteroidDodge'
@@ -14,8 +14,11 @@ function NextHops({ stationName, currentName }: { stationName: string; currentNa
       {hops.map((h, i) => (
         <span key={h.name}>
           {i > 0 && <span style={{ opacity: 0.4, margin: '0 4px' }}>·</span>}
-          <span style={{ color: 'var(--text-dim)' }}>{h.name}</span>
-          <span style={{ color: 'var(--cyan)', opacity: 0.7, marginLeft: '3px', fontSize: '9px' }}>({getFuelCost(stationName, h.name)}⛽)</span>
+          <span style={{ color: FUEL_STATIONS.has(h.name) ? 'var(--green)' : 'var(--text-dim)' }}
+            title={FUEL_STATIONS.has(h.name) ? 'Vend du carburant' : undefined}>
+            {FUEL_STATIONS.has(h.name) ? '⛽ ' : ''}{h.name}
+          </span>
+          <span style={{ color: 'var(--cyan)', opacity: 0.7, marginLeft: '3px', fontSize: '9px' }}>(coût {getFuelCost(stationName, h.name)})</span>
         </span>
       ))}
     </div>
@@ -183,6 +186,9 @@ export function TravelScreen() {
                   <div className="t-xs mt4" style={{ color: canGo ? 'var(--cyan)' : 'var(--red)' }}>
                     {cost} CARBURANT{fuelBonus > 0 ? <span className="t-red"> (+{fuelBonus})</span> : ''}
                   </div>
+                  {FUEL_STATIONS.has(station.name) && (
+                    <div className="t-xs mt4" style={{ color: 'var(--green)' }}>⛽ VEND DU CARBURANT</div>
+                  )}
                   {banned && <div className="t-xs t-red mt4">BANNI</div>}
                   {isClosed && <div className="t-xs t-red mt4">⚠ BLOQUÉ</div>}
                 </div>

@@ -45,6 +45,16 @@ export const CLASSES: PlayerClass[] = [
     combatAttackMult: 1.25, combatDefenseMult: 1.20, combatCritBonus: 5, combatStaminaRegen: 15,
   },
   {
+    name: 'Rayane',
+    description: "Ses stats sont catastrophiques. Sa seule force : quand tout semble perdu, il propose toujours de tout jouer à pile ou face. À toi de juger si le risque vaut le coup.",
+    tier: 'bad',
+    startCredits: 300, startFuel: 3, maxFuel: 5, startHp: 65, startStamina: 80,
+    startStation: 'La Carcasse',
+    bonusDesc: '⚠ Pires stats du jeu · 🪙 Pile ou face DISPONIBLE (jamais imposé) en combat, en fuite, en ravitaillement, sur les récompenses de quête, et une fois face à la mort par run',
+    color: '#ffcc00', icon: '🪙',
+    combatAttackMult: 0.65, combatDefenseMult: 1.35,
+  },
+  {
     name: 'Maudit',
     description: "L'univers ne t'aime tout simplement pas. Les événements positifs ont 50% de chance de se retourner contre toi.",
     tier: 'bad',

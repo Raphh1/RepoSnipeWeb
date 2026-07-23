@@ -132,8 +132,17 @@ export function applyClassTravelEffects(gs: GameState): Partial<GameState> {
 // Clock : 3 actions terrain = 1 jour
 export function spendAction(gs: GameState): Partial<GameState> {
   const newActions = gs.actionsToday + 1
+
+  // Folie — la faim du cannibale monte même hors combat/voyage, à chaque
+  // action passée sans se nourrir. Seule la Morsure en combat la fait
+  // redescendre : ça pousse le joueur à chercher le conflit plutôt qu'à l'éviter.
+  const folieChanges: Partial<GameState> = gs.moralTags.includes('cannibal')
+    ? { folieLevel: Math.min(100, (gs.folieLevel ?? 0) + 6) }
+    : {}
+
   if (newActions >= 3) {
     const dayChanges: Partial<GameState> = {
+      ...folieChanges,
       actionsToday: 0,
       day: gs.day + 1,
     }
@@ -143,5 +152,5 @@ export function spendAction(gs: GameState): Partial<GameState> {
     }
     return dayChanges
   }
-  return { actionsToday: newActions }
+  return { ...folieChanges, actionsToday: newActions }
 }
