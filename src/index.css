@@ -283,8 +283,8 @@ html, body, #root {
 }
 
 /* ── STATUS BAR GRID ── */
-.status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: center; }
-.status-grid--folie { grid-template-columns: repeat(5, 1fr); }
+.status-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: center; }
+.status-grid--folie { grid-template-columns: repeat(6, 1fr); }
 
 /* ── STATION HUB — contenu + sidebar quêtes ── */
 .hub-layout { display: flex; gap: 16px; align-items: flex-start; }

@@ -47,14 +47,12 @@ export const NEXUS_FRAGMENTS: NexusFragment[] = [
 
 export type NexusAction =
   | 'force'       // Combat direct
-  | 'pay'         // Transaction financière
+  | 'pay'         // Transaction financière — réservé à Alanossa (200 000 cr, 50/50)
   | 'alliance'    // Relation + standing
-  | 'legendary'   // Sacrifice arme tier 5
   | 'gamble'      // Pari (Scotty)
-  | 'steal'       // Vol (classes voleur)
+  | 'steal'       // Vol — déclenché par la visite privée (bonne réputation), pas un bouton direct
   | 'lore'        // (héritage Eliotis — non utilisé)
   | 'war'         // Déclencher une guerre entre deux détenteurs
-  | 'betray'      // Trahir après alliance
   | 'manipulate'  // Entourloupe sans combat
 
 export interface NexusResult {
@@ -69,11 +67,9 @@ export interface NexusResult {
 
 export function getActionSuccessChance(idx: number, action: NexusAction): number | null {
   if (action === 'manipulate') return [40, 35, 30, 40][idx] ?? null
-  if (action === 'legendary') return 55
   if (action === 'war') return 60
-  if (action === 'betray') return 100
   if (action === 'force') return 100
-  if (action === 'pay') return idx === 2 ? 0 : 100
+  if (action === 'pay') return idx === 0 ? 50 : 0
   if (action === 'alliance') return 100
   return null
 }
@@ -146,7 +142,7 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
       if (action === 'force') return { ok: true }
       if (action === 'pay') {
         if (getStanding(gs, 'alanossa') < -10) return { ok: false, reason: 'Standing Alanossa trop négatif — elle refuse de traiter avec toi' }
-        return gs.credits >= 12000 ? { ok: true } : { ok: false, reason: `Manque ${(12000 - gs.credits).toLocaleString()} cr` }
+        return gs.credits >= 200000 ? { ok: true } : { ok: false, reason: `Manque ${(200000 - gs.credits).toLocaleString()} cr` }
       }
       if (action === 'alliance') {
         const defeated = gs.subBossesDefeated ?? {}
@@ -162,20 +158,10 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
         }
         return { ok: true }
       }
-      if (action === 'steal') {
-        if (!['Vagabond', 'Contrebandier'].includes(gs.class.name)) return { ok: false, reason: 'Classe Vagabond ou Contrebandier requise' }
-        if (getStanding(gs, 'alanossa') < 0) return { ok: false, reason: 'Standing Alanossa négatif — elle te surveille trop' }
-        return { ok: true }
-      }
       if (action === 'war') {
         const targets = ['cesarion', 'raphazarus', 'scotty'].filter(p => hasMetHolder(gs, p))
         if (targets.length === 0) return { ok: false, reason: 'Rencontre d\'abord un autre détenteur pour semer la discorde' }
         if (getStanding(gs, 'alanossa') < 5) return { ok: false, reason: 'Standing Alanossa insuffisant — elle ne t\'écouterait pas' }
-        return { ok: true }
-      }
-      if (action === 'betray') {
-        if (getStanding(gs, 'alanossa') < 28) return { ok: false, reason: 'Atteins d\'abord le niveau Alliance avec Alanossa' }
-        if (!decisions.includes('alliance-alanossa')) return { ok: false, reason: 'Forme d\'abord une alliance avec Alanossa' }
         return { ok: true }
       }
       if (action === 'manipulate') {
@@ -192,7 +178,7 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
         if (!gs.equippedWeapon) return { ok: false, reason: "Cesarion refuse le combat face à quelqu'un de désarmé" }
         return { ok: true }
       }
-      if (action === 'pay') return gs.credits >= 18000 ? { ok: true } : { ok: false, reason: `Manque ${(18000 - gs.credits).toLocaleString()} cr` }
+      if (action === 'pay') return { ok: false, reason: "Cesarion refuse toute transaction directe. L'Empire ne se marchande pas — il se mérite." }
       if (action === 'alliance') {
         const defeated = gs.subBossesDefeated ?? {}
         const hasProvedLoyalty = arePillarSubBossesCleared(defeated, 'alanossa') || arePillarSubBossesCleared(defeated, 'raphazarus')
@@ -207,20 +193,10 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
         }
         return { ok: true }
       }
-      if (action === 'legendary') {
-        if (!gs.weapons.some(w => w.tier >= 5)) return { ok: false, reason: 'Aucune arme Tier 5 en possession' }
-        if (getStanding(gs, 'cesarion') < 10) return { ok: false, reason: `Standing Cesarion trop faible (${getStanding(gs, 'cesarion')}/10)` }
-        return { ok: true }
-      }
       if (action === 'war') {
         const targets = ['alanossa', 'raphazarus', 'scotty'].filter(p => hasMetHolder(gs, p))
         if (targets.length === 0) return { ok: false, reason: 'Rencontre d\'abord un autre détenteur' }
         if (getStanding(gs, 'cesarion') < 5) return { ok: false, reason: 'Standing Cesarion insuffisant — il ne t\'accordera pas d\'audience' }
-        return { ok: true }
-      }
-      if (action === 'betray') {
-        if (getStanding(gs, 'cesarion') < 45) return { ok: false, reason: 'Atteins d\'abord le niveau Alliance avec Cesarion' }
-        if (!decisions.includes('alliance-cesarion')) return { ok: false, reason: 'Forme d\'abord une alliance avec Cesarion' }
         return { ok: true }
       }
       if (action === 'manipulate') {
@@ -251,19 +227,10 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
         }
         return { ok: true }
       }
-      if (action === 'legendary') {
-        if (!gs.weapons.some(w => w.tier >= 5)) return { ok: false, reason: 'Seule une arme de légende pourrait impressionner Raphazarus' }
-        if (getStanding(gs, 'raphazarus') < 15) return { ok: false, reason: `Raphazarus ne daigne pas regarder — standing ${getStanding(gs, 'raphazarus')}/15` }
-        return { ok: true }
-      }
       if (action === 'war') {
         const targets = ['alanossa', 'cesarion', 'scotty'].filter(p => hasMetHolder(gs, p))
         if (targets.length === 0) return { ok: false, reason: 'Rencontre d\'abord un autre détenteur' }
         if (getStanding(gs, 'raphazarus') < 15) return { ok: false, reason: 'Raphazarus ne t\'écoute pas — standing trop faible (15 requis)' }
-        return { ok: true }
-      }
-      if (action === 'betray') {
-        if (!decisions.includes('alliance-raphazarus')) return { ok: false, reason: 'Forme d\'abord une alliance avec Raphazarus — si tu en es capable' }
         return { ok: true }
       }
       if (action === 'manipulate') {
@@ -277,7 +244,7 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
     // ── SAMY SCOTTY ──────────────────────────────────────────────────────────
     case 3:
       if (action === 'force') return { ok: true }
-      if (action === 'pay') return gs.credits >= 8000 ? { ok: true } : { ok: false, reason: `Manque ${(8000 - gs.credits).toLocaleString()} cr` }
+      if (action === 'pay') return { ok: false, reason: "Scotty refuse — il ne vend pas ce fragment, il ne le fait que gagner ou offrir. C'est une question de principe, pas d'argent." }
       if (action === 'alliance') {
         const ok = getStanding(gs, 'scotty') >= 25 && gs.day >= 5
         if (!ok) {
@@ -297,11 +264,6 @@ export function canAttempt(gs: GameState, idx: number, action: NexusAction): { o
         const targets = ['alanossa', 'cesarion', 'raphazarus'].filter(p => hasMetHolder(gs, p))
         if (targets.length === 0) return { ok: false, reason: 'Rencontre d\'abord un autre détenteur' }
         if (getStanding(gs, 'scotty') < 5) return { ok: false, reason: 'Scotty ne t\'écouterait pas — standing trop faible' }
-        return { ok: true }
-      }
-      if (action === 'betray') {
-        if (getStanding(gs, 'scotty') < 25) return { ok: false, reason: 'Atteins d\'abord le niveau Alliance avec Scotty' }
-        if (!decisions.includes('alliance-scotty')) return { ok: false, reason: 'Forme d\'abord une alliance avec Scotty' }
         return { ok: true }
       }
       if (action === 'manipulate') {
@@ -335,22 +297,19 @@ export function attemptNexusFragment(gs: GameState, idx: number, action: NexusAc
       if (action === 'force')
         return { success: true, message: "Tu l'affrontes en plein pont de commandement. Elle rit et sort sa lame. 'C'est le meilleur argument que j'aie entendu aujourd'hui.'", triggerCombat: true, pillarBossName: 'Alanossa' }
       if (action === 'pay')
-        return { success: true, message: "Elle compte les crédits sans se presser. 'Quelqu'un qui paie sans négocier — soit stupide, soit pressé. J'espère que c'est le second.' Elle sourit. -12 000 cr.", newGs: { credits: gs.credits - 12000, pillarStanding: shiftPillar(gs, 'alanossa', -3) } }
+        {
+          const ok = Math.random() < 0.5
+          if (ok) return { success: true, message: "Elle compte les crédits sans se presser. 'Deux cent mille. Personne paie ça sans raison.' Elle sourit et pose le fragment sur la table. 'J'aime les gens qui savent ce qu'ils veulent.' -200 000 cr.", newGs: { credits: gs.credits - 200000, pillarStanding: shiftPillar(gs, 'alanossa', +5) } }
+          return { success: false, message: "Elle prend les crédits, les compte, les glisse dans un coffre. 'Merci pour le don.' Elle ne te donne rien en retour. -200 000 cr, pour rien.", newGs: { credits: gs.credits - 200000, pillarStanding: shiftPillar(gs, 'alanossa', -5) } }
+        }
       if (action === 'alliance')
         return { success: true, message: "Elle regarde les dossiers que tu lui apportes — les lieutenants d'un autre pilier, tous éliminés par tes mains. Un long silence. 'T'as fait le ménage chez les autres avant de venir chez moi. C'est soit de la loyauté, soit de la stratégie.' Elle sourit. 'J'aime les deux.' Elle pose le fragment dans ta main. 'Bienvenue dans la famille.'", newGs: { pillarStanding: shiftPillar(gs, 'alanossa', +15), pastDecisions: [...decisions.filter(d => d !== 'alliance-alanossa'), 'alliance-alanossa'] } }
-      if (action === 'steal') {
-        const ok = Math.random() < 0.55
-        if (ok) return { success: true, message: "Il a disparu de sa ceinture avant qu'elle remette le pied dans la pièce. Une heure plus tard, tu entends son rire dans tout le vaisseau — 'QUI L'A FAIT ?!' Elle sait pas. Pas encore.", newGs: { pillarStanding: shiftPillar(gs, 'alanossa', -25) } }
-        return { success: false, message: "Elle te voit. Ses yeux descendent vers sa ceinture, puis remontent. Un long silence. 'Bien tenté.' Ce qu'elle fait ensuite n'est pas agréable. -standing, -PV.", newGs: { pillarStanding: shiftPillar(gs, 'alanossa', -18), playerHp: Math.max(1, gs.playerHp - 40) } }
-      }
       if (action === 'war') {
         const targets = ['cesarion', 'raphazarus', 'scotty'].filter(p => hasMetHolder(gs, p))
         const target = targets[Math.floor(Math.random() * targets.length)]
         const tName = target.charAt(0).toUpperCase() + target.slice(1)
         return { success: false, message: `Tu glisses à Alanossa de fausses infos sur ${tName}. Elle écoute, mâchoires serrées. 'Il a vraiment fait ça ?' La paix entre eux est terminée. Mais les deux pourraient bien te chercher si la vérité éclate.`, triggersWar: { holderA: 'alanossa', holderB: target }, newGs: { pillarStanding: shiftPillar(gs, 'alanossa', -5) } }
       }
-      if (action === 'betray')
-        return { success: true, message: "Elle lui tournait le dos — confiance absolue. Tu en as profité. Le fragment est dans ta poche avant qu'elle comprenne. Son regard quand elle se retourne vaut tout l'or du secteur. Et maintenant, elle va te le faire payer.", newGs: { pillarStanding: shiftPillar(gs, 'alanossa', -80), nexusAngered: angeredAdd('alanossa'), pastDecisions: [...decisions, 'betrayed-alanossa'] }, spawnsBounty: true }
       if (action === 'manipulate') {
         const ok = Math.random() < 0.40
         if (ok) return { success: true, message: "Tu lui joues la comédie du partenariat stratégique. Elle y croit — une guerrière, pas une politique. Le fragment change de main dans le cadre d'un 'accord de sang'. -7000 cr.", newGs: { credits: gs.credits - 7000, pillarStanding: shiftPillar(gs, 'alanossa', -10) } }
@@ -362,23 +321,14 @@ export function attemptNexusFragment(gs: GameState, idx: number, action: NexusAc
     case 1:
       if (action === 'force')
         return { success: true, message: "Tu défies Cesarion dans son propre trône. Il se lève lentement. 'Je t'accorde le respect de ne pas appeler les gardes.' Il sort une lame de derrière le dossier. 'Tu vas le regretter.'", triggerCombat: true, pillarBossName: 'Cesarion' }
-      if (action === 'pay')
-        return { success: true, message: "'18 000. Transaction enregistrée.' Il signe sans lever les yeux. 'Tu peux sortir.' -18 000 cr.", newGs: { credits: gs.credits - 18000, pillarStanding: shiftPillar(gs, 'cesarion', +5) } }
       if (action === 'alliance')
         return { success: true, message: "Il examine les preuves de tes exploits — les lieutenants d'un rival, tous neutralisés. Son regard ne change pas, mais sa voix s'adoucit d'un micron. 'Tu as prouvé ta loyauté par le sang. C'est la seule monnaie que l'Empire reconnaît.' Il ouvre un coffre blindé. 'Bienvenue dans les cercles intérieurs.'", newGs: { pillarStanding: shiftPillar(gs, 'cesarion', +20), factionReputation: { ...gs.factionReputation, emporium: gs.factionReputation.emporium + 15 }, pastDecisions: [...decisions.filter(d => d !== 'alliance-cesarion'), 'alliance-cesarion'] } }
-      if (action === 'legendary') {
-        const kept = gs.weapons.filter(w => w.tier < 5)
-        const offered = gs.weapons.find(w => w.tier >= 5)
-        return { success: true, message: `Tu poses ${offered?.name ?? 'l\'arme'} sur son bureau. 'L\'acier de qualité mérite acier de qualité.' Il ouvre son coffre. 'L'échange est équitable.' -${offered?.name ?? 'arme Tier 5'}`, newGs: { weapons: kept, pillarStanding: shiftPillar(gs, 'cesarion', +12) } }
-      }
       if (action === 'war') {
         const targets = ['alanossa', 'raphazarus', 'scotty'].filter(p => hasMetHolder(gs, p))
         const target = targets[Math.floor(Math.random() * targets.length)]
         const tName = target.charAt(0).toUpperCase() + target.slice(1)
         return { success: false, message: `Tu présentes à Cesarion des données fabriquées sur ${tName}. Il les analyse en silence. 'Intéressant. Très intéressant.' Il appelle ses conseillers. La guerre commerciale — ou pire — vient de commencer.`, triggersWar: { holderA: 'cesarion', holderB: target }, newGs: { pillarStanding: shiftPillar(gs, 'cesarion', -5) } }
       }
-      if (action === 'betray')
-        return { success: true, message: "L'accord était scellé. Tu l'as utilisé comme outil, précisément comme il l'aurait fait lui-même. 'Élégant.' dit-il quand il comprend. 'Je n'oublierai pas.' Ce n'est pas une menace. C'est une promesse.", newGs: { pillarStanding: shiftPillar(gs, 'cesarion', -80), nexusAngered: angeredAdd('cesarion'), pastDecisions: [...decisions, 'betrayed-cesarion'] }, spawnsBounty: true }
       if (action === 'manipulate') {
         const ok = Math.random() < 0.35
         if (ok) return { success: true, message: "Tu lui présentes le fragment comme un investissement stratégique. La logique est tordue mais les chiffres tiennent — et Cesarion respecte les chiffres. 'Un partenariat inhabituel.' -10 000 cr.", newGs: { credits: gs.credits - 10000, pillarStanding: shiftPillar(gs, 'cesarion', -5) } }
@@ -392,19 +342,12 @@ export function attemptNexusFragment(gs: GameState, idx: number, action: NexusAc
         return { success: true, message: "Raphazarus se lève de son siège — lentement, comme s'il avait tout le temps du monde. Il pose son regard sur toi, celui d'un homme qui a vu des civilisations s'éteindre. 'Tu sais ce que ça fait, de perdre une guerre ?' Il dégaine. 'Tu vas l'apprendre.'", triggerCombat: true, pillarBossName: 'Raphazarus' }
       if (action === 'alliance')
         return { success: true, message: gs.nexusFragments.length >= 3 ? "Il te fixe longtemps. Très longtemps. 'Tu as fait ce que j'ai échoué à faire — réunir ce qui a été brisé.' Il ouvre sa main. Le fragment brille. 'Finis ce que j'ai commencé. Et ne trahis pas leur mémoire.'" : "Il écoute ton histoire en silence. Tes combats, tes choix, tes cicatrices. Quand tu finis, il dit simplement : 'Tu n'es pas un soldat. Mais tu as la discipline d'un guerrier.' Il pose le fragment entre vous deux. 'Prouve que tu mérites ce que des milliers sont morts pour protéger.'", newGs: { pillarStanding: shiftPillar(gs, 'raphazarus', +25), reputation: gs.reputation + 20, pastDecisions: [...decisions.filter(d => d !== 'alliance-raphazarus'), 'alliance-raphazarus'] } }
-      if (action === 'legendary') {
-        const kept = gs.weapons.filter(w => w.tier < 5)
-        const offered = gs.weapons.find(w => w.tier >= 5)
-        return { success: true, message: `Raphazarus prend ${offered?.name ?? "l'arme"} dans ses mains calleuses. Il la retourne, la soupèse, passe le pouce sur la lame. Ses yeux brillent — pour la première fois. 'Ça fait quarante-sept ans que j'ai pas tenu une arme comme ça.' Il pose le fragment. 'Échange de soldat à soldat.'`, newGs: { weapons: kept, pillarStanding: shiftPillar(gs, 'raphazarus', +15) } }
-      }
       if (action === 'war') {
         const targets = ['alanossa', 'cesarion', 'scotty'].filter(p => hasMetHolder(gs, p))
         const target = targets[Math.floor(Math.random() * targets.length)]
         const tName = target.charAt(0).toUpperCase() + target.slice(1)
         return { success: false, message: `Tu présentes à Raphazarus des informations falsifiées sur ${tName}. Le Général ne réagit pas tout de suite. Il analyse. Puis : 'Si c'est vrai, c'est une déclaration de guerre. Et je ne perds pas les guerres.' Ses vétérans commencent à se mobiliser. La tempête arrive.`, triggersWar: { holderA: 'raphazarus', holderB: target }, newGs: { pillarStanding: shiftPillar(gs, 'raphazarus', -8) } }
       }
-      if (action === 'betray')
-        return { success: true, message: "Tu as gagné sa confiance — la chose la plus rare de l'univers. Et tu l'as utilisée comme une arme. Quand le Général comprend, il ne crie pas. Il ne menace pas. Il dit simplement : 'La dernière personne qui m'a trahi, je l'ai poursuivie pendant onze ans. Elle n'a jamais dormi tranquille.' Il te regarde partir. Tu sens son regard dans ton dos longtemps après avoir quitté l'Arc Perdu.", newGs: { pillarStanding: shiftPillar(gs, 'raphazarus', -100), nexusAngered: angeredAdd('raphazarus'), pastDecisions: [...decisions, 'betrayed-raphazarus'], reputation: gs.reputation - 30 }, spawnsBounty: true }
       if (action === 'manipulate') {
         const ok = Math.random() < 0.30
         if (ok) return { success: true, message: "Tu montes une opération complexe — faux renseignements, fausses pistes, fausse urgence. Raphazarus, pour la première fois en 47 ans, quitte l'Arc Perdu. Le fragment est resté. Tu ne restes pas longtemps non plus. -6000 cr.", newGs: { credits: gs.credits - 6000, pillarStanding: shiftPillar(gs, 'raphazarus', -20) } }
@@ -416,8 +359,6 @@ export function attemptNexusFragment(gs: GameState, idx: number, action: NexusAc
     case 3:
       if (action === 'force')
         return { success: true, message: "'Tss. Tu pouvais juste payer.' Il siffle. Les gardes entrent par trois portes. Scotty se rassied avec son verre. 'Je regarde — c'est plus intéressant comme ça.'", triggerCombat: true, pillarBossName: 'Samy Scotty' }
-      if (action === 'pay')
-        return { success: true, message: "Scotty regarde les crédits transiter. 'Toujours un plaisir de traiter avec quelqu'un qui comprend la valeur des choses.' Il ouvre son coffre. 'Bonne route.' -8 000 cr.", newGs: { credits: gs.credits - 8000, pillarStanding: shiftPillar(gs, 'scotty', +8) } }
       if (action === 'alliance')
         return { success: true, message: "Scotty t'observe par-dessus son verre. 'T'as jamais triché, jamais mal joué.' Il ouvre son coffre. 'Dans mon métier, la loyauté dure rarement. La tienne oui.' Il te tend le fragment. 'Maintenant, bois quelque chose.'", newGs: { pillarStanding: shiftPillar(gs, 'scotty', +15), pastDecisions: [...decisions.filter(d => d !== 'alliance-scotty'), 'alliance-scotty'] } }
       if (action === 'gamble') {
@@ -448,8 +389,6 @@ export function attemptNexusFragment(gs: GameState, idx: number, action: NexusAc
         const tName = target.charAt(0).toUpperCase() + target.slice(1)
         return { success: false, message: `Scotty écoute ton histoire sur ${tName} avec un sourire croissant. 'Ah. Intéressant jeu.' Il sort un communicateur. 'Ce genre de rumeur fait de très bonnes affaires — pour moi.' La guerre vient de commencer, et Scotty en tirera profit d'une façon ou d'une autre.`, triggersWar: { holderA: 'scotty', holderB: target }, newGs: { pillarStanding: shiftPillar(gs, 'scotty', -5) } }
       }
-      if (action === 'betray')
-        return { success: true, message: "Il t'avait accordé sa confiance — ce qui n'arrive presque jamais. Et tu l'as retournée contre lui. Quand il réalise, il ne crie pas. Il dit juste : 'J'aurais dû parier contre toi.' La prime sur ta tête est posée dans l'heure.", newGs: { pillarStanding: shiftPillar(gs, 'scotty', -80), nexusAngered: angeredAdd('scotty'), pastDecisions: [...decisions, 'betrayed-scotty'] }, spawnsBounty: true }
       if (action === 'manipulate') {
         const ok = Math.random() < 0.60
         if (ok) return { success: true, message: "Tu lui présentes un deal tellement tordu que même lui n'arrive pas à trouver le piège. Il accepte juste pour voir. 'T'es soit brillant soit fou.' Le fragment change de main. -4000 cr.", newGs: { credits: gs.credits - 4000, pillarStanding: shiftPillar(gs, 'scotty', -5) } }

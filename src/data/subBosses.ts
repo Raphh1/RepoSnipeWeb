@@ -7,6 +7,15 @@ function makeEnemy(name: string, hp: number, dMin: number, dMax: number, lootMin
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 // ── ALANOSSA — Faucons Noirs ────────────────────────────────────────────────
 const ALANOSSA_SUBS: SubBossData[] = [
   {
@@ -312,12 +321,37 @@ export function getSubBossMinigame(enemyName: string): { kind: SubBossMinigameKi
   return { kind, difficulty: ORDER_DIFFICULTY[sb.order] ?? 2 }
 }
 
-export function getSubBossesForPillar(pillar: string): SubBossData[] {
-  return SUB_BOSSES.filter(sb => sb.pillar === pillar).sort((a, b) => a.order - b.order)
+// ── STATIONS DES LIEUTENANTS — mélangées par run ─────────────────────────────
+// Les 4 lieutenants d'un même pilier gardent les 4 stations habituelles de ce
+// pilier, mais laquelle appartient à qui change à chaque run : impossible de
+// mémoriser "le lieutenant 2 d'Alanossa est toujours au Perchoir" d'une partie
+// à l'autre. Le mélange reste à l'intérieur du territoire du pilier — on ne
+// mélange pas entre piliers, pour ne pas percuter le reste du contenu propre
+// à chaque station (contrôle de faction, quêtes d'équipement, etc.).
+export function generateLieutenantStationAssignment(): Record<string, string> {
+  const assignment: Record<string, string> = {}
+  const pillars = [...new Set(SUB_BOSSES.map(sb => sb.pillar))]
+  for (const pillar of pillars) {
+    const subs = getSubBossesForPillar(pillar)
+    const shuffledStations = shuffle(subs.map(sb => sb.station))
+    subs.forEach((sb, i) => { assignment[sb.id] = shuffledStations[i] })
+  }
+  return assignment
 }
 
-export function getSubBossAtStation(station: string): SubBossData | undefined {
-  return SUB_BOSSES.find(sb => sb.station === station)
+export function getSubBossStation(gs: GameState, sb: SubBossData): string {
+  return gs.lieutenantStationAssignment?.[sb.id] ?? sb.station
+}
+
+export function getSubBossesForPillar(pillar: string, gs?: GameState): SubBossData[] {
+  const subs = SUB_BOSSES.filter(sb => sb.pillar === pillar).sort((a, b) => a.order - b.order)
+  if (!gs) return subs
+  return subs.map(sb => ({ ...sb, station: getSubBossStation(gs, sb) }))
+}
+
+export function getSubBossAtStation(gs: GameState, station: string): SubBossData | undefined {
+  const sb = SUB_BOSSES.find(s => getSubBossStation(gs, s) === station)
+  return sb ? { ...sb, station: getSubBossStation(gs, sb) } : undefined
 }
 
 export function isSubBossDefeated(defeated: Record<string, string[]>, subBossId: string): boolean {
@@ -363,12 +397,12 @@ export function pickLieutenantForClue(defeated: Record<string, string[]>, locati
   return pick(candidates)
 }
 
-export function getLieutenantClueText(sb: SubBossData, level: number): string {
+export function getLieutenantClueText(gs: GameState, sb: SubBossData, level: number): string {
+  const resolvedStation = getSubBossStation(gs, sb)
   if (level < LIEUTENANT_CLUE_REVEAL_LEVEL) {
-    const station = getStation(sb.station)
-    return station.description
+    return getStation(resolvedStation).description
   }
-  return `${sb.name} se trouve à ${sb.station}.`
+  return `${sb.name} se trouve à ${resolvedStation}.`
 }
 
 export interface LieutenantClueEvent {
@@ -395,7 +429,7 @@ export function rollLieutenantClueEvent(gs: GameState): { event: LieutenantClueE
   const currentLevel = (gs.lieutenantClueLevels ?? {})[sb.id] ?? 0
   const nextLevel = currentLevel + 1
   return {
-    event: { subBoss: sb, level: nextLevel, npcLine: pick(INFORMANT_LINES), clueText: getLieutenantClueText(sb, nextLevel) },
+    event: { subBoss: sb, level: nextLevel, npcLine: pick(INFORMANT_LINES), clueText: getLieutenantClueText(gs, sb, nextLevel) },
     newMilestone,
   }
 }

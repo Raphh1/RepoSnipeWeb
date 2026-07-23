@@ -1,7 +1,7 @@
 import { useGameStore } from '../../store/gameStore'
 import { NAMED_NPCS } from '../../engine/npcTracker'
 import { getStationsSellingItem, getStation } from '../../data/stations'
-import { BOSS_TRIGGER_TYPES } from '../../engine/quests'
+import { BOSS_TRIGGER_TYPES, CRAFTED_DELIVERY_ITEMS } from '../../engine/quests'
 import type { MajorQuestCondition, QuestType, GameState } from '../../types'
 
 function stageDestination(cond: MajorQuestCondition): string | null {
@@ -247,6 +247,11 @@ export function QuestsScreen() {
                       {sellers.length > 0 && (
                         <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
                           ◆ Achetable à : {sellers.slice(0, 4).join(', ')}{sellers.length > 4 ? '…' : ''}
+                        </div>
+                      )}
+                      {!hasItem && sellers.length === 0 && CRAFTED_DELIVERY_ITEMS.includes(q.targetItem!) && (
+                        <div style={{ marginTop: '3px', color: 'var(--purple)', fontSize: '8px' }}>
+                          🔧 Introuvable en achat — doit être fabriqué à l'Atelier.
                         </div>
                       )}
                     </div>

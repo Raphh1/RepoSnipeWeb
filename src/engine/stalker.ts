@@ -9,6 +9,10 @@ export interface StalkerState {
   daysSinceLastSeen: number
   threatLevel: number  // 1-5 — escalade avec le temps
   daysActive: number   // jours depuis l'apparition du stalker
+  // Si ce stalker venge un fragment volé : le pilier concerné. S'il te rattrape
+  // et te bat, il récupère le fragment (voir handleCombatOutcome). Traque
+  // beaucoup plus agressive qu'un stalker normal — voir checkAvengingAmbush.
+  avengingPillar?: string
 }
 
 // Stalkers potentiels selon les actions du joueur
@@ -91,10 +95,21 @@ export function rollStalkerEvent(gs: GameState, stalker: StalkerState): StalkerE
 
 // Chance que le stalker surgisse pendant une action (explore / wander)
 export function getStalkerAmbushChance(stalker: StalkerState, action: 'explore' | 'wander'): number {
+  // Un vengeur de fragment volé ne laisse aucun répit — il frappe bien plus souvent
+  // qu'un stalker normal, où que tu ailles.
+  if (stalker.avengingPillar) return 0.55
   const base = action === 'explore' ? 0.06 : 0.04
   const threatBonus = stalker.threatLevel * 0.04
   const closingBonus = stalker.closingIn ? 0.08 : 0
   return Math.min(0.28, base + threatBonus + closingBonus)
+}
+
+// Chance qu'un vengeur de fragment volé frappe à la simple arrivée dans une
+// station — pas besoin d'explorer ou d'errer. C'est ce qui le rend inéchappable :
+// contrairement à un stalker normal, il n'attend pas que tu prennes un risque.
+export function getAvengingArrivalAmbushChance(stalker: StalkerState): number {
+  if (!stalker.avengingPillar) return 0
+  return 0.45
 }
 
 // Texte de présence atmosphérique pour le hub

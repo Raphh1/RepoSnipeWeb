@@ -25,28 +25,28 @@ const PILLAR_COLORS: Record<string, string> = {
 
 const ACTION_LABELS: Record<NexusAction, string> = {
   force:      '⚔ Forcer — affronter le gardien en combat',
-  pay:        '💰 Payer — transaction directe',
+  pay:        '💰 Payer 200 000 cr — 50/50, quoi qu\'il arrive',
   alliance:   '🤝 Alliance — standing & réputation',
-  legendary:  '⚡ Offrir une arme légendaire (Tier 5)',
   gamble:     '🎲 Parier — mise au casino (50/50)',
-  steal:      '🌑 Voler — classe voleur requise',
+  steal:      '🌑 Voler — via une visite privée (réputation)',
   lore:       '◆ Mémoire — par la connaissance du Nexus',
   war:        '⚔💥 Déclencher une guerre entre détenteurs',
-  betray:     '🗡 Trahir — exploiter la confiance acquise',
   manipulate: '🎭 Entourloupe — convaincre sans combat',
 }
 
+// "steal" n'est plus un bouton d'action instantané : il se déclenche tout seul
+// en visitant la station du détenteur avec une réputation suffisante (visite
+// privée — voir bossHomeVisits.ts). Il n'apparaît donc dans aucune liste ici.
 const ACTIONS_BY_FRAGMENT: Record<number, NexusAction[]> = {
-  0: ['force', 'pay', 'alliance', 'steal', 'war', 'betray', 'manipulate'],
-  1: ['force', 'pay', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
-  2: ['force', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
-  3: ['force', 'pay', 'alliance', 'gamble', 'war', 'betray', 'manipulate'],
+  0: ['force', 'pay', 'alliance', 'war', 'manipulate'],
+  1: ['force', 'alliance', 'war', 'manipulate'],
+  2: ['force', 'alliance', 'war', 'manipulate'],
+  3: ['force', 'alliance', 'gamble', 'war', 'manipulate'],
 }
 
 const ACTION_DANGER: Partial<Record<NexusAction, string>> = {
   force:    'var(--red)',
   war:      'var(--orange)',
-  betray:   'var(--orange)',
   manipulate: 'var(--purple)',
 }
 
@@ -54,12 +54,10 @@ const PATH_LABELS: Record<NexusAction, string> = {
   force:      'Par la force',
   pay:        "Par l'argent",
   alliance:   'Par l\'alliance',
-  legendary:  'Par le sacrifice',
   gamble:     'Par le hasard',
   steal:      'Par la ruse',
   lore:       'Par la mémoire',
   war:        'Par la guerre',
-  betray:     'Par la trahison',
   manipulate: 'Par la manipulation',
 }
 
@@ -217,7 +215,7 @@ export function NexusScreen() {
         {(() => {
           const sbProg = getSubBossProgress(gs.subBossesDefeated ?? {}, f.pillar)
           const sbCleared = arePillarSubBossesCleared(gs.subBossesDefeated ?? {}, f.pillar)
-          const subs = getSubBossesForPillar(f.pillar)
+          const subs = getSubBossesForPillar(f.pillar, gs)
           const pillarDefeated = gs.subBossesDefeated?.[f.pillar] ?? []
           const locationsKnown = gs.lieutenantLocationsKnown ?? []
           const clueLevels = gs.lieutenantClueLevels ?? {}
@@ -237,7 +235,7 @@ export function NexusScreen() {
                     </div>
                     {!done && sb.id === nextSb?.id && !known && (clueLevels[sb.id] ?? 0) > 0 && (
                       <div className="t-xs" style={{ color: 'var(--cyan)', lineHeight: 1.6, marginLeft: '14px' }}>
-                        Indice : {getLieutenantClueText(sb, clueLevels[sb.id] ?? 0)}
+                        Indice : {getLieutenantClueText(gs, sb, clueLevels[sb.id] ?? 0)}
                       </div>
                     )}
                     {!done && sb.id === nextSb?.id && !known && (

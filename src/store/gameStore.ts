@@ -12,7 +12,7 @@ import { applyClassTravelEffects, rollTravelEvent, spendAction } from '../engine
 import { rollPillarRumor } from '../engine/pillarRumors'
 import { checkArcTriggers, ARC_DEFINITIONS, advanceArc } from '../engine/narrativeArcs'
 import { maybeRivalEncounter } from '../engine/npcTracker'
-import { checkStalkerTrigger, rollStalkerEvent, escalateStalker } from '../engine/stalker'
+import { checkStalkerTrigger, rollStalkerEvent, escalateStalker, getAvengingArrivalAmbushChance, stalkerToEnemy } from '../engine/stalker'
 import { getArrivalSituation } from '../engine/arrivalSituations'
 import { getStation } from '../data/stations'
 import { rollWeaponForTier } from '../data/weapons'
@@ -26,8 +26,9 @@ import { addJournal } from '../engine/journal'
 import { resolveNexusWars, HOLDER_BOUNTY_HUNTERS, getSubBossKillConsequence } from '../engine/nexus'
 import { arePillarSubBossesCleared } from '../data/subBosses'
 import { shouldRaphazarusStrike, getRaphazarusWarrior } from '../engine/raphazarus'
-import { getSubBossAtStation } from '../data/subBosses'
+import { getSubBossAtStation, generateLieutenantStationAssignment } from '../data/subBosses'
 import { getDailyExpenses } from '../engine/expenses'
+import { checkBossHomeVisit, getBossHomeVisit } from '../engine/bossHomeVisits'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 
@@ -140,6 +141,7 @@ function buildInitialState(playerClass: PlayerClass): GameState {
        'Scotty Golden North','La Tribosphère'].map(n => [n, 0.75 + Math.random() * 0.5])
     ),
     subBossesDefeated: {},
+    lieutenantStationAssignment: generateLieutenantStationAssignment(),
     completedEquipmentQuests: [],
     arcPerduClues: [],
     bazarPurchases: {},
@@ -397,6 +399,15 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       }
     }
 
+    // Vengeur de fragment volé — frappe à la simple arrivée, sans attendre que
+    // le joueur explore/erre. C'est ce qui le rend inéchappable.
+    const avengingStalker = newGs.stalker
+    if (avengingStalker?.avengingPillar && newGs.screen === 'station-arrival' && Math.random() < getAvengingArrivalAmbushChance(avengingStalker)) {
+      const hunter = stalkerToEnemy(avengingStalker)
+      newGs = { ...newGs, combatEnemy: hunter, combatState: initCombat(hunter), screen: 'combat', stamina: newGs.maxStamina }
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `☠ ${avengingStalker.name} t'attendait à l'arrivée. Il veut le fragment.`
+    }
+
     // ── GUERRES ENTRE DÉTENTEURS — résolution après 4 jours ─────────────────
     if ((newGs.nexusWars ?? []).some(w => !w.resolved)) {
       const { gs: warGs, messages: warMsgs } = resolveNexusWars(newGs)
@@ -472,6 +483,13 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     const arrival = getArrivalSituation(newGs)
     if (arrival && newGs.screen === 'station-arrival') {
       newGs = { ...newGs, pendingArrival: true, pendingMessage: arrival.title }
+    }
+
+    // Visite privée d'un détenteur de pilier — vol par réputation, en exclusivité
+    // avec la situation d'arrivée ci-dessus pour ne pas empiler deux prises d'écran.
+    if (!newGs.pendingArrival && newGs.screen === 'station-arrival') {
+      const visit = checkBossHomeVisit(newGs)
+      if (visit) newGs = { ...newGs, pendingBossVisit: visit.pillar }
     }
 
     // ── CHAIN EVENTS — créer selon conditions ────────────────────────────────
@@ -944,6 +962,24 @@ function handleCombatOutcome(
 ) {
   let newGs: GameState = { ...gs, combatState: cs }
 
+  // ── VENGEUR DE FRAGMENT VOLÉ — te rattrape, te bat, récupère le fragment ──
+  // S'applique seulement si tu perds réellement (mort, capture, assommé) —
+  // fuir avec succès ('fled') ne compte pas comme une défaite, le fragment reste à toi.
+  if ((outcome === 'dead' || outcome === 'captured' || outcome === 'stunned') && gs.stalker?.avengingPillar && gs.combatEnemy?.name === gs.stalker.name) {
+    const pillar = gs.stalker.avengingPillar
+    const visit = getBossHomeVisit(pillar)
+    if (visit && (gs.nexusFragments ?? []).includes(visit.idx)) {
+      const newFragments = gs.nexusFragments.filter(i => i !== visit.idx)
+      newGs = {
+        ...newGs,
+        nexusFragments: newFragments,
+        stationPiecesRallied: newFragments.length,
+        stalker: undefined,
+        journal: addJournal(gs, `${gs.stalker.name} m'a rattrapé et a repris le fragment de ${visit.bossName}. Il ne me traque plus — il a eu ce qu'il voulait.`, 'combat'),
+      }
+    }
+  }
+
   // ── TOURNOI : victoire en round intermédiaire ou finale ──────────────────
   if (outcome === 'victory' && gs.tournamentRound > 0) {
     if (gs.tournamentRound < 10) {
@@ -1059,7 +1095,7 @@ function handleCombatOutcome(
     // Sub-boss vaincu au combat
     let subBossMsg: string | null = null
     if (gs.combatEnemy?.isSubBoss) {
-      const sb = getSubBossAtStation(gs.currentStation)
+      const sb = getSubBossAtStation(gs, gs.currentStation)
       if (sb && sb.enemy.name === gs.combatEnemy.name) {
         const defeated = { ...(newGs.subBossesDefeated ?? {}) }
         defeated[sb.pillar] = [...(defeated[sb.pillar] ?? []), sb.id]

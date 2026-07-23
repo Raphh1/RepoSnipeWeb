@@ -459,7 +459,9 @@ export interface GameState {
   multiCombatState: import('../engine/multiCombat').MultiCombatState | null
   // Nexus fragments (condition de victoire)
   nexusFragments: number[]
-  nexusPath: Partial<Record<number, 'force' | 'pay' | 'alliance' | 'legendary' | 'gamble' | 'steal' | 'lore' | 'war' | 'betray' | 'manipulate'>>
+  nexusPath: Partial<Record<number, 'force' | 'pay' | 'alliance' | 'gamble' | 'steal' | 'lore' | 'war' | 'manipulate'>>
+  // Visite privée en attente (vol par réputation) — pillar en attente de résolution
+  pendingBossVisit?: string | null
   nexusWars: NexusWar[]
   nexusAngered: string[]  // pillar keys des détenteurs rendus ennemis permanents
   // Tracker Nexus révélé après la quête tutorielle (5.1)
@@ -527,6 +529,7 @@ export interface GameState {
   prisonCellmatePending: boolean  // un codétenu hostile attend dans la cellule
   // Services exclusifs des stations
   implantsBought: string[]         // identifiants implants achetés ce run
+  cargoImplantsUsed?: number       // implants cargo posés ce run (plafonné — bug: illimité sinon)
   usedFreeRestStations: string[]   // stations où le repos gratuit a été utilisé ce run
   usedLocalActivities: string[]
   scavengedThisVisit?: boolean
@@ -544,6 +547,10 @@ export interface GameState {
   waypoint?: string
   // Sous-boss vaincus par pilier { pillarKey: subBossId[] }
   subBossesDefeated: Record<string, string[]>
+  // Stations des lieutenants pour cette run — mélangées à la création (voir
+  // generateLieutenantStationAssignment) pour qu'un même pilier n'ait pas
+  // toujours ses lieutenants aux mêmes endroits d'une run à l'autre.
+  lieutenantStationAssignment?: Record<string, string>
   // Indices de localisation des lieutenants { subBossId: niveau d'indice reçu (0 = aucun) }
   lieutenantClueLevels?: Record<string, number>
   // Lieutenants dont la station a été découverte (devinée ou visitée)

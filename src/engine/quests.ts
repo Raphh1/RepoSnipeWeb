@@ -22,6 +22,12 @@ const DELIVERY_ITEMS = [
   'Implants','Eau purifiée','Rations militaires','Cristaux énergétiques',
 ]
 
+// Objets qui n'existent nulle part dans le commerce — uniquement issus de
+// l'Atelier de fabrication (recipes.ts : void_regulator, ghost_nav_chip,
+// annealed_alloy). Une quête ciblant l'un d'eux ne peut pas se résoudre en
+// achetant : il faut réunir les matériaux et les fabriquer soi-même.
+export const CRAFTED_DELIVERY_ITEMS = ['Régulateur de Vide', 'Puce de Navigation Fantôme', 'Alliage Recuit']
+
 // ── QUÊTE TUTORIELLE (5.1) ────────────────────────────────────────────────────
 // Auto-assignée au jour 1. Un PNJ de la station de départ demande une livraison
 // vers la station proche la moins chère. Guide le joueur : acheter → voyager →
@@ -258,11 +264,16 @@ export function generateQuest(gs: GameState): Quest | null {
 
   switch (type) {
     case 'delivery': {
-      const item   = pick(DELIVERY_ITEMS)
-      const reward = scale(rng(600, 2200))
-      const desc   = pick(DELIVERY_DESCS)(item, giver, target.name)
+      // 20% de chance de cibler une pièce exclusive à l'Atelier — introuvable
+      // en achat, doit être fabriquée. Récompense majorée en conséquence.
+      const isCrafted = Math.random() < 0.20
+      const item   = isCrafted ? pick(CRAFTED_DELIVERY_ITEMS) : pick(DELIVERY_ITEMS)
+      const reward = isCrafted ? scale(rng(1400, 3200)) : scale(rng(600, 2200))
+      const desc   = isCrafted
+        ? `${giver} a besoin de ${item} — une pièce qui ne s'achète nulle part. Il faut la fabriquer à l'Atelier avant de pouvoir la livrer à ${target.name}.`
+        : pick(DELIVERY_DESCS)(item, giver, target.name)
       return { id, title: `Livraison : ${item}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 10, dayMult }
+        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: isCrafted ? 15 : 10, dayMult }
     }
     case 'kill': {
       const boss   = BOSS_NAMES[target.name] ?? `le chef de ${target.name}`

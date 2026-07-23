@@ -189,4 +189,32 @@ export const RECIPES: Recipe[] = [
     ingredients: { 'Métaux bruts': 4, 'Composants électroniques': 1 },
     output: { type: 'cargo', item: 'Métaux rares', quantity: 2 },
   },
+
+  // ── PIÈCES EXCLUSIVES À L'ATELIER ────────────────────────────────────────
+  // N'existent nulle part ailleurs — aucune station ne les vend, aucun ennemi
+  // ne les largue. Seul moyen de les obtenir : les fabriquer ici.
+  {
+    id: 'void_regulator',
+    name: 'Régulateur de Vide',
+    description: "Stabilise un flux énergétique instable en signal exploitable. Aucun marchand ne sait en fabriquer — ou n'ose l'admettre.",
+    category: 'ressource',
+    ingredients: { 'Cristaux énergétiques': 2, 'Composants électroniques': 2, 'Métaux rares': 1 },
+    output: { type: 'cargo', item: 'Régulateur de Vide', quantity: 1 },
+  },
+  {
+    id: 'ghost_nav_chip',
+    name: 'Puce de Navigation Fantôme',
+    description: "Calcule des routes que les cartes officielles ignorent. Un croisement de données classifiées et de composants qu'on ne trouve sur aucun catalogue.",
+    category: 'ressource',
+    ingredients: { 'Données classifiées': 1, 'Composants électroniques': 1, 'Technologies avancées': 1 },
+    output: { type: 'cargo', item: 'Puce de Navigation Fantôme', quantity: 1 },
+  },
+  {
+    id: 'annealed_alloy',
+    name: 'Alliage Recuit',
+    description: "Un traitement thermique précis que seul un atelier bien équipé peut reproduire de façon fiable.",
+    category: 'ressource',
+    ingredients: { 'Métaux rares': 2, 'Métaux bruts': 3, 'Outils': 1 },
+    output: { type: 'cargo', item: 'Alliage Recuit', quantity: 2 },
+  },
 ]

@@ -1,4 +1,5 @@
 import type { GameState } from '../../types'
+import { FACTION_MAP } from '../../engine/factions'
 
 interface Props { gs: GameState }
 
@@ -14,6 +15,11 @@ export function StatusBar({ gs }: Props) {
   const folieLabel = gs.moralTags.includes('cannibal') && gs.class.name === 'Accro'
     ? 'FOLIE (×2)'
     : gs.moralTags.includes('cannibal') ? 'FOLIE 🩸' : 'FOLIE'
+
+  const repColor = gs.reputation >= 40 ? 'var(--green)' : gs.reputation <= -40 ? 'var(--red)' : 'var(--text)'
+  const faction = gs.faction !== 'none' ? FACTION_MAP[gs.faction] : null
+  const factionRep = faction ? gs.factionReputation[faction.id as keyof typeof gs.factionReputation] : null
+  const factionRepColor = factionRep !== null && factionRep >= 40 ? 'var(--green)' : factionRep !== null && factionRep <= -40 ? 'var(--red)' : 'var(--text)'
 
   return (
     <div className={`px-box status-grid ${showFolie ? 'status-grid--folie' : ''}`}>
@@ -57,6 +63,16 @@ export function StatusBar({ gs }: Props) {
         <div><span className="t-dim t-xs">CR </span><span className="t-gold t-sm">{gs.credits.toLocaleString()}</span></div>
         <div><span className="t-dim t-xs">FUEL </span><span className="t-cyan t-sm">{gs.fuel}/{gs.maxFuel}</span></div>
         <div><span className="t-dim t-xs">JOUR </span><span className="t-sm">{gs.day}</span></div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <div><span className="t-dim t-xs">RÉP </span><span className="t-sm" style={{ color: repColor }}>{gs.reputation > 0 ? '+' : ''}{gs.reputation}</span></div>
+        {faction && factionRep !== null && (
+          <div>
+            <span className="t-xs" style={{ color: faction.color }}>{faction.name.replace(/^(Les |L'|Le )/, '')} </span>
+            <span className="t-sm" style={{ color: factionRepColor }}>{factionRep > 0 ? '+' : ''}{factionRep}</span>
+          </div>
+        )}
       </div>
 
       {(gs.equippedWeapon || gs.equippedArmor) && (

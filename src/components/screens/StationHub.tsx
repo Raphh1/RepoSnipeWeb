@@ -21,6 +21,7 @@ import { CustomsGame } from '../minigames/CustomsGame'
 import { stalkerToEnemy, getStalkerAmbushChance, getStalkerPresenceText } from '../../engine/stalker'
 import { isFactionBlockedAtStation, getStationFactionName, STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getArrivalSituation, type ArrivalSituation } from '../../engine/arrivalSituations'
+import { getBossHomeVisit, resolveBossHomeVisit, type BossHomeVisitDef, type BossHomeVisitResult } from '../../engine/bossHomeVisits'
 import { RUN_MODIFIERS } from '../../data/runModifiers'
 import { getRunObjective } from '../../data/runObjectives'
 import { getSubBossAtStation, isSubBossDefeated, getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar, rollLieutenantClueEvent, LIEUTENANT_CLUE_REVEAL_LEVEL, type LieutenantClueEvent } from '../../data/subBosses'
@@ -49,6 +50,7 @@ export function StationHub() {
   const addQuest     = useGameStore(s => s.addQuest)
   const manualCompleteQuest = useGameStore(s => s.manualCompleteQuest)
   const resolveRayaneGamble = useGameStore(s => s.resolveRayaneGamble)
+  const collectNexusFragment = useGameStore(s => s.collectNexusFragment)
 
   function tickPatrolProgress() {
     const q = gs.activeQuests.find(aq => aq.type === 'patrol' && aq.targetStation === gs.currentStation)
@@ -91,6 +93,8 @@ export function StationHub() {
   const [lieutenantClueEvent, setLieutenantClueEvent] = useState<LieutenantClueEvent | null>(null)
   const [arrivalSit, setArrivalSit] = useState<ArrivalSituation | null>(null)
   const [arrivalResult, setArrivalResult] = useState<string | null>(null)
+  const [bossVisit, setBossVisit] = useState<BossHomeVisitDef | null>(null)
+  const [bossVisitResult, setBossVisitResult] = useState<BossHomeVisitResult | null>(null)
   const [pendingDeliveryQuest, setPendingDeliveryQuest] = useState<ReturnType<typeof generateQuest>>(null)
   const [deliveryResult, setDeliveryResult] = useState<string | null>(null)
   const [negotiationBase]   = useState(() => Math.floor(Math.random() * 1500 + 600))
@@ -137,13 +141,22 @@ export function StationHub() {
     }
   }, [])
 
+  // Visite privée d'un détenteur — calculée une fois au montage si pendingBossVisit est posé
+  useEffect(() => {
+    if (gs.pendingBossVisit && !bossVisit) {
+      const def = getBossHomeVisit(gs.pendingBossVisit)
+      if (def) setBossVisit(def)
+      else patch({ pendingBossVisit: null })
+    }
+  }, [])
+
   // Réinitialise le résultat de résolution de lieutenant au changement de station.
   useEffect(() => { setSubBossResult(null) }, [gs.currentStation])
 
   // Arriver physiquement à la station d'un lieutenant le révèle automatiquement —
   // pas besoin d'indice si le joueur l'a trouvé tout seul.
   useEffect(() => {
-    const sb = getSubBossAtStation(gs.currentStation)
+    const sb = getSubBossAtStation(gs, gs.currentStation)
     if (sb && !(gs.lieutenantLocationsKnown ?? []).includes(sb.id) && !isSubBossDefeated(gs.subBossesDefeated ?? {}, sb.id)) {
       patch({ lieutenantLocationsKnown: [...(gs.lieutenantLocationsKnown ?? []), sb.id] })
     }
@@ -898,8 +911,46 @@ export function StationHub() {
         </div>
       )}
 
+      {/* ── VISITE PRIVÉE D'UN DÉTENTEUR (vol par réputation) ───────────────── */}
+      {bossVisit && !arrivalSit && (
+        <div className="px-box" style={{ borderColor: 'var(--purple)', background: 'rgba(20,0,30,0.6)' }}>
+          <div className="t-xs mb4" style={{ color: 'var(--purple)', letterSpacing: '2px' }}>◆ VISITE PRIVÉE — {bossVisit.bossName.toUpperCase()}</div>
+          {!bossVisitResult ? (
+            <>
+              <div className="t-xs mb8" style={{ lineHeight: '2.2' }}>{bossVisit.inviteLine}</div>
+              <div className="t-xs t-dim mb8" style={{ lineHeight: '2.2', fontStyle: 'italic' }}>{bossVisit.tourLine}</div>
+              <button className="px-btn" style={{ borderColor: 'var(--purple)', color: 'var(--purple)' }}
+                onClick={() => {
+                  const result = resolveBossHomeVisit(gs, bossVisit)
+                  setBossVisitResult(result)
+                  patch({ ...result.patch, pendingBossVisit: null })
+                }}>
+                Suivre {bossVisit.bossName}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="t-xs mb8" style={{ lineHeight: '2.2', color: bossVisitResult.revealed ? 'var(--green)' : 'var(--text)' }}>
+                {bossVisitResult.message}
+              </div>
+              <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: 'var(--purple)', color: 'var(--purple)' }}
+                onClick={() => {
+                  if (bossVisitResult.revealed) {
+                    collectNexusFragment(bossVisit.idx)
+                    patch({ nexusPath: { ...gs.nexusPath, [bossVisit.idx]: 'steal' } })
+                  }
+                  setBossVisit(null)
+                  setBossVisitResult(null)
+                }}>
+                Continuer →
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {/* ── BRIEFING UNIFIÉ — toutes les notifications d'arrivée en un bloc ── */}
-      {!arrivalSit && !arrivalResult && (gs.pendingDaySummary || worldEventPopup || chainEvent || travelMsg || questPopup || objPopup || gs.rayaneGambleOffer) ? (
+      {!arrivalSit && !arrivalResult && !bossVisit && (gs.pendingDaySummary || worldEventPopup || chainEvent || travelMsg || questPopup || objPopup || gs.rayaneGambleOffer) ? (
         <div className="px-box" style={{ borderColor: 'var(--cyan)', background: 'rgba(0,0,0,0.5)' }}>
           <div className="t-xs mb8" style={{ color: 'var(--cyan)', letterSpacing: '2px' }}>◆ BRIEFING — JOUR {gs.day}</div>
 
@@ -1286,13 +1337,13 @@ export function StationHub() {
 
       {/* ── SOUS-BOSS ───────────────────────────────────────────────────── */}
       {(() => {
-        const subBoss = getSubBossAtStation(gs.currentStation)
+        const subBoss = getSubBossAtStation(gs, gs.currentStation)
         if (!subBoss) return null
         const defeated = gs.subBossesDefeated ?? {}
         const alreadyDone = isSubBossDefeated(defeated, subBoss.id)
         const progress = getSubBossProgress(defeated, subBoss.pillar)
         const pillarSubs = defeated[subBoss.pillar] ?? []
-        const prevSubBoss = subBoss.order === 1 ? null : getSubBossesForPillar(subBoss.pillar).find(sb => sb.order === subBoss.order - 1)
+        const prevSubBoss = subBoss.order === 1 ? null : getSubBossesForPillar(subBoss.pillar, gs).find(sb => sb.order === subBoss.order - 1)
         const prevDone = subBoss.order === 1 || (prevSubBoss ? pillarSubs.includes(prevSubBoss.id) : true)
         const pName = subBoss.pillar.charAt(0).toUpperCase() + subBoss.pillar.slice(1)
         return (
@@ -1728,17 +1779,26 @@ export function StationHub() {
               </button>
             )
           })()}
-          {/* Implants (cargo) → bonus HP max permanent */}
-          {(gs.cargo['Implants'] ?? 0) > 0 && (
-            <button className="px-btn" style={{ borderColor: 'var(--purple)', color: 'var(--purple)' }} onClick={() => {
-              const qty = (gs.cargo['Implants'] ?? 1) - 1
-              const nc = { ...gs.cargo, 'Implants': qty }
-              if (qty <= 0) delete (nc as Record<string,number>)['Implants']
-              patch({ playerMaxHp: gs.playerMaxHp + 15, playerHp: Math.min(gs.playerMaxHp + 15, gs.playerHp + 10), cargo: nc })
-            }}>
-              ⬆ Implant posé → +15 PV max permanent (+10 PV actuels) · ×{gs.cargo['Implants']}
-            </button>
-          )}
+          {/* Implants (cargo) → bonus HP max permanent — plafonné à 3 par run,
+              sinon le corps ne suit plus (et c'était un bug : illimité avant). */}
+          {(gs.cargo['Implants'] ?? 0) > 0 && (() => {
+            const used = gs.cargoImplantsUsed ?? 0
+            const capped = used >= 3
+            return (
+              <button className="px-btn" style={{ borderColor: 'var(--purple)', color: 'var(--purple)', opacity: capped ? 0.4 : 1 }}
+                disabled={capped}
+                onClick={() => {
+                  const qty = (gs.cargo['Implants'] ?? 1) - 1
+                  const nc = { ...gs.cargo, 'Implants': qty }
+                  if (qty <= 0) delete (nc as Record<string,number>)['Implants']
+                  patch({ playerMaxHp: gs.playerMaxHp + 15, playerHp: Math.min(gs.playerMaxHp + 15, gs.playerHp + 10), cargo: nc, cargoImplantsUsed: used + 1 })
+                }}>
+                {capped
+                  ? `⬆ Implant posé → limite atteinte (3/3 ce run) — le corps ne peut plus en encaisser`
+                  : `⬆ Implant posé → +15 PV max permanent (+10 PV actuels) · ${used}/3 posés · ×${gs.cargo['Implants']}`}
+              </button>
+            )
+          })()}
           {/* Logiciels → effacer le contrôle douanier du jour */}
           {(gs.cargo['Logiciels'] ?? 0) > 0 && station.type === 'military' && (
             <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }} onClick={() => {

@@ -14,6 +14,22 @@ interface Asteroid {
   hue: number
 }
 
+interface EnemyShip {
+  x: number
+  y: number
+  r: number
+  vx: number
+  vy: number
+}
+
+interface Bullet {
+  x: number
+  y: number
+  vx: number
+}
+
+const SHOT_COOLDOWN_MS = 260
+
 export function EscortMiniGameScreen() {
   const gs                  = useGameStore(s => s.gs!)
   const completeEscortQuest = useGameStore(s => s.completeEscortQuest)
@@ -23,16 +39,22 @@ export function EscortMiniGameScreen() {
     playerX: 80, playerY: 150,
     lives: 3,
     asteroids: [] as Asteroid[],
+    ships: [] as EnemyShip[],
+    bullets: [] as Bullet[],
     keys: new Set<string>(),
     startTime: 0,
     invincibleUntil: 0,
     lastSpawn: 0,
+    lastShipSpawn: 0,
+    lastShot: 0,
+    shipsDestroyed: 0,
     done: false,
   })
 
   const [lives, setLives]     = useState(3)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [result, setResult]   = useState<'won' | 'lost' | null>(null)
+  const [shipsDestroyed, setShipsDestroyed] = useState(0)
 
   const quest = gs.activeQuests.find(q => q.id === gs.pendingEscortQuestId)
 
@@ -49,14 +71,27 @@ export function EscortMiniGameScreen() {
     s.playerX      = 80
     s.playerY      = H / 2
     s.asteroids    = []
+    s.ships        = []
+    s.bullets      = []
     s.lastSpawn    = Date.now()
+    s.lastShipSpawn = Date.now()
+    s.lastShot     = 0
+    s.shipsDestroyed = 0
     s.invincibleUntil = 0
+
+    function shoot() {
+      const now = Date.now()
+      if (now - s.lastShot < SHOT_COOLDOWN_MS) return
+      s.lastShot = now
+      s.bullets.push({ x: s.playerX + PLAYER_W, y: s.playerY, vx: 7 })
+    }
 
     const onMove = (e: MouseEvent) => {
       const r  = canvas.getBoundingClientRect()
       s.playerX = Math.max(PLAYER_W, Math.min(W - PLAYER_W, (e.clientX - r.left) * (W / r.width)))
       s.playerY = Math.max(PLAYER_H, Math.min(H - PLAYER_H, (e.clientY - r.top)  * (H / r.height)))
     }
+    const onClick = () => shoot()
     const onTouch = (e: TouchEvent) => {
       e.preventDefault()
       const r  = canvas.getBoundingClientRect()
@@ -64,11 +99,17 @@ export function EscortMiniGameScreen() {
       s.playerX = Math.max(PLAYER_W, Math.min(W - PLAYER_W, (t.clientX - r.left) * (W / r.width)))
       s.playerY = Math.max(PLAYER_H, Math.min(H - PLAYER_H, (t.clientY - r.top)  * (H / r.height)))
     }
-    const onKeyDown = (e: KeyboardEvent) => s.keys.add(e.key)
+    const onKeyDown = (e: KeyboardEvent) => {
+      s.keys.add(e.key)
+      if (e.key === ' ') { e.preventDefault(); shoot() }
+    }
     const onKeyUp   = (e: KeyboardEvent) => s.keys.delete(e.key)
+    const onTouchStartShoot = () => shoot()
 
     canvas.addEventListener('mousemove', onMove)
+    canvas.addEventListener('mousedown', onClick)
     canvas.addEventListener('touchmove', onTouch, { passive: false })
+    canvas.addEventListener('touchstart', onTouchStartShoot)
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup', onKeyUp)
 
@@ -96,6 +137,14 @@ export function EscortMiniGameScreen() {
         s.lastSpawn = now
       }
 
+      // Spawn vaisseaux ennemis — moins fréquents que les astéroïdes, destructibles au tir
+      const shipSpawnInterval = Math.max(1800, 3400 - elapsed * 40)
+      if (now - s.lastShipSpawn > shipSpawnInterval) {
+        const r = 11
+        s.ships.push({ x: W + r, y: Math.random() * (H - r * 2) + r, r, vx: -(Math.random() * 1.6 + 1.2), vy: (Math.random() - 0.5) * 1.0 })
+        s.lastShipSpawn = now
+      }
+
       // Move & cull asteroids
       s.asteroids = s.asteroids.filter(a => a.x + a.r > 0)
       for (const a of s.asteroids) {
@@ -104,9 +153,38 @@ export function EscortMiniGameScreen() {
         if (a.y - a.r < 0 || a.y + a.r > H) a.vy *= -1
       }
 
-      // Hit detection (small ellipse hitbox)
+      // Move & cull ships
+      s.ships = s.ships.filter(sh => sh.x + sh.r > 0)
+      for (const sh of s.ships) {
+        sh.x += sh.vx
+        sh.y += sh.vy
+        if (sh.y - sh.r < 0 || sh.y + sh.r > H) sh.vy *= -1
+      }
+
+      // Move & cull bullets
+      s.bullets = s.bullets.filter(b => b.x < W)
+      for (const b of s.bullets) b.x += b.vx
+
+      // Collision tir ↔ vaisseau — détruit le vaisseau, libère l'espace, pas de combat déclenché
+      for (const b of s.bullets) {
+        for (const sh of s.ships) {
+          const dx = sh.x - b.x
+          const dy = sh.y - b.y
+          if (dx * dx + dy * dy < sh.r * sh.r) {
+            b.x = W + 999 // marque le tir pour suppression
+            sh.x = -999   // marque le vaisseau pour suppression
+            s.shipsDestroyed++
+            setShipsDestroyed(s.shipsDestroyed)
+            break
+          }
+        }
+      }
+      s.bullets = s.bullets.filter(b => b.x < W)
+      s.ships = s.ships.filter(sh => sh.x + sh.r > 0)
+
+      // Hit detection (small ellipse hitbox) — astéroïdes ET vaisseaux non détruits
       if (now > s.invincibleUntil) {
-        for (const a of s.asteroids) {
+        for (const a of [...s.asteroids, ...s.ships]) {
           const dx = a.x - s.playerX
           const dy = a.y - s.playerY
           if (dx * dx / ((a.r + 10) * (a.r + 10)) + dy * dy / ((a.r + 8) * (a.r + 8)) < 1) {
@@ -144,6 +222,30 @@ export function EscortMiniGameScreen() {
         ctx.strokeStyle = `hsl(${a.hue},40%,55%)`
         ctx.lineWidth = 1.5
         ctx.stroke()
+      }
+
+      // Enemy ships (destructibles au tir — silhouette distincte des astéroïdes)
+      for (const sh of s.ships) {
+        ctx.save()
+        ctx.translate(sh.x, sh.y)
+        ctx.fillStyle = '#ff3355'
+        ctx.beginPath()
+        ctx.moveTo(-sh.r, 0)
+        ctx.lineTo(sh.r, -sh.r * 0.7)
+        ctx.lineTo(sh.r * 0.3, 0)
+        ctx.lineTo(sh.r, sh.r * 0.7)
+        ctx.closePath()
+        ctx.fill()
+        ctx.strokeStyle = '#ffaabb'
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.restore()
+      }
+
+      // Bullets
+      ctx.fillStyle = '#40ffe0'
+      for (const b of s.bullets) {
+        ctx.fillRect(b.x - 4, b.y - 1.5, 8, 3)
       }
 
       // Player ship (flicker when invincible)
@@ -184,7 +286,9 @@ export function EscortMiniGameScreen() {
     return () => {
       cancelAnimationFrame(animId)
       canvas.removeEventListener('mousemove', onMove)
+      canvas.removeEventListener('mousedown', onClick)
       canvas.removeEventListener('touchmove', onTouch)
+      canvas.removeEventListener('touchstart', onTouchStartShoot)
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
     }
@@ -207,6 +311,9 @@ export function EscortMiniGameScreen() {
             <span key={i} style={{ color: i < lives ? 'var(--red)' : 'var(--border-dim)', marginRight: '4px', fontSize: '16px' }}>♥</span>
           ))}
         </div>
+        <div className="t-xs" style={{ color: 'var(--cyan)' }}>
+          🚀 {shipsDestroyed} détruit{shipsDestroyed > 1 ? 's' : ''}
+        </div>
         <div className="t-xs" style={{ color: timeLeft <= 5 ? 'var(--red)' : 'var(--text)' }}>
           <span className={timeLeft <= 5 ? 'blink' : ''}>{timeLeft}s</span>
         </div>
@@ -220,7 +327,7 @@ export function EscortMiniGameScreen() {
       />
 
       <div className="t-xs t-dim t-center">
-        Souris · ZQSD · Flèches — Survie {GAME_DURATION}s pour livrer le passager
+        Souris · ZQSD · Flèches pour naviguer — Clic ou Espace pour tirer sur les vaisseaux ennemis (les détruire libère l'espace, pas de combat déclenché) — Survie {GAME_DURATION}s pour livrer le passager
       </div>
 
       {result && (
