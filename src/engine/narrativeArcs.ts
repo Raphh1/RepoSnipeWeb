@@ -4,6 +4,7 @@ export interface ArcStep {
   title: string
   description: string
   condition?: (gs: GameState) => boolean
+  conditionHint?: string
   choices: ArcChoice[]
 }
 
@@ -128,29 +129,29 @@ const ARC_RAPHAZARUS: ArcDefinition = {
   title: 'Le Prophète du Vide',
   intro: "Des graffitis apparaissent sur toutes les stations. Le même symbole. Le même nom : Raphazarus.",
   triggerCondition: gs => gs.day >= 10 && gs.visitedStations.length >= 4,
-  completionMessage: "Raphazarus est vaincu — ou rallié. Le Culte du Vide change de visage.",
+  completionMessage: "Tu as rencontré Raphazarus à L'Arc Perdu. Le Culte du Vide t'attend — ou te craint. Raphazarus peut être affronté là-bas si tu veux régler ça définitivement.",
   completionReward: gs => ({
-    credits: gs.credits + 6000,
-    reputation: gs.reputation + 100,
+    credits: gs.credits + (gs.pastDecisions?.includes('raphazarus_joined') ? 4000 : 1500),
+    reputation: gs.reputation + (gs.pastDecisions?.includes('raphazarus_joined') ? 80 : 20),
     stationPiecesRallied: gs.stationPiecesRallied + 1,
   }),
   steps: [
     {
       title: "Le Symbole",
-      description: "Partout où tu vas, le même symbole : un cercle avec une ligne brisée. Les habitants murmurent. 'Raphazarus annonce la fin des routes commerciales.'",
+      description: "Partout où tu vas, le même symbole gravé sur les murs : un cercle avec une ligne brisée. Les habitants baissent la voix. 'Raphazarus annonce la fin des routes commerciales. Il dit que le vide a faim.'",
       choices: [
         {
           label: "Chercher à comprendre ce symbole",
           effect: gs => ({
             reputation: gs.reputation + 8,
-            message: "Tu poses des questions. Ça te vaut une réputation de curieux. +8 rép.",
+            message: "Tu poses des questions. Les gens t'évitent après. Mais tu sais maintenant que Raphazarus opère depuis L'Arc Perdu — un vieux fragment militaire dérivant. +8 rép.",
             advancesArc: true,
           }),
         },
         {
           label: "Ignorer — c'est une secte de plus",
           effect: gs => ({
-            message: "Tu continues. Le symbole aussi.",
+            message: "Tu continues. Le symbole aussi. Il semble te suivre.",
             advancesArc: true,
           }),
         },
@@ -158,28 +159,27 @@ const ARC_RAPHAZARUS: ArcDefinition = {
     },
     {
       title: "Le Premier Disciple",
-      description: "Une femme t'aborde. Robe sombre. Regard vide. 'Raphazarus a vu ton avenir dans les étoiles. Il demande à te rencontrer. C'est une invitation, pas une menace.'",
+      description: "Une femme t'aborde dans un couloir. Robe sombre, regard absent. 'Raphazarus a vu ton nom dans les étoiles. Il demande à te rencontrer à L'Arc Perdu. C'est une invitation — pas une convocation.'",
       choices: [
         {
-          label: "Accepter l'invitation",
+          label: "Accepter l'invitation — se rendre à L'Arc Perdu",
           effect: gs => ({
-            message: "Tu suis la disciple. L'arc progresse.",
+            message: "Tu suis la disciple. Direction L'Arc Perdu.",
             advancesArc: true,
           }),
         },
         {
-          label: "Interroger la disciple sur Raphazarus",
+          label: "Interroger la disciple — qui est vraiment Raphazarus ?",
           effect: gs => ({
             reputation: gs.reputation + 5,
-            message: "Elle parle. Des heures. Tu gardes les informations utiles. +5 rép.",
+            message: "Elle parle pendant des heures. Tu gardes ce qui est utile : Raphazarus s'est installé à L'Arc Perdu, ancien fragment militaire de la Grande Guerre. +5 rép.",
             advancesArc: true,
           }),
         },
         {
-          label: "Refuser et partir",
+          label: "Décliner — ce n'est pas ton problème",
           effect: gs => ({
-            message: "Elle sourit. 'Tu viendras quand même.' Elle n'a peut-être pas tort.",
-            failsArc: false,
+            message: "Elle sourit. 'Raphazarus pensait que tu dirais ça. Il attend à L'Arc Perdu quand même.' Elle disparaît.",
             advancesArc: true,
           }),
         },
@@ -187,31 +187,48 @@ const ARC_RAPHAZARUS: ArcDefinition = {
     },
     {
       title: "Face à Raphazarus",
-      description: "Il est plus vieux que tu ne pensais. Ses yeux ne regardent pas vraiment vers toi — vers quelque chose derrière toi. 'Le vide te connaît. Je peux être ton allié ou ton obstacle. À toi de décider.'",
+      condition: gs => gs.currentStation === "L'Arc Perdu",
+      conditionHint: "Rends-toi à L'Arc Perdu pour rencontrer Raphazarus.",
+      description: "Il est plus vieux que tu ne pensais. Ses yeux fixent quelque chose derrière toi. 'Le vide te connaît. Je t'ai observé depuis longtemps. Je ne t'offre pas un emploi — je t'offre un sens.' Il attend ta réponse.",
       choices: [
         {
-          label: "S'allier à Raphazarus",
+          label: "Rejoindre le Culte du Vide",
+          available: gs => gs.faction === 'none',
           effect: gs => ({
             reputation: gs.reputation + 60,
-            faction: gs.faction === 'none' ? 'culte' : gs.faction,
-            message: "Alliance avec le Culte du Vide. +60 rép. Le Culte te soutient désormais.",
+            faction: 'culte' as const,
+            pastDecisions: [...(gs.pastDecisions ?? []), 'raphazarus_joined'],
+            message: "Tu rejoins le Culte. Il pose une main sur ton épaule. 'Le vide t'a choisi.' +60 rép. Tu es maintenant membre du Culte du Vide.",
             advancesArc: true,
           }),
         },
         {
-          label: "Combattre Raphazarus",
+          label: "Rejoindre le Culte (déjà engagé ailleurs — allégeance double)",
+          available: gs => gs.faction !== 'none' && gs.faction !== 'culte',
           effect: gs => ({
-            message: "Combat avec Raphazarus.",
+            reputation: gs.reputation + 30,
+            isDoubleAgent: true,
+            pastDecisions: [...(gs.pastDecisions ?? []), 'raphazarus_joined'],
+            message: "Tu joues un jeu dangereux. Raphazarus accepte — il sait que tu as d'autres allégeances. Double agent. +30 rép.",
             advancesArc: true,
           }),
         },
         {
-          label: "Demander sa protection en échange d'information",
+          label: "Refuser — ce n'est pas ta voie",
+          effect: gs => ({
+            pastDecisions: [...(gs.pastDecisions ?? []), 'raphazarus_refused'],
+            message: "Tu déclines. Il n'insiste pas. 'Le vide n'oublie pas les refus. Mais il pardonne les honnêtes.' Il te laisse partir. Tu sais maintenant où le trouver.",
+            advancesArc: true,
+          }),
+        },
+        {
+          label: "Négocier — protection contre informations",
           available: gs => gs.completedQuestIds.length >= 5,
           effect: gs => ({
             reputation: gs.reputation + 40,
             credits: gs.credits + 2000,
-            message: "Arrangement trouvé. +40 rép, +2000 cr. Le Culte te doit quelque chose.",
+            pastDecisions: [...(gs.pastDecisions ?? []), 'raphazarus_deal'],
+            message: "Arrangement trouvé. +40 rép, +2000 cr. Il te doit quelque chose. Et toi à lui.",
             advancesArc: true,
           }),
         },
@@ -465,10 +482,20 @@ export function checkArcTriggers(gs: GameState): NarrativeArc[] {
   return newArcs
 }
 
-export function getCurrentStep(arc: NarrativeArc): ArcStep | null {
+export function getCurrentStep(arc: NarrativeArc, gs?: GameState): ArcStep | null {
   const def = ARC_DEFINITIONS.find(d => d.id === arc.id)
   if (!def || arc.step >= def.steps.length) return null
-  return def.steps[arc.step]
+  const step = def.steps[arc.step]
+  if (step.condition && gs && !step.condition(gs)) return null
+  return step
+}
+
+export function getCurrentStepBlocked(arc: NarrativeArc, gs: GameState): string | null {
+  const def = ARC_DEFINITIONS.find(d => d.id === arc.id)
+  if (!def || arc.step >= def.steps.length) return null
+  const step = def.steps[arc.step]
+  if (step.condition && !step.condition(gs)) return step.conditionHint ?? 'Prérequis non remplis.'
+  return null
 }
 
 export function advanceArc(arc: NarrativeArc, gs: GameState): { arc: NarrativeArc; rewardGs?: Partial<GameState>; completed: boolean } {

@@ -38,6 +38,11 @@ export function getFaction(id: FactionId): Faction | null {
 export function getBuyDiscount(gs: GameState): number {
   let disc = gs.class.buyDiscountPercent ?? 0
   if (gs.faction === 'emporium') disc += 15
+  // Bonus réputation Emporium (stackable avec membership)
+  const emporiumRep = gs.factionReputation?.emporium ?? 0
+  if (emporiumRep >= 80)      disc += 15
+  else if (emporiumRep >= 50) disc += 10
+  else if (emporiumRep >= 20) disc += 5
   return disc
 }
 

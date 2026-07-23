@@ -1,0 +1,176 @@
+import type { MetaUnlock } from '../types/meta'
+
+export const META_UNLOCKS: MetaUnlock[] = [
+  // ── SURVIE ───────────────────────────────────────────────────────────────
+  {
+    id: 'nanites',
+    name: 'Nanites réparatrices',
+    description: 'Des nanobots dormants dans ton organisme. +10 PV max à chaque run.',
+    cost: 3,
+    category: 'survie',
+    effect: { startHpBonus: 10 },
+  },
+  {
+    id: 'armor_boost',
+    name: 'Armure de fortune',
+    description: 'Une couche de plaques céramiques soudées sous la peau. −10% dégâts reçus en combat.',
+    cost: 6,
+    category: 'survie',
+    requires: 'nanites',
+    effect: { defenseMult: 0.90 },
+  },
+  {
+    id: 'stamina_boost',
+    name: 'Second souffle',
+    description: 'Entraînement cardio accéléré entre les runs. +1 stamina max à chaque run.',
+    cost: 4,
+    category: 'survie',
+    effect: { startStaminaBonus: 1 },
+  },
+
+  // ── COMBAT ───────────────────────────────────────────────────────────────
+  {
+    id: 'sharp_blade',
+    name: 'Lame affûtée',
+    description: 'Tu sais maintenant affûter tes armes correctement. +2 dégâts minimum avec toutes les armes.',
+    cost: 4,
+    category: 'combat',
+    effect: { attackBonus: 2 },
+  },
+  {
+    id: 'reflexes',
+    name: 'Réflexes augmentés',
+    description: 'Implant neural de vitesse de réaction. +8% chance de coup critique.',
+    cost: 6,
+    category: 'combat',
+    requires: 'sharp_blade',
+    effect: { critBonus: 8 },
+  },
+  {
+    id: 'starter_weapon',
+    name: 'Arsenal de départ',
+    description: 'Un contact te file une arme Tier 2 en début de run. Pas de questions.',
+    cost: 7,
+    category: 'combat',
+    requires: 'sharp_blade',
+    effect: { startWeaponTier: 2 },
+  },
+
+  // ── COMMERCE ─────────────────────────────────────────────────────────────
+  {
+    id: 'starting_funds',
+    name: 'Fonds de roulement',
+    description: 'Un vieux compte bancaire oublié. +300 crédits au démarrage de chaque run.',
+    cost: 3,
+    category: 'commerce',
+    effect: { startCreditsBonus: 300 },
+  },
+  {
+    id: 'merchant_contacts',
+    name: 'Contacts marchands',
+    description: 'Ton réseau de revendeurs te fait des prix. −8% sur tous les achats en marché.',
+    cost: 6,
+    category: 'commerce',
+    requires: 'starting_funds',
+    effect: { buyDiscountBonus: 8 },
+  },
+  {
+    id: 'starter_cargo',
+    name: 'Soute préparée',
+    description: 'Quelqu\'un charge ta soute avant le départ. Commence avec 2 marchandises aléatoires.',
+    cost: 4,
+    category: 'commerce',
+    effect: { startCargoBonus: true },
+  },
+
+  // ── VOYAGE ───────────────────────────────────────────────────────────────
+  {
+    id: 'spare_tank',
+    name: 'Réservoir de secours',
+    description: 'Un jerricane soudé sous la coque. +2 carburant au démarrage de chaque run.',
+    cost: 3,
+    category: 'voyage',
+    effect: { startFuelBonus: 2 },
+  },
+  {
+    id: 'engine_tuning',
+    name: 'Moteur optimisé',
+    description: 'Modifications illégales sur le moteur de propulsion. +2 capacité carburant max.',
+    cost: 5,
+    category: 'voyage',
+    requires: 'spare_tank',
+    effect: { maxFuelBonus: 2 },
+  },
+  {
+    id: 'travel_scanner',
+    name: 'Scanner d\'alerte',
+    description: 'Détecte les événements de voyage avant qu\'ils frappent. Tu vois les risques à l\'avance.',
+    cost: 6,
+    category: 'voyage',
+    effect: { seesTravelEvents: true },
+  },
+
+  // ── SPÉCIAL ──────────────────────────────────────────────────────────────
+  {
+    id: 'reputation',
+    name: 'Réputation établie',
+    description: 'Ta légende précède ton vaisseau. +20 réputation de départ.',
+    cost: 4,
+    category: 'special',
+    effect: { startReputationBonus: 20 },
+  },
+  {
+    id: 'nexus_fragment',
+    name: 'Mémoire fractale',
+    description: 'Un fragment du Nexus te suit entre les runs. Commence avec un fragment déjà collecté.',
+    cost: 9,
+    category: 'special',
+    effect: { startNexusFragment: true },
+  },
+  {
+    id: 'medkit',
+    name: 'Héritage de soins',
+    description: 'Un kit médical de famille toujours prêt dans ta soute. +2 médicaments de départ.',
+    cost: 3,
+    category: 'special',
+    effect: { startMedkitBonus: 2 },
+  },
+
+  // ── UNLOCKS AVANCÉS ──────────────────────────────────────────────────────
+  {
+    id: 'last_stand',
+    name: 'Dernier souffle',
+    description: 'Une seule fois par run, un coup qui devrait te tuer te laisse à 1 PV. Tu vis pour le regretter.',
+    cost: 8,
+    category: 'survie',
+    requires: 'armor_boost',
+    effect: { surviveLethalOnce: true },
+  },
+  {
+    id: 'coup_de_grace',
+    name: 'Exécution froide',
+    description: 'Quand un ennemi est sous 25% de PV, tes coups font +40% de dégâts. La mise à mort est efficace.',
+    cost: 7,
+    category: 'combat',
+    requires: 'reflexes',
+    effect: { coupDeGrace: 40 },
+  },
+  {
+    id: 'faction_ties',
+    name: 'Anciens liens',
+    description: 'Des contacts d\'avant te gardent en mémoire. +30 réputation avec ta faction de départ.',
+    cost: 6,
+    category: 'special',
+    requires: 'reputation',
+    effect: { startFactionRepBonus: 30 },
+  },
+  {
+    id: 'scout_training',
+    name: 'Formation éclaireur',
+    description: 'Tu arrives dans chaque run avec une zone déjà cartographiée. Commence en profondeur 2.',
+    cost: 5,
+    category: 'voyage',
+    requires: 'travel_scanner',
+    effect: { startZoneDepthBonus: 2 },
+  },
+]

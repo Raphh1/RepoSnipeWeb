@@ -1,4 +1,5 @@
 import type { GameState, Quest, QuestType } from '../types'
+import { getRandomUndiscoveredFragment } from '../data/loreFragments'
 import { getStation, getAccessibleStations } from '../data/stations'
 import { rollWeaponForTier } from '../data/weapons'
 import {
@@ -7,18 +8,20 @@ import {
   JSON_EXPLORE_SCIENTIFIC, JSON_EXPLORE_RUINS, JSON_EXPLORE_MILITARY,
   JSON_EXPLORE_LUXURY, JSON_EXPLORE_GENERIC,
 } from './jsonEventLoader'
+import { rollMemoryEvent, addDecision, shiftPillar } from './memoryEvents'
+import { addJournal } from './journal'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
 
 export type ExploreResult =
   | { type: 'combat'; depth: number }
-  | { type: 'loot'; credits: number; description: string }
-  | { type: 'item'; item: string; qty: number; description: string }
-  | { type: 'fuel'; amount: number; description: string }
-  | { type: 'event'; description: string; choices: ExploreChoice[] }
-  | { type: 'nothing'; description: string }
   | { type: 'boss' }
+  | { type: 'loot'; credits: number; description: string; loreFragmentId?: string }
+  | { type: 'item'; item: string; qty: number; description: string; loreFragmentId?: string }
+  | { type: 'fuel'; amount: number; description: string; loreFragmentId?: string }
+  | { type: 'event'; description: string; choices: ExploreChoice[]; loreFragmentId?: string }
+  | { type: 'nothing'; description: string; loreFragmentId?: string }
 
 export interface ExploreChoice {
   label: string
@@ -96,6 +99,43 @@ const SCENES_DANGEROUS: Array<() => ExploreResult> = [
       { label: "Passer ton chemin", result: () => ({ gs: {}, message: "Tu passes. Ça valait probablement rien." }) }
     ]
   }),
+  // ── PIÈGES ZONES DANGEREUSES ──
+  () => ({
+    type: 'event',
+    description: "Des lumières stroboscopiques. Des voix qui aboient des ordres. Une rafle. Tu es dans la mauvaise ruelle au mauvais moment.",
+    choices: [
+      {
+        label: "Tenter de fuir dans la foule (30% réussite)",
+        result: (gs) => Math.random() < 0.30
+          ? { gs: { playerHp: Math.max(1, gs.playerHp - rng(10, 22)) }, message: "Tu disparais dans le chaos. Quelques coups de matraque en chemin. -PV." }
+          : { gs: { pendingInterrogation: { faction: 'Milice locale', captureStation: gs.currentStation }, screen: 'interrogation' as const }, message: "Ils t'ont chopé. Direction le poste." }
+      },
+      {
+        label: "Obtempérer — montrer patte blanche",
+        result: (gs) => ({ gs: { pendingInterrogation: { faction: 'Milice locale', captureStation: gs.currentStation }, screen: 'interrogation' as const }, message: "Ils t'escortent hors de la zone. Un interrogatoire attend." })
+      },
+      {
+        label: "Résister — combat à l'aveugle",
+        result: (gs) => ({ gs: { isImprisoned: true as const, prisonDaysLeft: rng(2, 5), screen: 'prison' as const, playerHp: Math.max(1, gs.playerHp - rng(25, 45)), reputation: gs.reputation - 20 }, message: "Ils te maîtrisent. Tu te réveilles en cellule avec des hématomes." })
+      }
+    ]
+  }),
+  () => ({
+    type: 'event',
+    description: "Un couloir sans issue. Quelqu'un l'a créé exprès. Le panneau 'Sortie' pointait dans la mauvaise direction.",
+    choices: [
+      {
+        label: "Chercher une autre issue",
+        result: (gs) => Math.random() < 0.40
+          ? { gs: { playerHp: Math.max(1, gs.playerHp - rng(8, 18)) }, message: "Une fenêtre technique. Tu passes de justesse. -PV." }
+          : { gs: { isImprisoned: true as const, prisonDaysLeft: rng(1, 3), screen: 'prison' as const, credits: Math.max(0, gs.credits - rng(100, 400)) }, message: "Ils t'attendaient. La cage se referme." }
+      },
+      {
+        label: "Attendre — voir ce qui se passe",
+        result: (gs) => ({ gs: { isImprisoned: true as const, prisonDaysLeft: rng(1, 2), screen: 'prison' as const }, message: "Des gens armés arrivent. Pas de question posée." })
+      }
+    ]
+  }),
 ]
 
 const SCENES_PEACEFUL: Array<() => ExploreResult> = [
@@ -162,6 +202,39 @@ const SCENES_RUINS: Array<() => ExploreResult> = [
       { label: "Effacer le terminal", result: () => ({ gs: {}, message: "Tu effaces tout. Parfois mieux vaut pas savoir." }) }
     ]
   }),
+  // ── PIÈGES RUINES ──
+  () => ({
+    type: 'event',
+    description: "Le sol émet un craquement sourd sous ton pied. Une fraction de seconde pour comprendre. Puis le vide.",
+    choices: [
+      {
+        label: "S'agripper à une poutre en tombant (20% survie)",
+        result: (gs) => Math.random() < 0.20
+          ? { gs: { playerHp: Math.max(1, gs.playerHp - rng(35, 55)) }, message: "Tu t'accroches. L'épaule sort de son axe. Tu survis. À peine." }
+          : { gs: { isDead: true as const, deathCause: "Effondrement structural dans les ruines. La dalle a cédé sans prévenir. Personne ne le saura." }, message: "Le noir." }
+      },
+      {
+        label: "Rien — trop rapide.",
+        result: () => ({ gs: { isDead: true as const, deathCause: "Effondrement structural dans les ruines. La dalle a cédé sans prévenir. Personne ne le saura." }, message: "Le noir." })
+      }
+    ]
+  }),
+  () => ({
+    type: 'event',
+    description: "Trois silhouettes sortent de l'ombre en même temps. Armées, coordonnées. Quelqu'un attendait que tu entres là.",
+    choices: [
+      {
+        label: "Se débattre violemment (25% réussite)",
+        result: (gs) => Math.random() < 0.25
+          ? { gs: { playerHp: Math.max(1, gs.playerHp - rng(20, 40)) }, message: "Tu t'en sors. Eux aussi. Tu fuis en sang." }
+          : { gs: { isImprisoned: true as const, prisonDaysLeft: rng(2, 4), screen: 'prison' as const, credits: Math.max(0, gs.credits - rng(200, 500)), reputation: gs.reputation - 10 }, message: "Ils t'ont eu. Tu te réveilles en cellule, allégé de tes crédits." }
+      },
+      {
+        label: "Se rendre — ne pas résister",
+        result: (gs) => ({ gs: { isImprisoned: true as const, prisonDaysLeft: rng(1, 3), screen: 'prison' as const }, message: "Tu lèves les mains. Ils t'emmènent sans un mot." })
+      }
+    ]
+  }),
 ]
 
 const SCENES_MILITARY: Array<() => ExploreResult> = [
@@ -209,7 +282,7 @@ const SCENES_SCIENTIFIC: Array<() => ExploreResult> = [
     type: 'event',
     description: "Un scientifique paniqué te court après. 'Aide-moi. Ils arrivent.' Il tient quelque chose d'important.",
     choices: [
-      { label: "L'aider à fuir", result: (gs) => ({ gs: { reputation: gs.reputation + 20, credits: gs.credits + rng(400, 900) }, message: "+20 rép. Il te remercie avec tout ce qu'il a. +crédits." }) },
+      { label: "L'aider à fuir", result: (gs) => ({ gs: { reputation: gs.reputation + 20, credits: gs.credits + rng(400, 900), pastDecisions: addDecision(gs, 'aided-scientist'), journal: addJournal(gs, "J'ai aidé un scientifique en fuite. Il avait peur de quelque chose — ou de quelqu'un. Il m'a tout donné pour sa liberté.", 'decision') }, message: "+20 rép. Il te remercie avec tout ce qu'il a. +crédits." }) },
       { label: "Prendre ce qu'il tient et partir", result: (gs) => ({ gs: { credits: gs.credits + rng(500, 1200), reputation: gs.reputation - 15 }, message: "Tu prends l'objet. +crédits, -15 rép." }) },
       { label: "Ignorer", result: () => ({ gs: {}, message: "Tu passes. Ses cris s'éloignent." }) }
     ]
@@ -233,38 +306,51 @@ function getScenesForZone(type: string): Array<() => ExploreResult> {
   }
 }
 
-// Résultats spéciaux selon profondeur et danger
-function maybeSpecialEvent(depth: number, danger: number, gs: GameState): ExploreResult | null {
-  // Boss à profondeur 4+ dans zones dangereuses
-  if (depth >= 4 && danger >= 2 && Math.random() < 0.25) {
-    return { type: 'boss' }
-  }
-  // Grand loot à profondeur élevée
-  if (depth >= 3 && Math.random() < 0.15) {
-    return { type: 'loot', credits: rng(500, 1500), description: "Profondeur récompensée. Un vrai trésor." }
-  }
-  return null
-}
-
 export function rollExplorationEvent(gs: GameState): ExploreResult {
   const station = getStation(gs.currentStation)
   const depth = gs.zoneDepth
   const danger = station.danger
+  const fightsDone = gs.explorationFightsDone ?? 0
 
-  // Événement spécial possible
-  const special = maybeSpecialEvent(depth, danger, gs)
-  if (special) return special
+  // Garantie minimum 3 combats : forcer un combat tous les 2 niveaux
+  // si le quota de combats n'est pas atteint
+  if (depth >= 2 && depth % 2 === 0 && fightsDone < depth / 2) {
+    return { type: 'combat', depth }
+  }
+
+  // Boss uniquement après 3 combats ET profondeur 7+, dans les zones dangereuses
+  if (fightsDone >= 3 && depth >= 7 && danger >= 2 && Math.random() < 0.30) {
+    return { type: 'boss' }
+  }
+
+  // Grand loot à profondeur élevée (après les combats)
+  if (fightsDone >= 2 && depth >= 5 && Math.random() < 0.15) {
+    return { type: 'loot', credits: rng(600, 2000), description: "Profondeur récompensée. Un vrai trésor au fond." }
+  }
 
   // Alternance forcée : pas de combat deux fois de suite
   if (!gs.lastExploreWasCombat) {
-    const combatChance = 0.2 + depth * 0.1 + danger * 0.1
+    const scannerLevel = gs.shipModules?.scanner ?? 0
+    const scannerReduction = scannerLevel >= 3 ? 0.20 : scannerLevel >= 2 ? 0.10 : 0
+    const gardiensRep = gs.factionReputation?.gardiens ?? 0
+    const gardiensReduction = gardiensRep >= 80 ? 0.15 : gardiensRep >= 50 ? 0.10 : gardiensRep >= 20 ? 0.05 : 0
+    const traqueMod = (gs.runModifiers ?? []).includes('traque') ? 0.15 : 0
+    const combatChance = Math.max(0, 0.15 + depth * 0.07 + danger * 0.08 - scannerReduction - gardiensReduction + traqueMod)
     if (Math.random() < combatChance) {
       return { type: 'combat', depth }
     }
   }
 
   const scenes = getScenesForZone(station.type)
-  return pick(scenes)()
+  const base = pick(scenes)()
+
+  // 12% de chance de trouver un fragment de lore pendant l'exploration
+  if (base.type !== 'combat' && base.type !== 'boss' && Math.random() < 0.12) {
+    const fragment = getRandomUndiscoveredFragment(gs.discoveredLore ?? [])
+    if (fragment) return { ...base, loreFragmentId: fragment.id } as typeof base
+  }
+
+  return base
 }
 
 // ── HELPER GÉNÉRATION DE QUÊTE INLINE ────────────────────────────────────────
@@ -365,12 +451,30 @@ export const WANDER_EVENTS_LOW: Array<(gs: GameState) => WanderEvent> = [
         if (!gs || gs.credits < 40) return { gs: {}, message: "Pas assez de crédits pour l'entretenir. Il s'endort." }
         const t = pickTarget(gs)
         if (!t) return { gs: { credits: gs.credits - 40 }, message: "Il délire. Rien d'exploitable. -40cr pour rien." }
-        const q = quickQuest(gs, 'info', 'Source anonyme', `Vérification : ${t.name}`, `L'ivrogne a mentionné des activités inhabituelles sur ${t.name}. Ça mérite vérification. 'Si c'est vrai, quelqu'un paiera cher pour le savoir.'`, t.name, undefined, 900, 8)
+        const q = quickQuest(gs, 'patrol', 'Source anonyme', `Vérification : ${t.name}`, `L'ivrogne a mentionné des activités inhabituelles sur ${t.name}. Ça mérite vérification. 'Si c'est vrai, quelqu'un paiera cher pour le savoir.'`, t.name, undefined, 900, 8)
         return { gs: { credits: gs.credits - 40 }, message: `Il mentionne ${t.name} plusieurs fois. Quelque chose s'y passe. -40cr, piste intéressante.`, quest: q }
       }},
       { label: "L'ignorer", result: () => ({ gs: {}, message: "Il s'endort tout seul. Probablement rien d'utile." }) },
       { label: "Le fouiller discrètement (-rép)", result: (gs) => ({ gs: { credits: (gs?.credits ?? 0) + rng(40, 120), reputation: (gs?.reputation ?? 0) - 10 }, message: `Quelques crédits dans ses poches. Il se réveillera sans savoir. -10 rép.` }) }
     ]
+  }),
+
+  (_gs) => ({
+    title: "Un marchand intercepte ton chemin",
+    description: "Il se lève de sa table avant même que tu passes devant lui. 'J'ai un contrat à proposer — du transport, rien de compliqué. Mais je veux un bon prix et pas de questions.' Il a l'air pressé.",
+    choices: [
+      { label: "Écouter ce qu'il propose", result: () => ({ type: 'negotiation' as const, message: '' }) },
+      { label: "Décliner poliment", result: () => ({ gs: {}, message: "Il hausse les épaules et se rassied. Une autre fois peut-être." }) },
+    ],
+  }),
+
+  (_gs) => ({
+    title: "Courtier cherche un pilote fiable",
+    description: "Une femme en tailleur sombre t'observe depuis le bar. Elle pose son verre et vient vers toi. 'On m'a dit que tu faisais de bonnes liaisons. J'ai une marchandise délicate. Les termes sont à négocier — maintenant, ici.'",
+    choices: [
+      { label: "S'asseoir et négocier", result: () => ({ type: 'negotiation' as const, message: '' }) },
+      { label: "Tu n'es pas intéressé", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) + 2 }, message: "Elle note ton refus avec une légère surprise. +2 rép (elle respecte les gens qui savent dire non)." }) },
+    ],
   }),
 
 ]
@@ -453,7 +557,7 @@ export const WANDER_EVENTS_MID: Array<(gs: GameState) => WanderEvent> = [
         const q = quickQuest(gs!, 'bounty', 'Transfuge', `Prime — cible identifiée`, `La transfuge t'a donné une adresse sur ${t.name} et un nom. 'Cette personne a du sang sur les mains. Et quelqu'un paie pour que ça s'arrête.' Elle n'en dit pas plus.`, t.name, undefined, 4500, 30)
         return { gs: { reputation: gs!.reputation + 10 }, message: `Elle te donne une cible sur ${t.name}. Précise. Documentée. +10 rép.`, quest: q }
       }},
-      { label: "La livrer aux autorités (+crédits, -rép)", result: (gs) => ({ gs: { credits: (gs?.credits ?? 0) + rng(400, 900), reputation: (gs?.reputation ?? 0) - 20, moralTags: [...(gs?.moralTags ?? []), 'délateur'] }, message: "+crédits. Elle te regarde partir. Ce regard restera. -20 rép, tag 'délateur'." }) },
+      { label: "La livrer aux autorités (+crédits, -rép)", result: (gs) => ({ gs: { credits: (gs?.credits ?? 0) + rng(400, 900), reputation: (gs?.reputation ?? 0) - 20, moralTags: [...(gs?.moralTags ?? []), 'délateur'], pastDecisions: addDecision(gs!, 'betrayed-transfuge'), journal: addJournal(gs!, "J'ai livré une transfuge aux autorités. Elle m'a regardé partir sans un mot. Ce regard ne part pas.", 'decision') }, message: "+crédits. Elle te regarde partir. Ce regard restera. -20 rép, tag 'délateur'." }) },
       { label: "Refuser de t'impliquer", result: () => ({ gs: {}, message: "Elle disparaît dans la foule. Tu continues. Peut-être la bonne décision." }) }
     ]
   }),
@@ -472,7 +576,7 @@ export const WANDER_EVENTS_MID: Array<(gs: GameState) => WanderEvent> = [
         if (Math.random() < 0.5) {
           const t = gs && pickTarget(gs)
           if (t) {
-            const q = quickQuest(gs!, 'info', 'Informateur Fen', `Surveillance : ${t.name}`, `L'informateur veut d'abord une reconnaissance de ${t.name}. 'Vérifie que la cible est encore là-bas. Je partage la prime après.'`, t.name, undefined, 1200, 8)
+            const q = quickQuest(gs!, 'patrol', 'Informateur Fen', `Surveillance : ${t.name}`, `L'informateur veut d'abord une présence active sur ${t.name}. 'Vérifie que la cible est encore là-bas. Je partage la prime après.'`, t.name, undefined, 1200, 8)
             return { gs: {}, message: `Il propose d'abord une reco sur ${t.name} avant de révéler la vraie cible.`, quest: q }
           }
         }
@@ -480,6 +584,24 @@ export const WANDER_EVENTS_MID: Array<(gs: GameState) => WanderEvent> = [
       }},
       { label: "Passer ton chemin", result: () => ({ gs: {}, message: "Tu passes. Il cherchera quelqu'un d'autre." }) }
     ]
+  }),
+
+  (_gs) => ({
+    title: "Couloir de transit non sécurisé",
+    description: "Un technicien de dock te hèle depuis une passerelle. 'Si tu repars bientôt, évite la route nord — il y a des débris flottants depuis l'explosion d'hier. Fais gaffe.' Il te tend une carte de secteur annotée à la main.",
+    choices: [
+      { label: "Prendre la carte et naviguer maintenant", result: () => ({ type: 'navigation' as const, message: '' }) },
+      { label: "Le remercier et passer son chemin", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) + 3 }, message: "Tu notes l'info mentalement. +3 rép — les gens du coin te font confiance." }) },
+    ],
+  }),
+
+  (_gs) => ({
+    title: "Pilote en détresse dans le secteur",
+    description: "Le signal de détresse est faible mais clair. Quelqu'un est coincé entre deux zones instables. Ta route passe par là de toute façon. Tu peux tenter la navigation — ou ignorer.",
+    choices: [
+      { label: "Tenter la navigation pour l'aider", result: () => ({ type: 'navigation' as const, message: '' }) },
+      { label: "Ignorer — trop risqué", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) - 5 }, message: "Tu coupes le signal. Il s'arrangera. -5 rép." }) },
+    ],
   }),
 
 ]
@@ -559,10 +681,10 @@ export const WANDER_EVENTS_HIGH: Array<(gs: GameState) => WanderEvent> = [
         const newCargo: typeof gs.cargo = { ...gs.cargo, 'Médicaments': (gs.cargo['Médicaments'] ?? 1) - 1 }
         if ((newCargo['Médicaments'] ?? 0) <= 0) delete (newCargo as Record<string, number>)['Médicaments']
         const q = t ? quickQuest(gs, 'revenge', 'Mercenaire Cador', `Représailles — ${t.name}`, `Le mercenaire t'a donné le nom de ceux qui l'ont tendu un piège sur ${t.name}. 'Si tu passes par là-bas, rends-leur la politesse.' Reconnaissance en retour.`, t.name, undefined, 2500, 20) : undefined
-        return { gs: { reputation: gs.reputation + 18, cargo: newCargo }, message: `Tu soignes. Il tient. En échange, il te donne une piste sur ${t?.name ?? 'une destination'}. +18 rép, -1 Médicaments.`, quest: q ?? undefined }
+        return { gs: { reputation: gs.reputation + 18, cargo: newCargo, pastDecisions: addDecision(gs, 'saved-mercenary'), journal: addJournal(gs, "J'ai soigné un mercenaire blessé dans les décombres. Il s'appelait Cador. Il m'a donné une piste en échange.", 'decision') }, message: `Tu soignes. Il tient. En échange, il te donne une piste sur ${t?.name ?? 'une destination'}. +18 rép, -1 Médicaments.`, quest: q ?? undefined }
       }},
       { label: "L'ignorer et passer", result: () => ({ gs: {}, message: "Tu passes. Il ne dit rien. Cette image restera." }) },
-      { label: "Le fouiller s'il perd connaissance (–rép)", result: (gs) => ({ gs: { credits: (gs?.credits ?? 0) + rng(150, 400), reputation: (gs?.reputation ?? 0) - 18, moralTags: [...(gs?.moralTags ?? []), 'opportuniste'] }, message: "+crédits. -18 rép. Tag 'opportuniste'. Tu savais ce que tu faisais." }) }
+      { label: "Le fouiller s'il perd connaissance (–rép)", result: (gs) => ({ gs: { credits: (gs?.credits ?? 0) + rng(150, 400), reputation: (gs?.reputation ?? 0) - 18, moralTags: [...(gs?.moralTags ?? []), 'opportuniste'], pastDecisions: addDecision(gs!, 'pillaged-wounded'), journal: addJournal(gs!, "J'ai fouillé un blessé qui perdait connaissance. Je ne suis pas fier de ça.", 'decision') }, message: "+crédits. -18 rép. Tag 'opportuniste'. Tu savais ce que tu faisais." }) }
     ]
   }),
 
@@ -583,6 +705,71 @@ export const WANDER_EVENTS_HIGH: Array<(gs: GameState) => WanderEvent> = [
     ]
   }),
 
+  // ── PIÈGES ZONES EXTRÊMES ──
+  (gs) => ({
+    title: "Embuscade — aucun signe avant-coureur",
+    description: "Tu marches. Il n'y a personne. Et puis il y a quelqu'un. Un sac sur la tête. Des mains dans le dos. Quelqu'un a fait ça des milliers de fois.",
+    choices: [
+      {
+        label: "Se débattre au hasard (15% réussite)",
+        result: (gs) => Math.random() < 0.15
+          ? { gs: { playerHp: Math.max(1, (gs?.playerHp ?? 50) - rng(30, 50)) }, message: "Tu te dégages dans un chaos total. Tu cours. Tu saignes. Tu es dehors. -PV." }
+          : { gs: { isImprisoned: true, prisonDaysLeft: rng(3, 5), screen: 'prison' as const, credits: Math.max(0, (gs?.credits ?? 0) - rng(400, 900)) }, message: "Tu te réveilles en cellule. Portefeuille vide. Personne ne sait que tu es là." }
+      },
+      {
+        label: "Rester immobile — ne pas provoquer",
+        result: (gs) => ({ gs: { isImprisoned: true, prisonDaysLeft: rng(2, 4), screen: 'prison' as const, credits: Math.max(0, (gs?.credits ?? 0) - rng(200, 600)) }, message: "Ils t'embarquent. Méthodique. Tu perds des crédits et ta liberté." })
+      }
+    ]
+  }),
+
+  (gs) => ({
+    title: "Cargaison piégée",
+    description: "Une caisse abandonnée dans un couloir. Trop bien placée. Tu t'en approches. Tu t'accroupis. Tu l'ouvres.",
+    choices: [
+      {
+        label: "Ouvrir",
+        result: (gs) => {
+          const roll = Math.random()
+          if (roll < 0.30) return { gs: { isDead: true, deathCause: "Cargaison piégée. L'explosion t'a pris par surprise dans un couloir de zone dangereuse." }, message: "Lumière blanche. Bruit. Plus rien." }
+          if (roll < 0.65) return { gs: { playerHp: Math.max(1, (gs?.playerHp ?? 50) - rng(30, 60)), isImprisoned: true, prisonDaysLeft: 2, screen: 'prison' as const }, message: "Gaz soporifique. Tu te réveilles en cellule, désorienté." }
+          return { gs: { credits: (gs?.credits ?? 0) + rng(400, 1200) }, message: "De vrais crédits. Tu ne comprends pas. Tu ne cherches pas à comprendre." }
+        }
+      },
+      {
+        label: "Reculer et ne pas y toucher",
+        result: () => ({ gs: {}, message: "Tu t'éloignes. Quelqu'un d'autre aura peut-être moins de self-control." })
+      }
+    ]
+  }),
+
+  (gs) => ({
+    title: "Vérification d'identité — agents en civil",
+    description: "Deux inconnus te bloquent poliment le passage. 'Vos papiers.' Ils n'ont aucun insigne visible. Ils n'en ont pas besoin — leurs attitudes suffisent.",
+    choices: [
+      {
+        label: "Coopérer — donner ses papiers",
+        result: (gs) => {
+          const roll = Math.random()
+          if (roll < 0.35) return { gs: { pendingInterrogation: { faction: 'Agents de faction inconnue', captureStation: gs?.currentStation ?? '' }, screen: 'interrogation' as const }, message: "Ils regardent tes papiers et font signe à un troisième homme. Direction poste d'interrogatoire." }
+          return { gs: { reputation: (gs?.reputation ?? 0) - 5 }, message: "Ils vérifient et te laissent passer. Un dossier vient d'être ouvert sur toi, quelque part." }
+        }
+      },
+      {
+        label: "Refuser et partir",
+        result: (gs) => Math.random() < 0.4
+          ? { gs: {}, message: "Ils te laissent partir. Cette fois." }
+          : { gs: { isImprisoned: true, prisonDaysLeft: rng(1, 3), screen: 'prison' as const, playerHp: Math.max(1, (gs?.playerHp ?? 50) - rng(15, 30)) }, message: "Refus de coopérer. Ils t'ont plaqué au sol avant que tu finisses ta phrase." }
+      },
+      {
+        label: "Fuir immédiatement",
+        result: (gs) => Math.random() < 0.50
+          ? { gs: {}, message: "Tu cours. Ils ne te suivent pas. Peut-être qu'ils avaient autre chose à faire." }
+          : { gs: { isImprisoned: true, prisonDaysLeft: rng(2, 4), screen: 'prison' as const }, message: "La fuite était la mauvaise réponse. Il y en avait d'autres dans le couloir." }
+      }
+    ]
+  }),
+
 ]
 
 export interface WanderEvent {
@@ -591,9 +778,218 @@ export interface WanderEvent {
   choices: WanderChoice[]
 }
 
+// ── EVENTS MAUVAISE RÉPUTATION (rep < -20) ───────────────────────────────────
+export const WANDER_EVENTS_BAD_REP: Array<(gs: GameState) => WanderEvent> = [
+
+  (gs) => ({
+    title: "Prix pour ta tête",
+    description: `Un inconnu te suit depuis l'entrée. Quand tu te retournes, il sourit. "T'as ${Math.abs(gs.reputation)} de réputation en moins. Quelqu'un paie bien pour savoir où tu es." Il montre discrètement une arme.`,
+    choices: [
+      { label: "Payer pour qu'il se taise (300 cr)", result: (gs) => gs && gs.credits >= 300
+        ? { gs: { credits: gs.credits - 300 }, message: "Il empoche. Il disparaît. Pour combien de temps ?" }
+        : { gs: { playerHp: Math.max(1, (gs?.playerHp ?? 50) - rng(15, 30)) }, message: "Pas assez. Il t'envoie un avertissement physique avant de disparaître." }
+      },
+      { label: "Appeler son bluff", result: (gs) => {
+        const success = Math.random() < 0.40
+        return success
+          ? { gs: {}, message: "Il recule. C'était un bluff. Mais maintenant il sait que tu tiens bon." }
+          : { gs: { playerHp: Math.max(1, (gs?.playerHp ?? 50) - rng(20, 40)), reputation: (gs?.reputation ?? 0) - 10 }, message: "C'était pas un bluff. Tu le sors de justesse mais tu prends cher." }
+      }},
+      { label: "Fuir dans la foule", result: () => {
+        const success = Math.random() < 0.65
+        return success
+          ? { gs: {}, message: "Tu te perds dans le couloir bondé. Il perd ta trace." }
+          : { gs: { reputation: -5, playerHp: Math.max(1, 50 - rng(10, 20)) }, message: "Il te rattrape. Un coup. Il te laisse tomber et disparaît." }
+      }}
+    ]
+  }),
+
+  (gs) => ({
+    title: "Refus de service",
+    description: `Un tenancier te reconnaît dès que tu entres. "Désolé, on sert pas les gens comme toi ici." Il fait signe à ses gorilles. "Ta réputation te précède — et pas dans le bon sens."`,
+    choices: [
+      { label: "Insister poliment", result: (gs) => ({
+        gs: { reputation: (gs?.reputation ?? 0) - 5, credits: (gs?.credits ?? 0) + rng(0, 50) },
+        message: "Ils t'escortent dehors. -5 rép. Tu glanes quelques infos en passant."
+      })},
+      { label: "Invoquer ta réputation passée (si tu en as)", result: (gs) => {
+        const ok = (gs?.reputation ?? 0) > -35
+        return ok
+          ? { gs: { reputation: (gs?.reputation ?? 0) + 3 }, message: "Tu rappelles quelques bons coups. Le tenancier hésite. Il accepte à contrecœur. +3 rép." }
+          : { gs: { reputation: (gs?.reputation ?? 0) - 8 }, message: "Il rit. Ta 'réputation passée' a pas de valeur ici. Tu sors humilié. -8 rép." }
+      }},
+      { label: "Partir sans un mot", result: () => ({ gs: {}, message: "Tu ressors. Cette station, c'est plus pour toi. Pour l'instant." }) }
+    ]
+  }),
+
+  (gs) => ({
+    title: "Transaction toxique",
+    description: "Un revendeur de l'ombre t'aborde. Il sait qui tu es — et il pense qu'une personne avec ta réputation cherche forcément des trucs pas nets. Il propose des implants de contrebande à prix bradé.",
+    choices: [
+      { label: "Acheter l'implant (200 cr, risque)", result: (gs) => {
+        if (!gs || gs.credits < 200) return { gs: {}, message: "Pas assez de crédits." }
+        const ok = Math.random() < 0.55
+        return ok
+          ? { gs: { credits: gs.credits - 200, playerMaxHp: gs.playerMaxHp + 12, playerHp: Math.min(gs.playerMaxHp + 12, gs.playerHp + 8) }, message: "+12 PV max. L'implant prend. Pas mal pour du marché noir. -200 cr." }
+          : { gs: { credits: gs.credits - 200, playerHp: Math.max(1, gs.playerHp - rng(15, 30)) }, message: "L'implant rejette. -PV, -200 cr. Le revendeur est déjà parti." }
+      }},
+      { label: "Refuser mais demander des infos", result: (gs) => ({
+        gs: { reputation: (gs?.reputation ?? 0) + 5 },
+        message: "Il te parle de contacts utiles en zone grise. +5 rép dans l'ombre."
+      })},
+      { label: "Ignorer et partir", result: () => ({ gs: {}, message: "Tu passes. Pas le bon jour pour jouer avec le marché noir." }) }
+    ]
+  }),
+
+  (gs) => ({
+    title: "Ancien ennemi",
+    description: `Quelqu'un te fixe depuis l'autre bout du couloir. Tu le reconnais — ou lui te reconnaît. Un visage d'une station que t'aurais préféré oublier. Il avance vers toi. Calme. Décidé.`,
+    choices: [
+      { label: "Faire face", result: (gs) => {
+        const ok = Math.random() < 0.35 + ((gs?.reputation ?? 0) < -40 ? -0.15 : 0)
+        return ok
+          ? { gs: { reputation: (gs?.reputation ?? 0) + 8 }, message: "La confrontation tourne à la paix froide. Il repart. Quelque chose de réglé. +8 rép." }
+          : { gs: { playerHp: Math.max(1, (gs?.playerHp ?? 50) - rng(20, 35)), reputation: (gs?.reputation ?? 0) - 10 }, message: "Ça dégénère. Tu t'en sors mais c'est moche. -PV, -10 rép." }
+      }},
+      { label: "Tenter de s'expliquer", result: (gs) => {
+        const ok = Math.random() < 0.50
+        return ok
+          ? { gs: { reputation: (gs?.reputation ?? 0) + 15 }, message: "Il écoute. Vraiment. Tu gagnes quelque chose de rare : une deuxième chance. +15 rép." }
+          : { gs: { reputation: (gs?.reputation ?? 0) - 5 }, message: "Il t'écoute pas. 'T'aurais dû y penser avant.' Il repart dégoûté. -5 rép." }
+      }},
+      { label: "Partir rapidement dans la direction opposée", result: (gs) => ({
+        gs: { reputation: (gs?.reputation ?? 0) - 3 },
+        message: "Tu évites l'affrontement. Pour l'instant. Mais les ruelles sont petites."
+      })}
+    ]
+  }),
+
+  (_gs) => ({
+    title: "Rumeurs qui voyagent",
+    description: "Deux personnes parlent de toi sans te voir — ou font semblant. Ce que tu entends n'est pas flatteur. Ton nom circule dans la mauvaise catégorie. Tu choisis comment réagir.",
+    choices: [
+      { label: "Corriger la rumeur en public", result: (gs) => {
+        const ok = Math.random() < 0.45
+        return ok
+          ? { gs: { reputation: (gs?.reputation ?? 0) + 12 }, message: "Tu interviens avec aplomb. Les gens t'écoutent. La version change. +12 rép." }
+          : { gs: { reputation: (gs?.reputation ?? 0) - 8 }, message: "Tu t'emballes. Ça tourne à l'incident public. -8 rép. Tu ressors honteux." }
+      }},
+      { label: "Alimenter délibérément la rumeur (rep vers le bas)", result: (gs) => ({
+        gs: { reputation: (gs?.reputation ?? 0) - 5, credits: (gs?.credits ?? 0) + rng(200, 500) },
+        message: "Tu joues le jeu de ta mauvaise réputation. Quelqu'un te paie pour un boulot sale. -5 rép, +crédits."
+      })},
+      { label: "Ignorer et passer", result: () => ({ gs: {}, message: "Tu passes sans un mot. La rumeur continuera sans toi." }) }
+    ]
+  }),
+]
+
+// ── EVENTS CONTEXTUELS (selon l'état du joueur) ──────────────────────────────
+function rollContextAwareEvent(gs: GameState): WanderEvent | null {
+  const candidates: Array<[number, () => WanderEvent]> = []
+
+  // HP très bas → quelqu'un propose de l'aide
+  if (gs.playerHp < gs.playerMaxHp * 0.3) {
+    candidates.push([0.5, () => ({
+      title: "Tu as mauvaise mine",
+      description: "Un médecin de terrain te remarque en passant. 'T'as l'air d'avoir besoin de soins d'urgence. Je peux faire quelque chose — mais je travaille pas pour rien.'",
+      choices: [
+        { label: "Accepter et payer (150 cr)", result: (gs) => gs && gs.credits >= 150
+          ? { gs: { credits: gs.credits - 150, playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 40) }, message: "+40 PV. Soins de fortune mais efficaces. -150 cr." }
+          : { gs: {}, message: "Pas les crédits. Il hoche la tête et repart." }
+        },
+        { label: "Demander un crédit humanitaire", result: (gs) => {
+          const ok = (gs?.reputation ?? 0) >= 10
+          return ok
+            ? { gs: { playerHp: Math.min((gs?.playerMaxHp ?? 100), (gs?.playerHp ?? 1) + 20) }, message: "+20 PV. Il se souvient des gens qui ont bonne réputation." }
+            : { gs: {}, message: "Il sourit poliment. 'Ta réputation te fait pas de faveur.' Il repart." }
+        }},
+        { label: "Refuser — tu t'en sortiras", result: () => ({ gs: {}, message: "Il hoche la tête et repart. Le vide ne soigne personne." }) }
+      ]
+    })])
+  }
+
+  // Beaucoup de cargo → tentative de vol
+  const cargoCount = Object.values(gs.cargo).reduce((s, v) => s + v, 0)
+  if (cargoCount >= 5) {
+    candidates.push([0.4, () => ({
+      title: "Regard sur ta soute",
+      description: "Tu remarques deux types qui scrutent ton vaisseau depuis le quai. Ils font semblant de ne pas regarder. Ils regardent.",
+      choices: [
+        { label: "Les approcher directement", result: (gs) => {
+          const ok = (gs?.reputation ?? 0) >= 0
+          return ok
+            ? { gs: { reputation: (gs?.reputation ?? 0) + 5 }, message: "Ta réputation les décourage. Ils partent. +5 rép pour avoir tenu bon." }
+            : { gs: { reputation: (gs?.reputation ?? 0) - 3, cargo: {} }, message: "Ils se sentent dans leur droit face à quelqu'un de ta réputation. Ta soute est vide quand tu reviens. -3 rép." }
+        }},
+        { label: "Surveiller discrètement et les prendre sur le fait", result: (gs) => {
+          const ok = Math.random() < 0.60
+          return ok
+            ? { gs: { reputation: (gs?.reputation ?? 0) + 10, credits: (gs?.credits ?? 0) + rng(100, 300) }, message: "Tu les attends. Tu les confrontes. Ils laissent leurs affaires en partant. +10 rép, +crédits." }
+            : { gs: { cargo: {} }, message: "Trop tard. Ils étaient plus malins. Ta soute est vide." }
+        }},
+        { label: "Déplacer ton vaisseau dans un autre hangar", result: (gs) => ({
+          gs: { credits: (gs?.credits ?? 0) - 80 },
+          message: "80 crédits pour changer de quai. Cher mais sûr. -80 cr."
+        })}
+      ]
+    })])
+  }
+
+  // Beaucoup de crédits → pickpocket
+  if (gs.credits >= 1500) {
+    candidates.push([0.3, () => ({
+      title: "Mains rapides",
+      description: "Tu sens quelque chose. Un frôlement. Une légèreté dans ta poche que t'aurais pas dû remarquer aussi tôt.",
+      choices: [
+        { label: "Courir après (50% chance de rattraper)", result: (gs) => {
+          const ok = Math.random() < 0.50
+          const stolen = rng(200, 600)
+          return ok
+            ? { gs: {}, message: `Tu le rattrapes au coin. Il lâche ${stolen} cr et détale. Tu récupères tout.` }
+            : { gs: { credits: (gs?.credits ?? 0) - stolen }, message: `Trop lent. ${stolen} cr envolés dans la foule.` }
+        }},
+        { label: "Vérifier tes poches d'abord", result: (gs) => {
+          const lost = rng(100, 400)
+          const detected = (gs?.credits ?? 0) > 0
+          return detected
+            ? { gs: { credits: Math.max(0, (gs?.credits ?? 0) - lost) }, message: `${lost} cr ont disparu. Tu remarques le vol trop tard.` }
+            : { gs: {}, message: "Rien de manquant. Peut-être que tu as imaginé." }
+        }}
+      ]
+    })])
+  }
+
+  // Long voyage (many days) → reconnaissance par un inconnu
+  if (gs.day >= 10 && gs.visitedStations.length >= 4) {
+    candidates.push([0.35, () => ({
+      title: "Ta réputation t'a précédé",
+      description: `Un pilote t'aborde. "J'ai entendu parler de toi sur ${gs.visitedStations[gs.visitedStations.length - 2] ?? 'une autre station'}. Quelqu'un a dit que tu étais passé par là." Il a l'air d'attendre quelque chose.`,
+      choices: [
+        { label: "Parler de tes voyages", result: (gs) => {
+          const t = gs && pickTarget(gs)
+          if (!t) return { gs: { reputation: (gs?.reputation ?? 0) + 8 }, message: "Tu partages. Il écoute. Ta réputation de voyageur est utile. +8 rép." }
+          const q = quickQuest(gs!, 'delivery', 'Pilote rencontré', `Paquet pour un contact`, `Le pilote a un colis urgent à faire livrer sur ${t.name}. Il n'a pas le temps. Toi si.`, t.name, 'Données', 1600, 12)
+          return { gs: { reputation: gs!.reputation + 8 }, message: `Il te propose du boulot. +8 rép pour la conversation.`, quest: q }
+        }},
+        { label: "Demander pourquoi ça l'intéresse", result: (gs) => ({
+          gs: { reputation: (gs?.reputation ?? 0) + 3 },
+          message: "Il cherchait quelqu'un de confiance pour un message. Il te le remet. +3 rép, un billet chiffré dans ta poche."
+        })},
+        { label: "Rester évasif", result: () => ({ gs: {}, message: "Tu esquives les questions. Il comprend. Il repart." }) }
+      ]
+    })])
+  }
+
+  if (candidates.length === 0) return null
+  for (const [chance, factory] of candidates) {
+    if (Math.random() < chance) return factory()
+  }
+  return null
+}
+
 export interface WanderChoice {
   label: string
-  result: (gs?: GameState) => { gs?: Partial<GameState>; message: string; type?: 'combat'; quest?: import('../types').Quest }
+  result: (gs?: GameState) => { gs?: Partial<GameState>; message: string; type?: 'combat' | 'negotiation' | 'navigation'; quest?: import('../types').Quest }
   available?: (gs: GameState) => boolean
 }
 
@@ -718,7 +1114,7 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
         { label: "S'asseoir face à lui", result: (gs) => {
           const t = gs && pickTarget(gs)
           const q = t ? quickQuest(gs!, 'sabotage', 'Cael', `Opération Faucon — ${t.name}`, `Cael a une opération en cours sur ${t.name}. Il te teste en te le confiant. 'Si tu rates, j'ai jamais parlé.' Si tu réussis, tu as une dette positive avec les Faucons.`, t.name, undefined, 4000, -8) : undefined
-          return { gs: { reputation: gs!.reputation + 5 }, message: `Cael parle peu. Mais il te donne quelque chose sur ${t?.name ?? 'une cible'}. +5 rép.`, quest: q ?? undefined }
+          return { gs: { reputation: gs!.reputation + 5, pastDecisions: addDecision(gs!, 'cael-contact') }, message: `Cael parle peu. Mais il te donne quelque chose sur ${t?.name ?? 'une cible'}. +5 rép.`, quest: q ?? undefined }
         }},
         { label: "Ne pas s'approcher — Cael ne se rencontre pas par accident", result: () => ({ gs: {}, message: "Tu continues. Ce n'est probablement pas le bon moment." }) }
       ]
@@ -732,7 +1128,7 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
       choices: [
         { label: "L'approcher", result: (gs) => {
           const t = gs && pickTarget(gs)
-          const q = t ? quickQuest(gs!, 'info', 'Neva', `Information pour Neva`, `Neva a besoin de savoir ce qui se passe sur ${t.name}. 'J'ai des raisons. Tu as les moyens d'y aller.' Elle paie pour des faits, pas des rumeurs.`, t.name, undefined, 1100, 15) : undefined
+          const q = t ? quickQuest(gs!, 'patrol', 'Neva', `Présence pour Neva`, `Neva a besoin que tu te montres sur ${t.name}. 'J'ai des raisons. Tu as les moyens d'y aller.' Elle paie pour des faits, pas des rumeurs.`, t.name, undefined, 1100, 15) : undefined
           return { gs: { reputation: gs!.reputation + 6 }, message: `Neva a besoin d'informations sur ${t?.name ?? 'une destination'}. +6 rép.`, quest: q ?? undefined }
         }},
         { label: "La saluer de loin et continuer", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) + 4 }, message: "Elle hoche la tête. C'est suffisant. Le Purgatoire a ses codes. +4 rép." }) }
@@ -786,7 +1182,7 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
         { label: "L'emmener — elle monte à bord", result: (gs) => {
           const t = gs && pickTarget(gs)
           const q = t ? quickQuest(gs!, 'escort', 'Recrue désertrice', `Extraction urgente`, `Tu as une désertrice à bord. Elle veut aller sur ${t.name}. Les autorités de Fort Kharos pourraient chercher. Pas de détours.`, t.name, undefined, 2000, -10) : undefined
-          return { gs: { cargo: { ...(gs?.cargo ?? {}), 'Passager': ((gs?.cargo ?? {})['Passager'] ?? 0) + 1 } }, message: `Elle monte. Tu as maintenant une désertrice à bord et une destination sur ${t?.name ?? 'une station'}.`, quest: q ?? undefined }
+          return { gs: { cargo: { ...(gs?.cargo ?? {}), 'Passager': ((gs?.cargo ?? {})['Passager'] ?? 0) + 1 }, pastDecisions: addDecision(gs!, 'helped-defector'), journal: addJournal(gs!, "J'ai embarqué une désertrice de Fort Kharos. Elle fuyait quelque chose de plus lourd que moi. Je l'ai aidée.", 'decision') }, message: `Elle monte. Tu as maintenant une désertrice à bord et une destination sur ${t?.name ?? 'une station'}.`, quest: q ?? undefined }
         }},
         { label: "Lui conseiller de partir par d'autres moyens", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) + 6 }, message: "Tu lui donnes des noms, des routes. Elle te remercie. +6 rép." }) },
         { label: "La signaler — tu veux pas d'ennuis", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) - 15, credits: (gs?.credits ?? 0) + 300 }, message: "La milice la récupère. Une prime arrive dans ta poche. -15 rép, +300cr." }) }
@@ -828,9 +1224,9 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
       choices: [
         { label: "S'asseoir et voir ce qu'il a", result: (gs) => {
           const t = gs && pickTarget(gs)
-          if (!t) return { gs: { credits: (gs?.credits ?? 0) + 400, reputation: (gs?.reputation ?? 0) + 8 }, message: "Pistis a des contacts partout. Il te glisse quelques informations monnayables. +400cr, +8 rép." }
+          if (!t) return { gs: { credits: (gs?.credits ?? 0) + 400, reputation: (gs?.reputation ?? 0) + 8, pastDecisions: addDecision(gs!, 'pistis-ally'), pillarStanding: shiftPillar(gs!, 'cesarion', +8), journal: addJournal(gs!, "J'ai rencontré Pistis au niveau 9. Il m'a glissé des infos sans me regarder dans les yeux. Ce type a des contacts partout.", 'event') }, message: "Pistis a des contacts partout. Il te glisse quelques informations monnayables. +400cr, +8 rép." }
           const q = quickQuest(gs!, 'delivery', 'Pistis', `Livraison discrète`, `Pistis a quelque chose à faire parvenir sur ${t.name}. 'Rien d'illégal. Enfin rien que la loi peut prouver.' Il paie au-dessus du marché pour la discrétion.`, t.name, 'Renseignements', 3000, 8)
-          return { gs: { reputation: gs!.reputation + 8 }, message: `Pistis a une livraison pour ${t.name}. Il paie bien. +8 rép.`, quest: q }
+          return { gs: { reputation: gs!.reputation + 8, pastDecisions: addDecision(gs!, 'pistis-ally'), pillarStanding: shiftPillar(gs!, 'cesarion', +8), journal: addJournal(gs!, "J'ai rencontré Pistis au niveau 9. Il avait une livraison. Je n'ai pas demandé ce que c'était.", 'event') }, message: `Pistis a une livraison pour ${t.name}. Il paie bien. +8 rép.`, quest: q }
         }},
         { label: "Refuser poliment — Pistis crée des obligations", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) + 3 }, message: "Il comprend. 'Tu reviendras.' Probablement vrai. +3 rép (tu sais ce que tu fais)." }) }
       ]
@@ -870,6 +1266,75 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
     }),
   ],
 
+  'L\'Arc Perdu': [
+    (gs) => ({
+      title: "Sentinelle automatique — aucune hésitation",
+      description: "Un ronronnement mécanique dans un couloir latéral. Un gyroscope. Un canon. Il pivote vers toi avant que tu comprennes ce que c'est.",
+      choices: [
+        {
+          label: "Plonger sur le côté (30% survie)",
+          result: (gs) => Math.random() < 0.30
+            ? { gs: { playerHp: Math.max(1, gs!.playerHp - rng(40, 65)) }, message: "Tu évites l'essentiel. La rafale t'effleure. Tu cours sans te retourner. -PV." }
+            : { gs: { isDead: true, deathCause: "Sentinelle automatique dans L'Arc Perdu. Système d'avant-guerre. Aucune conscience. Aucune pitié." }, message: "Le canon n'a pas hésité. Toi si." }
+        },
+        {
+          label: "Lever les mains — peut-être un capteur de reddition",
+          result: (gs) => Math.random() < 0.20
+            ? { gs: { isImprisoned: true, prisonDaysLeft: rng(2, 5), screen: 'prison' as const }, message: "Le système t'encercle et t'escorte. Tu finis en cellule. Les soldats de Raphazarus arrivent plus tard." }
+            : { gs: { isDead: true, deathCause: "La sentinelle n'avait pas de mode 'reddition'. L'Arc Perdu n'a pas été conçu pour faire des prisonniers." }, message: "Il n'y avait pas de protocole de reddition." }
+        }
+      ]
+    }),
+
+    (gs) => ({
+      title: "Soldats de Raphazarus — patrouille silencieuse",
+      description: "Quatre hommes en armure lourde, sans insigne clair. Ils marchent sans parler. Ils t'ont vu il y a trente secondes. Ils attendent que tu fasses un geste.",
+      choices: [
+        {
+          label: "T'identifier et demander à passer",
+          result: (gs) => {
+            const roll = Math.random()
+            if (roll < 0.25) return { gs: { reputation: gs!.reputation + 5, pillarStanding: shiftPillar(gs!, 'raphazarus', +8), pastDecisions: addDecision(gs!, 'passed-raphazarus-patrol'), journal: addJournal(gs!, "La patrouille de Raphazarus m'a laissé passer. Pas un mot. Ils m'ont regardé comme s'ils savaient quelque chose que j'ignore.", 'event') }, message: "L'un d'eux fait signe de laisser passer. Pas un mot. Un test réussi, tu sais pas pourquoi." }
+            if (roll < 0.60) return { gs: { pendingInterrogation: { faction: "Soldats de Raphazarus", captureStation: gs!.currentStation }, screen: 'interrogation' as const }, message: "Ils t'escortent. Pas de force. 'Vous avez des questions. Nous aussi.'" }
+            return { gs: { isImprisoned: true, prisonDaysLeft: rng(3, 6), screen: 'prison' as const, playerHp: Math.max(1, gs!.playerHp - rng(20, 40)) }, message: "L'un d'eux n'attendait pas ta réponse. Tu te réveilles dans un cachot de L'Arc Perdu." }
+          }
+        },
+        {
+          label: "Fuir — immédiatement",
+          result: (gs) => Math.random() < 0.35
+            ? { gs: { playerHp: Math.max(1, gs!.playerHp - rng(15, 30)) }, message: "Tu cours dans les décombres. Ils ne te suivent pas loin. Tu t'en sors, à peine. -PV." }
+            : { gs: { isImprisoned: true, prisonDaysLeft: rng(4, 7), screen: 'prison' as const, playerHp: Math.max(1, gs!.playerHp - rng(30, 55)) }, message: "Ils couraient plus vite que tu pensais. Les ruines n'ont aucun secret pour eux." }
+        },
+        {
+          label: "Rester immobile — laisser décider",
+          result: (gs) => Math.random() < 0.50
+            ? { gs: { pendingInterrogation: { faction: "Soldats de Raphazarus", captureStation: gs!.currentStation }, screen: 'interrogation' as const }, message: "'Vous venez avec nous.' Pas de violence. Juste une certitude." }
+            : { gs: {}, message: "Ils passent. L'un d'eux te regarde une seconde de trop. Puis ils disparaissent dans les ruines." }
+        }
+      ]
+    }),
+
+    (gs) => ({
+      title: "Zone de radiations non cartographiée",
+      description: "Un couloir au fond des ruines. Les murs changent de couleur — une fluorescence faible, presque belle. Quelque chose rayonne là-dedans.",
+      choices: [
+        {
+          label: "Entrer — explorer (risque élevé)",
+          result: (gs) => {
+            const roll = Math.random()
+            if (roll < 0.20) return { gs: { isDead: true, deathCause: "Radiations létales dans une zone non cartographiée de L'Arc Perdu. Dose fatale en quelques minutes." }, message: "Tu avances. La douleur commence cinq minutes plus tard. Tu ne ressors pas." }
+            if (roll < 0.55) return { gs: { playerHp: Math.max(1, gs!.playerHp - rng(35, 70)), cargo: { ...gs!.cargo, 'Artefacts': (gs!.cargo['Artefacts'] ?? 0) + 2 } }, message: "Tu récupères des artefacts d'avant-guerre. Et des nausées qui ne partiront pas de sitôt. -PV, +2 Artefacts." }
+            return { gs: { cargo: { ...gs!.cargo, 'Données pré-Fracture': (gs!.cargo['Données pré-Fracture'] ?? 0) + 1 }, credits: gs!.credits + rng(1000, 2500) }, message: "Une capsule blindée. Protégée par la coque. Des données d'avant la Grande Guerre. Valeur inestimable. +crédits, +données." }
+          }
+        },
+        {
+          label: "Rester dehors — attendre que la fluorescence s'atténue",
+          result: () => ({ gs: {}, message: "Elle ne s'atténue pas. Tu repars. Ces zones ne se visitent pas sans équipement." })
+        }
+      ]
+    }),
+  ],
+
   'Star Quest': [
     (gs) => ({
       title: "Ganz a une proposition",
@@ -878,7 +1343,7 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
         { label: "Écouter ce qu'il a", result: (gs) => {
           const t = gs && pickTarget(gs)
           if (!t) return { gs: { reputation: gs!.reputation + 5 }, message: "Il teste ton intérêt. Pas de mission concrète ce soir. Mais il se souvient que tu as écouté. +5 rép." }
-          const q = quickQuest(gs!, 'info', 'Ganz', `Surveillance pour Ganz`, `Ganz veut savoir ce qui se passe sur ${t.name}. Certains de ses clients viennent de là-bas. 'Je paie pour des faits concrets.' Il paie bien.`, t.name, undefined, 1800, 10)
+          const q = quickQuest(gs!, 'patrol', 'Ganz', `Présence pour Ganz`, `Ganz veut une présence active sur ${t.name}. Certains de ses clients viennent de là-bas. 'Je paie pour du concret.' Il paie bien.`, t.name, undefined, 1800, 10)
           return { gs: { reputation: gs!.reputation + 5 }, message: `Ganz veut une surveillance de ${t.name}. Paiement sérieux. +5 rép.`, quest: q }
         }},
         { label: "Refuser poliment et aller au casino", result: (gs) => ({ gs: { reputation: (gs?.reputation ?? 0) + 2 }, message: "Il rit. 'Bonne idée.' Il te laisse passer. +2 rép." }) }
@@ -890,13 +1355,30 @@ export const STATION_WANDER_EVENTS: Partial<Record<string, Array<(gs: GameState)
 export function rollWanderEvent(gs: GameState): WanderEvent {
   const station = getStation(gs.currentStation)
 
-  // 1. Événement unique à cette station (30% de chance si disponible)
+  // 1. Mauvaise réputation → événements spécifiques (rep < -20, 40% de chance)
+  if (gs.reputation < -20 && Math.random() < 0.40) {
+    return pick(WANDER_EVENTS_BAD_REP)(gs)
+  }
+
+  // 2. Événements contextuels (20% de chance) — surprise selon l'état du joueur
+  if (Math.random() < 0.20) {
+    const ctx = rollContextAwareEvent(gs)
+    if (ctx) return ctx
+  }
+
+  // 3. Événements de mémoire (25% si éligible — priorité narrative)
+  if (Math.random() < 0.25) {
+    const mem = rollMemoryEvent(gs)
+    if (mem) return mem
+  }
+
+  // 4. Événement unique à cette station (30% de chance si disponible)
   const stationSpecific = STATION_WANDER_EVENTS[gs.currentStation]
   if (stationSpecific && stationSpecific.length > 0 && Math.random() < 0.30) {
     return pick(stationSpecific)(gs)
   }
 
-  // 2. JSON ou TS générique
+  // 5. JSON ou TS générique
   const useJson = Math.random() < 0.55
   if (useJson) {
     const jsonPool =

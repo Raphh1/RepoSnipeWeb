@@ -59,6 +59,22 @@ export function StatusBar({ gs }: Props) {
         <div><span className="t-dim t-xs">REP </span><span className="t-sm">{gs.reputation}</span></div>
         <div><span className="t-dim t-xs">JOUR </span><span className="t-sm">{gs.day}</span></div>
       </div>
+
+      {(gs.equippedWeapon || gs.equippedArmor) && (
+        <div style={{ gridColumn: '1 / -1', borderTop: '1px solid var(--border)', paddingTop: '8px', display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span className="t-xs t-dim">ÉQUIPÉ</span>
+          {gs.equippedWeapon && (
+            <span className={`tag tier-${gs.equippedWeapon.tier} t-xs`}>
+              ⚔ {gs.equippedWeapon.name}
+            </span>
+          )}
+          {gs.equippedArmor && (
+            <span className={`tag tier-${gs.equippedArmor.tier} t-xs`} style={{ color: 'var(--blue)', borderColor: '#224488' }}>
+              🛡 {gs.equippedArmor.name}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   )
 }

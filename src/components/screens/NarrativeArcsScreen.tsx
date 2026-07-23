@@ -1,8 +1,32 @@
 import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
-import { ARC_DEFINITIONS, getCurrentStep, advanceArc } from '../../engine/narrativeArcs'
-import type { NarrativeArc } from '../../types'
+import { ARC_DEFINITIONS, getCurrentStep, getCurrentStepBlocked, advanceArc } from '../../engine/narrativeArcs'
+import type { NarrativeArc, Enemy } from '../../types'
 import { TIER_MID } from '../../data/enemies'
+
+const ARC_BOSSES: Record<string, Enemy> = {
+  raphazarus: {
+    name: 'Raphazarus le Prophète',
+    maxHp: 130, damageMin: 18, damageMax: 32,
+    lootMin: 2500, lootMax: 6000,
+    description: 'Il combat avec la conviction de quelqu\'un qui croit vraiment. C\'est le plus dangereux des adversaires.',
+    captureChance: 5, killChance: 30, isBoss: true, role: 'ranged',
+  },
+  alanossa: {
+    name: 'Alanossa',
+    maxHp: 160, damageMin: 22, damageMax: 38,
+    lootMin: 3000, lootMax: 7000,
+    description: 'Elle se bat comme quelqu\'un qui n\'a jamais perdu. Elle ne compte pas sur la chance.',
+    captureChance: 5, killChance: 35, isBoss: true, role: 'tank',
+  },
+  vael: {
+    name: 'Directeur Pale',
+    maxHp: 110, damageMin: 15, damageMax: 28,
+    lootMin: 2000, lootMax: 5000,
+    description: 'Il a effacé des traces toute sa vie. Il sait aussi effacer des gens.',
+    captureChance: 10, killChance: 25, isBoss: true, role: 'normal',
+  },
+}
 
 const ARC_COLORS: Record<string, string> = {
   alanossa:   'var(--red)',
@@ -37,11 +61,12 @@ export function NarrativeArcsScreen() {
 
     setMsg(message)
 
-    // Si combat requis
+    // Si combat requis — on garde l'arc dans activeArcs, on le complétera après victoire
     if (message.toLowerCase().includes('combat')) {
-      const enemy = TIER_MID[Math.floor(Math.random() * TIER_MID.length)]
-      const updatedArcs = gs.activeArcs.filter(a => a.id !== arc.id)
-      patch({ ...gsChanges, activeArcs: updatedArcs })
+      const enemy = ARC_BOSSES[arc.id] ?? TIER_MID[Math.floor(Math.random() * TIER_MID.length)]
+      const existingArcs = gs.activeArcs.filter(a => a.id !== arc.id)
+      const updatedArc = { ...arc }
+      patch({ ...gsChanges, activeArcs: [...existingArcs, updatedArc], pendingCombatArcId: arc.id })
       startCombat(enemy)
       return
     }
@@ -76,7 +101,8 @@ export function NarrativeArcsScreen() {
 
   if (activeArc) {
     const def = ARC_DEFINITIONS.find(d => d.id === activeArc.id)
-    const step = getCurrentStep(activeArc)
+    const step = getCurrentStep(activeArc, gs)
+    const blockedHint = !step && !activeArc.completed ? getCurrentStepBlocked(activeArc, gs) : null
 
     return (
       <div className="layout">
@@ -92,6 +118,13 @@ export function NarrativeArcsScreen() {
           <div className="px-box">
             <div className="t-xs t-green">{msg}</div>
             <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={() => setMsg(null)}>Continuer</button>
+          </div>
+        )}
+
+        {!msg && blockedHint && (
+          <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
+            <div className="t-xs t-dim mb4">⚠ PRÉREQUIS NON REMPLIS</div>
+            <div className="t-xs" style={{ color: 'var(--orange)' }}>{blockedHint}</div>
           </div>
         )}
 
@@ -112,7 +145,7 @@ export function NarrativeArcsScreen() {
           </div>
         )}
 
-        {!msg && !step && activeArc.completed && (
+        {!msg && !step && !blockedHint && activeArc.completed && (
           <div className="px-box t-gold t-sm">★ Arc complété !</div>
         )}
 
@@ -141,7 +174,8 @@ export function NarrativeArcsScreen() {
           <div className="col gap4">
             {allArcs.filter(a => !a.completed && !a.failed).map(arc => {
               const def = ARC_DEFINITIONS.find(d => d.id === arc.id)
-              const step = getCurrentStep(arc)
+              const step = getCurrentStep(arc, gs)
+              const hint = !step ? getCurrentStepBlocked(arc, gs) : null
               return (
                 <div key={arc.id} className="px-box px-box--hi" style={{ cursor: 'pointer' }}
                   onClick={() => setActiveArc(arc)}>
@@ -151,7 +185,8 @@ export function NarrativeArcsScreen() {
                   </div>
                   <div className="t-xs t-dim mb4">{def?.intro}</div>
                   {step && <div className="t-xs t-bright">Étape actuelle : {step.title}</div>}
-                  <div className="t-xs t-cyan mt8">→ Cliquer pour continuer</div>
+                  {hint && <div className="t-xs" style={{ color: 'var(--orange)' }}>⚠ {hint}</div>}
+                  <div className="t-xs t-cyan mt8">→ Cliquer pour voir les détails</div>
                 </div>
               )
             })}

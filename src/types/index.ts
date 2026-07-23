@@ -1,5 +1,6 @@
 export type Screen =
   | 'class-select'
+  | 'intro'
   | 'station-hub'
   | 'travel'
   | 'market'
@@ -23,6 +24,11 @@ export type Screen =
   | 'combat-outcome'
   | 'victory'
   | 'game-over'
+  | 'meta'
+  | 'crafting'
+  | 'interrogation'
+  | 'journal'
+  | 'escort-minigame'
 
 export type PlayerClassName =
   | 'Vagabond' | 'Ferrailleur' | 'Endetté' | 'Accro' | 'Maudit'
@@ -64,12 +70,23 @@ export interface PlayerClass {
   combatCritBonus?: number      // bonus chance critique flat
   combatStaminaRegen?: number   // stamina regen bonus par tour
   combatMomentumStart?: number  // momentum de départ (Vétéran)
+  coupDeGraceBonus?: number     // % dégâts bonus quand ennemi < 25% PV
 }
 
 export type WeaponEffect =
   | 'none' | 'stun' | 'paralyze' | 'burn' | 'poison'
   | 'blind' | 'flee' | 'distraction' | 'confusion'
-  | 'random' | 'silence' | 'armorPierce'
+  | 'random' | 'silence' | 'armorPierce' | 'disarm'
+  // Nouveaux effets
+  | 'lifesteal'       // vole 35% des dégâts infligés en PV
+  | 'shock'           // stun + brûlure 3 tours
+  | 'double_strike'   // frappe deux fois (×0.85 chacune)
+  | 'sacrifice'       // coûte 25% PV max, frappe ×2.5
+  | 'unstable'        // 50% : ×3.5 dégâts | 50% : self-damage massif + stun joueur
+  | 'nuclear'         // ×4.5 dégâts, 65% chance self-damage 80-200 + affaibli
+  | 'berserker'       // dégâts × (1 + 1.5×%PV manquants), max ×2.5
+  | 'momentum_surge'  // frappe + momentum immédiatement à 3
+  | 'curse'           // ennemi affaibli -40% dégâts pendant 3 tours
 
 export interface WeaponData {
   name: string
@@ -100,6 +117,10 @@ export interface ArmorData {
 
 export type EnemyRole = 'normal' | 'tank' | 'ranged' | 'support'
 export type EnemyIntent = 'normal' | 'heavy' | 'defend' | 'charge' | 'disarm'
+  | 'blood_rage' | 'execution' | 'weaken'
+  | 'imperial_barrage' | 'phantom_strike' | 'party_over' | 'flora_toxin' | 'all_in'
+
+export type PillarAbility = 'imperial_barrage' | 'phantom_strike' | 'party_over' | 'flora_toxin' | 'all_in'
 
 export interface Enemy {
   name: string
@@ -113,6 +134,7 @@ export interface Enemy {
   killChance: number
   isBoss: boolean
   role: EnemyRole
+  pillarAbility?: PillarAbility
 }
 
 export type CombatOutcome = 'victory' | 'stunned' | 'captured' | 'dead' | 'fled'
@@ -134,6 +156,14 @@ export interface CombatState {
   enemyWeaponDisabledTurns: number
   lastPlayerDmg: number
   playerWeakenedTurns: number
+  playerStunnedTurns: number   // attaques spéciales personnages piliers
+  playerBurnDmg: number        // dégâts de poison/brûlure sur le joueur (flora_toxin)
+  playerBurnTurns: number
+  enemyWeakenedTurns: number   // curse — ennemi à -40% dégâts
+  enemyConfusedTurns: number   // confusion — ennemi se frappe lui-même
+  enemySilencedTurns: number   // silence — ennemi limité aux attaques basiques
+  playerExposedTurns: number   // après frappe concentrée — ennemi frappe ×1.5 ce tour
+  medicUses: number            // soins utilisés ce combat (max 3)
   log: CombatLogEntry[]
 }
 
@@ -149,7 +179,7 @@ export interface Cargo {
 
 // ── QUÊTES ───────────────────────────────────────────────────────────────────
 
-export type QuestType = 'delivery' | 'kill' | 'revenge' | 'info' | 'escort' | 'sabotage' | 'heist' | 'extraction' | 'bounty' | 'patrol'
+export type QuestType = 'delivery' | 'kill' | 'revenge' | 'escort' | 'sabotage' | 'heist' | 'extraction' | 'bounty' | 'patrol'
 
 export interface Quest {
   id: string
@@ -162,6 +192,9 @@ export interface Quest {
   targetItem?: string
   creditReward: number
   repReward: number
+  dayMult?: number
+  factionId?: string
+  progress?: number
 }
 
 // ── FACTIONS ─────────────────────────────────────────────────────────────────
@@ -190,6 +223,9 @@ export interface PersistentNpc {
   isAlly: boolean
   isEnemy: boolean
   tags: string[]
+  lastQuestDay?: number
+  lastServiceDay?: number
+  lastTalkDay?: number
 }
 
 // ── ARCS NARRATIFS ────────────────────────────────────────────────────────────
@@ -275,6 +311,41 @@ export interface MajorQuest {
   requiresNpcMet?: string
 }
 
+// ── ÉTAT DE STATION ───────────────────────────────────────────────────────────
+
+export type StationAlertType = 'siege' | 'festival' | 'lockdown' | 'epidemic'
+
+// ── ÉVÉNEMENTS MONDIAUX ───────────────────────────────────────────────────────
+
+export interface WorldEvent {
+  id: string
+  title: string
+  description: string
+  shortDesc: string      // résumé une ligne pour le bandeau
+  startDay: number
+  duration: number       // en jours
+  color: string          // couleur CSS pour l'affichage
+  effects: {
+    priceItems?: string[]       // items dont le prix est modifié
+    priceMultiplier?: number    // multiplicateur pour ces items
+    globalPriceMult?: number    // multiplicateur sur TOUS les items
+    fuelCostBonus?: number      // carburant supplémentaire par trajet
+    closedStations?: string[]   // stations inaccessibles
+    combatChanceBonus?: number  // probabilité combat exploration +X (0-1)
+    festivalStations?: string[] // stations en fête
+  }
+}
+
+// ── JOURNAL DE BORD ──────────────────────────────────────────────────────────
+
+export interface JournalEntry {
+  id: number
+  day: number
+  station: string
+  text: string
+  category: 'combat' | 'decision' | 'travel' | 'nexus' | 'prison' | 'event'
+}
+
 // ── GAME STATE ────────────────────────────────────────────────────────────────
 
 export interface GameState {
@@ -325,9 +396,16 @@ export interface GameState {
   // Zone exploration
   zoneDepth: number
   lastExploreWasCombat: boolean
+  explorationFightsDone: number
+  // Tournoi de l'arène
+  tournamentRound: number   // 0 = hors tournoi, 1-10 = round en cours
+  // Récompense carburant différée (combat pour du fuel)
+  pendingFuelReward: number
   // Prison
   isImprisoned: boolean
   prisonDaysLeft: number
+  // Interrogatoire (transfert forcé)
+  pendingInterrogation: { faction: string; captureStation: string } | null
   // Mort
   isDead: boolean
   deathCause: string
@@ -344,12 +422,27 @@ export interface GameState {
   multiCombatState: import('../engine/multiCombat').MultiCombatState | null
   // Nexus fragments (condition de victoire)
   nexusFragments: number[]
+  nexusPath: Partial<Record<number, 'force' | 'pay' | 'alliance' | 'legendary' | 'gamble' | 'steal' | 'lore'>>
+  pendingCombatArcId: string | null
   // Stalker system
   stalker: import('../engine/stalker').StalkerState | undefined
   // Arrival situation en cours
   pendingArrival: boolean
+  // Résumé fin de journée (montré à l'arrivée à la prochaine station)
+  pendingDaySummary: { prevDay: number; actionsUsed: number; station: string } | null
   // Moral / tags narratifs
   moralTags: string[]
+  // Mémoire des décisions importantes (identifiants uniques)
+  pastDecisions: string[]
+  // Relations avec les personnages piliers (-100 à +100)
+  pillarStanding: {
+    cesarion: number
+    raphazarus: number
+    eliotis: number
+    maxance: number
+    alanossa: number
+    scotty: number
+  }
   // Stats diverses
   totalCreditsEarned: number
   combatsWon: number
@@ -361,7 +454,54 @@ export interface GameState {
   folieConsumedThisTurn: boolean
   // Quêtes majeures
   majorQuests: MajorQuest[]
+  // Événements mondiaux actifs
+  activeWorldEvents: WorldEvent[]
+  // Modules vaisseau
+  shipModules: { moteur: number; soute: number; tourelle: number; scanner: number }
+  // Réputation par faction
+  factionReputation: { faucons: number; emporium: number; gardiens: number; culte: number }
+  // Modificateurs de run
+  runModifiers: string[]
+  runObjectiveId: string | null
+  runObjectiveCompleted: boolean
+  craftsPerformed: number
+  // Lore et chaîne narrative
+  discoveredLore: string[]
+  pendingChainEvents: import('../engine/chainEvents').ChainEvent[]
+  // Journal de bord auto-généré
+  journal: JournalEntry[]
+  // Système prison — confiscation et évasion
+  prisonConfiscatedItems: {
+    weapons: WeaponData[]
+    armors: ArmorData[]
+    equippedWeapon: WeaponData | null
+    equippedArmor: ArmorData | null
+    cargo: Cargo
+  } | null
+  prisonEscapeFailures: number    // nombre d'évasions ratées (catch) dans ce séjour
+  prisonCellmatePending: boolean  // un codétenu hostile attend dans la cellule
+  // Services exclusifs des stations
+  implantsBought: string[]         // identifiants implants achetés ce run
+  usedFreeRestStations: string[]   // stations où le repos gratuit a été utilisé ce run
+  // Quêtes enchaînées
+  pendingChainQuests: Quest[]
+  // États dynamiques des stations
+  stationAlerts: Record<string, StationAlertType>
+  // Variance de prix par station (seed aléatoire par run, 0.75–1.25)
+  stationPriceSeeds: Record<string, number>
+  // Meta unlock : survit à un coup mortel une fois par run
+  lethalSurviveAvailable?: boolean
+  // Mini-jeu escorte en attente
+  pendingEscortQuestId?: string
 }
+
+export type StationSpecialService =
+  | 'gambling'
+  | 'implants'
+  | 'fuel_cheap'
+  | 'weapon_forge'
+  | 'arena'
+  | 'rest_bonus'
 
 export interface StationData {
   name: string
@@ -370,6 +510,9 @@ export interface StationData {
   type: 'dangerous' | 'peaceful' | 'industrial' | 'scientific' | 'ruins' | 'luxury' | 'military'
   goods: string[]
   fuelCostFrom: Record<string, number>
+  specialService?: StationSpecialService
+  fuelDiscount?: number        // fraction de réduction (ex. 0.35 = -35%)
+  exclusiveGoods?: string[]    // goods marqués ★ EXCLUSIF dans le marché
 }
 
 export interface MarketItem {

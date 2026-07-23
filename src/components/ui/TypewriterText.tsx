@@ -24,8 +24,17 @@ export function TypewriterText({ text, speed = 22, onDone, className, style }: P
     return () => clearTimeout(t)
   }, [pos, text, speed, onDone])
 
+  function skip() {
+    if (pos < text.length) setPos(text.length)
+  }
+
   return (
-    <span className={className} style={style}>
+    <span
+      className={className}
+      style={{ ...style, cursor: pos < text.length ? 'pointer' : undefined }}
+      onClick={skip}
+      title={pos < text.length ? 'Clic pour passer' : undefined}
+    >
       {text.slice(0, pos)}
       {pos < text.length && <span className="blink" style={{ opacity: 0.7 }}>▌</span>}
     </span>

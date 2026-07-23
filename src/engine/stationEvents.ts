@@ -19,33 +19,35 @@ export interface StationEventChoice {
 export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Star Quest': [
     {
-      id: 'casino',
-      label: 'Aller au casino',
-      available: gs => gs.credits >= 100,
-      description: 'L\'arène des paris. Lumières, fumée, et la promesse de doubler ou de tout perdre.',
+      id: 'salon_vip',
+      label: 'Salon VIP — Réseau d\'affaires',
+      available: gs => gs.credits >= 400,
+      description: 'Une salle privée, lumière tamisée, flûtes de champagne synthétique. Des marchands, des courtiers, des gens qui se font des faveurs. Ici, les contacts valent plus que l\'or.',
       choices: [
         {
-          label: 'Miser 500 cr (50% chance)',
-          available: gs => gs.credits >= 500,
-          result: gs => Math.random() < 0.5
-            ? { gs: { credits: gs.credits + 500 }, message: '+500 cr. La chance sourit.' }
-            : { gs: { credits: gs.credits - 500 }, message: '-500 cr. La maison gagne toujours.' },
+          label: 'Payer l\'entrée et réseauter (400 cr)',
+          available: gs => gs.credits >= 400,
+          result: gs => ({
+            gs: { credits: gs.credits - 400 + rng(500, 1500), reputation: gs.reputation + 30 },
+            message: `-400 cr. Tu repars avec des contacts et des engagements. +${rng(500, 1500)} cr, +30 rép.`,
+          }),
         },
         {
-          label: 'Miser 200 cr (55% chance)',
-          available: gs => gs.credits >= 200,
-          result: gs => Math.random() < 0.55
-            ? { gs: { credits: gs.credits + 200 }, message: '+200 cr.' }
-            : { gs: { credits: gs.credits - 200 }, message: '-200 cr.' },
+          label: 'Extraire des données discrètement (Hackeur)',
+          available: gs => gs.class.name === 'Hackeur',
+          result: gs => Math.random() < 0.70
+            ? { gs: { credits: gs.credits + rng(1200, 2800), reputation: gs.reputation + 15 }, message: `[HACK] Données privées extraites. +${rng(1200, 2800)} cr, +15 rép.` }
+            : { gs: { reputation: gs.reputation - 25 }, message: 'Détecté. Expulsion discrète. -25 rép.' },
         },
         {
-          label: 'Tricher (Hackeur — 80% succès)',
-          available: gs => gs.class.name === 'Hackeur' && gs.credits >= 500,
-          result: gs => Math.random() < 0.80
-            ? { gs: { credits: gs.credits + 800 }, message: '[HACK] Algorithme biaisé. +800 cr.' }
-            : { gs: { credits: gs.credits - 200, reputation: gs.reputation - 15 }, message: 'Détecté. -200 cr, -15 rép.' },
+          label: 'Entrée gratuite (Rép ≥ 80)',
+          available: gs => gs.reputation >= 80,
+          result: gs => ({
+            gs: { credits: gs.credits + rng(800, 2000), reputation: gs.reputation + 40 },
+            message: `On te reconnaît. Tu entres sans payer. +${rng(800, 2000)} cr, +40 rép.`,
+          }),
         },
-        { label: 'Observer seulement', result: gs => ({ gs: {}, message: 'Spectacle gratuit.' }) },
+        { label: 'Ignorer', result: gs => ({ gs: {}, message: '' }) },
       ],
     },
     {
@@ -64,6 +66,89 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
           result: gs => Math.random() < 0.5
             ? { gs: { credits: gs.credits + 600 }, message: 'Ton poulain gagne. +600 cr.' }
             : { gs: { credits: gs.credits - 300 }, message: 'Il s\'effondre au troisième round. -300 cr.' },
+        },
+        { label: 'Partir', result: gs => ({ gs: {}, message: '' }) },
+      ],
+    },
+  ],
+
+  'Scotty Golden North': [
+    {
+      id: 'grand_casino',
+      label: 'Le Grand Casino Samy Scotty',
+      available: gs => gs.credits >= 150,
+      description: 'L\'entrée est un mur de lumière. Bruit de jetons, musique synthétique, odeur de carburant de luxe. Samy Scotty a transformé cette station en temple du hasard. Tout le monde peut jouer. Tout le monde peut perdre.',
+      choices: [
+        {
+          label: 'Table basse — miser 150 cr (55% chance → +200)',
+          available: gs => gs.credits >= 150,
+          result: gs => Math.random() < 0.55
+            ? { gs: { credits: gs.credits + 200 }, message: 'La bille tombe sur ton numéro. +200 cr.' }
+            : { gs: { credits: gs.credits - 150 }, message: 'Raté. La maison garde les 150 cr.' },
+        },
+        {
+          label: 'Table standard — miser 500 cr (50% → +650)',
+          available: gs => gs.credits >= 500,
+          result: gs => Math.random() < 0.50
+            ? { gs: { credits: gs.credits + 650 }, message: 'Double ou rien — double. +650 cr.' }
+            : { gs: { credits: gs.credits - 500 }, message: 'La maison ramasse. -500 cr.' },
+        },
+        {
+          label: 'Haute mise — miser 1500 cr (45% → +2400)',
+          available: gs => gs.credits >= 1500,
+          result: gs => Math.random() < 0.45
+            ? { gs: { credits: gs.credits + 2400 }, message: 'Le croupier blêmit. Tu empoches 2400 cr.' }
+            : { gs: { credits: gs.credits - 1500 }, message: 'Perdu. -1500 cr. Le croupier ne sourit même pas.' },
+        },
+        {
+          label: 'Table VIP — miser 3000 cr (40% → +6000) [Rép ≥ 60]',
+          available: gs => gs.credits >= 3000 && gs.reputation >= 60,
+          result: gs => Math.random() < 0.40
+            ? { gs: { credits: gs.credits + 6000, reputation: gs.reputation + 10 }, message: 'La table VIP applaudit. +6000 cr, +10 rép.' }
+            : { gs: { credits: gs.credits - 3000 }, message: 'Personne ne dit un mot. -3000 cr.' },
+        },
+        {
+          label: 'Pirater les algorithmes (Hackeur — 75% → +1800 cr)',
+          available: gs => gs.class.name === 'Hackeur' && gs.credits >= 500,
+          result: gs => Math.random() < 0.75
+            ? { gs: { credits: gs.credits + 1800 }, message: '[HACK] Odds biaisés. Tu gagnes systématiquement. +1800 cr.' }
+            : { gs: { credits: gs.credits - 500, reputation: gs.reputation - 20 }, message: 'Samy a des bons techniciens. Détecté. -500 cr, -20 rép.' },
+        },
+        { label: 'Observer la folie ambiante', result: gs => ({ gs: {}, message: 'Quelqu\'un perd sa fortune. Quelqu\'un d\'autre gagne la sienne. Rien de nouveau.' }) },
+      ],
+    },
+    {
+      id: 'machines_samy',
+      label: 'Les Machines de Samy — Paris clandestins',
+      available: gs => gs.credits >= 200,
+      description: 'Dans l\'arrière-salle, des paris sur des combats illégaux diffusés en direct. Des machines à sous trafiquées mais pas trop. L\'odeur de transgression à prix abordable.',
+      choices: [
+        {
+          label: 'Machine à sous — 200 cr (3 roues, jackpot ×6, deux identiques ×1.5)',
+          available: gs => gs.credits >= 200,
+          result: gs => {
+            const w = [rng(1, 6), rng(1, 6), rng(1, 6)]
+            if (w[0] === w[1] && w[1] === w[2]) return { gs: { credits: gs.credits + 200 * 6 - 200 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] JACKPOT ! +${200 * 6 - 200} cr.` }
+            if (w[0] === w[1] || w[1] === w[2] || w[0] === w[2]) return { gs: { credits: gs.credits + Math.floor(200 * 1.5) - 200 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Deux identiques. +${Math.floor(200 * 1.5) - 200} cr.` }
+            return { gs: { credits: gs.credits - 200 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Rien. -200 cr.` }
+          },
+        },
+        {
+          label: 'Machine à sous premium — 1000 cr (jackpot ×6)',
+          available: gs => gs.credits >= 1000,
+          result: gs => {
+            const w = [rng(1, 6), rng(1, 6), rng(1, 6)]
+            if (w[0] === w[1] && w[1] === w[2]) return { gs: { credits: gs.credits + 1000 * 6 - 1000 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] JACKPOT PREMIUM ! +${1000 * 6 - 1000} cr.` }
+            if (w[0] === w[1] || w[1] === w[2] || w[0] === w[2]) return { gs: { credits: gs.credits + Math.floor(1000 * 1.5) - 1000 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Deux identiques. +${Math.floor(1000 * 1.5) - 1000} cr.` }
+            return { gs: { credits: gs.credits - 1000 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Rien. -1000 cr.` }
+          },
+        },
+        {
+          label: 'Parier sur un combat illégal — 600 cr (35% → ×3)',
+          available: gs => gs.credits >= 600,
+          result: gs => Math.random() < 0.35
+            ? { gs: { credits: gs.credits + 600 * 3 - 600 }, message: `Ton combattant démolit l'adversaire. +${600 * 3 - 600} cr.` }
+            : { gs: { credits: gs.credits - 600 }, message: 'Il tombe en trente secondes. -600 cr.' },
         },
         { label: 'Partir', result: gs => ({ gs: {}, message: '' }) },
       ],
@@ -124,21 +209,30 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
 
   'Fort Kharos': [
     {
-      id: 'military_mission',
-      label: 'Mission militaire',
-      available: gs => gs.reputation >= 0,
-      description: 'L\'armée a un travail. Pas très légal côté faction, mais payé rubis sur ongle.',
+      id: 'armoury_access',
+      label: 'Accès à l\'armurerie militaire',
+      available: gs => gs.credits >= 400,
+      description: 'Un sergent te fait signe depuis le couloir. "T\'as l\'air de quelqu\'un qui sait utiliser du matériel. L\'armurerie vend quelques surplus — pas au catalogue officiel."',
       choices: [
         {
-          label: 'Accepter la mission d\'escorte',
+          label: 'Acheter des munitions spéciales (400 cr)',
+          available: gs => gs.credits >= 400,
           result: gs => ({
-            gs: { credits: gs.credits + rng(800, 2000), reputation: gs.reputation + 15 },
-            message: `Mission d'escorte accomplie. +${rng(800, 2000)} cr, +15 rép.`,
+            gs: { credits: gs.credits - 400, cargo: { ...gs.cargo, 'Munitions spéciales': (gs.cargo['Munitions spéciales'] ?? 0) + 2 } },
+            message: '-400 cr. Il glisse deux caisses sans regarder. +2 Munitions spéciales.',
+          }),
+        },
+        {
+          label: 'Acheter des rations militaires (200 cr)',
+          available: gs => gs.credits >= 200,
+          result: gs => ({
+            gs: { credits: gs.credits - 200, cargo: { ...gs.cargo, 'Rations militaires': (gs.cargo['Rations militaires'] ?? 0) + 3 } },
+            message: '-200 cr. +3 Rations militaires. "Discrétion attendue."',
           }),
         },
         {
           label: 'Refuser',
-          result: gs => ({ gs: {}, message: 'L\'officier hoche la tête froidement.' }),
+          result: _ => ({ gs: {}, message: 'Il hoche la tête. Pas de problème.' }),
         },
       ],
     },
@@ -228,6 +322,46 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
     },
   ],
 }
+
+// ── ARÈNE DE KORSUN ──────────────────────────────────────────────────────────
+;(STATION_EVENTS as Record<string, StationEvent[]>)["L'Arène de Korsun"] = [
+  {
+    id: 'tournament_register',
+    label: 'Consulter l\'affiche du Tournoi',
+    available: gs => gs.tournamentRound === 0,
+    description: 'Une affiche massive barre le couloir d\'entrée. DIX COMBATS. DIX ADVERSAIRES. Le dernier debout repart avec la gloire et l\'or. Un portier te dévisage depuis l\'entrée de l\'arène.',
+    choices: [
+      {
+        label: 'S\'inscrire — entrer dans l\'arène',
+        result: () => ({ gs: {}, message: 'TOURNAMENT_START' }),
+      },
+      {
+        label: 'Regarder le tableau des anciens champions',
+        result: () => ({ gs: {}, message: 'Des noms. Des étoiles à côté de certains. Des croix rouges à côté de la plupart. Tu comptes les survivants sur une main.' }),
+      },
+      {
+        label: 'Partir',
+        result: () => ({ gs: {}, message: '' }),
+      },
+    ],
+  },
+  {
+    id: 'tournament_ongoing',
+    label: 'Tournoi en cours — Round suivant',
+    available: gs => gs.tournamentRound > 0,
+    description: 'Tu es inscrit. La foule attend. Le prochain adversaire se prépare derrière la porte.',
+    choices: [
+      {
+        label: 'Continuer le tournoi',
+        result: () => ({ gs: {}, message: 'TOURNAMENT_CONTINUE' }),
+      },
+      {
+        label: 'Abandonner (disqualification)',
+        result: gs => ({ gs: { tournamentRound: 0 }, message: 'Tu jettes l\'éponge. La foule hue. Pas de honte à survivre.' }),
+      },
+    ],
+  },
+]
 
 export function getStationEvents(gs: GameState): StationEvent[] {
   const events = STATION_EVENTS[gs.currentStation] ?? []

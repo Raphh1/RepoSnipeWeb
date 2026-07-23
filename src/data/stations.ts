@@ -13,20 +13,21 @@ export const STATIONS: StationData[] = [
     description: "Hub commercial légal. Des agents de sécurité partout. Des marchands souriants qui te détestent.",
     danger: 0, type: 'peaceful',
     goods: ['Médicaments', 'Composants électroniques', 'Vêtements', 'Nourriture synthétique', 'Outils'],
-    fuelCostFrom: { 'La Carcasse': 2, 'Nexus Aldara': 2, 'Fort Kharos': 3, 'Les Bas-Fonds de Vega': 4, 'Colonie Perséphone': 3 },
+    fuelCostFrom: { 'La Carcasse': 2, 'Nexus Aldara': 2, 'Fort Kharos': 3, 'Les Bas-Fonds de Vega': 4, 'Colonie Perséphone': 3, 'Paradoxa Eterna': 4, 'Le Sanctuaire des Dérives': 3 },
   },
   {
     name: 'Les Bas-Fonds de Vega',
     description: "Marché noir. Tout se vend, tout s'achète. Ton âme incluse si le prix est bon.",
     danger: 2, type: 'dangerous',
     goods: ['Armes illégales', 'Drogues de synthèse', 'Données volées', 'Pièces de contrebande'],
-    fuelCostFrom: { 'La Carcasse': 3, 'Port Méridien': 4, 'Arc Ouest Apocalypse': 2 },
+    fuelCostFrom: { 'La Carcasse': 3, 'Port Méridien': 4, 'Arc Ouest Apocalypse': 2, 'Port des Brumes': 2 },
+    exclusiveGoods: ['Armes illégales', 'Drogues de synthèse'],
   },
   {
     name: 'Fort Kharos',
     description: "Station militaire. Entrée réglementée. Les gardes ne plaisantent pas, et les canons sont toujours chargés.",
     danger: 1, type: 'military',
-    goods: ['Armures légères', 'Rations militaires', 'Munitions', 'Composants tactiques'],
+    goods: ['Équipements blindés', 'Rations militaires', 'Munitions', 'Composants tactiques'],
     fuelCostFrom: { 'La Carcasse': 4, 'Port Méridien': 3, 'Nexus Aldara': 3, 'Fort Ossian': 3 },
   },
   {
@@ -34,7 +35,8 @@ export const STATIONS: StationData[] = [
     description: "Carrefour technologique. Les meilleurs hackers et ingénieurs y vivent — ou y meurent.",
     danger: 1, type: 'scientific',
     goods: ['Composants électroniques', 'Implants', 'Logiciels', 'Données'],
-    fuelCostFrom: { 'Port Méridien': 2, 'Fort Kharos': 3, 'Le Purgatoire': 3 },
+    fuelCostFrom: { 'Port Méridien': 2, 'Fort Kharos': 3, 'Le Purgatoire': 3, 'Sanctum Machina': 2 },
+    exclusiveGoods: ['Implants', 'Logiciels'],
   },
   {
     name: 'Arc Ouest Apocalypse',
@@ -62,14 +64,16 @@ export const STATIONS: StationData[] = [
     description: "Forteresse des confins. Soldats en rotation, ambiance de front. Rien n'entre facilement.",
     danger: 1, type: 'military',
     goods: ['Rations', 'Armures', 'Munitions lourdes'],
-    fuelCostFrom: { 'Le Purgatoire': 2, 'Nexus Aldara': 4, 'Colonie Perséphone': 3 },
+    fuelCostFrom: { 'Le Purgatoire': 2, 'Nexus Aldara': 4, 'Colonie Perséphone': 3, 'Poste Vigie': 1, "L'Oasis de Fer": 3 },
   },
   {
     name: 'Colonie Perséphone',
     description: "Colonie agricole. Calme en surface. Des tensions profondes sous la terre.",
     danger: 0, type: 'peaceful',
     goods: ['Nourriture fraîche', 'Eau purifiée', 'Minerais', 'Équipement agricole'],
-    fuelCostFrom: { 'Fort Ossian': 3, 'Station Rocaille': 2, 'Port Méridien': 3 },
+    fuelCostFrom: { 'Fort Ossian': 3, 'Station Rocaille': 2, 'Port Méridien': 3, 'Paradoxa Eterna': 3 },
+    specialService: 'rest_bonus',
+    exclusiveGoods: ['Nourriture fraîche', 'Équipement agricole'],
   },
   {
     name: 'Station Rocaille',
@@ -83,7 +87,9 @@ export const STATIONS: StationData[] = [
     description: "Usine flottante illégale. Ils fabriquent des armes sans licence. Excellentes armes.",
     danger: 2, type: 'industrial',
     goods: ['Armes artisanales', "Composants d'armure", 'Matériaux interdits'],
-    fuelCostFrom: { 'Station Rocaille': 2, "L'Entrepôt Zéro": 3 },
+    fuelCostFrom: { 'Station Rocaille': 2, "L'Entrepôt Zéro": 3, 'La Forge des Damnés': 2 },
+    specialService: 'weapon_forge',
+    exclusiveGoods: ['Armes artisanales', "Composants d'armure"],
   },
   {
     name: "L'Entrepôt Zéro",
@@ -94,45 +100,49 @@ export const STATIONS: StationData[] = [
   },
   {
     name: 'Emporium Requiem',
-    description: "Le plus grand marché de la région. Légal en façade. Tout le reste derrière.",
+    description: "Planète artificielle de Cesarion. Douane stricte, armée omniprésente — mais les meilleurs marchands d'armes du secteur s'y trouvent. L'accès se mérite.",
     danger: 2, type: 'luxury',
-    goods: ['Tout type de marchandise', 'Armes Tier 3', 'Armures premium'],
-    fuelCostFrom: { "L'Entrepôt Zéro": 3, 'Star Quest': 2, 'Les Abysses de Velkor': 4 },
+    goods: ['Armes Tier 4', 'Armures premium', 'Équipement militaire d\'élite', 'Composants tactiques'],
+    fuelCostFrom: { "L'Entrepôt Zéro": 3, 'Star Quest': 2, 'Les Abysses de Velkor': 4, 'Annexe Commerciale': 2 },
+    exclusiveGoods: ['Armes Tier 4', 'Équipement militaire d\'élite'],
   },
   {
     name: 'Star Quest',
-    description: "Station de loisirs pour riches. Casino, arènes de combat, cliniques privées. Tout à prix d'or.",
+    description: "Station de loisirs pour riches. Arènes de combat, cliniques privées, divertissements exclusifs. Le casino, c'est à Scotty — ici on joue autrement.",
     danger: 1, type: 'luxury',
-    goods: ['Luxe', 'Médicaments premium', 'Informations VIP'],
-    fuelCostFrom: { 'Emporium Requiem': 2, "La Couronne d'Eos": 3 },
+    goods: ['Luxe', 'Médicaments premium', 'Informations VIP', 'Or'],
+    fuelCostFrom: { 'Emporium Requiem': 2, "La Couronne d'Eos": 3, 'La Tribosphère': 3, "L'Arène de Korsun": 2 },
   },
   {
     name: 'La Citadelle Écarlate',
     description: "Bastion des Faucons Rouges. Une faction rivale des Faucons Noirs. Aussi violents.",
     danger: 3, type: 'military',
     goods: ["Armures d'élite", 'Armes lourdes', 'Munitions spéciales'],
-    fuelCostFrom: { 'Le Nid des Faucons': 2, 'Scotty Golden North': 4 },
+    fuelCostFrom: { 'Le Nid des Faucons': 2, 'Scotty Golden North': 4, 'La Forteresse Exilée': 4 },
   },
   {
     name: 'Les Abysses de Velkor',
     description: "Station de recherche abandonnée, reconvertie par des exilés. Sombre. Dangereuse. Fascinante.",
     danger: 3, type: 'ruins',
     goods: ['Artefacts', 'Composants expérimentaux', 'Données classifiées'],
-    fuelCostFrom: { 'Emporium Requiem': 4, 'Scotty Golden North': 3 },
+    fuelCostFrom: { 'Emporium Requiem': 4, 'Scotty Golden North': 3, "L'Arc Perdu": 5 },
   },
   {
     name: 'Scotty Golden North',
-    description: "Station de commerce du bout du monde. Loin de tout. Proche de rien. Les prix reflètent.",
+    description: "Le royaume de Samy Scotty. Casino, jeux d'argent, paris sur tout et n'importe quoi — c'est ici que les crédits du secteur finissent leur vie. Loin de tout, mais bien réel.",
     danger: 2, type: 'peaceful',
-    goods: ['Métaux rares', 'Carburant premium', 'Armes exotiques'],
-    fuelCostFrom: { 'La Citadelle Écarlate': 4, 'Les Abysses de Velkor': 3, "La Couronne d'Eos": 4 },
+    goods: ['Jetons de casino', 'Armes exotiques', 'Informations VIP', 'Luxe'],
+    fuelCostFrom: { 'La Citadelle Écarlate': 4, 'Les Abysses de Velkor': 3, "La Couronne d'Eos": 4, 'La Tribosphère': 3 },
+    specialService: 'gambling',
+    exclusiveGoods: ['Jetons de casino', 'Armes exotiques'],
   },
   {
     name: "La Couronne d'Eos",
     description: "Station orbitale de prestige. Les élites se réunissent ici pour décider du sort des autres.",
     danger: 2, type: 'luxury',
-    goods: ['Technologies avancées', 'Armes Tier 4', 'Armures Tier 4', 'Renseignements'],
-    fuelCostFrom: { 'Star Quest': 3, 'Scotty Golden North': 4 },
+    goods: ['Technologies avancées', 'Armes Tier 4', 'Armures Tier 4', 'Renseignements', 'Or'],
+    fuelCostFrom: { 'Star Quest': 3, 'Scotty Golden North': 4, 'La Tribosphère': 4, "Club Privé Éos": 2, 'Résidence Orbitale': 1 },
+    exclusiveGoods: ['Technologies avancées', 'Armures Tier 4', 'Renseignements'],
   },
 
   // ── SOUS-STATIONS FAUCONS NOIRS ─────────────────────────────────────────────
@@ -145,13 +155,13 @@ export const STATIONS: StationData[] = [
   { name: 'Station Ombre',
     description: "Base d'opérations clandestines des Faucons. Officiellement inexistante.",
     danger: 3, type: 'dangerous',
-    goods: ['Armes lourdes', 'Données volées', 'Équipement tactique'],
+    goods: ['Armes lourdes', 'Données volées', 'Équipement tactique', 'Matériel de guerre', 'Implants militaires'],
     fuelCostFrom: { 'Le Nid des Faucons': 1, 'Le Perchoir': 2, 'La Tanière': 3 } },
 
   { name: 'Relais Noir',
     description: "Point de ravitaillement Faucon. Ouvert à ceux qui savent comment demander.",
     danger: 1, type: 'industrial',
-    goods: ['Carburant de récup', 'Munitions', 'Pièces techniques'],
+    goods: ['Carburant de récup', 'Munitions', 'Pièces techniques', 'Composants électroniques', 'Outils lourds'],
     fuelCostFrom: { 'Arc Ouest Apocalypse': 2, 'Les Bas-Fonds de Vega': 3, 'Le Perchoir': 2 } },
 
   { name: 'La Tanière',
@@ -182,13 +192,13 @@ export const STATIONS: StationData[] = [
   { name: 'Bastion Mineur',
     description: "Garnison secondaire des Gardiens. Moins imposant que la Citadelle. Tout aussi sérieux.",
     danger: 1, type: 'military',
-    goods: ['Armures légères', 'Munitions', 'Rations'],
+    goods: ['Équipements blindés', 'Munitions', 'Rations'],
     fuelCostFrom: { 'La Citadelle Écarlate': 1, 'Le Nid des Faucons': 3, "L'Arsenal Écarlate": 1 } },
 
   { name: 'Poste Vigie',
     description: "Poste d'observation des Gardiens aux confins de leur territoire. Une vigie, deux soldats, une longue-vue.",
     danger: 1, type: 'military',
-    goods: ['Munitions', 'Renseignements', 'Rations militaires'],
+    goods: ['Munitions', 'Renseignements', 'Rations militaires', 'Équipements blindés', 'Composants tactiques'],
     fuelCostFrom: { 'Fort Ossian': 1, 'Fort Kharos': 4, 'Bastion Mineur': 3 } },
 
   { name: "L'Arsenal Écarlate",
@@ -226,27 +236,28 @@ export const STATIONS: StationData[] = [
   { name: 'Résidence Orbitale',
     description: "Logements privés pour l'élite orbitale. Sécurité discrète mais totale.",
     danger: 0, type: 'luxury',
-    goods: ['Luxe', 'Technologies avancées', 'Médicaments premium'],
+    goods: ['Luxe', 'Technologies avancées', 'Médicaments premium', 'Or'],
     fuelCostFrom: { "La Couronne d'Eos": 1, 'Star Quest': 2, 'Annexe Commerciale': 3 } },
 
   { name: "Club Privé Éos",
     description: "Salon de rencontres pour décideurs. Accès sur invitation. Ce qui s'y dit ne sort pas.",
     danger: 1, type: 'luxury',
-    goods: ['Informations VIP', 'Renseignements', 'Luxe'],
+    goods: ['Informations VIP', 'Renseignements', 'Luxe', 'Or'],
     fuelCostFrom: { "La Couronne d'Eos": 2, 'Résidence Orbitale': 1, 'Star Quest': 3 } },
 
   // ── STATIONS ABANDONNÉES / MYSTÉRIEUSES ──────────────────────────────────────
   { name: 'Les Cendres',
     description: "Ce qui reste d'une station détruite. Quelqu'un l'a brûlée. Quelqu'un y vit quand même.",
     danger: 2, type: 'ruins',
-    goods: ['Artefacts', 'Composants divers', 'Ferraille'],
+    goods: ['Artefacts', 'Composants divers', 'Ferraille', 'Eau purifiée', 'Médicaments bas de gamme'],
     fuelCostFrom: { 'Le Purgatoire': 2, 'Les Abysses de Velkor': 3, 'Station Quarantaine': 3 } },
 
   { name: 'Station Quarantaine',
     description: "Mise sous quarantaine il y a vingt ans. Levée officiellement. Les gens qui sont restés, non.",
     danger: 3, type: 'ruins',
     goods: ['Données classifiées', 'Composants expérimentaux', 'Artefacts'],
-    fuelCostFrom: { 'Les Abysses de Velkor': 4, 'Les Cendres': 3, "L'Épave Vivante": 4 } },
+    fuelCostFrom: { 'Les Abysses de Velkor': 4, 'Les Cendres': 3, "L'Épave Vivante": 4, "L'Arc Perdu": 6 },
+    exclusiveGoods: ['Composants expérimentaux'] },
 
   { name: 'Le Berceau',
     description: "Station ancienne — antérieure à tous les conflits actuels. Quelque chose a commencé ici.",
@@ -277,7 +288,7 @@ export const STATIONS: StationData[] = [
     description: "Station de navigation. Signal d'orientation pour tous les pilotes du secteur.",
     danger: 0, type: 'peaceful',
     goods: ['Eau purifiée', 'Nourriture synthétique', 'Carburant de récup'],
-    fuelCostFrom: { 'Colonie Perséphone': 2, 'Fort Ossian': 3, 'Confluent': 3 } },
+    fuelCostFrom: { 'Colonie Perséphone': 2, 'Fort Ossian': 3, 'Confluent': 3, 'Paradoxa Eterna': 4 } },
 
   { name: 'Confluent',
     description: "Carrefour de routes commerciales. Ni riche ni pauvre. Juste au milieu de tout.",
@@ -308,21 +319,111 @@ export const STATIONS: StationData[] = [
     description: "Dernier avant-poste cartographié. Les pilotes qui vont plus loin ne reviennent pas toujours.",
     danger: 2, type: 'scientific',
     goods: ['Données classifiées', 'Carburant premium', 'Composants expérimentaux'],
-    fuelCostFrom: { 'Scotty Golden North': 3, 'Les Abysses de Velkor': 4, "L'Observatoire": 4 } },
+    fuelCostFrom: { 'Scotty Golden North': 3, 'Les Abysses de Velkor': 4, "L'Observatoire": 4, 'La Bulle': 3 } },
 
   // ── INDUSTRIELS ────────────────────────────────────────────────────────────────
   { name: 'Les Cavernes de Mira',
     description: "Galeries creusées dans un astéroïde massif. Les mineurs ont trouvé autre chose que du minerai. Ils n'en parlent pas.",
     danger: 1, type: 'industrial',
     goods: ['Métaux rares', 'Cristaux énergétiques', 'Artefacts'],
-    fuelCostFrom: { 'Station Rocaille': 2, 'Station Fantôme': 2, 'La Forge Noire': 3 } },
+    fuelCostFrom: { 'Station Rocaille': 2, 'Station Fantôme': 2, 'La Forge Noire': 3 },
+    exclusiveGoods: ['Cristaux énergétiques'] },
 
   { name: 'La Raffinerie',
     description: "Plateforme de raffinage orbital. Chaleur, bruit, rendement. Les ouvriers repartent différents.",
     danger: 2, type: 'industrial',
     goods: ['Carburant premium', 'Métaux rares', 'Cristaux énergétiques'],
-    fuelCostFrom: { 'La Forge Noire': 1, 'Les Cavernes de Mira': 2, 'Station Rocaille': 4 } },
+    fuelCostFrom: { 'La Forge Noire': 1, 'Les Cavernes de Mira': 2, 'Station Rocaille': 4, 'Forge Alpha': 1 },
+    specialService: 'fuel_cheap',
+    fuelDiscount: 0.35,
+    exclusiveGoods: ['Carburant premium'] },
+
+  // ── PERSONNAGES PILIERS — ZONES SPÉCIALES ─────────────────────────────────────
+  {
+    name: "L'Arc Perdu",
+    description: "Fragment dérivant de l'ancienne grande station, abandonné depuis la Grande Guerre. Concentrait les soldats les plus dangereux — et un général qui n'en est jamais revenu. Ou si.",
+    danger: 3, type: 'ruins',
+    goods: ['Reliques de la Grande Guerre', 'Artefacts de Nexus', 'Données pré-Fracture', 'Équipement militaire ancien'],
+    fuelCostFrom: { 'Les Abysses de Velkor': 5, 'Station Quarantaine': 6 },
+    exclusiveGoods: ['Reliques de la Grande Guerre', 'Artefacts de Nexus', 'Données pré-Fracture'],
+  },
+  {
+    name: 'La Tribosphère',
+    description: "La planète festive d'Eliotis. Tout le monde est le bienvenu — sauf ceux qui viennent troubler la fête. Ce dernier point est appliqué avec une précision militaire.",
+    danger: 1, type: 'peaceful',
+    goods: ['Alcools exotiques', 'Spécialités festives', 'Médicaments', 'Divertissement'],
+    fuelCostFrom: { 'Star Quest': 3, 'Scotty Golden North': 3, "La Couronne d'Eos": 4 },
+    exclusiveGoods: ['Alcools exotiques', 'Spécialités festives', 'Divertissement'],
+  },
+  {
+    name: 'Paradoxa Eterna',
+    description: "Planète du Roi Maxance, couverte d'une faune et d'une flore extraordinaires. Pacifiste — mais fermée aux criminels notoires. Les fruits rares qui y poussent sont légendaires pour leurs effets.",
+    danger: 0, type: 'peaceful',
+    goods: ['Fruits rares', 'Plantes médicinales', 'Composants organiques', 'Épices exotiques'],
+    fuelCostFrom: { 'Colonie Perséphone': 3, 'Port Méridien': 4, 'La Balise': 4 },
+    specialService: 'rest_bonus',
+    exclusiveGoods: ['Fruits rares', 'Composants organiques', 'Épices exotiques'],
+  },
+
+  // ── ARÈNE ─────────────────────────────────────────────────────────────────
+  { name: "L'Arène de Korsun",
+    description: "Station de combat légalisé. Des tribunes criantes, des couloirs qui sentent le sang et la résine. Le seul endroit où mourir en public est considéré comme du divertissement.",
+    danger: 2, type: 'dangerous',
+    goods: ['Médicaments premium', 'Stimulants de combat', 'Équipement tactique'],
+    fuelCostFrom: { 'Star Quest': 2, 'Emporium Requiem': 3, 'Les Bas-Fonds de Vega': 4 },
+    specialService: 'arena',
+    exclusiveGoods: ['Stimulants de combat'] },
+
+  // ── NOUVELLES STATIONS ────────────────────────────────────────────────────────
+  { name: 'Port des Brumes',
+    description: "Le port doit son nom aux émanations constantes de ses recycleurs défaillants. Personne n'a jamais réparé les recycleurs. La brume cache les mains et brouille les caméras — c'est fonctionnel.",
+    danger: 2, type: 'dangerous',
+    goods: ['Fausses identités', 'Données volées', 'Équipement de camouflage', 'Pièces de contrebande'],
+    fuelCostFrom: { 'Les Bas-Fonds de Vega': 2, "L'Entrepôt Zéro": 2, 'Port de Nuit': 2 } },
+
+  { name: 'Forge Alpha',
+    description: "Complexe industriel qui ne s'arrête jamais. Trois équipes en rotation, chaque seconde d'inactivité une perte. Les ouvriers parlent en gestes entre les machines.",
+    danger: 1, type: 'industrial',
+    goods: ['Composants de précision', 'Matériaux industriels', 'Outils lourds', 'Pièces techniques'],
+    fuelCostFrom: { 'La Raffinerie': 1, 'Station Rocaille': 3, 'Les Cavernes de Mira': 3 },
+    specialService: 'fuel_cheap',
+    fuelDiscount: 0.35,
+    exclusiveGoods: ['Composants de précision', 'Matériaux industriels'] },
+
+  { name: 'Le Sanctuaire des Dérives',
+    description: "Le seul endroit du secteur où personne ne porte d'arme visible. Sœur Valkara l'a voulu ainsi. La règle tient non par force mais par consensus — ici on ne vient pas pour combattre.",
+    danger: 0, type: 'peaceful',
+    goods: ['Médicaments premium', 'Implants', 'Plantes médicinales', 'Équipement médical'],
+    fuelCostFrom: { 'Port Méridien': 3, 'Nexus Aldara': 3, 'Fort Ossian': 4 },
+    specialService: 'implants',
+    exclusiveGoods: ['Plantes médicinales', 'Équipement médical'] },
+
+  { name: 'Sanctum Machina',
+    description: "Les robots sont partout. ARIA-9, l'IA centrale, les coordonne en temps réel. À l'entrée, ton profil est créé en huit secondes. Elle t'a déjà évalué.",
+    danger: 2, type: 'scientific',
+    goods: ['Logiciels', 'Composants expérimentaux', 'Données', 'Implants cybernétiques'],
+    fuelCostFrom: { 'Nexus Aldara': 2, 'Station Zéphyr': 3, 'Le Berceau': 3 } },
+
+  { name: 'La Bulle',
+    description: "Station de recherche biomédicale aux activités créativement diversifiées. Le Docteur Flinch a compris que légal et illégal représentaient le même marché. Ses cliniques propres côtoient des arrière-salles dont les équipements sont trop précis pour être honnêtes.",
+    danger: 1, type: 'scientific',
+    goods: ['Implants', 'Médicaments expérimentaux', 'Composants biologiques', 'Drogues de synthèse'],
+    fuelCostFrom: { 'Nexus Aldara': 3, 'Station Limite': 3, "L'Observatoire": 4 },
+    specialService: 'implants',
+    exclusiveGoods: ['Médicaments expérimentaux', 'Composants biologiques'] },
+
+  { name: 'La Forge des Damnés',
+    description: "Produit des armes que les catalogues officiels ne listent pas. L'Armurière Skade travaille à la commande, sans questions. Ses armes ne portent pas de numéros de série. Ce n'est pas un défaut.",
+    danger: 3, type: 'industrial',
+    goods: ['Armes artisanales', 'Armes illégales', "Composants d'armure", 'Matériaux interdits'],
+    fuelCostFrom: { 'La Forge Noire': 2, 'Repaire Vega-Sud': 3, 'Port des Brumes': 3 },
+    specialService: 'weapon_forge',
+    exclusiveGoods: ['Armes illégales', 'Matériaux interdits'] },
 ]
+
+export function getStationsSellingItem(itemName: string): string[] {
+  return STATIONS.filter(s => s.goods.includes(itemName)).map(s => s.name)
+}
 
 export function getStation(name: string): StationData {
   return STATIONS.find(s => s.name === name) ?? STATIONS[0]
@@ -342,23 +443,93 @@ export function getFuelCost(from: string, to: string): number {
 }
 
 export const PEACEFUL_STATIONS = new Set([
-  'Port Méridien', 'Colonie Perséphone', 'Star Quest', 'Scotty Golden North'
+  'Port Méridien', 'Colonie Perséphone', 'Star Quest', 'Scotty Golden North', 'La Tribosphère', 'Paradoxa Eterna'
+])
+
+// Stations où le carburant est en vente et où les upgrades vaisseau sont disponibles
+export const FUEL_STATIONS = new Set([
+  'La Carcasse',
+  'Port Méridien',
+  'La Balise',
+  'Confluent',
+  'La Raffinerie',
+  'Forge Alpha',
+  'Relais Noir',
+  'Relais de Transit',
+  'Fort Kharos',
 ])
 
 export const BOSS_STATIONS: Record<string, string> = {
+  // Faucons Noirs
   'Arc Ouest Apocalypse':   'Alanossa',
   'Le Nid des Faucons':     'La Faucon',
-  'Les Abysses de Velkor':  'Directeur Pale',
-  'Star Quest':             "Garde du Corps d'Eliotis",
-  'Emporium Requiem':       'Directeur Pale',
-  'La Citadelle Écarlate':  'La Faucon',
-  'Scotty Golden North':    "Garde du Corps d'Eliotis",
-  "La Couronne d'Eos":      'Alanossa',
   'Station Ombre':          'Le Fantôme des Ombres',
   'La Tanière':             'La Bête Noire',
-  'Repaire Vega-Sud':       'La Veuve de Vega',
+  'Le Perchoir':            'Le Vigie Immortel',
+  'Relais Noir':            "Le Ravitailleur de l'Ombre",
+  'Fort de Cendres':        'Le Boucher de Velkor',
+  "L'Œil du Faucon":       "L'Architecte du Chaos",
+  // Gardiens Écarlates
+  'La Citadelle Écarlate':  'Commandante Zara Sable',
   'La Forteresse Exilée':   "L'Exilé Écarlate",
+  'Bastion Mineur':         'Commandant Garant',
+  'Poste Vigie':            'Amiral Voss-Kheran',
+  "L'Arsenal Écarlate":    'Le Colosse de Ferraille',
+  // Emporium
+  'Emporium Requiem':       'Cesarion',
+  'Comptoir Sud':           'La Marchande de Mort',
+  'Annexe Commerciale':     'Le Directeur Fantôme',
+  'Relais de Transit':      'Le Passeur Sanguinaire',
+  // Criminel / bas-fonds
+  'Les Bas-Fonds de Vega':  'Le Baron de Vega',
+  'Repaire Vega-Sud':       'La Veuve de Vega',
+  'Port de Nuit':           'Le Roi de Nuit',
+  'La Forge Noire':         'Le Maître-Forgeron Maudit',
+  "L'Entrepôt Zéro":       "L'Archiviste sans Visage",
+  // Militaire neutre
+  'Fort Kharos':            'Le Général de Fer',
+  'Fort Ossian':            'Frère Ossian le Dernier',
+  'Star Quest':             "Garde du Corps d'Eliotis",
+  // Ruines / abandonnées
+  'Les Abysses de Velkor':  'Directeur Pale',
   'Station Quarantaine':    'Patient Zéro',
   'Station Fantôme':        "L'Ombre du Vide",
-  'Port de Nuit':           'Le Roi de Nuit',
+  'Les Cendres':            'Le Survivant des Cendres',
+  'Le Berceau':             'Le Gardien Originel',
+  "L'Épave Vivante":       'Le Capitaine Amalgame',
+  'Le Purgatoire':          'Le Geôlier des Morts',
+  // Luxe / haute société
+  "La Couronne d'Eos":     'Oracle de la Singularité',
+  'Scotty Golden North':    'Samy Scotty',
+  'Résidence Orbitale':     'Lord Daekar',
+  "Club Privé Éos":        'Le Maître des Ombres',
+  // Industriel / minier
+  'Station Rocaille':       'Le Titan Mineur',
+  'Les Cavernes de Mira':   'La Créature de Mira',
+  'La Raffinerie':          'Le Contremaître Infernal',
+  // Scientifique
+  'Nexus Aldara':           'Protocole ΔX-7',
+  'Station Limite':         'La Mère Mecanique',
+  'Station Zéphyr':         'Le Chercheur Fracturé',
+  "L'Observatoire":        "L'Astronome des Abysses",
+  // Paisible / neutre
+  'La Carcasse':            'Le Ferrailleur des Épaves',
+  'Port Méridien':          "L'Inspecteur Véreux",
+  'Colonie Perséphone':     'La Matriarche de Perséphone',
+  "L'Oasis de Fer":        'Le Médiateur de Fer',
+  'La Balise':              'Le Gardien du Signal',
+  'Confluent':              'Le Seigneur des Routes',
+  // Personnages piliers — zones spéciales
+  "L'Arc Perdu":           'Raphazarus',
+  'La Tribosphère':         'Eliotis',
+  'Paradoxa Eterna':        'Le Roi Maxance',
+  // Arène
+  "L'Arène de Korsun":     'Le Champion des Arènes',
+  // Nouvelles stations
+  'Port des Brumes':          'Le Fantôme des Brumes',
+  'Forge Alpha':              'Le Contremaître de Forge',
+  'Le Sanctuaire des Dérives': 'Sœur Valkara',
+  'Sanctum Machina':          'ARIA-9 Protocole Noir',
+  'La Bulle':                 'Docteur Flinch',
+  'La Forge des Damnés':      "L'Armurière Skade",
 }

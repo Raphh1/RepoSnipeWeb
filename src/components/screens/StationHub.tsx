@@ -1,35 +1,57 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { TypewriterText } from '../ui/TypewriterText'
-import type { GameState } from '../../types'
+import type { GameState, WeaponData } from '../../types'
 import { useGameStore } from '../../store/gameStore'
 import { StatusBar } from '../ui/StatusBar'
-import { getStation } from '../../data/stations'
-import { getEnemyForDepth, scaleEnemy, TIER_BOSS, TIER_MID } from '../../data/enemies'
+import { getStation, BOSS_STATIONS, FUEL_STATIONS } from '../../data/stations'
+import { getEnemyForStation, scaleEnemy, TIER_BOSS } from '../../data/enemies'
 import { rollExplorationEvent, rollWanderEvent, type WanderEvent } from '../../engine/exploration'
 import type { ExploreResult } from '../../engine/exploration'
-import { generateQuest, generateNpcQuest, getGossip } from '../../engine/quests'
-import { getMajorQuestForNpc } from '../../engine/majorQuests'
+import { generateQuest } from '../../engine/quests'
 import { getStationEvents, type StationEvent } from '../../engine/stationEvents'
-import { NAMED_NPCS, getNpcReaction, getNpcGreeting, recordMeeting } from '../../engine/npcTracker'
+import { NAMED_NPCS, getNpcService } from '../../engine/npcTracker'
 import { getAmbiance } from '../../engine/jsonEventLoader'
 import { getEnemyByTier } from '../../data/enemies'
 import { checkArcTriggers } from '../../engine/narrativeArcs'
 import { OBJECTIVES } from '../../engine/objectives'
 import { StopTheBar, type StopResult } from '../minigames/StopTheBar'
 import { CardGame } from '../minigames/CardGame'
+import { ScenarioGame } from '../minigames/ScenarioGame'
+import { CustomsGame } from '../minigames/CustomsGame'
+import { stalkerToEnemy, getStalkerAmbushChance, getStalkerPresenceText } from '../../engine/stalker'
+import { isFactionBlockedAtStation, getStationFactionName } from '../../engine/factionRep'
+import { getArrivalSituation, type ArrivalSituation } from '../../engine/arrivalSituations'
+import { RUN_MODIFIERS } from '../../data/runModifiers'
+import { getRunObjective } from '../../data/runObjectives'
+import { ExploreResultPanel } from './hub/ExploreResultPanel'
+import { WanderResultPanel } from './hub/WanderResultPanel'
+import { QuestOfferPanel } from './hub/QuestOfferPanel'
+import { StationEventPanel } from './hub/StationEventPanel'
+import { NpcEncounterPanel } from './hub/NpcEncounterPanel'
 
 const DANGER_LABEL = ['◆ SÉCURISÉE', '◆ RISQUÉE', '◆ DANGEREUSE', '◆ ZONE DE GUERRE']
 const DANGER_CLS   = ['danger-0', 'danger-1', 'danger-2', 'danger-3']
 
-type HubMode = 'menu' | 'explore-result' | 'wander-result' | 'quest-offer' | 'station-event' | 'npc-encounter' | 'lockpick-game' | 'card-game'
+type HubMode = 'menu' | 'explore-result' | 'wander-result' | 'quest-offer' | 'station-event' | 'npc-encounter' | 'lockpick-game' | 'card-game' | 'fuel-scavenge' | 'delivery-event' | 'negotiation' | 'navigation-minigame' | 'customs'
 
 export function StationHub() {
   const gs           = useGameStore(s => s.gs!)
   const goTo         = useGameStore(s => s.goTo)
   const startCombat  = useGameStore(s => s.startCombat)
-  const rest         = useGameStore(s => s.rest)
   const patch        = useGameStore(s => s.patch)
   const addQuest     = useGameStore(s => s.addQuest)
+  const manualCompleteQuest = useGameStore(s => s.manualCompleteQuest)
+
+  function tickPatrolProgress() {
+    const q = gs.activeQuests.find(aq => aq.type === 'patrol' && aq.targetStation === gs.currentStation)
+    if (!q) return
+    const newProgress = (q.progress ?? 0) + 1
+    if (newProgress >= 3) {
+      manualCompleteQuest(q.id)
+    } else {
+      patch({ activeQuests: gs.activeQuests.map(aq => aq.id === q.id ? { ...aq, progress: newProgress } : aq) })
+    }
+  }
   const spendAction  = useGameStore(s => s.spendAction)
   const travelMsg    = useGameStore(s => s.travelEventMessage)
   const objPopup     = useGameStore(s => s.objectivePopup)
@@ -37,6 +59,10 @@ export function StationHub() {
   const dismissTravel    = useGameStore(s => s.dismissTravelEvent)
   const dismissObj       = useGameStore(s => s.dismissObjectivePopup)
   const dismissQuest     = useGameStore(s => s.dismissQuestCompletion)
+  const chainEvent       = useGameStore(s => s.chainEventNotification)
+  const dismissChain     = useGameStore(s => s.dismissChainEvent)
+  const worldEventPopup  = useGameStore(s => s.worldEventPopup)
+  const dismissWorldEvent = useGameStore(s => s.dismissWorldEventPopup)
   const advanceMajorQuests = useGameStore(s => s.advanceMajorQuests)
 
   const [mode, setMode]             = useState<HubMode>('menu')
@@ -44,11 +70,26 @@ export function StationHub() {
   const [wanderEvent, setWanderEvent]     = useState<WanderEvent | null>(null)
   const [questOffer, setQuestOffer]       = useState<ReturnType<typeof generateQuest>>(null)
   const [stationEvent, setStationEvent]   = useState<StationEvent | null>(null)
-  const [resultMsg, setResultMsg]         = useState<string | null>(null)
   const [npcDialogResult, setNpcDialogResult] = useState<string | null>(null)
+  const [lockpickMsg, setLockpickMsg] = useState<string | null>(null)
   const [miniGameReward, setMiniGameReward] = useState<Partial<GameState>>({})
+  const [fuelScavResult, setFuelScavResult] = useState<string | null>(null)
+  const [specialResult, setSpecialResult]   = useState<string | null>(null)
+  type DealCondition = { id: string; label: string; desc: string; fuelAmount: number; available: boolean; whyNot?: string; accept: () => void }
+  const [dealConditions, setDealConditions] = useState<DealCondition[] | null>(null)
+  const [confirmRestart, setConfirmRestart] = useState(false)
+  const [arrivalSit, setArrivalSit] = useState<ArrivalSituation | null>(null)
+  const [arrivalResult, setArrivalResult] = useState<string | null>(null)
+  const [pendingDeliveryQuest, setPendingDeliveryQuest] = useState<ReturnType<typeof generateQuest>>(null)
+  const [deliveryResult, setDeliveryResult] = useState<string | null>(null)
+  const [negotiationBase]   = useState(() => Math.floor(Math.random() * 1500 + 600))
+  const [negoResult, setNegoResult]         = useState<{ earned: number; label: string } | null>(null)
+  const [navResult, setNavResult]           = useState<{ shipDamage: number; bonusCredits: number } | null>(null)
+  const [customsResult, setCustomsResult]   = useState<{ confiscated: string[]; repChange: number } | null>(null)
 
   const station      = getStation(gs.currentStation)
+  const factionBlocked     = isFactionBlockedAtStation(gs, gs.currentStation)
+  const blockedFactionName = getStationFactionName(gs.currentStation)
   const outcome      = gs.pendingCombatOutcome
   const stationEvts  = getStationEvents(gs)
   const localNpc     = NAMED_NPCS.find(n => n.station === gs.currentStation)
@@ -56,192 +97,138 @@ export function StationHub() {
   const hasArcs      = gs.activeArcs.length > 0 || availableArcs.length > 0 || gs.completedArcs.length > 0
   const newArcsCount = availableArcs.filter(a => !gs.activeArcs.find(b => b.id === a.id)).length
 
+  // Situation d'arrivée — calculée une fois au montage si pendingArrival est vrai
+  useEffect(() => {
+    if (gs.pendingArrival && !arrivalSit) {
+      const sit = getArrivalSituation(gs, true)
+      if (sit) setArrivalSit(sit)
+      else patch({ pendingArrival: false })
+    }
+  }, [])
+
+  // Contrôle douanier auto sur stations militaires (une fois par visite de station/jour)
+  useEffect(() => {
+    const key = `customs_${gs.currentStation}_${gs.day}`
+    if (
+      station.type === 'military' &&
+      Object.keys(gs.cargo).length > 0 &&
+      !sessionStorage.getItem(key) &&
+      Math.random() < 0.38
+    ) {
+      sessionStorage.setItem(key, '1')
+      setMode('customs')
+    }
+  }, [])
+
   // ── ACTIONS ──────────────────────────────────────────────────────────────
 
   function explore() {
     spendAction()
+    tickPatrolProgress()
+    if (gs.stalker && Math.random() < getStalkerAmbushChance(gs.stalker, 'explore')) {
+      startCombat(stalkerToEnemy(gs.stalker))
+      return
+    }
     const depth = gs.zoneDepth + 1
     const result = rollExplorationEvent({ ...gs, zoneDepth: depth })
     if (result.type === 'combat') {
-      patch({ zoneDepth: depth, lastExploreWasCombat: true })
-      startCombat(scaleEnemy(getEnemyForDepth(depth, gs.day), Math.max(0, depth - 1)))
+      patch({ zoneDepth: depth, lastExploreWasCombat: true, explorationFightsDone: (gs.explorationFightsDone ?? 0) + 1 })
+      startCombat(scaleEnemy(getEnemyForStation(gs.currentStation, depth, gs.day), Math.max(0, depth - 2)))
       return
     }
     if (result.type === 'boss') {
       patch({ zoneDepth: depth, lastExploreWasCombat: true })
-      startCombat(TIER_BOSS[Math.floor(Math.random() * TIER_BOSS.length)])
+      const bossName = BOSS_STATIONS[gs.currentStation]
+      const boss = bossName
+        ? (TIER_BOSS.find(b => b.name === bossName) ?? TIER_BOSS[Math.floor(Math.random() * TIER_BOSS.length)])
+        : TIER_BOSS[Math.floor(Math.random() * TIER_BOSS.length)]
+      startCombat(boss)
       return
     }
     patch({ zoneDepth: depth, lastExploreWasCombat: false })
-    setExploreResult(result); setResultMsg(null); setMode('explore-result')
+    setExploreResult(result); setLockpickMsg(null); setMode('explore-result')
   }
 
   function wander() {
     spendAction()
-    setWanderEvent(rollWanderEvent(gs)); setResultMsg(null); setMode('wander-result')
+    tickPatrolProgress()
+    if (gs.stalker && Math.random() < getStalkerAmbushChance(gs.stalker, 'wander')) {
+      startCombat(stalkerToEnemy(gs.stalker))
+      return
+    }
+    // Sur les stations risquées/dangereuses, risque de tomber sur des problèmes
+    const wanderCombatChance = station.danger >= 3 ? 0.30 : station.danger >= 2 ? 0.22 : station.danger >= 1 ? 0.12 : 0
+    if (wanderCombatChance > 0 && Math.random() < wanderCombatChance) {
+      const tier = station.danger >= 3 ? 3 : station.danger >= 2 ? 2 : 1
+      startCombat(scaleEnemy(getEnemyByTier(tier as 1|2|3), Math.floor(gs.day / 15)))
+      return
+    }
+    setWanderEvent(rollWanderEvent(gs)); setMode('wander-result')
   }
 
   function lookForQuest() {
     spendAction()
-    setQuestOffer(generateQuest(gs)); setMode('quest-offer')
+    // Priorité aux quêtes enchaînées en attente
+    const chainPending = (gs.pendingChainQuests ?? [])
+    if (chainPending.length > 0) {
+      const [next, ...rest] = chainPending
+      patch({ pendingChainQuests: rest })
+      setQuestOffer(next)
+    } else {
+      setQuestOffer(generateQuest(gs))
+    }
+    setMode('quest-offer')
   }
 
   function openStationEvent(ev: StationEvent) {
     spendAction()
-    setStationEvent(ev); setResultMsg(null); setMode('station-event')
-  }
-
-  function applyExploreChoice(choice: { label: string; result: (g: GameState) => { gs: Partial<GameState>; message: string; minigame?: 'lockpick'; minigameReward?: Partial<GameState> } }) {
-    const result = choice.result(gs)
-    if (result.minigame === 'lockpick') {
-      setMiniGameReward(result.minigameReward ?? {})
-      setMode('lockpick-game')
-      return
-    }
-    patch(result.gs)
-    setResultMsg(result.message)
+    setStationEvent(ev); setMode('station-event')
   }
 
   // ── MODES ────────────────────────────────────────────────────────────────
 
   if (mode === 'explore-result' && exploreResult) {
     return (
-      <div className="layout">
-        <div className="t-xs t-dim t-center">— EXPLORATION — Profondeur {gs.zoneDepth} —</div>
-
-        {'description' in exploreResult && (
-          <div className="px-box">
-            <div className="t-sm t-gold mb8">
-              <TypewriterText text={exploreResult.description} speed={14} />
-            </div>
-
-            {exploreResult.type === 'loot' && !resultMsg && (
-              <button className="px-btn px-btn--primary" onClick={() => {
-                patch({ credits: gs.credits + (exploreResult as Extract<ExploreResult, {type:'loot'}> ).credits })
-                setResultMsg(`+${(exploreResult as Extract<ExploreResult, {type:'loot'}>).credits} cr récupérés.`)
-              }}>Ramasser (+{(exploreResult as Extract<ExploreResult, {type:'loot'}>).credits} cr)</button>
-            )}
-
-            {exploreResult.type === 'item' && !resultMsg && (
-              <button className="px-btn px-btn--primary" onClick={() => {
-                const e = exploreResult as Extract<ExploreResult, {type:'item'}>
-                patch({ cargo: { ...gs.cargo, [e.item]: (gs.cargo[e.item] ?? 0) + e.qty } })
-                setResultMsg(`+${e.qty}x ${e.item}`)
-              }}>Prendre ({(exploreResult as Extract<ExploreResult, {type:'item'}>).item})</button>
-            )}
-
-            {exploreResult.type === 'fuel' && !resultMsg && (
-              <button className="px-btn px-btn--primary" onClick={() => {
-                patch({ fuel: Math.min(gs.maxFuel, gs.fuel + (exploreResult as Extract<ExploreResult, {type:'fuel'}>).amount) })
-                setResultMsg(`+${(exploreResult as Extract<ExploreResult, {type:'fuel'}>).amount} carburant.`)
-              }}>Prendre le carburant</button>
-            )}
-
-            {'choices' in exploreResult && exploreResult.choices && !resultMsg && (
-              <div className="col gap4 mt8">
-                {(exploreResult as Extract<ExploreResult, {type:'event'}>).choices
-                  .filter((c: {available?:(g:GameState)=>boolean}) => !c.available || c.available(gs))
-                  .map((c: {label:string; result:(g:GameState)=>{gs:Partial<GameState>;message:string}}, i: number) => (
-                    <button key={i} className="px-btn" onClick={() => applyExploreChoice(c)}>{c.label}</button>
-                  ))
-                }
-              </div>
-            )}
-
-            {resultMsg && <div className="t-green t-sm mt8">{resultMsg}</div>}
-          </div>
-        )}
-
-        <div className="row gap4 mt8">
-          <button className="px-btn" style={{ flex: 1 }} onClick={explore}>
-            Continuer (profondeur {gs.zoneDepth + 1})
-          </button>
-          <button className="px-btn px-btn--danger" style={{ flex: 1 }} onClick={() => { patch({ zoneDepth: 0 }); setMode('menu') }}>
-            Retourner à la station
-          </button>
-        </div>
-      </div>
+      <ExploreResultPanel
+        gs={gs}
+        exploreResult={exploreResult}
+        initialResultMsg={lockpickMsg}
+        onContinue={explore}
+        onReturn={() => { patch({ zoneDepth: 0 }); setLockpickMsg(null); setMode('menu') }}
+        onStartLockpick={(reward) => { setMiniGameReward(reward); setMode('lockpick-game') }}
+        patch={patch}
+      />
     )
   }
 
   if (mode === 'wander-result' && wanderEvent) {
     return (
-      <div className="layout">
-        <div className="t-xs t-dim t-center">— EN STATION —</div>
-        <div className="px-box">
-          <div className="t-sm t-gold mb4">{wanderEvent.title}</div>
-          <div className="t-xs mb8" style={{ lineHeight: '2.2' }}>
-            <TypewriterText text={wanderEvent.description} speed={16} />
-          </div>
-          {resultMsg
-            ? <div className="t-xs mt4" style={{ color: 'var(--green)', lineHeight: '2' }}>{resultMsg}</div>
-            : <div className="col gap4">
-                {wanderEvent.choices
-                  .filter(c => !c.available || c.available(gs))
-                  .map((c, i) => (
-                    <button key={i} className="px-btn" onClick={() => {
-                      const res = c.result(gs)
-                      if (res.type === 'combat') {
-                        const tier = station.danger >= 3 ? 3 : station.danger >= 2 ? 2 : 1
-                        startCombat(getEnemyByTier(tier as 1|2|3))
-                        return
-                      }
-                      if (res.gs) patch(res.gs as Partial<GameState>)
-                      if (res.quest && gs.activeQuests.length < 5) addQuest(res.quest)
-                      setResultMsg(res.message + (res.quest ? `\n[QUÊTE AJOUTÉE : ${res.quest.title}]` : ''))
-                    }}>{c.label}</button>
-                  ))}
-              </div>
-          }
-        </div>
-        <div className="row gap4">
-          {resultMsg && (
-            <button className="px-btn px-btn--primary" style={{ flex: 1 }} onClick={() => {
-              setWanderEvent(rollWanderEvent(gs))
-              setResultMsg(null)
-              spendAction()
-            }}>
-              Traîner encore
-            </button>
-          )}
-          <button className="px-btn" style={{ flex: 1 }} onClick={() => { setResultMsg(null); setMode('menu') }}>
-            ← Retour au hub
-          </button>
-        </div>
-      </div>
+      <WanderResultPanel
+        gs={gs}
+        wanderEvent={wanderEvent}
+        dangerLevel={station.danger}
+        onReturn={() => setMode('menu')}
+        startCombat={startCombat}
+        patch={patch}
+        addQuest={addQuest}
+        spendAction={spendAction}
+        onWanderAgain={(next) => setWanderEvent(next)}
+        onNegotiation={() => { setNegoResult(null); setMode('negotiation') }}
+        onNavigation={() => { setNavResult(null); setMode('navigation-minigame') }}
+      />
     )
   }
 
   if (mode === 'station-event' && stationEvent) {
     return (
-      <div className="layout">
-        <div className="t-xs t-dim t-center">— {station.name.toUpperCase()} —</div>
-        <div className="px-box px-box--hi">
-          <div className="t-sm t-bright mb8">
-            <TypewriterText text={stationEvent.description} speed={16} />
-          </div>
-          {resultMsg
-            ? <div className={`t-sm ${resultMsg.includes('-') ? 't-red' : 't-green'}`}>{resultMsg}</div>
-            : <div className="col gap4">
-                {stationEvent.choices
-                  .filter(c => !c.available || c.available(gs))
-                  .map((c, i) => (
-                    <button key={i} className="px-btn" onClick={() => {
-                      if (c.label === 'Participer (combat)') {
-                        startCombat(TIER_MID[Math.floor(Math.random() * TIER_MID.length)])
-                        return
-                      }
-                      const res = c.result(gs)
-                      if (Object.keys(res.gs).length > 0) patch(res.gs as Partial<GameState>)
-                      if (res.message) setResultMsg(res.message)
-                      else setMode('menu')
-                    }}>{c.label}</button>
-                  ))}
-              </div>
-          }
-        </div>
-        <button className="px-btn" onClick={() => setMode('menu')}>← Retour</button>
-      </div>
+      <StationEventPanel
+        gs={gs}
+        stationEvent={stationEvent}
+        stationName={station.name}
+        onReturn={() => setMode('menu')}
+        startCombat={startCombat}
+        patch={patch}
+      />
     )
   }
 
@@ -251,12 +238,12 @@ export function StationHub() {
         if (result === 'perfect') {
           const bonus = Math.floor((miniGameReward.credits ?? 0) * 0.2)
           patch({ ...miniGameReward, credits: (miniGameReward.credits ?? 0) + bonus })
-          setResultMsg(`Crochetage parfait ! +${((miniGameReward.credits ?? 0) + bonus).toLocaleString()} cr (bonus précision)`)
+          setLockpickMsg(`Crochetage parfait ! +${((miniGameReward.credits ?? 0) + bonus).toLocaleString()} cr (bonus précision)`)
         } else if (result === 'good') {
           patch(miniGameReward)
-          setResultMsg(`Réussi. +${(miniGameReward.credits ?? 0).toLocaleString()} cr`)
+          setLockpickMsg(`Réussi. +${(miniGameReward.credits ?? 0).toLocaleString()} cr`)
         } else {
-          setResultMsg('Raté. L\'alarme se déclenche. Tu pars vite.')
+          setLockpickMsg('Raté. L\'alarme se déclenche. Tu pars vite.')
           patch({ reputation: gs.reputation - 5 })
         }
         setMode('explore-result')
@@ -276,212 +263,471 @@ export function StationHub() {
     )
   }
 
-  if (mode === 'quest-offer') {
+  // ── LIVRAISON MANUELLE AVEC OBSTACLES ────────────────────────────────────
+
+  if (mode === 'delivery-event' && pendingDeliveryQuest) {
+    const q = pendingDeliveryQuest
+
+    const DELIVERY_SCENES = [
+      { desc: `Le contact de ${q.giver} t'attend dans une arrière-salle. Il vérifie la marchandise en silence, puis hoche la tête. Transaction propre.`, outcome: 'smooth' as const },
+      { desc: `Tu trouves le destinataire après vingt minutes à chercher dans les couloirs. Il regarde l'item, puis toi. "T'es en retard." Il paie quand même.`, outcome: 'smooth' as const },
+      { desc: `Le destinataire est là, mais il n'est pas seul. Deux types dans l'ombre. Il te demande si tu es suivi.`, outcome: 'tense' as const },
+      { desc: `Tu arrives à l'adresse indiquée — le local est fermé. Un message épinglé sur la porte dit de te rendre au niveau inférieur.`, outcome: 'detour' as const },
+      { desc: `En chemin pour la livraison, quelqu'un te double dans le couloir et renverse délibérément ta caisse. Les regards se tournent vers toi.`, outcome: 'ambush' as const },
+      { desc: `Le destinataire est là mais refuse d'abord la marchandise. "Les termes ont changé." Il cherche à renégocier à la baisse.`, outcome: 'negotiation' as const },
+    ]
+
+    const HEIST_SCENES = [
+      { desc: `Tu remettre l'objet à ${q.giver}. Il ne le regarde même pas — il savait déjà ce que c'était. Le paiement arrive sans un mot.`, outcome: 'smooth' as const },
+      { desc: `Quelqu'un d'autre cherchait cet item. Il est là, dans le couloir, et il t'a vu.`, outcome: 'ambush' as const },
+      { desc: `La remise se passe. ${q.giver} examine l'objet longuement. "C'est le bon." Il paie. Mais tu te demandes depuis combien de temps il attendait exactement ça.`, outcome: 'smooth' as const },
+    ]
+
+    const scenes = q.type === 'heist' ? HEIST_SCENES : DELIVERY_SCENES
+    const scene = scenes[Math.floor(Math.random() * scenes.length)]
+
+    function resolveDelivery(choice: 'proceed' | 'negotiate' | 'flee') {
+      if (choice === 'flee') {
+        setDeliveryResult('Tu repars sans livrer. La quête reste en attente.')
+        setMode('menu')
+        setPendingDeliveryQuest(null)
+        return
+      }
+      if (choice === 'negotiate') {
+        const success = Math.random() < 0.55 + gs.reputation / 300
+        if (success) {
+          manualCompleteQuest(q.id)
+          setMode('menu')
+          setPendingDeliveryQuest(null)
+        } else {
+          patch({ credits: gs.credits - Math.floor(q.creditReward * 0.15) })
+          setDeliveryResult(`La négo tourne court. Tu cèdes 15% de la récompense pour clore l'affaire. Quête complétée quand même.`)
+          manualCompleteQuest(q.id)
+          setTimeout(() => { setMode('menu'); setPendingDeliveryQuest(null) }, 50)
+        }
+        return
+      }
+      // proceed — résoudre selon l'outcome de la scène
+      if (scene.outcome === 'smooth' || scene.outcome === 'detour') {
+        manualCompleteQuest(q.id)
+        setMode('menu')
+        setPendingDeliveryQuest(null)
+      } else if (scene.outcome === 'ambush') {
+        setPendingDeliveryQuest(null)
+        patch({ pendingFuelReward: 0 })
+        manualCompleteQuest(q.id)
+        startCombat(scaleEnemy(getEnemyByTier(station.danger >= 2 ? 2 : 1), Math.floor(gs.day / 15)))
+      } else {
+        manualCompleteQuest(q.id)
+        setMode('menu')
+        setPendingDeliveryQuest(null)
+      }
+    }
+
     return (
       <div className="layout">
-        <div className="t-xs t-dim t-center">— CHERCHER DU TRAVAIL —</div>
-        <div className="px-box">
-          <div className="t-xs t-dim mb4">RUMEUR DU COIN</div>
-          <div className="t-xs" style={{ lineHeight: '2', fontStyle: 'italic' }}>{getGossip(gs.currentStation)}</div>
-        </div>
-        {questOffer ? (
-          <div className="px-box px-box--hi">
-            <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
-              <div className="t-sm t-bright">{questOffer.title}</div>
-              <div className={`tag t-xs ${questOffer.type === 'kill' ? 'tag--red' : questOffer.type === 'delivery' ? 'tag--cyan' : 'tag--dim'}`}>
-                {questOffer.type.toUpperCase()}
-              </div>
-            </div>
-            <div className="t-xs" style={{ lineHeight: '2' }}>{questOffer.description}</div>
-            <div className="t-xs t-gold mt8">Récompense : {questOffer.creditReward.toLocaleString()} cr · +{questOffer.repReward} rép</div>
-            <div className="row gap4 mt8">
-              <button className="px-btn px-btn--primary" style={{ flex: 1 }}
-                onClick={() => { addQuest(questOffer); setMode('menu') }}
-                disabled={gs.activeQuests.length >= 5}>
-                Accepter
-              </button>
-              <button className="px-btn px-btn--danger" style={{ flex: 1 }} onClick={() => setMode('menu')}>Refuser</button>
-            </div>
+        <div className="t-xs t-dim t-center">— LIVRAISON — {q.targetStation} —</div>
+        <div className="px-box px-box--hi">
+          <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
+            <div className="t-sm t-bright">{q.title}</div>
+            <div className="tag t-xs tag--cyan">{q.type.toUpperCase()}</div>
           </div>
-        ) : (
-          <div className="px-box t-dim t-xs">Aucun travail disponible ici pour l'instant.</div>
-        )}
-        <button className="px-btn" onClick={() => setMode('menu')}>← Retour</button>
+          <div className="t-xs" style={{ lineHeight: '2.2', marginBottom: '10px' }}>
+            <TypewriterText text={scene.desc} speed={16} />
+          </div>
+          {deliveryResult ? (
+            <div className="t-xs t-green mt8">{deliveryResult}</div>
+          ) : (
+            <div className="col gap4">
+              {scene.outcome === 'ambush' ? (
+                <>
+                  <button className="px-btn px-btn--danger" onClick={() => resolveDelivery('proceed')}>
+                    ⚔ Livrer quand même — il faudra se battre
+                  </button>
+                  <button className="px-btn" onClick={() => resolveDelivery('flee')}>
+                    ← Rebrousser chemin — livrer plus tard
+                  </button>
+                </>
+              ) : scene.outcome === 'negotiation' ? (
+                <>
+                  <button className="px-btn px-btn--primary" onClick={() => resolveDelivery('negotiate')}>
+                    Négocier (55% réussite, sinon -15% récompense)
+                  </button>
+                  <button className="px-btn px-btn--danger" onClick={() => {
+                    patch({ reputation: gs.reputation - 5 })
+                    resolveDelivery('proceed')
+                  }}>
+                    Imposer les termes originaux (-5 rép si ça passe mal)
+                  </button>
+                  <button className="px-btn" onClick={() => resolveDelivery('flee')}>
+                    ← Partir — revenir plus tard
+                  </button>
+                </>
+              ) : scene.outcome === 'tense' ? (
+                <>
+                  <button className="px-btn px-btn--primary" onClick={() => resolveDelivery('proceed')}>
+                    Livrer malgré tout — t'as confiance
+                  </button>
+                  <button className="px-btn" onClick={() => resolveDelivery('flee')}>
+                    ← Rebrousser chemin — c'est louche
+                  </button>
+                </>
+              ) : (
+                <button className="px-btn px-btn--primary" onClick={() => resolveDelivery('proceed')}>
+                  Compléter la livraison (+{q.creditReward.toLocaleString()} cr · +{q.repReward} rép)
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+        <button className="px-btn" onClick={() => { setMode('menu'); setPendingDeliveryQuest(null); setDeliveryResult(null) }}>← Retour au hub</button>
       </div>
+    )
+  }
+
+  if (mode === 'quest-offer') {
+    return (
+      <QuestOfferPanel
+        gs={gs}
+        questOffer={questOffer}
+        addQuest={addQuest}
+        onReturn={() => setMode('menu')}
+      />
     )
   }
 
   // ── NPC ENCOUNTER ─────────────────────────────────────────────────────────
 
   if (mode === 'npc-encounter' && localNpc) {
-    const npcState = gs.knownNpcs[localNpc.id]
-    const reaction = npcState ? getNpcReaction(npcState, gs) : 'neutral'
-    const greeting = npcState ? getNpcGreeting(npcState, reaction) : `${localNpc.name} te regarde arriver.`
-    const timesMet = npcState?.timesMet ?? 0
+    return (
+      <NpcEncounterPanel
+        gs={gs}
+        localNpc={localNpc}
+        npcDialogResult={npcDialogResult}
+        onDialogResult={setNpcDialogResult}
+        onCardGame={() => setMode('card-game')}
+        onBack={() => { setMode('menu'); setNpcDialogResult(null) }}
+        patch={patch}
+        startCombat={startCombat}
+        advanceMajorQuests={advanceMajorQuests}
+        spendAction={spendAction}
+      />
+    )
+  }
 
-    const REACTION_COLOR: Record<string, string> = {
-      ally: 'var(--gold)', friendly: 'var(--green)', warm: 'var(--cyan)',
-      neutral: 'var(--text-dim)', cold: 'var(--orange)', hostile: 'var(--red)',
-    }
-    const REACTION_LABEL: Record<string, string> = {
-      ally: '★ Allié', friendly: '◆ Amical', warm: '◆ Chaleureux',
-      neutral: '◆ Neutre', cold: '◆ Froid', hostile: '⚠ Hostile',
+  // ── CHERCHER DU CARBURANT ─────────────────────────────────────────────────
+
+  function generateDealConditions(): DealCondition[] {
+    const pool: DealCondition[] = []
+    const creditCost = (Math.floor(Math.random() * 8) + 4) * 100
+
+    pool.push({
+      id: 'credits',
+      label: `Payer ${creditCost.toLocaleString()} cr`,
+      desc: `"Du liquide. Pas de trace, pas de ticket. T'as ça ou t'as pas."`,
+      fuelAmount: 2,
+      available: gs.credits >= creditCost,
+      whyNot: gs.credits < creditCost ? `Il te manque ${(creditCost - gs.credits).toLocaleString()} cr` : undefined,
+      accept: () => {
+        patch({ credits: gs.credits - creditCost, fuel: Math.min(gs.maxFuel, gs.fuel + 2) })
+        setFuelScavResult(`Marché conclu. -${creditCost.toLocaleString()} cr · +2 carburant.`)
+        setDealConditions(null)
+      },
+    })
+
+    if (Object.keys(gs.cargo).length > 0) {
+      const cargoLabel = Object.entries(gs.cargo).map(([k, v]) => `${k} ×${v}`).join(', ')
+      pool.push({
+        id: 'cargo',
+        label: 'Vider ta soute entière',
+        desc: `"Je prends tout ce que t'as là-dedans. Tout. ${cargoLabel}. Après on est quittes."`,
+        fuelAmount: 3,
+        available: true,
+        accept: () => {
+          patch({ cargo: {}, fuel: Math.min(gs.maxFuel, gs.fuel + 3) })
+          setFuelScavResult(`Il vide ta soute sans un mot. Tu repars les mains vides mais +3 carburant.`)
+          setDealConditions(null)
+        },
+      })
     }
 
-    function openNpc() {
-      const updated = recordMeeting(
-        npcState ?? { id: localNpc!.id, name: localNpc!.name, station: localNpc!.station, firstMetDay: gs.day, timesMet: 0, repDelta: 0, isAlly: false, isEnemy: false, tags: [] },
+    pool.push({
+      id: 'favor_sexual',
+      label: 'Faveur personnelle',
+      desc: `Il te regarde lentement de la tête aux pieds, s'attarde. "Je veux une faveur. Du genre... personnel." Il attend ta réponse, le sourire aux lèvres.`,
+      fuelAmount: 2,
+      available: true,
+      accept: () => {
+        patch({ fuel: Math.min(gs.maxFuel, gs.fuel + 2), reputation: gs.reputation - 5 })
+        setFuelScavResult(`Tu fermes les yeux sur la dignité. +2 carburant. (-5 rép)`)
+        setDealConditions(null)
+      },
+    })
+
+    const scavengeableWeapons = gs.weapons.filter(w => (w.tier ?? 0) < 5)
+    if (scavengeableWeapons.length > 0) {
+      const w = scavengeableWeapons[scavengeableWeapons.length - 1]
+      pool.push({
+        id: 'weapon',
+        label: `Céder ${w.name}`,
+        desc: `"Cette arme-là. Je la veux depuis que t'es entré. Donne-la et on règle ça proprement."`,
+        fuelAmount: 2,
+        available: true,
+        accept: () => {
+          const remaining = gs.weapons.filter(x => x !== w)
+          patch({ weapons: remaining, equippedWeapon: gs.equippedWeapon === w ? null : gs.equippedWeapon, fuel: Math.min(gs.maxFuel, gs.fuel + 2) })
+          setFuelScavResult(`Tu poses ${w.name} sur le comptoir. Il sourit. +2 carburant.`)
+          setDealConditions(null)
+        },
+      })
+    }
+
+    if (gs.equippedArmor) {
+      pool.push({
+        id: 'armor',
+        label: `Laisser ton armure`,
+        desc: `"L'armure. Elle m'intéresse. Tu te bats très bien sans, j'en suis sûr." Il tend la main.`,
+        fuelAmount: 2,
+        available: true,
+        accept: () => {
+          patch({ equippedArmor: null, fuel: Math.min(gs.maxFuel, gs.fuel + 2) })
+          setFuelScavResult(`L'armure change de mains. Tu repartiras plus vulnérable. +2 carburant.`)
+          setDealConditions(null)
+        },
+      })
+    }
+
+    pool.push({
+      id: 'humiliation',
+      label: 'Faire le sale boulot',
+      desc: `"J'ai un problème avec la tuyauterie du niveau trois. Ça fuit, ça pue, personne veut toucher ça. Toi si. Deux heures, une unité."`,
+      fuelAmount: 1,
+      available: true,
+      accept: () => {
+        patch({ fuel: Math.min(gs.maxFuel, gs.fuel + 1), reputation: gs.reputation - 8 })
+        setFuelScavResult(`Deux heures plus tard, tu es couvert de trucs que tu préfères ne pas identifier. +1 carburant. (-8 rép)`)
+        setDealConditions(null)
+      },
+    })
+
+    pool.push({
+      id: 'intel',
+      label: 'Donner des informations',
+      desc: `"T'as voyagé. T'as vu des choses. Dis-moi ce que tu sais sur les mouvements dans ce secteur."`,
+      fuelAmount: 2,
+      available: gs.reputation >= 10,
+      whyNot: gs.reputation < 10 ? `Il te voit pas comme quelqu'un qui sait des choses utiles` : undefined,
+      accept: () => {
+        patch({ fuel: Math.min(gs.maxFuel, gs.fuel + 2), reputation: gs.reputation - 12 })
+        setFuelScavResult(`Tu parles. Il prend des notes. Ces infos coûteront peut-être plus cher que tu ne le penses. +2 carburant. (-12 rép)`)
+        setDealConditions(null)
+      },
+    })
+
+    const shuffled = [...pool].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, Math.min(pool.length, Math.floor(Math.random() * 2) + 2))
+  }
+
+  if (mode === 'fuel-scavenge') {
+    const dangerTier = station.danger >= 2 ? 2 : 1
+
+    if (dealConditions) {
+      return (
+        <div className="layout">
+          <div className="t-xs t-red t-center">⚠ NÉGOCIATION — MARCHÉ NOIR</div>
+          <div className="px-box" style={{ borderColor: 'var(--cyan)' }}>
+            <div className="t-sm t-bright mb8">SES CONDITIONS</div>
+            <div className="t-xs t-dim mb8" style={{ lineHeight: '2', fontStyle: 'italic' }}>
+              "J'ai ce qu'il te faut. Mais rien est gratuit ici. Voilà ce que j'accepte."
+            </div>
+            <div className="col gap4">
+              {dealConditions.map(c => (
+                <button key={c.id} className="px-btn" disabled={!c.available}
+                  style={{ borderColor: c.available ? 'var(--cyan)' : undefined, textAlign: 'left' }}
+                  onClick={() => c.accept()}>
+                  <div className="row" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span className="t-xs t-bright">{c.label}</span>
+                    <span className="t-xs t-cyan">+{c.fuelAmount} carburant</span>
+                  </div>
+                  <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{c.desc}</div>
+                  {!c.available && c.whyNot && <div className="t-xs t-red mt2">{c.whyNot}</div>}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button className="px-btn t-dim" onClick={() => setDealConditions(null)}>
+            ← Refuser toutes les conditions
+          </button>
+        </div>
       )
-      const names = new Set(gs.npcsMet)
-      names.add(localNpc!.name)
-      patch({ knownNpcs: { ...gs.knownNpcs, [localNpc!.id]: updated }, npcsMet: Array.from(names) })
-      advanceMajorQuests()
-    }
-
-    function handleTalk() {
-      openNpc()
-      const rep = npcState?.repDelta ?? 0
-      const lines: Record<string, string[]> = {
-        Ferrailleur:       ["Il te montre une pièce rare. +30cr.", "Il grogne, mais t'indique une cache de matériel."],
-        Marchande:         ["Elle glisse une info commerciale. +40cr.", "Elle te fait un prix sur le prochain achat. +50cr."],
-        Vétéran:           ["Il raconte une bataille. Tu apprends quelque chose d'utile. +5 rép.", "Il te montre une technique. Ta prochaine attaque sera meilleure."],
-        Hackeuse:          ["Elle te transfère des crédits volés. +60cr.", "Elle a effacé ton casier quelque part. +10 rép."],
-        Dealer:            ["Il te propose quelque chose. Tu refuses poliment.", "Il a l'air méfiant. Il regarde ailleurs."],
-        Survivante:        ["Elle te raconte comment elle a tenu ici. +8 rép.", "Elle a un objet qu'elle veut céder. +1 Médicaments."],
-        Courtier:          ["Il te donne un tuyau sur le marché. +50cr.", "Il mentionne un acheteur intéressant quelque part."],
-        Organisateur:      ["Il te parle d'un pari gagnant. +70cr.", "Il te reconnaît. +5 rép."],
-        Commandante:       ["Elle te juge du regard. +5 rép si tu tiens.", "Elle a un travail pour toi — peut-être."],
-        Chercheuse:        ["Elle t'explique sa découverte. Fascinant. +10 rép.", "Elle a besoin d'aide pour quelque chose."],
-        'Pilote retraité': ["Il se souvient de routes que personne ne connaît. +40cr.", "Il rit de tes aventures. +5 rép."],
-        Forgeron:          ["Il te montre une arme qu'il fabrique. Impressionnant.", "Il fait des prix pour les réguliers. +30cr."],
-        Fermier:           ["Il partage sa récolte. +1 Nourriture fraîche.", "Calme et honnête. +5 rép."],
-        Lieutenant:        ["Il ne dit rien. Mais son regard dit tout.", "Il te laisse passer. Pour l'instant."],
-      }
-      const pool = lines[localNpc!.role] ?? ["Il hocha la tête. Pas grand chose de plus."]
-      const base = pool[timesMet % pool.length]
-      let gsUpdate: Partial<GameState> = {}
-      let msg = base
-      if (rep >= 20) {
-        gsUpdate = { credits: gs.credits + 50, reputation: gs.reputation + 3 }
-        msg += ' (ami : +50cr, +3 rép)'
-      } else if (rep <= -20) {
-        msg = `${localNpc!.name} tourne la tête. La conversation est terminée.`
-      } else {
-        gsUpdate = { reputation: gs.reputation + 2 }
-        msg += ' (+2 rép)'
-      }
-      patch(gsUpdate)
-      setNpcDialogResult(msg)
-    }
-
-    function handleProvoke() {
-      openNpc()
-      const updated = { ...(npcState ?? { id: localNpc!.id, name: localNpc!.name, station: localNpc!.station, firstMetDay: gs.day, timesMet: 1, repDelta: 0, isAlly: false, isEnemy: false, tags: [] }), isEnemy: true, repDelta: -50 }
-      patch({ knownNpcs: { ...gs.knownNpcs, [localNpc!.id]: updated }, reputation: gs.reputation - 5 })
-      const enemy = {
-        name: localNpc!.name,
-        maxHp: 40 + Math.floor(gs.day * 2),
-        damageMin: 8, damageMax: 18,
-        lootMin: 150, lootMax: 500,
-        description: `${localNpc!.role}. Tu l'as cherché.`,
-        captureChance: 15, killChance: 15, isBoss: false, role: 'normal' as const,
-      }
-      startCombat(enemy)
     }
 
     return (
       <div className="layout">
-        <div className="t-xs t-dim t-center">— {localNpc.name.toUpperCase()} —</div>
+        <div className="t-xs t-red t-center">⚠ RÉSERVOIR À SEC — STATION SANS CARBURANT</div>
 
-        <div className="px-box px-box--hi" style={{ borderColor: 'var(--cyan)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-            <div>
-              <div className="t-sm t-bright">{localNpc.name}</div>
-              <div className="t-xs t-dim">{localNpc.role}</div>
-            </div>
-            <div className="t-xs" style={{ color: REACTION_COLOR[reaction] }}>{REACTION_LABEL[reaction]}</div>
+        <div className="px-box" style={{ borderColor: 'var(--red)' }}>
+          <div className="t-sm t-red mb8">SITUATION CRITIQUE</div>
+          <div className="t-xs mb8" style={{ lineHeight: '2.2' }}>
+            <TypewriterText
+              text="Ton réservoir est vide. Tu ne peux pas partir d'ici. Cette station ne vend pas de carburant — mais ça ne veut pas dire qu'il n'y en a pas. Toutes les options sont risquées."
+              speed={16}
+            />
           </div>
-          <div className="t-xs t-dim mb8" style={{ lineHeight: '1.8' }}>
-            <TypewriterText text={localNpc.description} speed={14} />
-          </div>
-          {timesMet > 0 && <div className="t-xs t-dim mb8">{timesMet} rencontre{timesMet > 1 ? 's' : ''} · Jour {npcState?.firstMetDay ?? gs.day}</div>}
-          <div className="t-xs t-cyan" style={{ fontStyle: 'italic' }}>
-            "<TypewriterText text={greeting} speed={28} />"
-          </div>
+
+          {fuelScavResult
+            ? (
+              <div className="t-xs mt8" style={{ lineHeight: '2.2', color: 'var(--green)' }}>
+                {fuelScavResult}
+              </div>
+            )
+            : (
+              <div className="col gap4">
+                <button className="px-btn" style={{ borderColor: 'var(--orange)', color: 'var(--orange)' }}
+                  onClick={() => {
+                    const roll = Math.random()
+                    if (roll < 0.45) {
+                      const amount = Math.random() < 0.5 ? 1 : 2
+                      patch({ fuel: Math.min(gs.maxFuel, gs.fuel + amount), reputation: gs.reputation - 3 })
+                      setFuelScavResult(`+${amount} carburant. Tu vides un conteneur non surveillé et tu disparais. Quelqu'un a peut-être remarqué. (-3 rép)`)
+                    } else if (roll < 0.65) {
+                      patch({ reputation: gs.reputation - 8, pendingFuelReward: 2 })
+                      startCombat(scaleEnemy(getEnemyByTier(dangerTier as 1|2|3), Math.floor(gs.day / 15)))
+                    } else if (roll < 0.82) {
+                      patch({ reputation: gs.reputation - 5 })
+                      setFuelScavResult("Alarme déclenchée. Tu recules sans rien. La prochaine fois ils t'attendront. (-5 rép)")
+                    } else {
+                      const fine = Math.floor(Math.random() * 400 + 300)
+                      patch({
+                        isImprisoned: true,
+                        prisonDaysLeft: 2,
+                        reputation: gs.reputation - 20,
+                        credits: Math.max(0, gs.credits - fine),
+                        screen: 'prison',
+                      })
+                    }
+                  }}>
+                  🔧 Voler discrètement — silencieux si ça passe
+                </button>
+
+                <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }}
+                  onClick={() => setDealConditions(generateDealConditions())}>
+                  🤝 Négocier — voir les conditions posées
+                </button>
+
+                <button className="px-btn px-btn--danger"
+                  onClick={() => {
+                    patch({ pendingFuelReward: 2 })
+                    startCombat(scaleEnemy(getEnemyByTier(dangerTier as 1|2|3), Math.floor(gs.day / 15)))
+                  }}>
+                  ⚔ Prendre de force — combat, victoire = +2 carburant
+                </button>
+              </div>
+            )
+          }
         </div>
 
-        {npcDialogResult ? (
-          <div className="px-box" style={{ borderColor: 'var(--green)' }}>
-            <div className="t-xs" style={{ lineHeight: '2' }}>
-              <TypewriterText text={npcDialogResult} speed={14} />
-            </div>
-          </div>
-        ) : (
-          <div className="col gap4">
-            {reaction !== 'hostile' && (
-              <button className="px-btn" onClick={handleTalk}>
-                Parler / Échanger des infos
-              </button>
-            )}
-            {reaction !== 'hostile' && gs.activeQuests.length < 5 && (
-              <button className="px-btn" style={{ color: 'var(--gold)' }} onClick={() => {
-                openNpc()
-                const q = generateNpcQuest(gs, localNpc!.name, localNpc!.role, localNpc!.station)
-                if (q) {
-                  addQuest(q)
-                  setNpcDialogResult(`${localNpc!.name} te confie une mission : "${q.title}". Destination : ${q.targetStation}.`)
-                } else {
-                  setNpcDialogResult(`${localNpc!.name} n'a rien de concret pour toi en ce moment.`)
-                }
-              }}>
-                ★ Demander du travail
-              </button>
-            )}
-            {reaction !== 'hostile' && (() => {
-              const mq = getMajorQuestForNpc(gs, localNpc!.name)
-              if (!mq) return null
-              return (
-                <button className="px-btn" style={{ color: 'var(--purple)', borderColor: 'var(--purple)' }} onClick={() => {
-                  openNpc()
-                  patch({ majorQuests: [...gs.majorQuests, { ...mq }] })
-                  setNpcDialogResult(`[MISSION MAJEURE] ${mq.title}\n\n${mq.lore}\n\nPremière étape : ${mq.stages[0].objective}`)
-                }}>
-                  ★★ Mission importante — {mq.title}
-                </button>
-              )
-            })()}
-            {localNpc.role === 'Organisateur' && reaction !== 'hostile' && (
-              <button className="px-btn px-btn--primary" onClick={() => {
-                openNpc()
-                setMode('card-game')
-              }}>
-                ★ Jouer aux cartes (peut gagner des crédits)
-              </button>
-            )}
-            {reaction === 'ally' && (
-              <button className="px-btn px-btn--green" onClick={() => {
-                openNpc()
-                patch({ playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 20), reputation: gs.reputation + 5 })
-                setNpcDialogResult(`${localNpc.name} t'aide. +20 PV, +5 rép.`)
-              }}>
-                Demander de l'aide (allié)
-              </button>
-            )}
-            {reaction === 'hostile' && (
-              <button className="px-btn px-btn--danger" onClick={handleProvoke}>
-                ⚔ Se battre — il t'en veut
-              </button>
-            )}
-            {reaction !== 'hostile' && reaction !== 'ally' && (
-              <button className="px-btn t-dim" style={{ opacity: 0.6 }} onClick={handleProvoke}>
-                Provoquer (déclenche un combat, -5 rép)
-              </button>
-            )}
-          </div>
-        )}
-
-        <button className="px-btn" onClick={() => { setMode('menu'); setNpcDialogResult(null) }}>← Retour</button>
+        <button className="px-btn" onClick={() => { setFuelScavResult(null); setDealConditions(null); setMode('menu') }}>← Retour</button>
       </div>
+    )
+  }
+
+  // ── MINI-JEUX ─────────────────────────────────────────────────────────────
+
+  if (mode === 'negotiation') {
+    if (negoResult) {
+      return (
+        <div className="layout">
+          <div className="t-xs t-dim t-center">— NÉGOCIATION TERMINÉE —</div>
+          <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
+            <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div className="t-sm t-bright">Résultat : {negoResult.label}</div>
+              <div className="tag tag--gold t-xs">{negoResult.label}</div>
+            </div>
+            <div className="t-xs t-gold">+{negoResult.earned.toLocaleString()} cr — contrat conclu.</div>
+          </div>
+          <button className="px-btn px-btn--primary" onClick={() => {
+            patch({ credits: gs.credits + negoResult.earned })
+            setNegoResult(null)
+            setMode('menu')
+          }}>Encaisser et continuer</button>
+        </div>
+      )
+    }
+    return (
+      <ScenarioGame
+        mode="negotiation"
+        baseCredits={negotiationBase}
+        onResult={(earned, label) => setNegoResult({ earned, label })}
+      />
+    )
+  }
+
+  if (mode === 'navigation-minigame') {
+    if (navResult) {
+      const dmg = navResult.shipDamage
+      const bonus = navResult.bonusCredits
+      return (
+        <div className="layout">
+          <div className="t-xs t-dim t-center">— NAVIGATION TERMINÉE —</div>
+          <div className="px-box" style={{ borderColor: dmg === 0 ? 'var(--green)' : dmg <= 10 ? 'var(--gold)' : 'var(--red)' }}>
+            <div className="t-sm t-bright mb4">{dmg === 0 ? 'Navigation parfaite' : dmg <= 15 ? 'Navigation correcte' : 'Navigation difficile'}</div>
+            {dmg > 0 && <div className="t-xs t-red">Vaisseau endommagé : -{dmg} PV</div>}
+            {bonus > 0 && <div className="t-xs t-gold mt4">+{bonus.toLocaleString()} cr (bonus manœuvre)</div>}
+            {dmg === 0 && bonus === 0 && <div className="t-xs t-green">Aucun dommage.</div>}
+          </div>
+          <button className="px-btn px-btn--primary" onClick={() => {
+            patch({
+              shipHp: Math.max(1, gs.shipHp - dmg),
+              credits: gs.credits + bonus,
+            })
+            setNavResult(null)
+            setMode('menu')
+          }}>Continuer</button>
+        </div>
+      )
+    }
+    return <ScenarioGame mode="navigation" onResult={(shipDamage, bonusCredits) => setNavResult({ shipDamage, bonusCredits })} />
+  }
+
+  if (mode === 'customs') {
+    if (customsResult) {
+      const { confiscated, repChange } = customsResult
+      return (
+        <div className="layout">
+          <div className="t-xs t-dim t-center">— CONTRÔLE DOUANIER TERMINÉ —</div>
+          <div className="px-box" style={{ borderColor: confiscated.length > 0 ? 'var(--red)' : 'var(--green)' }}>
+            <div className="t-sm t-bright mb4">
+              {confiscated.length > 0 ? '⚠ Contrebande détectée' : '✓ Scan propre'}
+            </div>
+            {confiscated.length > 0 ? (
+              <>
+                <div className="t-xs t-red mb4">Items confisqués : {confiscated.join(', ')}</div>
+                <div className="t-xs t-dim">{repChange} réputation · Les items ont été saisis.</div>
+              </>
+            ) : (
+              <div className="t-xs t-green">Rien de suspect. +{repChange} réputation pour coopération.</div>
+            )}
+          </div>
+          <button className="px-btn px-btn--primary" onClick={() => {
+            const newCargo = { ...gs.cargo }
+            confiscated.forEach(item => { delete newCargo[item] })
+            patch({
+              cargo: newCargo,
+              reputation: gs.reputation + repChange,
+            })
+            setCustomsResult(null)
+            setMode('menu')
+          }}>Continuer</button>
+        </div>
+      )
+    }
+    return (
+      <CustomsGame
+        cargo={gs.cargo}
+        maxHide={2 + (gs.shipModules?.soute ?? 0)}
+        onResult={(confiscated, repChange) => setCustomsResult({ confiscated, repChange })}
+      />
     )
   }
 
@@ -491,21 +737,111 @@ export function StationHub() {
     <div className="layout scanlines">
       <StatusBar gs={gs} />
 
-      {/* Popups voyage */}
-      {travelMsg && (
+      {/* ── RÉSUMÉ FIN DE JOURNÉE ──────────────────────────────────────────── */}
+      {gs.pendingDaySummary && (
+        <div className="px-box" style={{ borderColor: 'var(--dim)', background: 'rgba(0,0,0,0.5)' }}>
+          <div className="t-xs t-dim mb4" style={{ letterSpacing: '2px' }}>JOUR {gs.pendingDaySummary.prevDay} TERMINÉ</div>
+          <div className="t-sm t-bright mb4">
+            {gs.pendingDaySummary.actionsUsed >= 3
+              ? '★ Journée pleine — 3 actions effectuées.'
+              : gs.pendingDaySummary.actionsUsed > 0
+              ? `${gs.pendingDaySummary.actionsUsed}/3 actions effectuées sur ${gs.pendingDaySummary.station}.`
+              : `Aucune action à ${gs.pendingDaySummary.station}. Le vide n'attend pas.`}
+          </div>
+          <div className="t-xs t-dim mb8">
+            {gs.day <= 3 ? 'Le secteur te teste encore. Continue d\'avancer.' :
+             gs.day <= 7 ? 'Tu trouves ton rythme dans le vide.' :
+             gs.day <= 14 ? 'Les routes deviennent familières. Les dangers, moins.' :
+             'Le Nexus attend. Chaque jour compte.'}
+          </div>
+          <button className="px-btn px-btn--sm" style={{ width: 'auto' }}
+            onClick={() => patch({ pendingDaySummary: null })}>
+            Jour {gs.day} → Continuer
+          </button>
+        </div>
+      )}
+
+      {/* ── SITUATION D'ARRIVÉE ─────────────────────────────────────────────── */}
+      {arrivalSit && !arrivalResult && (
+        <div className="px-box" style={{ borderColor: 'var(--orange)', background: 'rgba(20,10,0,0.7)' }}>
+          <div className="t-xs mb4" style={{ color: 'var(--orange)', letterSpacing: '2px' }}>◆ ARRIVÉE — {gs.currentStation.toUpperCase()}</div>
+          <div className="t-sm t-bright mb8">{arrivalSit.title}</div>
+          <div className="t-xs" style={{ lineHeight: '2.2', marginBottom: '14px' }}>{arrivalSit.description}</div>
+          <div className="col gap4">
+            {arrivalSit.choices.map((c, i) => {
+              const avail = c.available ? c.available(gs) : true
+              return (
+                <button key={i} className="px-btn" disabled={!avail}
+                  style={{ borderColor: avail ? 'var(--orange)' : undefined, textAlign: 'left' }}
+                  onClick={() => {
+                    const result = c.result(gs)
+                    patch({ ...result.gs, pendingArrival: false })
+                    setArrivalResult(result.message)
+                    if (result.triggerCombat) {
+                      setArrivalSit(null)
+                      const enemy = scaleEnemy(getEnemyForStation(gs.currentStation, gs.zoneDepth, gs.day), 0)
+                      startCombat(enemy)
+                    }
+                    if (result.triggerPrison) {
+                      setArrivalSit(null)
+                      goTo('prison')
+                    }
+                  }}>
+                  <span className="t-xs">{c.label}</span>
+                  {!avail && <div className="t-xs t-dim mt2">Condition non remplie</div>}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+      {arrivalResult && (
+        <div className="px-box" style={{ borderColor: 'var(--dim)' }}>
+          <div className="t-xs t-dim mb4">◆ RÉSULTAT D'ARRIVÉE</div>
+          <div className="t-xs">{arrivalResult}</div>
+          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={() => { setArrivalSit(null); setArrivalResult(null) }}>
+            Continuer →
+          </button>
+        </div>
+      )}
+
+      {/* ── BRIEFING D'ARRIVÉE : une seule carte à la fois ─────────────────── */}
+      {!arrivalSit && !arrivalResult && worldEventPopup ? (
+        <div className="px-box" style={{ borderColor: worldEventPopup.color, background: 'rgba(0,0,0,0.6)', boxShadow: `0 0 24px ${worldEventPopup.color}33` }}>
+          <div className="t-xs mb4" style={{ color: worldEventPopup.color, letterSpacing: '3px' }}>⚠ NOUVEL ÉVÉNEMENT MONDIAL</div>
+          <div className="t-sm t-bright mb8" style={{ color: worldEventPopup.color }}>{worldEventPopup.title}</div>
+          <div className="t-xs" style={{ lineHeight: '2', marginBottom: '12px' }}>{worldEventPopup.description}</div>
+          <div className="px-box" style={{ borderColor: 'var(--border)', background: 'rgba(0,0,0,0.3)', marginBottom: '12px', padding: '8px 12px' }}>
+            <div className="t-xs t-dim mb4">EFFETS</div>
+            <div className="t-xs" style={{ color: worldEventPopup.color }}>{worldEventPopup.shortDesc}</div>
+            <div className="t-xs t-dim mt4">Durée : {worldEventPopup.duration} jours (J{worldEventPopup.startDay}–J{worldEventPopup.startDay + worldEventPopup.duration})</div>
+          </div>
+          <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: worldEventPopup.color, color: worldEventPopup.color }} onClick={dismissWorldEvent}>
+            Continuer →
+          </button>
+        </div>
+      ) : chainEvent ? (
+        <div className="px-box" style={{ borderColor: chainEvent.color, background: 'rgba(0,0,0,0.5)' }}>
+          <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <div className="t-xs" style={{ color: chainEvent.color, letterSpacing: '2px' }}>
+              {chainEvent.type === 'reward' ? '★ CONSÉQUENCE' : chainEvent.type === 'threat' ? '⚠ REPRÉSAILLE' : chainEvent.type === 'mystery' ? '◆ MYSTÈRE' : chainEvent.type === 'consequence' ? '▼ CONSÉQUENCE' : '◆ INFORMATION'}
+            </div>
+            <div className="t-xs" style={{ color: chainEvent.color }}>{chainEvent.title}</div>
+          </div>
+          <div className="t-xs" style={{ lineHeight: '2.2', color: 'var(--text)', marginBottom: '10px' }}>
+            {chainEvent.description}
+          </div>
+          <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: chainEvent.color, color: chainEvent.color }} onClick={dismissChain}>
+            Continuer →
+          </button>
+        </div>
+      ) : travelMsg ? (
         <div className="px-box" style={{ borderColor: 'var(--cyan)' }}>
           <div className="t-xs t-cyan mb4">ÉVÉNEMENT DE VOYAGE</div>
           <div className="t-xs">{travelMsg}</div>
-          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={dismissTravel}>OK</button>
+          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={dismissTravel}>Continuer →</button>
         </div>
-      )}
-      {objPopup && (
-        <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
-          <div className="t-xs t-gold">{objPopup}</div>
-          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={dismissObj}>OK</button>
-        </div>
-      )}
-      {questPopup && (
+      ) : questPopup ? (
         <div className="px-box" style={{ borderColor: 'var(--green)', background: '#0a1a0a' }}>
           <div className="t-xs t-green mb8">QUÊTE ACCOMPLIE</div>
           {questPopup.split('\n\n').map((block, i) => {
@@ -517,22 +853,26 @@ export function StationHub() {
               </div>
             )
           })}
-          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto', borderColor: 'var(--green)', color: 'var(--green)' }} onClick={dismissQuest}>Continuer</button>
+          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto', borderColor: 'var(--green)', color: 'var(--green)' }} onClick={dismissQuest}>Continuer →</button>
         </div>
-      )}
-      {newArcsCount > 0 && (
+      ) : objPopup ? (
+        <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
+          <div className="t-xs t-gold">{objPopup}</div>
+          <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={dismissObj}>Continuer →</button>
+        </div>
+      ) : newArcsCount > 0 ? (
         <div className="px-box" style={{ borderColor: 'var(--purple)' }}>
           <div className="t-xs t-purple mb4">NOUVEAU ARC NARRATIF — {availableArcs.slice(0, newArcsCount).map(a => a.title).join(', ')}</div>
           <button className="px-btn px-btn--sm" style={{ width: 'auto', color: 'var(--purple)' }}
             onClick={() => goTo('narrative-arcs')}>Voir les arcs →</button>
         </div>
-      )}
+      ) : null}
 
       {/* Outcomes combat */}
-      {outcome === 'victory'  && <div className="px-box t-gold t-sm t-center">★ VICTOIRE — Butin collecté !</div>}
-      {outcome === 'fled'     && <div className="px-box t-dim t-sm t-center">Tu t'es échappé.</div>}
-      {outcome === 'stunned'  && <div className="px-box t-red t-sm t-center">Assommé et dévalisé. Tu te relèves.</div>}
-      {outcome === 'captured' && <div className="px-box t-red t-sm t-center">Capturé. Direction la prison.</div>}
+      {!arrivalSit && outcome === 'victory'  && <div className="px-box t-gold t-sm t-center">★ VICTOIRE — Butin collecté !</div>}
+      {!arrivalSit && outcome === 'fled'     && <div className="px-box t-dim t-sm t-center">Tu t'es échappé.</div>}
+      {!arrivalSit && outcome === 'stunned'  && <div className="px-box t-red t-sm t-center">Assommé et dévalisé. Tu te relèves.</div>}
+      {!arrivalSit && outcome === 'captured' && <div className="px-box t-red t-sm t-center">Capturé. Direction la prison.</div>}
 
       {gs.isImprisoned && (
         <div className="px-box" style={{ borderColor: 'var(--red)' }}>
@@ -540,6 +880,70 @@ export function StationHub() {
           <button className="px-btn px-btn--danger px-btn--sm" onClick={() => goTo('prison')}>Gérer l'emprisonnement</button>
         </div>
       )}
+
+      {/* Événements mondiaux actifs */}
+      {(gs.activeWorldEvents ?? []).length > 0 && (
+        <div className="col gap4">
+          {(gs.activeWorldEvents ?? []).map(evt => (
+            <div key={evt.id} className="px-box" style={{ borderColor: evt.color, padding: '6px 12px', background: 'rgba(0,0,0,0.35)' }}>
+              <div className="row" style={{ alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: evt.color, fontSize: '9px', letterSpacing: '1px' }}>⚠ ÉVÉNEMENT MONDIAL — {evt.title}</span>
+                <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>J{evt.startDay}–J{evt.startDay + evt.duration}</span>
+              </div>
+              <div className="t-xs t-dim" style={{ marginTop: '2px' }}>{evt.shortDesc}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── PRÉSENCE DU STALKER ────────────────────────────────────────────── */}
+      {gs.stalker && (
+        <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(180,0,0,0.07)', boxShadow: '0 0 12px rgba(255,40,40,0.15)' }}>
+          <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+            <div className="t-xs t-red blink" style={{ letterSpacing: '3px' }}>⚠ {gs.stalker.name.toUpperCase()}</div>
+            <div className="t-xs t-red">{'★'.repeat(gs.stalker.threatLevel)}</div>
+          </div>
+          <div className="t-xs" style={{ lineHeight: '2', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+            {getStalkerPresenceText(gs.stalker)}
+          </div>
+          <button
+            className="px-btn px-btn--danger px-btn--sm"
+            style={{ width: 'auto', marginTop: '10px' }}
+            onClick={() => { spendAction(); startCombat(stalkerToEnemy(gs.stalker!)) }}
+            disabled={gs.actionsToday >= 3}
+          >
+            ⚔ L'affronter — coûte 1 action
+          </button>
+        </div>
+      )}
+
+      {/* ── MODIFICATEURS DE RUN ───────────────────────────────────────────── */}
+      {(gs.runModifiers ?? []).length > 0 && (() => {
+        const mods = (gs.runModifiers ?? []).map(id => RUN_MODIFIERS.find(m => m.id === id)).filter(Boolean)
+        const runObj = gs.runObjectiveId ? getRunObjective(gs.runObjectiveId) : null
+        const TAG_COLOR: Record<string, string> = { buff: 'var(--green)', debuff: 'var(--red)', mixed: 'var(--gold)' }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
+              {mods.map(mod => mod && (
+                <div key={mod.id} className="tag t-xs" style={{ borderColor: TAG_COLOR[mod.tag], color: TAG_COLOR[mod.tag] }}
+                  title={mod.desc}>
+                  {mod.tag === 'buff' ? '▲' : mod.tag === 'debuff' ? '▼' : '◆'} {mod.name}
+                </div>
+              ))}
+              {runObj && (
+                <div className="tag t-xs" style={{
+                  borderColor: gs.runObjectiveCompleted ? 'var(--gold)' : 'var(--purple)',
+                  color: gs.runObjectiveCompleted ? 'var(--gold)' : 'var(--purple)',
+                  marginLeft: 'auto',
+                }} title={runObj.desc}>
+                  {gs.runObjectiveCompleted ? '★' : '○'} {runObj.name} — {runObj.progress(gs)}
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Station info */}
       <div className="px-box">
@@ -558,51 +962,136 @@ export function StationHub() {
           {gs.equippedWeapon && <> · <span className="t-orange">{gs.equippedWeapon.name}</span></>}
           {gs.equippedArmor  && <> · <span style={{ color: 'var(--blue)' }}>{gs.equippedArmor.name}</span></>}
         </div>
-      </div>
-
-      {/* Grille de menus */}
-      <div className="grid2">
-        <div className="px-box col" style={{ gap: '8px' }}>
-          <div className="t-xs t-dim mb4">◆ NAVIGATION</div>
-          <button className="px-btn" onClick={() => goTo('travel')} disabled={gs.fuel <= 0}>
-            Voyager{gs.fuel <= 0 ? ' (plus de carburant)' : ` — ${gs.fuel} carburant`}
-          </button>
-          <button className="px-btn" onClick={() => goTo('market')}>
-            Marché
-          </button>
-          <button className="px-btn" onClick={() => goTo('ship-workshop')}>
-            Atelier vaisseau — {gs.shipHp}/{gs.shipMaxHp} PV
-          </button>
-        </div>
-
-        <div className="px-box col" style={{ gap: '8px' }}>
-          <div className="t-xs t-dim mb4">◆ ACTIONS ({gs.actionsToday}/3)</div>
-          <button className="px-btn" onClick={explore}>
-            Explorer la zone (profondeur {gs.zoneDepth + 1})
-          </button>
-          <button className="px-btn" onClick={wander}>
-            Traîner dans le coin
-          </button>
-          <button className="px-btn" onClick={lookForQuest}>
-            Chercher du travail / Rumeurs
-          </button>
-          <button className="px-btn" onClick={() => {
-            spendAction()
-            const weights: [number, number, number][] = [
-              [70, 22, 8],
-              [45, 40, 15],
-              [20, 50, 30],
-              [8,  32, 60],
-            ]
-            const [w1, w2, w3] = weights[station.danger]
-            const roll = Math.random() * 100
-            const tier: 1|2|3 = roll < w1 ? 1 : roll < w1 + w2 ? 2 : 3
-            startCombat(scaleEnemy(getEnemyByTier(tier), Math.floor(gs.day / 15)))
-          }}>
-            Chercher la bagarre
-          </button>
+        {/* Tracker Nexus permanent */}
+        <div className="row mt4" style={{ gap: '6px', alignItems: 'center' }}>
+          {[0, 1, 2, 3].map(i => {
+            const collected = (gs.nexusFragments ?? []).includes(i)
+            return (
+              <span key={i} style={{
+                fontSize: '16px',
+                color: collected ? 'var(--gold)' : 'var(--border)',
+                textShadow: collected ? '0 0 8px var(--gold)' : 'none',
+                transition: 'all 0.3s',
+              }}>◈</span>
+            )
+          })}
+          <span className="t-xs" style={{ color: (gs.nexusFragments?.length ?? 0) >= 4 ? 'var(--gold)' : 'var(--dim)' }}>
+            {gs.nexusFragments?.length ?? 0}/4 Nexus
+          </span>
         </div>
       </div>
+
+      {/* Alerte de station (world event) */}
+      {(() => {
+        const alert = gs.stationAlerts?.[gs.currentStation]
+        if (!alert) return null
+        const ALERT_CONFIG = {
+          siege:    { label: '⚔ ZONE DE SIÈGE', color: 'var(--red)',    bg: 'rgba(180,0,0,0.12)',    desc: 'Des combats font rage ici. Les sorties sont risquées, les marchés en désordre.' },
+          lockdown: { label: '🔒 VERROUILLAGE', color: 'var(--orange)', bg: 'rgba(180,90,0,0.12)',   desc: 'Autorités militaires en contrôle total. Certains services sont suspendus.' },
+          epidemic: { label: '☣ ÉPIDÉMIE',      color: 'var(--green)',  bg: 'rgba(0,120,0,0.10)',    desc: 'Un pathogène circule. Les échanges sont restreints, la quarantaine active.' },
+          festival: { label: '★ FESTIVAL',       color: 'var(--gold)',   bg: 'rgba(180,140,0,0.12)',  desc: 'La station est en fête. Marchandises de luxe en demande, ambiance détendue.' },
+        }
+        const cfg = ALERT_CONFIG[alert]
+        return (
+          <div className="px-box" style={{ borderColor: cfg.color, background: cfg.bg }}>
+            <div className="t-xs" style={{ color: cfg.color, letterSpacing: '1px' }}>{cfg.label}</div>
+            <div className="t-xs t-dim" style={{ marginTop: '4px' }}>{cfg.desc}</div>
+          </div>
+        )
+      })()}
+
+      {/* Avertissement faction hostile */}
+      {factionBlocked && (
+        <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(180,0,0,0.12)' }}>
+          <div className="t-xs" style={{ color: 'var(--red)', letterSpacing: '1px' }}>
+            ⚠ TERRITOIRE HOSTILE — {blockedFactionName?.toUpperCase()}
+          </div>
+          <div className="t-xs t-dim" style={{ marginTop: '4px' }}>
+            Cette faction te considère comme un ennemi. Les prix sont majorés de 30%, les quêtes et réparations te sont refusées.
+          </div>
+        </div>
+      )}
+
+      {/* Tutoriel progressif jour 1 — T8 */}
+      {(() => {
+        // Phase 0 : premier jour, aucune action → 3 boutons max
+        // Phase 1 : premier jour, 1 action → déverrouille traîner + voyager
+        // Phase 2+ : tout déverrouillé
+        const tutPhase = gs.day === 1
+          ? gs.actionsToday === 0 ? 0 : gs.actionsToday === 1 ? 1 : 2
+          : 3
+
+        const HINTS = [
+          { label: '① Commence ici', text: 'Cherche du travail pour une première quête, ou explore la zone pour trouver du butin. Le Marché te permet d\'acheter des armes et du carburant.' },
+          { label: '② Tu prends le rythme', text: 'Tu peux maintenant traîner dans le coin pour rencontrer des personnages — et voyager vers d\'autres stations pour tes quêtes.' },
+        ]
+        const hint = tutPhase < 2 ? HINTS[tutPhase] : null
+
+        return (
+          <>
+            {hint && (
+              <div className="px-box" style={{ borderColor: 'var(--cyan)', opacity: 0.9 }}>
+                <div className="t-xs t-cyan mb4">{hint.label}</div>
+                <div className="t-xs t-dim" style={{ lineHeight: '2.2' }}>{hint.text}</div>
+              </div>
+            )}
+
+            {/* Grille de menus */}
+            <div className="grid2">
+              <div className="px-box col" style={{ gap: '8px' }}>
+                <div className="section-header">◆ NAVIGATION</div>
+                {tutPhase >= 1 && (
+                  <button className="px-btn" onClick={() => goTo('travel')} disabled={gs.fuel <= 0}>
+                    Voyager{gs.fuel <= 0 ? ' (plus de carburant)' : ` — ${gs.fuel} carburant`}
+                  </button>
+                )}
+                {gs.fuel < 6 && !FUEL_STATIONS.has(gs.currentStation) && (
+                  <button className="px-btn px-btn--danger" onClick={() => { setFuelScavResult(null); setMode('fuel-scavenge') }}>
+                    {gs.fuel <= 0 ? '⚠ RÉSERVOIR À SEC — Chercher du carburant' : `⚠ Carburant critique (${gs.fuel}) — Chercher du carburant`}
+                  </button>
+                )}
+                <button className="px-btn" onClick={() => goTo('market')}>
+                  Marché
+                </button>
+                {tutPhase >= 2 && (
+                  <button className="px-btn" onClick={() => goTo('crafting')} style={{ borderColor: 'var(--orange)', color: 'var(--orange)' }}>
+                    ⚙ Atelier de fabrication
+                  </button>
+                )}
+                {tutPhase >= 2 && (
+                  <button className="px-btn" onClick={() => goTo('ship-workshop')}>
+                    Atelier vaisseau — {gs.shipHp}/{gs.shipMaxHp} PV
+                  </button>
+                )}
+              </div>
+
+              <div className="px-box col" style={{ gap: '8px' }}>
+                <div className="section-header">◆ ACTIONS <span style={{ color: gs.actionsToday >= 3 ? 'var(--red)' : 'var(--cyan)' }}>({gs.actionsToday}/3)</span></div>
+                <button className="px-btn" onClick={explore}>
+                  Explorer la zone (profondeur {gs.zoneDepth + 1})
+                </button>
+                {tutPhase >= 1 && (
+                  <button className="px-btn" onClick={wander}>
+                    Traîner dans le coin
+                  </button>
+                )}
+                <button className="px-btn" onClick={lookForQuest}
+                  disabled={factionBlocked}
+                  style={factionBlocked ? { opacity: 0.4, cursor: 'not-allowed' } : (gs.pendingChainQuests ?? []).length > 0 ? { borderColor: 'var(--gold)', color: 'var(--gold)' } : undefined}>
+                  Chercher du travail / Rumeurs
+                  {factionBlocked && <span className="t-xs" style={{ marginLeft: '8px', color: 'var(--red)' }}>REFUSÉ</span>}
+                  {!factionBlocked && (gs.pendingChainQuests ?? []).length > 0 && <span className="t-xs" style={{ marginLeft: '8px', color: 'var(--gold)' }}>📋 suite disponible</span>}
+                </button>
+                {tutPhase >= 1 && gs.activeQuests.length === 0 && gs.day <= 2 && (
+                  <div className="t-xs t-dim" style={{ opacity: 0.6, lineHeight: 2, marginTop: '4px' }}>
+                    ↑ Cherche d'abord du travail pour une quête, puis voyage vers ta destination.
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )
+      })()}
 
       {/* Événements spéciaux de station */}
       {stationEvts.length > 0 && (
@@ -618,26 +1107,236 @@ export function StationHub() {
         </div>
       )}
 
-      {/* PNJ local */}
-      {localNpc && (
-        <div className="px-box" style={{ borderColor: 'var(--cyan)' }}>
-          <div className="t-xs t-cyan mb4">PNJ LOCAL</div>
-          <div className="t-sm t-bright mb4">{localNpc.name}
-            <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>{localNpc.role}</span>
+      {/* ── SERVICE EXCLUSIF ──────────────────────────────────────────────── */}
+      {station.specialService && (() => {
+        const svc = station.specialService!
+        const SERVICE_LABELS: Record<string, string> = {
+          gambling:     'CASINO — SCOTTY GOLDEN NORTH',
+          implants:     'CLINIQUE IMPLANTS',
+          fuel_cheap:   `CARBURANT À PRIX RÉDUIT (-${Math.round((station.fuelDiscount ?? 0.35) * 100)}%)`,
+          weapon_forge: 'FORGE — AMÉLIORATION D\'ARME',
+          arena:        'ARÈNE — COMBAT VOLONTAIRE',
+          rest_bonus:   'REPOS COMPLET',
+        }
+        return (
+          <div className="px-box" style={{ borderColor: 'var(--gold)', background: 'rgba(30,20,0,0.3)' }}>
+            <div className="t-xs t-gold mb8" style={{ letterSpacing: '2px' }}>★ {SERVICE_LABELS[svc]}</div>
+
+            {/* GAMBLING */}
+            {svc === 'gambling' && (
+              specialResult
+                ? <div className="col gap4">
+                    <div className="t-xs" style={{ color: specialResult.includes('gagnes') ? 'var(--green)' : 'var(--red)', lineHeight: 2 }}>{specialResult}</div>
+                    <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => setSpecialResult(null)}>Rejouer</button>
+                  </div>
+                : <div className="col gap4">
+                    <div className="t-xs t-dim mb4" style={{ lineHeight: 2 }}>45% de chance de doubler la mise. La maison prend le reste.</div>
+                    <div className="row gap4">
+                      {([100, 500, 1000] as const).map(bet => (
+                        <button key={bet} className="px-btn" style={{ flex: 1, opacity: gs.credits < bet ? 0.4 : 1 }}
+                          disabled={gs.credits < bet}
+                          onClick={() => {
+                            const win = Math.random() < 0.45
+                            patch({ credits: win ? gs.credits + bet : gs.credits - bet })
+                            setSpecialResult(win
+                              ? `★ Tu gagnes ${bet.toLocaleString()} cr. La table était de ton côté ce soir.`
+                              : `Tu perds ${bet.toLocaleString()} cr. Le casino gagne toujours.`)
+                          }}>
+                          Miser {bet.toLocaleString()} cr
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+            )}
+
+            {/* IMPLANTS */}
+            {svc === 'implants' && (() => {
+              const bought = gs.implantsBought ?? []
+              const IMPLANTS = [
+                { id: 'hp',      label: 'Implant Vital (+25 PV max)',       cost: 800,  apply: (g: GameState): Partial<GameState> => ({ implantsBought: [...(g.implantsBought ?? []), 'hp'],      playerMaxHp: g.playerMaxHp + 25, playerHp: g.playerMaxHp + 25 }) },
+                { id: 'stamina', label: 'Implant Neural (+2 Stamina max)',  cost: 600,  apply: (g: GameState): Partial<GameState> => ({ implantsBought: [...(g.implantsBought ?? []), 'stamina'], maxStamina: g.maxStamina + 2,    stamina: g.maxStamina + 2 }) },
+                { id: 'regen',   label: 'Implant Regen (5 kits médicaux)', cost: 500,  apply: (g: GameState): Partial<GameState> => ({ implantsBought: [...(g.implantsBought ?? []), 'regen'],   cargo: { ...g.cargo, 'Kit médical': (g.cargo['Kit médical'] ?? 0) + 5 } }) },
+              ]
+              return (
+                <div className="col gap4">
+                  {specialResult && <div className="t-xs t-green mb4">{specialResult}</div>}
+                  {IMPLANTS.map(imp => {
+                    const alreadyBought = bought.includes(imp.id)
+                    const canAfford = gs.credits >= imp.cost
+                    return (
+                      <button key={imp.id} className="px-btn"
+                        style={{ opacity: alreadyBought || !canAfford ? 0.4 : 1, color: alreadyBought ? undefined : 'var(--cyan)', borderColor: alreadyBought ? undefined : 'var(--cyan)' }}
+                        disabled={alreadyBought || !canAfford}
+                        onClick={() => {
+                          patch({ ...imp.apply(gs), credits: gs.credits - imp.cost })
+                          setSpecialResult(`Implant posé avec succès — ${imp.label}`)
+                        }}>
+                        {imp.label}
+                        <span className="t-dim" style={{ marginLeft: '8px', fontSize: '9px' }}>
+                          {alreadyBought ? '(déjà installé ce run)' : `${imp.cost.toLocaleString()} cr`}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )
+            })()}
+
+            {/* FUEL CHEAP */}
+            {svc === 'fuel_cheap' && (() => {
+              const basePrice = 240
+              const disc = station.fuelDiscount ?? 0.35
+              const price = Math.floor(basePrice * (1 - disc))
+              const missing = gs.maxFuel - gs.fuel
+              return specialResult
+                ? <div className="t-xs t-green">{specialResult}</div>
+                : <div className="col gap4">
+                    <div className="t-xs t-dim mb4" style={{ lineHeight: 2 }}>
+                      Carburant directement de la source — <span style={{ color: 'var(--green)' }}>{price} cr/u</span>
+                      <span className="t-dim" style={{ marginLeft: '6px', textDecoration: 'line-through', fontSize: '9px' }}>{basePrice} cr</span>
+                    </div>
+                    {missing === 0
+                      ? <div className="t-xs t-dim">Réservoir déjà plein.</div>
+                      : [1, 2, 3].filter(n => n <= missing).map(qty => (
+                          <button key={qty} className="px-btn"
+                            style={{ opacity: gs.credits < price * qty ? 0.4 : 1, color: 'var(--green)', borderColor: 'var(--green)' }}
+                            disabled={gs.credits < price * qty}
+                            onClick={() => {
+                              patch({ credits: gs.credits - price * qty, fuel: gs.fuel + qty })
+                              setSpecialResult(`+${qty} carburant — -${(price * qty).toLocaleString()} cr (prix réduit)`)
+                            }}>
+                            Acheter {qty}u — {(price * qty).toLocaleString()} cr
+                          </button>
+                        ))
+                    }
+                  </div>
+            })()}
+
+            {/* WEAPON FORGE */}
+            {svc === 'weapon_forge' && (() => {
+              const w = gs.equippedWeapon
+              if (!w) return <div className="t-xs t-dim">Équipe une arme pour la faire améliorer ici.</div>
+              const alreadyUpgraded = w.name.includes('[+]')
+              const cost = w.tier <= 2 ? 500 : 1200
+              const canAfford = gs.credits >= cost
+              return specialResult
+                ? <div className="t-xs t-green">{specialResult}</div>
+                : <div className="col gap4">
+                    <div className="t-xs t-dim mb4" style={{ lineHeight: 2 }}>
+                      Arme équipée : <span className="t-bright">{w.name}</span> · {w.damageMin}–{w.damageMax} dmg · Tier {w.tier}
+                    </div>
+                    <button className="px-btn"
+                      style={{ opacity: alreadyUpgraded || !canAfford ? 0.4 : 1, color: 'var(--orange)', borderColor: 'var(--orange)' }}
+                      disabled={alreadyUpgraded || !canAfford}
+                      onClick={() => {
+                        const upgraded: WeaponData = { ...w, name: w.name + ' [+]', damageMin: w.damageMin + 4, damageMax: w.damageMax + 6 }
+                        patch({ credits: gs.credits - cost, equippedWeapon: upgraded, weapons: gs.weapons.map(x => x === w ? upgraded : x) })
+                        setSpecialResult(`${w.name} forgée — +4 min, +6 max dégâts. (-${cost.toLocaleString()} cr)`)
+                      }}>
+                      ⚒ Améliorer {w.name} — {cost.toLocaleString()} cr
+                      {alreadyUpgraded && <span className="t-dim" style={{ marginLeft: '8px', fontSize: '9px' }}>(déjà améliorée)</span>}
+                    </button>
+                  </div>
+            })()}
+
+            {/* ARENA */}
+            {svc === 'arena' && (
+              specialResult
+                ? <div className="col gap4">
+                    <div className="t-xs t-green">{specialResult}</div>
+                    <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => setSpecialResult(null)}>Combattre encore</button>
+                  </div>
+                : <div className="col gap4">
+                    <div className="t-xs t-dim mb4" style={{ lineHeight: 2 }}>Combat volontaire. L'ennemi a un butin 2× la normale. La foule regarde.</div>
+                    {([
+                      { label: 'Qualification — Tier 1', tier: 1 as const, note: 'Adversaire débutant, butin de base doublé' },
+                      { label: 'Prestige — Tier 2',      tier: 2 as const, note: 'Adversaire confirmé, butin moyen doublé' },
+                      { label: 'Championnat — Tier 3',   tier: 3 as const, note: 'Champion, butin élevé doublé' },
+                    ]).map(f => (
+                      <button key={f.tier} className="px-btn"
+                        style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+                        onClick={() => {
+                          spendAction()
+                          const base = getEnemyByTier(f.tier)
+                          startCombat({ ...base, lootMin: base.lootMin * 2, lootMax: base.lootMax * 2, description: `[ARÈNE] ${base.description}` })
+                        }}>
+                        ⚔ {f.label}
+                        <span className="t-dim" style={{ marginLeft: '8px', fontSize: '9px' }}>{f.note}</span>
+                      </button>
+                    ))}
+                  </div>
+            )}
+
+            {/* REST BONUS */}
+            {svc === 'rest_bonus' && (() => {
+              const usedFree  = (gs.usedFreeRestStations ?? []).includes(gs.currentStation)
+              const cost      = usedFree ? 200 : 0
+              const alreadyFull = gs.playerHp >= gs.playerMaxHp && gs.stamina >= gs.maxStamina
+              return specialResult
+                ? <div className="t-xs t-green">{specialResult}</div>
+                : factionBlocked
+                ? <div className="t-xs" style={{ color: 'var(--red)', opacity: 0.7 }}>★ Se reposer — <span style={{ color: 'var(--red)' }}>ACCÈS REFUSÉ</span></div>
+                : <div className="col gap4">
+                    <div className="t-xs t-dim mb4" style={{ lineHeight: 2 }}>
+                      {usedFree
+                        ? `Repos payant — HP et Stamina à fond pour ${cost} cr.`
+                        : 'Premier repos gratuit ici. HP et Stamina à fond.'}
+                    </div>
+                    <button className="px-btn"
+                      style={{ opacity: alreadyFull || (usedFree && gs.credits < cost) ? 0.4 : 1, color: 'var(--green)', borderColor: 'var(--green)' }}
+                      disabled={alreadyFull || (usedFree && gs.credits < cost)}
+                      onClick={() => {
+                        patch({
+                          playerHp: gs.playerMaxHp,
+                          stamina: gs.maxStamina,
+                          credits: usedFree ? gs.credits - cost : gs.credits,
+                          usedFreeRestStations: usedFree
+                            ? gs.usedFreeRestStations
+                            : [...(gs.usedFreeRestStations ?? []), gs.currentStation],
+                        })
+                        setSpecialResult(`Repos complet. HP ${gs.playerMaxHp}/${gs.playerMaxHp} · Stamina ${gs.maxStamina}/${gs.maxStamina}.${usedFree ? ` (-${cost} cr)` : ' (gratuit)'}`)
+                      }}>
+                      ★ Se reposer{cost > 0 ? ` (${cost} cr)` : ' (gratuit)'}
+                    </button>
+                    {alreadyFull && <div className="t-xs t-dim">Tu es déjà au maximum.</div>}
+                  </div>
+            })()}
           </div>
-          <div className="t-xs t-dim mb8">{localNpc.description}</div>
-          <button className="px-btn px-btn--sm" onClick={() => {
-            setNpcDialogResult(null)
-            setMode('npc-encounter')
-          }}>
-            › Parler à {localNpc.name}
-          </button>
-        </div>
-      )}
+        )
+      })()}
+
+      {/* PNJ local */}
+      {localNpc && (() => {
+        const svc = getNpcService(localNpc.role)
+        const npcState = gs.knownNpcs[localNpc.id]
+        const serviceUsed = (npcState?.lastServiceDay ?? -1) === gs.day
+        return (
+          <div className="px-box" style={{ borderColor: 'var(--cyan)' }}>
+            <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <div>
+                <span className="t-sm t-bright">{localNpc.name}</span>
+                <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>{localNpc.role}</span>
+              </div>
+              {svc && (
+                <span className="t-xs" style={{ color: serviceUsed ? 'var(--text-dim)' : 'var(--cyan)', opacity: serviceUsed ? 0.5 : 1 }}>
+                  {svc.label} — {svc.costText}
+                </span>
+              )}
+            </div>
+            <div className="t-xs t-dim mb8">{localNpc.description}</div>
+            <button className="px-btn px-btn--sm" onClick={() => {
+              setNpcDialogResult(null)
+              setMode('npc-encounter')
+            }}>
+              › {svc ? `Voir ${localNpc.name}` : `Parler à ${localNpc.name}`}
+            </button>
+          </div>
+        )
+      })()}
 
       <div className="grid2">
         <div className="col">
-          <div className="t-xs t-dim">INVENTAIRE</div>
+          <div className="section-header">◆ INVENTAIRE</div>
           <button className="px-btn" onClick={() => goTo('inventory')} disabled={gs.weapons.length === 0 && gs.armors.length === 0}>
             Armes & Armures ({gs.weapons.length} / {gs.armors.length})
           </button>
@@ -651,15 +1350,108 @@ export function StationHub() {
               Se soigner +30 PV (Médicaments ×{gs.cargo['Médicaments']})
             </button>
           )}
+          {(gs.cargo['Kit médical'] ?? 0) > 0 && gs.playerHp < gs.playerMaxHp && (
+            <button className="px-btn" style={{ borderColor: 'var(--green)', color: 'var(--green)' }} onClick={() => {
+              const qty = (gs.cargo['Kit médical'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Kit médical': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Kit médical']
+              patch({ playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 30), cargo: nc })
+            }}>
+              ⚙ Kit médical +30 PV (×{gs.cargo['Kit médical']})
+            </button>
+          )}
+          {(gs.cargo['Kit médical premium'] ?? 0) > 0 && (gs.playerHp < gs.playerMaxHp || gs.stamina < gs.maxStamina) && (
+            <button className="px-btn" style={{ borderColor: 'var(--green)', color: 'var(--green)' }} onClick={() => {
+              const qty = (gs.cargo['Kit médical premium'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Kit médical premium': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Kit médical premium']
+              patch({ playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 60), stamina: Math.min(gs.maxStamina, gs.stamina + 2), cargo: nc })
+            }}>
+              ⚙ Kit premium +60 PV +2 Stamina (×{gs.cargo['Kit médical premium']})
+            </button>
+          )}
+          {(gs.cargo['Stimulant'] ?? 0) > 0 && gs.stamina < gs.maxStamina && (
+            <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }} onClick={() => {
+              const qty = (gs.cargo['Stimulant'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Stimulant': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Stimulant']
+              patch({ stamina: Math.min(gs.maxStamina, gs.stamina + 3), cargo: nc })
+            }}>
+              ⚙ Stimulant +3 Stamina (×{gs.cargo['Stimulant']})
+            </button>
+          )}
+          {/* Pièces techniques / Pièces de rechange → réparation vaisseau */}
+          {(() => {
+            const REPAIR = ['Pièces techniques', 'Pièces de rechange']
+            const key = REPAIR.find(k => (gs.cargo[k] ?? 0) > 0)
+            if (!key || gs.shipHp >= gs.shipMaxHp) return null
+            return (
+              <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }} onClick={() => {
+                const qty = (gs.cargo[key] ?? 1) - 1
+                const nc = { ...gs.cargo, [key]: qty }
+                if (qty <= 0) delete (nc as Record<string,number>)[key]
+                patch({ shipHp: Math.min(gs.shipMaxHp, gs.shipHp + 5), cargo: nc })
+              }}>
+                🔧 {key} → réparer vaisseau +5 PV ({gs.shipHp}/{gs.shipMaxHp}) · ×{gs.cargo[key]}
+              </button>
+            )
+          })()}
+          {/* Implants (cargo) → bonus HP max permanent */}
+          {(gs.cargo['Implants'] ?? 0) > 0 && (
+            <button className="px-btn" style={{ borderColor: 'var(--purple)', color: 'var(--purple)' }} onClick={() => {
+              const qty = (gs.cargo['Implants'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Implants': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Implants']
+              patch({ playerMaxHp: gs.playerMaxHp + 15, playerHp: Math.min(gs.playerMaxHp + 15, gs.playerHp + 10), cargo: nc })
+            }}>
+              ⬆ Implant posé → +15 PV max permanent (+10 PV actuels) · ×{gs.cargo['Implants']}
+            </button>
+          )}
+          {/* Logiciels → effacer le contrôle douanier du jour */}
+          {(gs.cargo['Logiciels'] ?? 0) > 0 && station.type === 'military' && (
+            <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }} onClick={() => {
+              const qty = (gs.cargo['Logiciels'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Logiciels': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Logiciels']
+              sessionStorage.setItem(`customs_${gs.currentStation}_${gs.day}`, '1')
+              patch({ cargo: nc, pendingMessage: '◆ Logiciels : scan douanier effacé pour aujourd\'hui.' })
+            }}>
+              💾 Logiciels → effacer scan douanier · ×{gs.cargo['Logiciels']}
+            </button>
+          )}
+          {/* Or → pot-de-vin reputation */}
+          {(gs.cargo['Or'] ?? 0) > 0 && (
+            <button className="px-btn" style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }} onClick={() => {
+              const qty = (gs.cargo['Or'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Or': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Or']
+              patch({ cargo: nc, reputation: gs.reputation + 15, pendingMessage: '◆ Or distribué. +15 réputation.' })
+            }}>
+              ★ Distribuer de l'Or → +15 réputation · ×{gs.cargo['Or']}
+            </button>
+          )}
         </div>
 
         <div className="col">
-          <div className="t-xs t-dim">PROGRESSION</div>
+          <div className="section-header">◆ PROGRESSION</div>
           <button className="px-btn" onClick={() => goTo('quests')} disabled={gs.activeQuests.length === 0}>
             Quêtes ({gs.activeQuests.length})
           </button>
           <button className="px-btn" onClick={() => goTo('objectives')}>
             Objectifs ({gs.completedObjectives.length}/{OBJECTIVES.length})
+          </button>
+          <div className="px-box" style={{ borderColor: 'var(--purple)', padding: '8px 12px', background: 'rgba(80,0,120,0.1)' }}>
+            <div className="t-xs" style={{ color: 'var(--purple)' }}>
+              ★★ Fragments Nexus : <span className="t-bright">{gs.stationPiecesRallied} / 4</span>
+            </div>
+          </div>
+          <button className="px-btn" style={{ borderColor: 'var(--text-dim)', color: (gs.discoveredLore ?? []).length > 0 ? 'var(--cyan)' : 'var(--text-dim)' }}
+            onClick={() => goTo('lore')}>
+            Mémoire du Vide {(gs.discoveredLore ?? []).length > 0 ? `(${gs.discoveredLore.length} fragments)` : '— aucun fragment'}
+          </button>
+          <button className="px-btn" style={{ borderColor: 'var(--text-dim)', color: (gs.journal ?? []).length > 0 ? 'var(--orange)' : 'var(--text-dim)' }}
+            onClick={() => goTo('journal')}>
+            Journal de bord {(gs.journal ?? []).length > 0 ? `(${gs.journal.length} entrée${gs.journal.length > 1 ? 's' : ''})` : '— vide'}
           </button>
           <button className="px-btn" onClick={() => goTo('factions')}>
             Factions {gs.faction !== 'none' ? `[${gs.faction.toUpperCase()}]` : ''}
@@ -688,16 +1480,75 @@ export function StationHub() {
       {gs.activeQuests.length > 0 && (
         <div className="px-box">
           <div className="t-xs t-dim mb4">QUÊTES EN COURS</div>
-          {gs.activeQuests.slice(0, 3).map(q => (
-            <div key={q.id} className="t-xs" style={{ lineHeight: '1.8' }}>
-              <span className={`tag t-xs ${q.type === 'kill' ? 'tag--red' : 'tag--cyan'}`} style={{ marginRight: '8px' }}>
-                {q.type.toUpperCase()}
-              </span>
-              {q.title} → <span className="t-dim">{q.targetStation}</span>
-              {q.targetStation === gs.currentStation && <span className="t-gold"> ← ICI</span>}
-            </div>
-          ))}
+          {gs.activeQuests.slice(0, 3).map(q => {
+            // Vérifier si la quête est livrable manuellement ici
+            const isDeliveryReady = q.targetStation === gs.currentStation
+              && q.type === 'delivery' && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0
+            const isHeistReady = q.targetStation === gs.currentStation
+              && q.type === 'heist' && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0
+            const canDeliver = isDeliveryReady || isHeistReady
+
+            const isPatrolHere = q.type === 'patrol' && q.targetStation === gs.currentStation
+            const patrolProgress = q.progress ?? 0
+            const patrolDone = patrolProgress >= 3
+
+            return (
+              <div key={q.id} className="t-xs" style={{ marginBottom: canDeliver || isPatrolHere ? '10px' : '0', lineHeight: '1.8' }}>
+                <div>
+                  <span className={`tag t-xs ${q.type === 'kill' ? 'tag--red' : q.type === 'patrol' ? 'tag--dim' : canDeliver ? 'tag--green' : 'tag--cyan'}`} style={{ marginRight: '8px' }}>
+                    {q.type.toUpperCase()}
+                  </span>
+                  {q.title} → <span className="t-dim">{q.targetStation}</span>
+                  {q.targetStation === gs.currentStation && !canDeliver && !isPatrolHere && <span className="t-gold"> ← ICI</span>}
+                </div>
+                {canDeliver && (
+                  <button
+                    className="px-btn px-btn--sm"
+                    style={{ width: 'auto', marginTop: '4px', color: 'var(--green)', borderColor: 'var(--green)' }}
+                    onClick={() => { setPendingDeliveryQuest(q); setDeliveryResult(null); setMode('delivery-event') }}
+                  >
+                    ▶ Livrer en main propre — {q.targetItem}
+                  </button>
+                )}
+                {isPatrolHere && !patrolDone && (
+                  <div className="t-xs t-dim" style={{ marginTop: '4px', borderLeft: '2px solid var(--cyan)', paddingLeft: '8px' }}>
+                    Patrouille en cours : {patrolProgress}/3 — utilise <span className="t-cyan">Explorer</span> ou <span className="t-cyan">Traîner</span> sur cette station
+                  </div>
+                )}
+                {isPatrolHere && patrolDone && (
+                  <button
+                    className="px-btn px-btn--sm"
+                    style={{ width: 'auto', marginTop: '4px', color: 'var(--gold)', borderColor: 'var(--gold)' }}
+                    onClick={() => manualCompleteQuest(q.id)}
+                  >
+                    ★ Terminer la patrouille — rapport accompli
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
+      )}
+
+      {/* Recommencer */}
+      {confirmRestart ? (
+        <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(40,0,0,0.3)' }}>
+          <div className="t-xs t-red mb8">Abandonner cette run ? Toute progression sera perdue.</div>
+          <div className="row gap4">
+            <button className="px-btn px-btn--danger" style={{ flex: 1 }}
+              onClick={() => useGameStore.getState().newGame()}>
+              Confirmer — Nouvelle run
+            </button>
+            <button className="px-btn" style={{ flex: 1 }} onClick={() => setConfirmRestart(false)}>
+              Annuler
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="px-btn" style={{ color: 'var(--red)', borderColor: 'var(--red)' }}
+          onClick={() => setConfirmRestart(true)}>
+          Abandonner la run
+        </button>
       )}
     </div>
   )

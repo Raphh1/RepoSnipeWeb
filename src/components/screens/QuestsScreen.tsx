@@ -1,5 +1,6 @@
 import { useGameStore } from '../../store/gameStore'
 import { NAMED_NPCS } from '../../engine/npcTracker'
+import { getStationsSellingItem } from '../../data/stations'
 import type { MajorQuestCondition } from '../../types'
 
 function stageDestination(cond: MajorQuestCondition): string | null {
@@ -17,7 +18,6 @@ const TYPE_LABEL: Record<string, string> = {
   delivery:   'LIVRAISON',
   kill:       'CONTRAT',
   revenge:    'VENGEANCE',
-  info:       'RECO',
   escort:     'ESCORTE',
   sabotage:   'SABOTAGE',
   heist:      'BRAQUAGE',
@@ -30,7 +30,6 @@ const TYPE_CLASS: Record<string, string> = {
   delivery:   'tag--cyan',
   kill:       'tag--red',
   revenge:    'tag--orange',
-  info:       'tag--dim',
   escort:     'tag--green',
   sabotage:   'tag--red',
   heist:      'tag--purple',
@@ -43,7 +42,6 @@ const TYPE_COMPLETE_HINT: Record<string, string> = {
   delivery:   'Arriver à destination avec l\'item en cargo',
   kill:       'Vaincre le boss à destination',
   revenge:    'Gagner un combat à destination',
-  info:       'Arriver à destination',
   escort:     'Arriver à destination avec le passager',
   sabotage:   'Gagner un combat à destination',
   heist:      'Arriver à destination avec l\'item acquis sur place',
@@ -61,6 +59,9 @@ export function QuestsScreen() {
       <div className="row" style={{ alignItems: 'center', gap: '16px' }}>
         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
         <div className="t-sm t-bright">QUÊTES ACTIVES ({gs.activeQuests.length}/5)</div>
+        {gs.majorQuests.filter(q => !q.completed && !q.failed).length > 0 && (
+          <div className="tag tag--purple t-xs">{gs.majorQuests.filter(q => !q.completed && !q.failed).length} mission{gs.majorQuests.filter(q => !q.completed && !q.failed).length > 1 ? 's' : ''} majeure{gs.majorQuests.filter(q => !q.completed && !q.failed).length > 1 ? 's' : ''}</div>
+        )}
         <div className="t-xs t-dim">{gs.completedQuestIds.length} complétées</div>
       </div>
 
@@ -186,30 +187,51 @@ export function QuestsScreen() {
                 <div className="t-dim" style={{ fontStyle: 'italic', fontSize: '7px' }}>
                   {TYPE_COMPLETE_HINT[q.type]}
                 </div>
-                {q.targetItem && q.type !== 'extraction' && (
-                  <div>
-                    Item requis : <span className="t-orange">{q.targetItem}</span>
-                    {' '}
-                    {hasItem
-                      ? <span className="t-green">(en cargo)</span>
-                      : q.type === 'escort'
-                        ? hasPassenger ? <span className="t-green">(passager à bord)</span> : <span className="t-red">(passager non embarqué)</span>
-                        : <span className="t-red">(à acquérir)</span>
-                    }
-                  </div>
-                )}
-                {q.type === 'extraction' && q.targetItem && (
-                  <div>
-                    À récupérer : <span className="t-orange">{q.targetItem}</span>
-                    {' '}
-                    {hasItem ? <span className="t-green">(en cargo)</span> : <span className="t-dim">(pas encore récupéré)</span>}
-                  </div>
-                )}
+                {q.targetItem && q.type !== 'extraction' && (() => {
+                  const sellers = !hasItem && q.type !== 'escort' ? getStationsSellingItem(q.targetItem!) : []
+                  return (
+                    <div>
+                      Item requis : <span className="t-orange">{q.targetItem}</span>
+                      {' '}
+                      {hasItem
+                        ? <span className="t-green">(en cargo)</span>
+                        : q.type === 'escort'
+                          ? hasPassenger ? <span className="t-green">(passager à bord)</span> : <span className="t-red">(passager non embarqué)</span>
+                          : <span className="t-red">(à acquérir)</span>
+                      }
+                      {sellers.length > 0 && (
+                        <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
+                          ◆ Achetable à : {sellers.slice(0, 4).join(', ')}{sellers.length > 4 ? '…' : ''}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
+                {q.type === 'extraction' && q.targetItem && (() => {
+                  const sellers = !hasItem ? getStationsSellingItem(q.targetItem!) : []
+                  return (
+                    <div>
+                      À récupérer : <span className="t-orange">{q.targetItem}</span>
+                      {' '}
+                      {hasItem ? <span className="t-green">(en cargo)</span> : <span className="t-dim">(pas encore récupéré)</span>}
+                      {sellers.length > 0 && !hasItem && (
+                        <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
+                          ◆ Achetable à : {sellers.slice(0, 4).join(', ')}{sellers.length > 4 ? '…' : ''}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
 
               <div className="t-xs t-gold mt8">
                 Récompense : {q.creditReward.toLocaleString()} cr
                 {q.repReward > 0 ? ` · +${q.repReward} rép` : q.repReward < 0 ? ` · ${q.repReward} rép` : ''}
+                {(q.dayMult ?? 1) >= 1.1 && (
+                  <span style={{ color: 'var(--orange)', marginLeft: '8px', fontStyle: 'normal' }}>
+                    ×{(q.dayMult ?? 1).toFixed(1)}
+                  </span>
+                )}
               </div>
             </div>
           )

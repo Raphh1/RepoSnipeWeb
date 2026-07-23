@@ -59,6 +59,38 @@
         { "label": "Accepter sans savoir ce que c'est", "flavor": "L'information est bonne. La faveur arrivera à un moment inconvenant. C'est le deal.", "outcome": "credits_medium+rep_minus_tiny" },
         { "label": "Refuser — les dettes floues sont des pièges", "flavor": "Il hausse les épaules. 'T'as peut-être raison.'", "outcome": "rep_tiny" }
       ]
+    },
+    {
+      "setup": "Un réfugié de la dernière purge te tend une photo d'une station que tu ne reconnais pas. 'Elle existait encore il y a trois mois.' Il ne cherche pas la pitié. Il cherche quelqu'un qui s'en souvient.",
+      "choices": [
+        { "label": "Écouter son histoire", "flavor": "Il parle longtemps. Ce qu'il décrit ne ressemble à rien dans les bases de données officielles. Il te donne quelque chose en échange de ton attention.", "outcome": "credits_small+rep_small" },
+        { "label": "Lui donner des crédits sans écouter", "flavor": "Il prend l'argent. Il te regarde partir avec quelque chose entre le soulagement et la déception.", "outcome": "lose_credits_small+rep_small" },
+        { "label": "Passer — tu n'as pas le temps pour les histoires des autres", "flavor": "Il garde la photo dans sa main. Il attend quelqu'un d'autre.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Un technicien indépendant a installé son atelier dans un coin de couloir. 'Révision rapide, prix honnête, qualité correcte.' Il a l'air de savoir ce qu'il fait. À peu près.",
+      "choices": [
+        { "label": "Le laisser faire (révision complète)", "flavor": "Vingt minutes plus tard, tout fonctionne mieux qu'avant. Des endroits que tu avais oubliés.", "outcome": "stamina_full+lose_credits_small" },
+        { "label": "Négocier le prix à la baisse", "flavor": "Il accepte la moitié. Le travail est à moitié fait. Il est honnête sur ce point.", "outcome": "stamina_small+lose_credits_tiny" },
+        { "label": "Refuser poliment", "flavor": "Il hausse les épaules. 'Reviens quand ça cassera.'", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Un drone de livraison commercial bug devant toi. Son compartiment s'ouvre et la cargaison commence à glisser vers le sol.",
+      "choices": [
+        { "label": "Ramasser ce qui tombe", "flavor": "Composants, rations, un article non identifié. Le drone repart comme si de rien n'était.", "outcome": "item_common+rep_minus_tiny" },
+        { "label": "Signaler l'incident à l'opérateur de station", "flavor": "Il te remercie officiellement. Ce geste circule dans les cercles qui apprécient les gens fiables.", "outcome": "rep_small" },
+        { "label": "Photographier la scène et continuer", "flavor": "La preuve que les drones de la compagnie sont défaillants. Quelqu'un paiera pour ça.", "outcome": "credits_tiny" }
+      ]
+    },
+    {
+      "setup": "Un gamin d'une dizaine d'années joue seul avec des cartes magnétiques en récitant des probabilités à voix haute. Il sait exactement ce qu'il fait.",
+      "choices": [
+        { "label": "Jouer une manche avec lui", "flavor": "Il t'enseigne un système de calcul que tu n'avais pas vu. Tu perds. Ça vaut le coup.", "outcome": "rep_small+stamina_small" },
+        { "label": "Lui demander où il a appris ça", "flavor": "Son père était mathématicien de trajectoires. Il t'indique ensuite un raccourci que les navettes commerciales utilisent.", "outcome": "credits_small" },
+        { "label": "Continuer ton chemin", "flavor": "Il ne lève pas les yeux. Il comptait déjà sur le fait que tu passais.", "outcome": "nothing" }
+      ]
     }
   ],
   "mid": [
@@ -109,6 +141,70 @@
         { "label": "Rester pour regarder", "flavor": "Le duel a lieu. Le vainqueur est généreux dans sa victoire. Il partage quelque chose avec les témoins.", "outcome": "credits_small+rep_tiny" },
         { "label": "Partir avant que ça commence", "flavor": "Les duels impliquent parfois des innocents proches. Partir est une précaution raisonnable.", "outcome": "rep_tiny" }
       ]
+    },
+    {
+      "setup": "Un médecin de bord reconverti vend des augmentations dans un couloir discret. 'Rien d'illégal, techniquement.' Ses mains sont propres. Son sourire, moins.",
+      "choices": [
+        { "label": "Acheter un module de stabilisation", "flavor": "L'installation est rapide, approximativement propre. Ça tient. Pour l'instant.", "outcome": "stamina_full+item_rare+lose_credits_medium" },
+        { "label": "Lui acheter des médicaments à la place", "flavor": "Moins risqué. Fiabilité inconnue. Prix raisonnable pour les zones où les pharmacies ne posent pas de questions.", "outcome": "item_common+lose_credits_small" },
+        { "label": "Passer — les médecins clandestins sont des pièges", "flavor": "Peut-être. Probablement sage dans cet endroit précis.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un type pressé te demande de surveiller un colis pendant une heure. 'Je reviens. Tu touches rien. T'as cent crédits.' Il est parti avant que tu puisses répondre.",
+      "choices": [
+        { "label": "Surveiller le colis honnêtement", "flavor": "Il revient exactement à l'heure. Il te donne le double. 'T'as pas ouvert.' Ce n'était pas une question.", "outcome": "credits_medium+rep_small" },
+        { "label": "Ouvrir discrètement le colis", "flavor": "Des données classifiées. Trois personnes en cherchent une copie. Tu en as maintenant une. Ça va se savoir.", "outcome": "item_rare+credits_small+rep_minus_small" },
+        { "label": "Partir — ce n'est pas ton problème", "flavor": "Le colis reste là. Quelqu'un d'autre le trouvera, ou pas.", "outcome": "rep_minus_tiny" }
+      ]
+    },
+    {
+      "setup": "Un informateur que deux factions paient simultanément te propose ses services. Il est visiblement très occupé et légèrement paniqué.",
+      "choices": [
+        { "label": "L'engager normalement", "flavor": "Il te donne ce qu'il a. Bonne information, partiellement vraie, soigneusement filtrée.", "outcome": "credits_medium+rep_tiny" },
+        { "label": "L'utiliser pour vendre de fausses informations à ses clients", "flavor": "Il joue le jeu avec enthousiasme. Les deux factions ont de fausses données. Tu as de l'argent.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Le dénoncer à l'une des deux factions", "flavor": "Ils apprécient. Sa carrière d'informateur prend fin. Tu es maintenant sur leur liste positive.", "outcome": "rep_medium+credits_small" }
+      ]
+    },
+    {
+      "setup": "Un recéleur connu de la zone vend à prix cassé — trop cassé. Il liquide tout. Quelqu'un arrive bientôt pour le trouver, et il sait que tu as compris.",
+      "choices": [
+        { "label": "Acheter rapidement avant que ça ferme", "flavor": "Prix honnête pour du matériel chaud. La qualité est là. La provenance est trouble.", "outcome": "item_rare+lose_credits_small" },
+        { "label": "L'avertir que tu as vu les gens qui arrivent", "flavor": "Il te regarde différemment. Il disparaît. Il t'a laissé quelque chose en remerciement.", "outcome": "credits_medium+rep_small" },
+        { "label": "Passer ton chemin", "flavor": "Tu ne t'en mêles pas. Ce qui s'est passé ensuite, tu ne le sais pas.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Un officier militaire en civil te surveille depuis un moment. Il est mauvais à ça. Sa posture le trahit.",
+      "choices": [
+        { "label": "L'approcher directement — 'Vous me suivez depuis trois couloirs.'", "flavor": "Il abandonne le jeu. Il veut te parler de quelqu'un que vous connaissez peut-être tous les deux.", "outcome": "rep_medium+credits_medium" },
+        { "label": "Lui échapper délibérément", "flavor": "Il perd ta trace. Il notera que tu étais difficile à suivre. Ce n'est pas un problème dans tous les contextes.", "outcome": "rep_small" },
+        { "label": "Continuer normalement et le laisser suivre", "flavor": "Il note tes routines. Ce qu'il en fait dépend de qui il est vraiment.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un prêteur t'approche avec une offre non sollicitée. 'J'ai vu ta situation. Je peux aider.' Il a l'air honnête. Les prêteurs honnêtes sont rares.",
+      "choices": [
+        { "label": "Refuser poliment", "flavor": "Il respecte le refus. Il te donne sa fréquence 'au cas où'. La pression viendra plus tard.", "outcome": "rep_tiny" },
+        { "label": "Prendre l'argent — les dettes maintenant valent mieux que la misère aujourd'hui", "flavor": "L'argent arrive vite. Les conditions arrivent avec lui. Ce n'était pas exactement ce qu'il avait dit.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Lui demander pourquoi il t'approche toi", "flavor": "Il a ses sources. Ce qu'il sait sur toi et pourquoi il pense que tu rembourseras — les deux sont instructifs.", "outcome": "rep_small" }
+      ]
+    },
+    {
+      "setup": "Un diplomate en mission civile est visiblement hors de son élément. Sa mission s'est mal passée. Il cherche quelqu'un à qui parler.",
+      "choices": [
+        { "label": "L'écouter — les diplomates en détresse sont des mines d'information", "flavor": "Il parle trop longtemps. Ce qu'il dit par inadvertance dépasse ce qu'il voulait partager. Utile.", "outcome": "credits_medium+rep_small" },
+        { "label": "Lui offrir une aide pratique", "flavor": "Il avait besoin de quelqu'un qui connaît la station. Ce que tu lui facilites te crée une obligation favorable.", "outcome": "rep_large+lose_credits_tiny" },
+        { "label": "Passer — les diplomates en difficulté créent des problèmes diplomatiques", "flavor": "Sage.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Une rumeur court sur un trésor récemment découvert dans la station — plusieurs versions circulent, toutes différentes.",
+      "choices": [
+        { "label": "Croiser les versions pour trouver le fond de vérité", "flavor": "La moitié des gens racontent ce qu'ils ont entendu. Un détail revient dans toutes les versions.", "outcome": "credits_medium+rep_small" },
+        { "label": "Chercher directement sans perdre de temps à écouter", "flavor": "Tu trouves quelque chose. Pas ce que la rumeur décrivait. Ça a quand même de la valeur.", "outcome": "item_rare+lose_hp_tiny" },
+        { "label": "Ignorer — les trésors en station sont toujours déjà pris", "flavor": "Probablement vrai. Probablement.", "outcome": "nothing" }
+      ]
     }
   ],
   "high": [
@@ -150,6 +246,63 @@
         { "label": "Traverser normalement en ignorant les marquages", "flavor": "Ils te laissent passer. Ta confiance ou ton inconscience t'ont protégé cette fois.", "outcome": "rep_small" },
         { "label": "Négocier verbalement l'accès", "flavor": "Ils apprécient qu'on demande. Tu passes avec une obligation informelle.", "outcome": "rep_medium+rep_minus_tiny" },
         { "label": "Contourner la zone", "flavor": "Plus long. Plus sûr. Parfois c'est le bon calcul.", "outcome": "lose_hp_tiny" }
+      ]
+    },
+    {
+      "setup": "Un commandant de faction que tu reconnais de réputation est seul à une table. Il t'a vu. Il n'a pas appelé ses hommes.",
+      "choices": [
+        { "label": "Aller lui parler directement", "flavor": "Il apprécie l'audace. La conversation est courte, précise, et te laisse avec quelque chose à quoi réfléchir.", "outcome": "rep_large+credits_medium" },
+        { "label": "Ignorer et passer ton chemin", "flavor": "Il note ton visage. Pas forcément mauvais signe — les gens qui ne cherchent pas les problèmes l'intéressent aussi.", "outcome": "rep_small" },
+        { "label": "L'observer depuis un endroit discret", "flavor": "Il attend quelqu'un. Quelqu'un n'arrive pas. Il repart avec une expression qui ne présage rien de bon pour quelqu'un.", "outcome": "credits_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un assassinat est en train de se préparer — tu l'as lu dans les détails, les angles, les positions. La cible ne sait pas encore.",
+      "choices": [
+        { "label": "Prévenir la cible discrètement", "flavor": "Elle est surprise. Elle s'en va sans te regarder. Plus tard tu reçois quelque chose par messager anonyme.", "outcome": "credits_large+rep_medium" },
+        { "label": "Prévenir les assassins que tu as vu", "flavor": "Ils évaluent si tu es un problème. Ils décident que tu ne l'es pas encore. Ils repartent. La cible n'est plus là non plus.", "outcome": "credits_medium+rep_minus_small" },
+        { "label": "Ne rien faire — ce n'est pas ton problème", "flavor": "Tu t'éloignes. Plus tard quelqu'un est mort. Ce n'est peut-être pas ce que tu penses.", "outcome": "nothing" },
+        { "label": "Contrecarrer l'assassinat directement", "flavor": "L'affrontement est bref. Les assassins s'en vont. La cible vit. Sa gratitude est réelle et mesurable.", "outcome": "combat_hard+rep_large+credits_medium" }
+      ]
+    },
+    {
+      "setup": "Un signal de fréquence inconnue émet depuis un endroit précis dans la station. Court, répétitif. Artificiel mais pas officiel.",
+      "choices": [
+        { "label": "Localiser la source du signal", "flavor": "Un émetteur artisanal dans une cloison. Ce qu'il transmet, à qui, et pourquoi — trois questions dont les réponses valent chacune quelque chose.", "outcome": "credits_large+item_rare" },
+        { "label": "Émettre une réponse sur la même fréquence", "flavor": "Le signal s'arrête. Dix minutes plus tard quelqu'un arrive à l'endroit où tu te tiens. Il a l'air surpris.", "outcome": "rep_medium+credits_medium" },
+        { "label": "Ignorer — les signaux parasites dans les stations n'ont pas d'auteur connu", "flavor": "Sage. Les signaux non identifiés et leurs auteurs peuvent être aussi dangereux que la curiosité qu'ils génèrent.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un chef de faction secondaire te contacte directement. 'J'ai un travail. Propre. Rapide. Une faveur en retour.' Il n'explique pas la faveur.",
+      "choices": [
+        { "label": "Accepter le travail sans poser de questions", "flavor": "Il apprécie la discrétion. Le travail est exactement ce qu'il avait dit. La faveur se révèle utile plus tard.", "outcome": "credits_large+rep_medium" },
+        { "label": "Négocier des détails avant d'accepter", "flavor": "Il répond à certaines questions. Pas toutes. Ce qu'il accepte de clarifier est rassurant. Ce qu'il évite, moins.", "outcome": "credits_medium+rep_small" },
+        { "label": "Refuser — les factions et leurs faveurs sont des engrenages", "flavor": "Il note le refus. Il ne t'en voudra pas cette fois. Il garde l'information pour plus tard.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un vide de pouvoir vient de se produire localement — quelqu'un de clé dans la zone a disparu ce matin. Tout le monde attend de voir ce qui va remplir le vide.",
+      "choices": [
+        { "label": "Te positionner rapidement comme contact neutre", "flavor": "Plusieurs parties te cherchent dans les heures qui suivent. La neutralité dans un vide de pouvoir est une marchandise rare.", "outcome": "rep_large+credits_medium" },
+        { "label": "Chercher à savoir pourquoi la personne a disparu", "flavor": "La réponse a de la valeur pour plusieurs factions. Ce que tu en fais te définira dans ce secteur.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Quitter la zone avant que ça se complique", "flavor": "Sage. Les vides de pouvoir attirent des gens qui règlent des comptes en passant.", "outcome": "stamina_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un avis de recherche te concernant est affiché dans la zone — pas officiel, pas de faction connue. Juste ton nom et une récompense.",
+      "choices": [
+        { "label": "Arracher l'avis rapidement", "flavor": "Deux personnes t'ont déjà vu. L'avis est parti. Les deux personnes sont encore là.", "outcome": "rep_minus_small+stamina_small" },
+        { "label": "Laisser l'avis et chercher qui l'a posé", "flavor": "La source est une faction que tu ne connais pas encore. Ce qu'ils veulent de toi n'est pas ce que l'avis indique.", "outcome": "rep_medium+credits_small" },
+        { "label": "Partir immédiatement de la zone", "flavor": "Prudent. La zone deviendra dangereuse dans les heures qui suivent.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Un message chiffré a été transmis sur ta fréquence. Le contenu est ambigu. Le contexte suggère qu'il ne t'était peut-être pas destiné.",
+      "choices": [
+        { "label": "Répondre au message", "flavor": "Quelqu'un à l'autre bout réalise l'erreur. Il évalue si tu es un problème. Il décide de t'expliquer de quoi il s'agit.", "outcome": "rep_medium+credits_medium" },
+        { "label": "Analyser le message pour comprendre le contexte", "flavor": "Ce qu'il contient est un fragment d'une opération plus large. Isolément il vaut quelque chose.", "outcome": "credits_large" },
+        { "label": "Effacer le message et ignorer", "flavor": "Tu n'as rien reçu. Personne ne peut prouver le contraire.", "outcome": "rep_tiny" }
       ]
     }
   ],
@@ -212,6 +365,38 @@
       ]
     },
     {
+      "setup": "Un automate de service obsolète tourne encore dans un couloir de transit. Il distribue des boissons reconstituées que personne ne commande plus.",
+      "choices": [
+        { "label": "Commander quelque chose", "flavor": "Il produit quelque chose de chaud. Reconstitué à 90%. Mais chaud. Il t'adresse un signal de remerciement qui n'est peut-être que du code résiduel.", "outcome": "stamina_small+lose_credits_tiny" },
+        { "label": "Examiner l'automate de près", "flavor": "Son compartiment de gestion est ouvert depuis des semaines. Ce qu'il contient encore a de la valeur.", "outcome": "item_common+credits_tiny" },
+        { "label": "Passer sans t'arrêter", "flavor": "Il enregistre ton passage quand même. Ça lui donne quelque chose à faire.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Une lettre manuscrite traîne par terre dans un couloir fréquenté. Personne ne s'en est préoccupé.",
+      "choices": [
+        { "label": "La lire", "flavor": "Une demande d'aide. Une adresse. Une personne qui attendait que quelqu'un la lise.", "outcome": "rep_small+credits_tiny" },
+        { "label": "La ramasser et chercher le destinataire sur place", "flavor": "Il est dans le couloir d'à côté. Sa réaction en apprenant que tu as lu la lettre dépend de son contenu.", "outcome": "rep_medium" },
+        { "label": "La laisser", "flavor": "Quelqu'un d'autre la trouvera. Peut-être.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Un musicien chante dans une alcôve avec une voix qui ne correspond pas du tout à son apparence. Les gens passent sans s'arrêter.",
+      "choices": [
+        { "label": "T'arrêter pour écouter", "flavor": "Il chante une chanson de la Vieille Terre dont tu n'avais jamais entendu la version originale. Il te la laisse continuer longtemps.", "outcome": "stamina_full+rep_small" },
+        { "label": "Lui laisser des crédits", "flavor": "Il lève les yeux. Il ne dit pas merci. Il joue mieux après.", "outcome": "lose_credits_tiny+rep_small" },
+        { "label": "Lui parler entre deux morceaux", "flavor": "Il est plus intéressant que sa situation ne le suggère. Il connaît des gens et des endroits. Il t'en parle librement.", "outcome": "credits_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un couple se dispute à voix haute dans un couloir. Les passants détournent les yeux. Le ton monte.",
+      "choices": [
+        { "label": "Intervenir calmement pour désamorcer", "flavor": "Ils se retournent contre toi ensemble, ce qui finit par les faire rire. La dispute reprend plus doucement après ton départ.", "outcome": "rep_medium" },
+        { "label": "Rester à distance et attendre que ça se passe", "flavor": "Ça se résout sans toi. Certaines disputes n'ont pas besoin de public.", "outcome": "nothing" },
+        { "label": "Proposer ta médiation officieuse", "flavor": "L'un d'eux accepte. L'autre moins. Tu apprends quelque chose d'utile sur leur situation en essayant d'aider.", "outcome": "rep_small+credits_tiny" }
+      ]
+    },
+    {
       "setup": "Un marché de troc informel — les gens échangent des objets sans crédits.",
       "choices": [
         { "label": "Participer — proposer quelque chose", "flavor": "L'échange est honnête. Ce que tu obtiens en retour est différent mais équivalent.", "outcome": "item_common+item_rare" },
@@ -223,6 +408,42 @@
       "choices": [
         { "label": "Les emprunter", "flavor": "Plus rapide. Plus discret. Et tu croises des gens qui utilisent ces passages par nécessité — ce qui est instructif.", "outcome": "rep_small+credits_tiny" },
         { "label": "Rester sur les chemins officiels", "flavor": "Plus sûr. Tu sais exactement où les caméras sont.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un hologramme publicitaire défaillant projette des fragments d'une émission d'avant-guerre. Des visages qui ne correspondent à aucune époque actuelle.",
+      "choices": [
+        { "label": "Regarder les fragments jusqu'au bout", "flavor": "Un contexte culturel perdu. Une chanson. Un visage récurrent que tu n'identifies pas. Ça reste avec toi.", "outcome": "stamina_small+rep_tiny" },
+        { "label": "Signaler la panne technique", "flavor": "Un technicien arrive. Il te remercie distraitement. Il était au courant depuis deux semaines.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Une odeur que tu reconnais de quelque chose de précis dans ton passé traverse le couloir sans source apparente.",
+      "choices": [
+        { "label": "La suivre", "flavor": "Elle mène à une cuisine improvisée. Quelqu'un cuisine quelque chose de vrai dans une station où tout est reconstitué.", "outcome": "hp_small+stamina_small" },
+        { "label": "T'arrêter un moment", "flavor": "Le souvenir que ça convoque est net. Ça te donne quelque chose que le reste de la journée n'avait pas.", "outcome": "stamina_full" }
+      ]
+    },
+    {
+      "setup": "Un terminal public affiche un message laissé par quelqu'un à l'attention de 'celui qui passait là tous les matins'. Tu y passes.",
+      "choices": [
+        { "label": "Lire le message", "flavor": "Un adieu. Une dette remboursée à distance. Ce n'est pas pour toi mais ça compte quand même.", "outcome": "rep_small" },
+        { "label": "Effacer le message après l'avoir lu", "flavor": "Il a été lu. C'est tout ce qu'il demandait.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Un enfant te remet quelque chose sans explication et repart en courant. Un objet petit, fermé, non marqué.",
+      "choices": [
+        { "label": "Ouvrir l'objet immédiatement", "flavor": "Un message crypté, une petite chose de valeur, ou les deux. Quelqu'un te testait ou te faisait confiance.", "outcome": "item_rare+rep_small" },
+        { "label": "Courir après l'enfant pour lui rendre", "flavor": "Il était déjà loin. Il regardait si tu allais le faire. Il t'a vu courir. Il hoche la tête depuis le fond du couloir.", "outcome": "rep_medium" },
+        { "label": "Le mettre de côté et continuer", "flavor": "Tu l'ouvriras plus tard. Peut-être.", "outcome": "item_common" }
+      ]
+    },
+    {
+      "setup": "Un vieux soldat reconverti en gardien de sécurité civile te demande de l'aide pour quelque chose de trivial. Il n'a personne d'autre à qui demander.",
+      "choices": [
+        { "label": "Aider sans faire de cérémonie", "flavor": "Il est reconnaissant de façon directe. Il te montre quelque chose dans la station que personne d'autre ne t'aurait montré.", "outcome": "rep_medium+item_common" },
+        { "label": "Refuser poliment — tu n'as pas le temps", "flavor": "Il ne tient pas rigueur. Il trouve quelqu'un d'autre plus tard.", "outcome": "nothing" }
       ]
     }
   ]

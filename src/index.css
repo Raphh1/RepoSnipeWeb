@@ -55,14 +55,14 @@ html, body, #root {
   width: 100%;
   text-align: left;
   background: var(--bg-panel2);
-  border: 2px solid var(--border);
-  color: var(--text);
+  border: 2px solid var(--border-hi);
+  color: var(--text-bright);
   font-family: inherit;
   font-size: 10px;
   padding: 13px 18px;
   cursor: pointer;
   transition: none;
-  box-shadow: 2px 2px 0 var(--border);
+  box-shadow: 2px 2px 0 var(--border-hi);
   line-height: 1.8;
 }
 .px-btn:hover, .px-btn:focus {
@@ -181,3 +181,72 @@ html, body, #root {
 
 /* ── DIVIDER ── */
 .divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+
+/* ── SCREEN TRANSITION ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.screen-enter { animation: fadeIn 0.15s ease-out; }
+
+/* ── DAMAGE SHAKE ── */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-5px); }
+  40%       { transform: translateX(5px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(2px); }
+}
+.hp-damaged { animation: shake 0.35s ease-out; }
+
+/* ── HP BAR MEDIUM (30-60%) ── */
+.bar--hp.medium .bar__fill { background: var(--orange); }
+
+/* ── TIER TAGS ── */
+.tier-1 { color: var(--text-dim); border-color: var(--border); }
+.tier-2 { color: var(--blue);     border-color: #224488; }
+.tier-3 { color: var(--purple);   border-color: #602080; }
+.tier-4 { color: var(--gold);     border-color: #806020; }
+
+/* ── ZEBRA ROWS ── */
+.list-zebra > *:nth-child(odd) { background: rgba(255,255,255,0.025); }
+
+/* ── TOAST ── */
+@keyframes toastIn { from { opacity: 0; transform: translateX(-50%) translateY(12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9000;
+  background: var(--bg-panel2);
+  border: 2px solid var(--cyan);
+  box-shadow: 2px 2px 0 var(--cyan), 0 0 16px rgba(64,208,255,0.25);
+  padding: 10px 20px;
+  font-family: inherit;
+  font-size: 10px;
+  color: var(--text-bright);
+  max-width: 480px;
+  width: calc(100% - 40px);
+  text-align: center;
+  animation: toastIn 0.2s ease-out;
+  cursor: pointer;
+  line-height: 1.8;
+}
+
+/* ── COMBAT LOG GRADIENT ── */
+.combat-log-wrap { position: relative; }
+.combat-log-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 36px;
+  background: linear-gradient(transparent, var(--bg));
+  pointer-events: none;
+}
+
+/* ── SECTION HEADER IN HUB ── */
+.section-header {
+  font-size: 9px;
+  color: var(--text-dim);
+  border-left: 3px solid var(--border-hi);
+  padding-left: 8px;
+  margin-bottom: 4px;
+}

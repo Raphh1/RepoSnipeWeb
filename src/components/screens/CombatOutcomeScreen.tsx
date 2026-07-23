@@ -58,9 +58,9 @@ export function CombatOutcomeScreen() {
 
           <button className="px-btn" onClick={() => {
             patch({ pendingCombatOutcome: null, pendingMessage: null })
-            goTo('station-hub')
+            goTo(gs.isImprisoned ? 'prison' : 'station-hub')
           }}>
-            Se relever et continuer →
+            {gs.isImprisoned ? 'Retour en cellule →' : 'Se relever et continuer →'}
           </button>
         </div>
       </div>
@@ -180,9 +180,9 @@ export function CombatOutcomeScreen() {
 
           <button className="px-btn" onClick={() => {
             patch({ pendingCombatOutcome: null })
-            goTo('station-hub')
+            goTo(gs.isImprisoned ? 'prison' : 'station-hub')
           }}>
-            Continuer →
+            {gs.isImprisoned ? 'Retour en cellule →' : 'Continuer →'}
           </button>
         </div>
       </div>

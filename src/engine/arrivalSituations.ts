@@ -195,15 +195,12 @@ export const INTERROGATION: ArrivalSituation = {
   ]
 }
 
-export function getArrivalSituation(gs: GameState): ArrivalSituation | null {
-  // Probabilité d'une situation d'arrivée
-  if (Math.random() > 0.40) return null
+export function getArrivalSituation(gs: GameState, forced = false): ArrivalSituation | null {
+  if (!forced && Math.random() > 0.40) return null
 
-  // Situation spécifique par réputation
   const repSituation = getReputationArrival(gs)
-  if (repSituation && Math.random() < 0.5) return repSituation
+  if (repSituation && (forced || Math.random() < 0.5)) return repSituation
 
-  // Situation spécifique par station
   return STATION_ARRIVALS[gs.currentStation] ?? null
 }
 

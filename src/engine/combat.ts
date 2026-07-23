@@ -27,22 +27,57 @@ export function initCombat(enemy: Enemy): CombatState {
     enemyWeaponDisabledTurns: 0,
     lastPlayerDmg: 0,
     playerWeakenedTurns: 0,
+    playerStunnedTurns: 0,
+    playerBurnDmg: 0,
+    playerBurnTurns: 0,
+    enemyWeakenedTurns: 0,
+    enemyConfusedTurns: 0,
+    enemySilencedTurns: 0,
+    playerExposedTurns: 0,
+    medicUses: 0,
     log: [],
   }
 }
 
 function generateIntent(enemy: Enemy, cs: CombatState): EnemyIntent {
+  // Silence — l'ennemi ne peut qu'attaquer normalement ou se défendre
+  if (cs.enemySilencedTurns > 0) {
+    const rs = rng(0, 99)
+    return rs < 65 ? 'normal' : 'defend'
+  }
+
   const r = rng(0, 99)
-  if (cs.enemyHp < enemy.maxHp * 0.35)
-    return r < 50 ? 'heavy' : r < 70 ? 'charge' : 'normal'
-  if (enemy.isBoss) {
-    if (r < 25) return 'normal'
-    if (r < 40) return 'heavy'
-    if (r < 55) return 'defend'
-    if (r < 72) return 'charge'
-    if (r < 88) return 'disarm'
+  const lowHp = cs.enemyHp < enemy.maxHp * 0.35
+
+  // Personnages piliers — capacité unique (30 % de chance, 40 % si PV bas)
+  if (enemy.pillarAbility) {
+    const threshold = lowHp ? 40 : 30
+    if (r < threshold) return enemy.pillarAbility
+    if (r < threshold + 12) return 'blood_rage'
+    if (r < threshold + 22) return 'execution'
+    if (lowHp) return r < threshold + 32 ? 'heavy' : 'charge'
+    if (r < threshold + 30) return 'heavy'
+    if (r < threshold + 42) return 'charge'
+    if (r < threshold + 52) return 'defend'
+    if (r < threshold + 62) return 'disarm'
     return 'normal'
   }
+
+  // Tous les boss puissants — attaques spéciales génériques
+  if (enemy.isBoss) {
+    if (lowHp) return r < 45 ? 'heavy' : r < 60 ? 'charge' : r < 72 ? 'blood_rage' : r < 82 ? 'execution' : 'normal'
+    if (r < 20) return 'normal'
+    if (r < 34) return 'heavy'
+    if (r < 46) return 'defend'
+    if (r < 58) return 'charge'
+    if (r < 68) return 'disarm'
+    if (r < 78) return 'blood_rage'
+    if (r < 88) return 'execution'
+    return 'weaken'
+  }
+
+  // Ennemis normaux
+  if (lowHp) return r < 50 ? 'heavy' : r < 70 ? 'charge' : 'normal'
   if (r < 50) return 'normal'
   if (r < 65) return 'heavy'
   if (r < 75) return 'defend'
@@ -82,12 +117,17 @@ export type CombatAction =
   | { type: 'class' }
   | { type: 'flee' }
   | { type: 'negotiate' }
+  | { type: 'negotiate-accept' }
   | { type: 'intimidate' }
   | { type: 'heal' }
   | { type: 'bite' }
   | { type: 'drug' }
   | { type: 'rest' }
   | { type: 'water' }
+  | { type: 'food' }
+  | { type: 'herb' }
+  | { type: 'alcohol' }
+  | { type: 'premium_med' }
 
 export interface CombatResult {
   newGs: Partial<GameState>
@@ -119,6 +159,37 @@ export function processCombatAction(
 
   // ── PLAYER ACTION ──────────────────────────────────────────────────────
 
+  // Stun joueur (attaque spéciale Eliotis — party_over)
+  if (newCs.playerStunnedTurns > 0) {
+    newCs.playerStunnedTurns--
+    addLog(`Tu es étourdi et ne peux pas agir ! (${newCs.playerStunnedTurns} tour${newCs.playerStunnedTurns !== 1 ? 's' : ''} restant${newCs.playerStunnedTurns !== 1 ? 's' : ''})`, 'warning')
+    // Passe directement au tour ennemi — sans traiter l'action
+    newCs.currentIntent = newCs.enemyCharging ? 'heavy' : generateIntent(enemy, newCs)
+    if (newCs.enemyStunTurns > 0) {
+      newCs.enemyStunTurns--
+      addLog(`${enemy.name} est étourdi — perd son tour.`, 'info')
+    } else {
+      const enemyDmg2 = Math.floor(rng(enemy.damageMin, enemy.damageMax) * (gs.class.combatDefenseMult ?? 1.0))
+      const armor2 = gs.equippedArmor
+      const reduced2 = armor2 ? Math.floor(enemyDmg2 * armor2.defense / 100) : 0
+      const finalDmg2 = Math.max(0, enemyDmg2 - reduced2)
+      if (finalDmg2 > 0) {
+        playerHp = Math.max(0, playerHp - finalDmg2)
+        addLog(`${enemy.name} profite de ta vulnérabilité — ${finalDmg2} dégâts. PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+      }
+    }
+    if (playerHp <= 0) {
+      addLog(`Tu tombes. ${enemy.name} se penche sur toi...`, 'enemy')
+      const r2 = Math.random() * 100
+      let outcome2: CombatOutcome = 'stunned'
+      if (r2 < enemy.killChance) outcome2 = 'dead'
+      else if (r2 < enemy.killChance + enemy.captureChance) outcome2 = 'captured'
+      const survivedHp = outcome2 === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
+      return { newGs: { ...newGs, playerHp: survivedHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome: outcome2 }
+    }
+    return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+  }
+
   if (newCs.playerWeakenedTurns > 0) newCs.playerWeakenedTurns--
 
   newCs.lastPlayerDmg = 0
@@ -137,7 +208,10 @@ export function processCombatAction(
     const isCannibal = gs.moralTags.includes('cannibal')
     const folieMult = folie >= 80 ? 0.78 : folie >= 50 ? 0.90 : (isCannibal ? 1.15 : 1.0)
     const weakenMult = newCs.playerWeakenedTurns > 0 ? 0.65 : 1.0
-    let dmg = Math.floor(result.dmg * mult * attackMult * folieMult * weakenMult)
+    const coupDeGrace = (gs.class.coupDeGraceBonus ?? 0) > 0 && newCs.enemyHp < enemy.maxHp * 0.25
+      ? 1 + (gs.class.coupDeGraceBonus ?? 0) / 100
+      : 1.0
+    let dmg = Math.floor(result.dmg * mult * attackMult * folieMult * weakenMult * coupDeGrace)
     if (result.crit) addLog('COUP CRITIQUE !', 'crit')
     newCs.enemyHp = Math.max(0, newCs.enemyHp - dmg)
     newCs.lastPlayerDmg = dmg
@@ -166,7 +240,7 @@ export function processCombatAction(
       break
     }
     case 'offensive': {
-      stamina -= 20
+      stamina -= 30
       dealPlayerDamage(1.3, false, false, 'offensive')
       addLog('Tu t\'exposes (+20% dégâts reçus ce tour).', 'warning')
       break
@@ -187,16 +261,102 @@ export function processCombatAction(
     case 'focused': {
       stamina -= 50
       dealPlayerDamage(1.6, false, false, 'normal')
+      newCs.playerExposedTurns = 1
+      addLog('⚡ Frappe concentrée — tu es vulnérable au prochain coup ennemi (×1.5).', 'warning')
       break
     }
     case 'special': {
       if (!weapon) break
       stamina -= 35
-      dealPlayerDamage(1.0, true, false, 'offensive')
-      if (roll(weapon.effectChance)) {
-        applyWeaponEffect(weapon.effect, newCs, addLog)
-      } else {
-        addLog('L\'effet spécial ne s\'est pas déclenché.', 'info')
+
+      switch (weapon.effect) {
+
+        // ── EFFETS INSTANTANÉS COMPLEXES (gèrent leur propre dealPlayerDamage) ─
+
+        case 'double_strike': {
+          addLog('⚔ DOUBLE FRAPPE !', 'crit')
+          dealPlayerDamage(0.85, true, false, 'offensive')
+          const first = newCs.lastPlayerDmg
+          dealPlayerDamage(0.85, true, false, 'offensive')
+          addLog(`Deux coups — ${first} + ${newCs.lastPlayerDmg} dégâts.`, 'player')
+          break
+        }
+
+        case 'sacrifice': {
+          const cost = Math.floor(gs.playerMaxHp * 0.25)
+          if (playerHp <= cost + 5) {
+            addLog('Trop peu de PV pour activer le sacrifice — attaque normale.', 'warning')
+            dealPlayerDamage(0.8, false, false, 'normal')
+          } else {
+            playerHp -= cost
+            addLog(`🩸 SACRIFICE — ${cost} PV offerts en échange d'un coup dévastateur...`, 'warning')
+            dealPlayerDamage(2.5, true, false, 'offensive')
+          }
+          break
+        }
+
+        case 'unstable': {
+          if (roll(50)) {
+            addLog('⚡ DÉCHARGE INSTABLE — RÉACTION CRITIQUE !', 'crit')
+            dealPlayerDamage(3.5, true, false, 'offensive')
+          } else {
+            const selfDmg = rng(100, 300)
+            playerHp = Math.max(1, playerHp - selfDmg)
+            newCs.playerStunnedTurns = 1
+            addLog(`💥 INSTABILITÉ CATASTROPHIQUE — ${selfDmg} dégâts en retour ! Tu es étourdi 1 tour.`, 'warning')
+            dealPlayerDamage(0.2, false, false, 'normal')
+          }
+          break
+        }
+
+        case 'nuclear': {
+          addLog('☢ RÉACTION NUCLÉAIRE — IMPACT TOTAL !', 'crit')
+          dealPlayerDamage(4.5, true, false, 'offensive')
+          if (roll(65)) {
+            const selfDmg = rng(80, 200)
+            playerHp = Math.max(1, playerHp - selfDmg)
+            newCs.playerWeakenedTurns = Math.max(newCs.playerWeakenedTurns, 2)
+            addLog(`☢ IRRADIATION — ${selfDmg} dégâts en retour, affaibli 2 tours !`, 'warning')
+          } else {
+            addLog('Réaction maîtrisée. Pas d\'irradiation ce tour.', 'info')
+          }
+          break
+        }
+
+        case 'berserker': {
+          const missing = 1 - (playerHp / gs.playerMaxHp)
+          const bMult = Math.min(2.5, 1.0 + missing * 1.5)
+          const bPct = Math.round(bMult * 100)
+          addLog(`💢 RAGE BERSERK — ${bPct}% de puissance (${Math.round(missing * 100)}% PV manquants) !`, bMult > 1.7 ? 'crit' : 'info')
+          dealPlayerDamage(bMult, true, false, 'offensive')
+          break
+        }
+
+        case 'lifesteal': {
+          dealPlayerDamage(1.2, true, false, 'offensive')
+          const stolen = Math.floor(newCs.lastPlayerDmg * 0.35)
+          playerHp = Math.min(gs.playerMaxHp, playerHp + stolen)
+          addLog(`🩸 VOL DE VIE — +${stolen} PV récupérés. PV : ${playerHp}/${gs.playerMaxHp}`, 'player')
+          break
+        }
+
+        case 'momentum_surge': {
+          dealPlayerDamage(1.1, true, false, 'offensive')
+          newCs.momentum = 3
+          addLog('⚡ SURGE — MOMENTUM MAX INSTANTANÉ ! Finisher disponible !', 'crit')
+          break
+        }
+
+        // ── EFFETS À CHANCE (passent par applyWeaponEffect) ──────────────────
+
+        default: {
+          dealPlayerDamage(1.0, true, false, 'offensive')
+          if (weapon.effectChance > 0 && roll(weapon.effectChance)) {
+            applyWeaponEffect(weapon.effect, newCs, addLog)
+          } else if (weapon.effectChance > 0) {
+            addLog('L\'effet spécial ne s\'est pas déclenché.', 'info')
+          }
+        }
       }
       break
     }
@@ -262,12 +422,13 @@ export function processCombatAction(
       break
     }
     case 'negotiate': {
-      const chance = 20 + Math.max(0, Math.floor(reputation / 8))
-      if (roll(chance)) {
-        addLog('Tu trouves les mots. L\'ennemi baisse son arme.', 'victory')
-        newCs.enemyHp = 0
-        reputation += 5
-      } else addLog('Ça ne marche pas.', 'enemy')
+      addLog(`${enemy.name} refuse de négocier. Il attaque.`, 'enemy')
+      break
+    }
+    case 'negotiate-accept': {
+      newCs.enemyHp = 0
+      reputation += 3
+      addLog(`Accord trouvé. ${enemy.name} baisse les armes.`, 'victory')
       break
     }
     case 'intimidate': {
@@ -279,11 +440,16 @@ export function processCombatAction(
       break
     }
     case 'heal': {
+      if (newCs.medicUses >= 3) {
+        addLog('Limite de soins atteinte (3/3).', 'warning')
+        return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+      }
       if ((cargo['Médicaments'] ?? 0) > 0) {
         cargo['Médicaments']--
         if (cargo['Médicaments'] <= 0) delete cargo['Médicaments']
         playerHp = Math.min(gs.playerMaxHp, playerHp + 30)
-        addLog(`Soigné. PV : ${playerHp}/${gs.playerMaxHp}`, 'player')
+        newCs.medicUses++
+        addLog(`Soigné. PV : ${playerHp}/${gs.playerMaxHp} (${newCs.medicUses}/3 soins)`, 'player')
       }
       return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
     }
@@ -340,6 +506,60 @@ export function processCombatAction(
       }
       return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
     }
+    case 'food': {
+      if (newCs.medicUses >= 3) {
+        addLog('Limite de soins atteinte (3/3).', 'warning')
+        return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+      }
+      const FOOD_ORDER = ['Rations militaires', 'Rations', 'Vivres', 'Nourriture fraîche', 'Nourriture synthétique']
+      const key = FOOD_ORDER.find(k => (cargo[k] ?? 0) > 0)
+      if (key) {
+        cargo[key]--
+        if (cargo[key] <= 0) delete cargo[key]
+        playerHp = Math.min(gs.playerMaxHp, playerHp + 15)
+        newCs.medicUses++
+        addLog(`${key} consommé. +15 PV. (${playerHp}/${gs.playerMaxHp}) (${newCs.medicUses}/3 soins)`, 'player')
+      }
+      return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+    }
+    case 'herb': {
+      if (newCs.medicUses >= 3) {
+        addLog('Limite de soins atteinte (3/3).', 'warning')
+        return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+      }
+      if ((cargo['Plantes médicinales'] ?? 0) > 0) {
+        cargo['Plantes médicinales']--
+        if (cargo['Plantes médicinales'] <= 0) delete cargo['Plantes médicinales']
+        playerHp = Math.min(gs.playerMaxHp, playerHp + 25)
+        newCs.medicUses++
+        addLog(`Plantes médicinales appliquées. +25 PV. (${playerHp}/${gs.playerMaxHp}) (${newCs.medicUses}/3 soins)`, 'player')
+      }
+      return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+    }
+    case 'alcohol': {
+      if ((cargo['Alcools exotiques'] ?? 0) > 0) {
+        cargo['Alcools exotiques']--
+        if (cargo['Alcools exotiques'] <= 0) delete cargo['Alcools exotiques']
+        stamina = Math.min(gs.maxStamina, stamina + 60)
+        newCs.playerExposedTurns = (newCs.playerExposedTurns ?? 0) + 1
+        addLog(`Alcool englouti d\'un trait. +60 stamina. Tu es ralenti — l'ennemi en profite.`, 'warning')
+      }
+      break
+    }
+    case 'premium_med': {
+      if (newCs.medicUses >= 3) {
+        addLog('Limite de soins atteinte (3/3).', 'warning')
+        return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+      }
+      if ((cargo['Médicaments premium'] ?? 0) > 0) {
+        cargo['Médicaments premium']--
+        if (cargo['Médicaments premium'] <= 0) delete cargo['Médicaments premium']
+        playerHp = Math.min(gs.playerMaxHp, playerHp + 60)
+        newCs.medicUses++
+        addLog(`Médicaments premium. Soins intensifs. +60 PV. (${playerHp}/${gs.playerMaxHp}) (${newCs.medicUses}/3 soins)`, 'player')
+      }
+      return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
+    }
   }
 
   // Check victory before enemy turn
@@ -376,11 +596,21 @@ export function processCombatAction(
   }
 
   // ── ENEMY TURN ────────────────────────────────────────────────────────
+  if (newCs.enemySilencedTurns > 0) newCs.enemySilencedTurns--
   newCs.currentIntent = newCs.enemyCharging ? 'heavy' : generateIntent(enemy, newCs)
 
   if (newCs.enemyStunTurns > 0) {
     newCs.enemyStunTurns--
     addLog(`${enemy.name} est étourdi — perd son tour.`, 'info')
+  } else if (newCs.enemyConfusedTurns > 0) {
+    newCs.enemyConfusedTurns--
+    const confuseDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 0.55)
+    newCs.enemyHp = Math.max(0, newCs.enemyHp - confuseDmg)
+    addLog(`😵 ${enemy.name} est confus et se frappe lui-même ! ${confuseDmg} dégâts auto-infligés. (${newCs.enemyConfusedTurns}t)`, 'info')
+    if (newCs.enemyHp <= 0) {
+      const vC = resolveVictory(gs, enemy)
+      return { newGs: { ...newGs, playerHp, stamina, credits: credits + vC.loot, reputation: reputation + 10, equippedWeapon, cargo, ...vC.extra }, newCs, outcome: 'victory', reward: vC.rewardInfo }
+    }
   } else if (newCs.enemyWeaponDisabledTurns > 0) {
     newCs.enemyWeaponDisabledTurns--
     const hackDmg = rng(2, 8)
@@ -423,6 +653,96 @@ export function processCombatAction(
         }
         break
       }
+      // ── ATTAQUES SPÉCIALES — TOUS BOSS ──────────────────────────────────────
+      case 'blood_rage': {
+        const rawDmg = rng(enemy.damageMin, enemy.damageMax)
+        if (wasBlinded) enemyDmg = Math.floor(rawDmg * 0.6)
+        else enemyDmg = rawDmg
+        const heal = Math.floor(enemyDmg * 0.35)
+        newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + heal)
+        addLog(`SOIF DE SANG — ${enemy.name} se régénère en frappant ! (+${heal} PV)`, 'crit')
+        break
+      }
+      case 'execution': {
+        let execDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 1.4)
+        if (wasBlinded) execDmg = Math.floor(execDmg * 0.6)
+        execDmg = Math.floor(execDmg * (gs.class.combatDefenseMult ?? 1.0))
+        addLog(`${enemy.name} vise les failles de ton armure — armure ignorée !`, 'warning')
+        playerHp = Math.max(0, playerHp - execDmg)
+        addLog(`${execDmg} dégâts (armure ignorée). PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+        skipped = true
+        break
+      }
+      case 'weaken': {
+        enemyDmg = rng(enemy.damageMin, enemy.damageMax)
+        if (wasBlinded) enemyDmg = Math.floor(enemyDmg * 0.6)
+        newCs.playerWeakenedTurns = 2
+        addLog(`${enemy.name} frappe dans tes articulations — tu es AFFAIBLI 2 tours (-35% dégâts).`, 'warning')
+        break
+      }
+
+      // ── ATTAQUES UNIQUES — PERSONNAGES PILIERS ────────────────────────────
+      case 'imperial_barrage': {
+        // Cesarion — 3 coups rapides (chacun 70% des dégâts normaux)
+        addLog('⚡ SALVE IMPÉRIALE ! Cesarion attaque en rafale — 3 coups !', 'crit')
+        let totalBarrage = 0
+        for (let i = 0; i < 3; i++) {
+          const hit = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 0.70)
+          const armor = gs.equippedArmor
+          const red = armor ? Math.floor(hit * armor.defense / 100) : 0
+          const net = Math.max(1, hit - red)
+          totalBarrage += net
+          addLog(`  Coup ${i + 1} : ${net} dégâts.`, 'enemy')
+        }
+        playerHp = Math.max(0, playerHp - totalBarrage)
+        newCs.playerWeakenedTurns = 1
+        addLog(`Total : ${totalBarrage} dégâts. Tu es déstabilisé. PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+        skipped = true // dégâts déjà appliqués manuellement
+        break
+      }
+      case 'phantom_strike': {
+        // Raphazarus — frappe depuis l'angle mort, ignore armure, dodge ne fonctionne pas
+        enemyDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 1.6)
+        if (wasBlinded) enemyDmg = Math.floor(enemyDmg * 0.6)
+        addLog('👁 FRAPPE FANTÔME — Raphazarus surgit de l\'angle mort. Armure et esquive ignorées !', 'crit')
+        // Appliqué directement sans armure ni dodge
+        playerHp = Math.max(0, playerHp - enemyDmg)
+        addLog(`${enemyDmg} dégâts (armure ignorée). PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+        skipped = true
+        break
+      }
+      case 'party_over': {
+        // Eliotis — transformation instantanée : stun joueur + frappe lourde
+        enemyDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 1.5)
+        if (wasBlinded) enemyDmg = Math.floor(enemyDmg * 0.6)
+        newCs.playerStunnedTurns = 1
+        addLog('🎉 LA FÊTE EST TERMINÉE. Eliotis révèle sa vraie nature — tu es ÉTOURDI le prochain tour !', 'crit')
+        break
+      }
+      case 'flora_toxin': {
+        // Le Roi Maxance — poison de Paradoxa Eterna, très long et douloureux
+        const toxBase = rng(enemy.damageMin, enemy.damageMax)
+        enemyDmg = wasBlinded ? Math.floor(toxBase * 0.6) : toxBase
+        newCs.playerBurnDmg = rng(18, 35)
+        newCs.playerBurnTurns = 5
+        addLog(`🌿 TOXINE DE PARADOXA — Le Roi Maxance empoisonne l'atmosphère ! ${newCs.playerBurnDmg} dégâts/tour pendant 5 tours !`, 'crit')
+        break
+      }
+      case 'all_in': {
+        // Samy Scotty — casino : 50/50 entre 0 dégâts et x3
+        const allInRoll = Math.random()
+        if (allInRoll < 0.50) {
+          addLog('🎰 SAMY SCOTTY MISE TOUT ! ALL IN !!', 'crit')
+          enemyDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 3.0)
+          if (wasBlinded) enemyDmg = Math.floor(enemyDmg * 0.6)
+          addLog(`JACKPOT ! Samy frappe pour tout ce qu'il a.`, 'crit')
+        } else {
+          addLog('🎰 Samy Scotty mise tout... Le bluff ne passe pas. Il perd ce tour.', 'info')
+          skipped = true
+        }
+        break
+      }
+
       default: { // normal
         enemyDmg = rng(enemy.damageMin, enemy.damageMax)
         if (wasBlinded) enemyDmg = Math.floor(enemyDmg * 0.6)
@@ -435,7 +755,8 @@ export function processCombatAction(
     }
 
     if (!skipped && enemyDmg > 0) {
-      switch (newCs.playerStance) {
+      const stance = newCs.playerStance as import('../types').CombatStance
+      switch (stance) {
         case 'defensive': enemyDmg = Math.floor(enemyDmg * 0.70); break
         case 'offensive': enemyDmg = Math.floor(enemyDmg * 1.20); break
         case 'dodge':
@@ -445,6 +766,24 @@ export function processCombatAction(
           }
           break
       }
+    }
+
+    if (!skipped && enemyDmg > 0 && newCs.playerExposedTurns > 0) {
+      const stance = newCs.playerStance as import('../types').CombatStance
+      const exposedMult = stance === 'defensive' ? 1.10 : stance === 'dodge' ? 1.20 : 1.50
+      enemyDmg = Math.floor(enemyDmg * exposedMult)
+      newCs.playerExposedTurns = 0
+      if (exposedMult < 1.5) {
+        addLog(`Ta posture atténue l'exposition — ${Math.round(exposedMult * 100)}% dégâts reçus.`, 'warning')
+      } else {
+        addLog(`Tu étais exposé — ${enemy.name} frappe ×1.5 !`, 'enemy')
+      }
+    }
+
+    if (!skipped && enemyDmg > 0 && newCs.enemyWeakenedTurns > 0) {
+      enemyDmg = Math.floor(enemyDmg * 0.60)
+      newCs.enemyWeakenedTurns--
+      addLog(`🔮 Malédiction active — dégâts de ${enemy.name} réduits de 40% ! (${newCs.enemyWeakenedTurns} tour${newCs.enemyWeakenedTurns !== 1 ? 's' : ''} restant${newCs.enemyWeakenedTurns !== 1 ? 's' : ''})`, 'info')
     }
 
     if (!skipped && enemyDmg > 0) {
@@ -474,6 +813,22 @@ export function processCombatAction(
     }
   }
 
+  // ── POISON JOUEUR (flora_toxin — Le Roi Maxance) ─────────────────────────
+  if (newCs.playerBurnTurns > 0) {
+    playerHp = Math.max(0, playerHp - newCs.playerBurnDmg)
+    newCs.playerBurnTurns--
+    addLog(`☠ Toxine de Paradoxa — ${newCs.playerBurnDmg} dégâts. (${newCs.playerBurnTurns} tour${newCs.playerBurnTurns !== 1 ? 's' : ''} restant${newCs.playerBurnTurns !== 1 ? 's' : ''}). PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
+    if (playerHp <= 0) {
+      addLog(`Le poison t'a emporté. Tu tombes.`, 'enemy')
+      const rp = Math.random() * 100
+      let outcomeP: CombatOutcome = 'stunned'
+      if (rp < enemy.killChance) outcomeP = 'dead'
+      else if (rp < enemy.killChance + enemy.captureChance) outcomeP = 'captured'
+      const survivedHpP = outcomeP === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
+      return { newGs: { ...newGs, playerHp: survivedHpP, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome: outcomeP }
+    }
+  }
+
   // Regen armor
   if (gs.equippedArmor?.effect === 'regen') {
     const r = gs.equippedArmor.effectValue
@@ -481,9 +836,12 @@ export function processCombatAction(
     if (r > 0) addLog(`Régénération : +${r} PV.`, 'info')
   }
 
+  // Exposition résiduele (si l'ennemi était stun) — expirée proprement en fin de tour
+  if (newCs.playerExposedTurns > 0) newCs.playerExposedTurns = 0
+
   // Stamina regen
   const staminaRegen = 20 + (gs.equippedArmor?.effect === 'staminaBoost' ? gs.equippedArmor.effectValue : 0)
-    + (newCs.playerStance === 'defensive' ? 10 : 0)
+    + ((newCs.playerStance as import('../types').CombatStance) === 'defensive' ? 10 : 0)
     + (gs.class.combatStaminaRegen ?? 0)
   stamina = Math.min(gs.maxStamina, stamina + staminaRegen)
 
@@ -493,7 +851,8 @@ export function processCombatAction(
     let outcome: CombatOutcome = 'stunned'
     if (r < enemy.killChance) outcome = 'dead'
     else if (r < enemy.killChance + enemy.captureChance) outcome = 'captured'
-    return { newGs: { ...newGs, playerHp: 0, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome }
+    const survivedHpFinal = outcome === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0
+    return { newGs: { ...newGs, playerHp: survivedHpFinal, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome }
   }
 
   return { newGs: { ...newGs, playerHp, stamina, credits, reputation, equippedWeapon, cargo }, newCs }
@@ -501,19 +860,34 @@ export function processCombatAction(
 
 function applyWeaponEffect(effect: string, cs: CombatState, addLog: (t: string, type: CombatLogEntry['type']) => void) {
   switch (effect) {
-    case 'stun':        cs.enemyStunTurns = 1; addLog('Étourdi ! L\'ennemi perd son tour.', 'info'); break
-    case 'paralyze':    cs.enemyStunTurns = 2; addLog('Paralysé ! L\'ennemi perd 2 tours.', 'info'); break
-    case 'burn':        cs.enemyBurnDmg = rng(8, 20); cs.enemyBurnTurns = 3; addLog(`Brûlure ! ${cs.enemyBurnDmg} dégâts/tour x3.`, 'warning'); break
-    case 'poison':      cs.enemyBurnDmg = rng(5, 15); cs.enemyBurnTurns = 4; addLog(`Empoisonné ! ${cs.enemyBurnDmg} dégâts/tour x4.`, 'info'); break
-    case 'blind':       cs.enemyBlinded = true; addLog('Aveuglé ! -40% précision ennemi.', 'info'); break
-    case 'flee':        cs.enemyHp = 0; addLog('L\'ennemi panique et fuit !', 'victory'); break
-    case 'distraction': cs.enemyStunTurns = 1; addLog('Distrait ! L\'ennemi perd son tour.', 'info'); break
-    case 'random':      applyWeaponEffect(['stun','burn','blind','poison','flee'][rng(0,4)], cs, addLog); break
+    case 'stun':          cs.enemyStunTurns = 1; addLog('Étourdi ! L\'ennemi perd son tour.', 'info'); break
+    case 'paralyze':      cs.enemyStunTurns = 2; addLog('Paralysé ! L\'ennemi perd 2 tours.', 'info'); break
+    case 'burn':          cs.enemyBurnDmg = rng(8, 20);  cs.enemyBurnTurns = 3; addLog(`Brûlure ! ${cs.enemyBurnDmg} dégâts/tour ×3.`, 'warning'); break
+    case 'poison':        cs.enemyBurnDmg = rng(5, 15);  cs.enemyBurnTurns = 4; addLog(`Empoisonné ! ${cs.enemyBurnDmg} dégâts/tour ×4.`, 'info'); break
+    case 'blind':         cs.enemyBlinded = true; addLog('Aveuglé ! -40% précision ennemi.', 'info'); break
+    case 'flee':          cs.enemyHp = 0; addLog('L\'ennemi panique et fuit !', 'victory'); break
+    case 'distraction':   cs.enemyStunTurns = 1; addLog('Distrait ! L\'ennemi perd son tour.', 'info'); break
+    case 'shock':         cs.enemyStunTurns = 1; cs.enemyBurnDmg = rng(10, 18); cs.enemyBurnTurns = 3; addLog('⚡ CHOC — Étourdi + brûlure 10-18/tour ×3 !', 'warning'); break
+    case 'curse':         cs.enemyWeakenedTurns = 3; addLog('🔮 MALÉDICTION — Dégâts ennemis -40% pendant 3 tours !', 'info'); break
+    case 'confusion':     cs.enemyConfusedTurns = 2; addLog('😵 CONFUSION — L\'ennemi se prend lui-même pour cible pendant 2 tours !', 'info'); break
+    case 'silence':       cs.enemySilencedTurns = 2; addLog('🔇 SILENCE — L\'ennemi est limité aux attaques basiques pendant 2 tours !', 'info'); break
+    case 'disarm':        cs.enemyWeakenedTurns = Math.max(cs.enemyWeakenedTurns, 2); addLog('🗡 DÉSARMÉ — L\'ennemi a perdu son arme ! -40% dégâts pendant 2 tours.', 'info'); break
+    case 'random':        applyWeaponEffect(['stun','burn','blind','poison','flee','shock','curse','confusion'][rng(0,7)], cs, addLog); break
   }
 }
 
+// Déduit le tier d'un ennemi à partir de ses stats
+function inferEnemyTier(enemy: Enemy): 1 | 2 | 3 | 4 {
+  if (enemy.isBoss) return 4
+  if (enemy.maxHp >= 100) return 3
+  if (enemy.maxHp >= 45)  return 2
+  return 1
+}
+
 function resolveVictory(gs: GameState, enemy: Enemy): { loot: number; extra: Partial<GameState>; rewardInfo: { loot: number; weaponName?: string; armorName?: string; isBossKill: boolean } } {
-  const loot = rng(enemy.lootMin, enemy.lootMax)
+  const fauconsRep = gs.factionReputation?.faucons ?? 0
+  const lootMult = fauconsRep >= 80 ? 1.30 : fauconsRep >= 50 ? 1.20 : fauconsRep >= 20 ? 1.10 : 1.0
+  const loot = Math.floor(rng(enemy.lootMin, enemy.lootMax) * lootMult)
   const extra: Partial<GameState> = {}
   const bossNames = ['Alanossa', 'La Faucon', 'Directeur Pale', 'Garde du Corps d\'Eliotis',
     'Le Boucher de Velkor', 'Oracle de la Singularité', 'Amiral Voss-Kheran', 'La Curatrice',
@@ -531,15 +905,23 @@ function resolveVictory(gs: GameState, enemy: Enemy): { loot: number; extra: Par
     extra.weapons = [...gs.weapons, legendary]
     weaponName = legendary.name
   } else {
-    const r = rng(0, 99)
-    if (r < 20) {
-      const w = rollWeaponForTier(rng(1, 3))
-      extra.weapons = [...gs.weapons, w]
-      weaponName = w.name
-    } else if (r < 30) {
-      const a = rollArmorForTier(rng(1, 3))
-      extra.armors = [...gs.armors, a]
-      armorName = a.name
+    // Tier de drop lié au niveau de l'ennemi
+    const enemyTier = inferEnemyTier(enemy)
+    // chance de drop et fourchette de tier selon l'ennemi
+    const dropChance = enemyTier === 1 ? 22 : enemyTier === 2 ? 32 : enemyTier === 3 ? 42 : 55
+    const minTier    = enemyTier === 1 ? 1  : enemyTier === 2 ? 1  : enemyTier === 3 ? 2  : 3
+    const maxTier    = enemyTier === 1 ? 1  : enemyTier === 2 ? 2  : enemyTier === 3 ? 3  : 4
+
+    if (rng(0, 99) < dropChance) {
+      if (Math.random() < 0.6) {
+        const w = rollWeaponForTier(rng(minTier, maxTier))
+        extra.weapons = [...gs.weapons, w]
+        weaponName = w.name
+      } else {
+        const a = rollArmorForTier(rng(minTier, maxTier))
+        extra.armors = [...gs.armors, a]
+        armorName = a.name
+      }
     }
   }
   return { loot, extra, rewardInfo: { loot, weaponName, armorName, isBossKill } }

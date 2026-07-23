@@ -1,5 +1,6 @@
 import type { GameState, Quest, QuestType } from '../types'
 import { getAccessibleStations } from '../data/stations'
+import { getRunQuestRewardMult } from '../data/runModifiers'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
@@ -152,27 +153,27 @@ const BOUNTY_DESCS = [
 
 const PATROL_DESCS = [
   (_: string, giver: string, target: string) =>
-    `${giver} a besoin que quelqu'un se montre sur ${target}. Ta présence seule suffit à décourager certains.`,
+    `${giver} tient à ce que ${target} reste sous contrôle. Trois passages actifs — explorer, se montrer, décourager les problèmes. Paiement à la sécurisation.`,
   (_: string, _2: string, target: string) =>
-    `Patrouille de vérification à ${target}. Rapport attendu sur l'activité récente et le niveau de tension.`,
+    `Zone instable sur ${target}. Il faut une présence physique : circuler, explorer les accès, traîner dans les points chauds. Trois actions sur place.`,
   (_: string, giver: string, target: string) =>
-    `${giver} a des intérêts sur ${target}. Un passage régulier maintient l'ordre. C'est ton tour.`,
+    `${giver} a des actifs sur ${target} qui doivent rester intacts. Sécuriser la zone en trois passages — pas de rapport, juste de la présence.`,
   (_: string, _2: string, target: string) =>
-    `Mission de présence à ${target}. Pas de combat requis. Juste être là, observer, et repartir vivant.`,
+    `Maintien de l'ordre sur ${target}. Pas de bureau, pas de formulaire — juste se montrer partout où ça craint, trois fois. Ça suffit généralement.`,
 ]
 
 // ── GÉNÉRATEUR PRINCIPAL ─────────────────────────────────────────────────────
 
 const ALL_TYPES: QuestType[] = [
-  'delivery','kill','revenge','info',
+  'delivery','kill','revenge',
   'escort','sabotage','heist','extraction','bounty','patrol',
 ]
 
 // Poids par type pour le tirage (rare = plus intéressant)
 const TYPE_WEIGHTS: Record<QuestType, number> = {
-  delivery:   20, info:      15, revenge:   12, kill:      10,
-  patrol:     10, escort:    10, sabotage:  8,  extraction: 8,
-  heist:      5,  bounty:    5,
+  delivery:   20, revenge:   15, kill:      12,
+  escort:     10, sabotage:  8,  extraction: 8,  heist:     5,
+  bounty:     5,  patrol:    3,
 }
 
 function pickWeightedType(available: QuestType[]): QuestType {
@@ -205,72 +206,137 @@ export function generateQuest(gs: GameState): Quest | null {
   const types = availableTypes.length > 0 ? availableTypes : ALL_TYPES
   const type  = pickWeightedType(types)
 
+  const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
+  const scale   = (base: number) => Math.round(base * dayMult)
+
   switch (type) {
     case 'delivery': {
       const item   = pick(DELIVERY_ITEMS)
-      const reward = rng(800, 3500)
+      const reward = scale(rng(600, 2200))
       const desc   = pick(DELIVERY_DESCS)(item, giver, target.name)
       return { id, title: `Livraison : ${item}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 10 }
+        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 10, dayMult }
     }
     case 'kill': {
       const boss   = BOSS_NAMES[target.name] ?? `le chef de ${target.name}`
-      const reward = rng(2000, 7000)
+      const reward = scale(rng(1500, 5000))
       const desc   = pick(KILL_DESCS)(boss, giver, target.name)
       return { id, title: `Contrat : ${boss}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, creditReward: reward, repReward: 30 }
+        description: desc, targetStation: target.name, creditReward: reward, repReward: 25, dayMult }
     }
     case 'revenge': {
-      const reward = rng(1200, 4000)
+      const reward = scale(rng(900, 2800))
       const desc   = pick(REVENGE_DESCS)('', giver, target.name)
       return { id, title: `Règlement de comptes — ${target.name}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, creditReward: reward, repReward: 20 }
-    }
-    case 'info': {
-      const reward = rng(600, 2000)
-      const desc   = pick(INFO_DESCS)('', giver, target.name)
-      return { id, title: `Reconnaissance : ${target.name}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, creditReward: reward, repReward: 8 }
+        description: desc, targetStation: target.name, creditReward: reward, repReward: 18, dayMult }
     }
     case 'escort': {
-      const reward = rng(1800, 5000)
+      const reward = scale(rng(1400, 3500))
       const desc   = pick(ESCORT_DESCS)(giver, target.name)
       return { id, title: `Escorte vers ${target.name}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, targetItem: 'Passager', creditReward: reward, repReward: 15 }
+        description: desc, targetStation: target.name, targetItem: 'Passager', creditReward: reward, repReward: 15, dayMult }
     }
     case 'sabotage': {
-      const reward = rng(2500, 6000)
+      const reward = scale(rng(1800, 4500))
       const desc   = pick(SABOTAGE_DESCS)(giver, target.name)
       return { id, title: `Sabotage — ${target.name}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, creditReward: reward, repReward: -5 }
+        description: desc, targetStation: target.name, creditReward: reward, repReward: -5, dayMult }
     }
     case 'heist': {
       const item   = pick(HEIST_ITEMS)
-      const reward = rng(3000, 8000)
+      const reward = scale(rng(2200, 5500))
       const desc   = pick(HEIST_DESCS)(item, giver, target.name)
       return { id, title: `Acquisition : ${item}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 5 }
+        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 5, dayMult }
     }
     case 'extraction': {
       const item   = pick(EXTRACTION_ITEMS)
-      const reward = rng(1500, 4500)
+      const reward = scale(rng(1100, 3200))
       const desc   = pick(EXTRACTION_DESCS)(item, giver, target.name)
       return { id, title: `Extraction depuis ${target.name}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 12 }
+        description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 12, dayMult }
     }
     case 'bounty': {
       const boss   = BOSS_NAMES[target.name] ?? `un chef de guerre à ${target.name}`
-      const reward = rng(4000, 10000)
+      const reward = scale(rng(3000, 7000))
       const desc   = pick(BOUNTY_DESCS)(boss, giver, target.name)
       return { id, title: `Prime — ${boss}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, creditReward: reward, repReward: 40 }
+        description: desc, targetStation: target.name, creditReward: reward, repReward: 35, dayMult }
     }
     case 'patrol': {
-      const reward = rng(500, 1800)
+      const reward = scale(rng(500, 1800))
       const desc   = pick(PATROL_DESCS)('', giver, target.name)
       return { id, title: `Patrouille : ${target.name}`, giver, giverStation: gs.currentStation, type,
-        description: desc, targetStation: target.name, creditReward: reward, repReward: 6 }
+        description: desc, targetStation: target.name, creditReward: reward, repReward: 6, dayMult }
     }
+  }
+}
+
+// ── QUÊTES ENCHAÎNÉES ────────────────────────────────────────────────────────
+
+const CHAIN_CHANCE: Partial<Record<QuestType, number>> = {
+  delivery: 0.45, escort: 0.40, extraction: 0.40, patrol: 0.35,
+  kill: 0.30, revenge: 0.25, bounty: 0.25, sabotage: 0.20, heist: 0.20,
+}
+
+const CHAIN_FOLLOW: Partial<Record<QuestType, QuestType[]>> = {
+  delivery:   ['delivery', 'extraction', 'escort'],
+  escort:     ['delivery', 'extraction'],
+  extraction: ['delivery', 'heist'],
+  patrol:     ['patrol', 'bounty'],
+  kill:       ['bounty', 'kill'],
+  revenge:    ['kill', 'bounty'],
+  bounty:     ['bounty', 'kill'],
+  sabotage:   ['kill', 'sabotage'],
+  heist:      ['delivery', 'heist'],
+}
+
+const CHAIN_DESCS: Record<QuestType, (prev: Quest) => string> = {
+  delivery:   q => `Suite directe du contrat avec ${q.giver}. 'Il y a plus à transporter que prévu — même route, même tarif, plus de marchandise.' Fiable.`,
+  escort:     q => `${q.giver} a un second passager délicat à escorter. 'Même discrétion que la première fois. Tu sais comment ça marche.' Paiement majoré.`,
+  extraction: q => `${q.giver} a laissé autre chose là-bas. 'Je savais que j'aurais besoin de toi une deuxième fois. C'est prêt.' Bonus sur la précédente mission.`,
+  patrol:     q => `Zone toujours instable selon ${q.giver}. 'Repasse là-bas — la situation a bougé. Trois passages, comme avant.' Récompense augmentée.`,
+  kill:       q => `La cible avait des associés. ${q.giver} les a tracés. 'Le travail n'était qu'à moitié fait. Tu veux finir ce qu'on a commencé ?' Prime élevée.`,
+  revenge:    q => `${q.giver} a identifié d'autres responsables. 'Il en reste. Même station, même méthode. Tu veux la suite ?' Plus difficile. Plus payant.`,
+  bounty:     q => `Contrat en cascade. La cible précédente avait un commanditaire. ${q.giver} a remonté la piste. 'La vraie tête est là-bas.' Prime plus haute.`,
+  sabotage:   q => `${q.giver} veut aller plus loin. 'Ce qu'on a fait a déstabilisé les choses. Maintenant c'est le moment d'enfoncer le clou.' Même cible, autre mission.`,
+  heist:      q => `${q.giver} a repéré autre chose sur place. 'En y allant, t'as vu ce que j'avais pas vu. Y'a plus à prendre là-bas.' Acquisition supplémentaire.`,
+}
+
+export function generateChainQuest(completed: Quest, gs: GameState): Quest | null {
+  const chance = CHAIN_CHANCE[completed.type] ?? 0
+  if (Math.random() > chance) return null
+
+  const followTypes = CHAIN_FOLLOW[completed.type] ?? [completed.type]
+  const newType = followTypes[Math.floor(Math.random() * followTypes.length)]
+
+  const accessible = getAccessibleStations(gs.currentStation).filter(s => s.name !== gs.currentStation)
+  if (accessible.length === 0) return null
+  const target = accessible[Math.floor(Math.random() * accessible.length)]
+
+  const id = Math.random().toString(36).slice(2, 8)
+  const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
+  const scale = (base: number) => Math.round(base * dayMult * 1.25)
+
+  const targetItem = ['delivery','extraction','heist'].includes(newType)
+    ? pick(newType === 'delivery' ? DELIVERY_ITEMS : newType === 'extraction' ? EXTRACTION_ITEMS : HEIST_ITEMS)
+    : undefined
+
+  const REWARDS: Record<QuestType, [number, number]> = {
+    delivery: [700, 2500], escort: [1500, 4000], extraction: [1200, 3500],
+    patrol: [900, 2500], kill: [1700, 5500], revenge: [1000, 3200],
+    bounty: [3200, 7500], sabotage: [2000, 5000], heist: [2500, 6000],
+  }
+  const [rMin, rMax] = REWARDS[newType]
+  const creditReward = scale(rng(rMin, rMax))
+  const repReward = Math.round((completed.repReward ?? 10) * 1.3)
+
+  return {
+    id, title: `[SUITE] ${completed.title}`,
+    giver: completed.giver, giverStation: completed.giverStation,
+    type: newType, targetStation: target.name, targetItem,
+    description: CHAIN_DESCS[newType](completed),
+    creditReward, repReward, dayMult,
   }
 }
 
@@ -305,16 +371,9 @@ export function checkQuestsOnArrival(gs: GameState): { completed: Quest[]; compl
   for (const q of gs.activeQuests) {
     // Quêtes qui se complètent à la station CIBLE
     if (q.targetStation === gs.currentStation) {
-      if (q.type === 'info' || q.type === 'patrol') {
+      if (q.type === 'escort' && (gs.cargo['Passager'] ?? 0) > 0) {
         completed.push(q)
-      } else if ((q.type === 'delivery') && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0) {
-        const comp = checkDeliveryComplication(q)
-        if (comp.type === 'normal') completed.push(q)
-        else complications.push(comp)
-      } else if (q.type === 'escort' && (gs.cargo['Passager'] ?? 0) > 0) {
-        completed.push(q)
-      } else if (q.type === 'heist' && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0) {
-        completed.push(q)
+        // delivery et heist nécessitent une livraison manuelle depuis le hub (voir StationHub)
       } else if ((q.type === 'revenge' || q.type === 'sabotage') && gs.stationBossesBeaten.includes(q.targetStation)) {
         completed.push(q)
       } else if ((q.type === 'kill' || q.type === 'bounty') && gs.stationBossesBeaten.includes(q.targetStation)) {
@@ -346,16 +405,115 @@ export function completeQuest(gs: GameState, quest: Quest): Partial<GameState> {
     else newCargo['Passager'] = cur - 1
   }
 
-  return {
-    credits: gs.credits + quest.creditReward,
+  const rewardMult = getRunQuestRewardMult(gs)
+  const result: Partial<GameState> = {
+    credits: gs.credits + Math.floor(quest.creditReward * rewardMult),
     reputation: gs.reputation + quest.repReward,
     activeQuests: gs.activeQuests.filter(q => q.id !== quest.id),
     completedQuestIds: [...gs.completedQuestIds, quest.id],
     cargo: newCargo,
   }
+
+  if (quest.factionId && quest.factionId === gs.faction) {
+    result.factionMissions = (gs.factionMissions ?? 0) + 1
+  }
+
+  if (quest.factionId && gs.factionReputation) {
+    const rivals: Record<string, string> = { faucons: 'gardiens', gardiens: 'faucons', emporium: 'culte', culte: 'emporium' }
+    const fkey = quest.factionId
+    const rival = rivals[fkey]
+    const newRep = Math.min(100, (gs.factionReputation[fkey as keyof typeof gs.factionReputation] ?? 0) + 20)
+    const newRivalRep = rival ? Math.max(-100, (gs.factionReputation[rival as keyof typeof gs.factionReputation] ?? 0) - 10) : undefined
+    result.factionReputation = {
+      ...gs.factionReputation,
+      [fkey]: newRep,
+      ...(rival && newRivalRep !== undefined ? { [rival]: newRivalRep } : {}),
+    }
+  }
+
+  return result
 }
 
 // ── RUMEURS ───────────────────────────────────────────────────────────────────
+
+// ── MISSIONS DE FACTION ──────────────────────────────────────────────────────
+
+const FACTION_ENEMY_STATIONS: Record<string, string[]> = {
+  faucons:  ['La Citadelle Écarlate', 'Fort Ossian', "L'Arsenal Écarlate", 'Fort de Cendres'],
+  gardiens: ['Arc Ouest Apocalypse', 'Le Nid des Faucons', 'Station Ombre', 'La Tanière'],
+  emporium: ['Port Méridien', 'Nexus Aldara', "L'Entrepôt Zéro", 'La Forge Noire'],
+  culte:    ['Le Purgatoire', 'Les Abysses de Velkor', 'Station Zéphyr', 'Nexus Aldara'],
+}
+
+const FACTION_MISSION_TYPES: Record<string, QuestType[]> = {
+  faucons:  ['kill', 'sabotage'],
+  gardiens: ['kill', 'sabotage'],
+  emporium: ['delivery', 'heist'],
+  culte:    ['delivery', 'escort'],
+}
+
+const FACTION_GIVERS: Record<string, string> = {
+  faucons:  'Officier Faucon',
+  gardiens: 'Commandante Garde',
+  emporium: 'Agent Emporium',
+  culte:    'Disciple du Vide',
+}
+
+export function generateFactionMission(gs: GameState, factionId: string): Quest | null {
+  const stations = FACTION_ENEMY_STATIONS[factionId]
+  const types    = FACTION_MISSION_TYPES[factionId]
+  if (!stations || !types) return null
+
+  const usedTargets = new Set(
+    gs.activeQuests.filter(q => q.factionId === factionId).map(q => q.targetStation)
+  )
+  const pool = stations.filter(s => s !== gs.currentStation && !usedTargets.has(s))
+  const target = pick(pool.length > 0 ? pool : stations.filter(s => s !== gs.currentStation))
+  if (!target) return null
+
+  const type    = pick(types)
+  const giver   = FACTION_GIVERS[factionId] ?? 'Officier'
+  const id      = Math.random().toString(36).slice(2, 8)
+  const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
+  const scale   = (base: number) => Math.round(base * dayMult)
+
+  switch (type) {
+    case 'kill': {
+      const boss   = BOSS_NAMES[target] ?? `le chef de ${target}`
+      const reward = scale(rng(2500, 6000))
+      return { id, factionId, title: `[FACTION] Éliminer ${boss}`, giver, giverStation: gs.currentStation, type,
+        description: `Mission officielle. ${boss} sur ${target} représente une menace directe. L'élimination doit avoir lieu sur place — gagne un combat contre le boss là-bas pour compléter.`,
+        targetStation: target, creditReward: reward, repReward: 15, dayMult }
+    }
+    case 'sabotage': {
+      const reward = scale(rng(2000, 5000))
+      return { id, factionId, title: `[FACTION] Opération sur ${target}`, giver, giverStation: gs.currentStation, type,
+        description: `Rends-toi sur ${target} et gagne un combat là-bas. Ça envoie le message — l'ennemi doit comprendre que vos territoires ont des limites.`,
+        targetStation: target, creditReward: reward, repReward: 10, dayMult }
+    }
+    case 'delivery': {
+      const item   = pick(DELIVERY_ITEMS)
+      const reward = scale(rng(1500, 4000))
+      return { id, factionId, title: `[FACTION] Livraison : ${item} vers ${target}`, giver, giverStation: gs.currentStation, type,
+        description: `L'Emporium a besoin que ${item} arrive sur ${target}. Prends la marchandise et livre-la en main propre — paiement à l'arrivée avec le bonus faction.`,
+        targetStation: target, targetItem: item, creditReward: reward, repReward: 10, dayMult }
+    }
+    case 'heist': {
+      const item   = pick(HEIST_ITEMS)
+      const reward = scale(rng(3000, 7000))
+      return { id, factionId, title: `[FACTION] Acquisition : ${item} depuis ${target}`, giver, giverStation: gs.currentStation, type,
+        description: `L'Emporium veut ${item} provenant de ${target}. Vas-y, procure-le comme tu l'entends, reviens avec — paiement garanti plus bonus faction.`,
+        targetStation: target, targetItem: item, creditReward: reward, repReward: 10, dayMult }
+    }
+    case 'escort': {
+      const reward = scale(rng(2000, 5000))
+      return { id, factionId, title: `[FACTION] Escorte vers ${target}`, giver, giverStation: gs.currentStation, type,
+        description: `Un émissaire du Culte doit rejoindre ${target}. Embarque le passager et escorte-le à destination.`,
+        targetStation: target, targetItem: 'Passager', creditReward: reward, repReward: 12, dayMult }
+    }
+    default: return null
+  }
+}
 
 export const GOSSIP: Record<string, string[]> = {
   'La Carcasse': [
@@ -430,23 +588,23 @@ export const GOSSIP: Record<string, string[]> = {
 
 const NPC_QUEST_PROFILES: Record<string, { types: QuestType[]; items?: string[]; creditMult?: number; repMult?: number; flavor: string }> = {
   'Ferrailleur': { types: ['delivery','extraction'], items: ['Pièces techniques','Composants électroniques','Métaux bruts'], creditMult: 1.0, flavor: "a des pièces à récupérer ou livrer" },
-  'Marchande':   { types: ['delivery','info'], items: ['Médicaments','Vivres','Composants électroniques'], creditMult: 1.0, flavor: "a une route commerciale à couvrir" },
+  'Marchande':   { types: ['delivery','escort'], items: ['Médicaments','Vivres','Composants électroniques'], creditMult: 1.0, flavor: "a une route commerciale à couvrir" },
   'Vétéran':     { types: ['revenge','bounty'], creditMult: 1.3, repMult: 1.5, flavor: "a des comptes à régler" },
   'Hackeuse':    { types: ['heist','sabotage'], items: ['Données classifiées','Logiciels'], creditMult: 1.4, flavor: "a besoin d'accès à des systèmes" },
   'Dealer':      { types: ['delivery','escort'], items: ['Pièces de contrebande','Drogues de synthèse'], creditMult: 1.2, flavor: "a des livraisons délicates" },
   'Lieutenant':  { types: ['sabotage','bounty'], creditMult: 1.5, repMult: 0.8, flavor: "a une mission pour les Faucons" },
-  'Survivante':  { types: ['info','extraction'], items: ['Artefacts','Données'], creditMult: 0.9, repMult: 1.4, flavor: "a besoin de savoir ce qui se passe ailleurs" },
+  'Survivante':  { types: ['patrol','extraction'], items: ['Artefacts','Données'], creditMult: 0.9, repMult: 1.4, flavor: "a besoin de savoir ce qui se passe ailleurs" },
   'Courtier':    { types: ['delivery','heist'], items: ['Renseignements','Artefacts','Or'], creditMult: 1.3, flavor: "a des affaires à faire circuler" },
-  'Organisateur':{ types: ['info','patrol'], creditMult: 1.1, flavor: "a des intérêts à surveiller" },
+  'Organisateur':{ types: ['delivery','patrol'], creditMult: 1.1, flavor: "a des intérêts à surveiller" },
   'Commandante': { types: ['bounty','sabotage'], creditMult: 1.4, repMult: 1.3, flavor: "a une cible à neutraliser" },
   'Chercheuse':  { types: ['heist','extraction'], items: ['Artefacts','Composants expérimentaux','Données classifiées'], creditMult: 1.2, repMult: 1.2, flavor: "cherche des artefacts" },
-  'Pilote retraité': { types: ['patrol','info'], creditMult: 0.9, repMult: 1.1, flavor: "connaît des routes que personne d'autre ne connaît" },
+  'Pilote retraité': { types: ['patrol','escort'], creditMult: 0.9, repMult: 1.1, flavor: "connaît des routes que personne d'autre ne connaît" },
   'Forgeron':    { types: ['extraction','delivery'], items: ['Métaux rares','Cristaux énergétiques',"Composants d'armure"], creditMult: 1.0, flavor: "a besoin de matériaux pour forger" },
   'Fermier':     { types: ['delivery','patrol'], items: ['Nourriture fraîche','Eau purifiée','Équipement agricole'], creditMult: 0.8, repMult: 1.3, flavor: "a une livraison à faire" },
   'Recruteur':   { types: ['sabotage','bounty'], creditMult: 1.4, repMult: 0.7, flavor: "recrute pour les Faucons Noirs" },
   'Officière':   { types: ['revenge','bounty'], creditMult: 1.2, repMult: 1.1, flavor: "a un dossier non résolu" },
   'Gardien':     { types: ['extraction','heist'], items: ['Marchandises volées','Données','Artefacts'], creditMult: 1.3, flavor: "gère des choses qui appartiennent à personne" },
-  'Conseiller':  { types: ['info','bounty'], creditMult: 1.6, repMult: 1.0, flavor: "a besoin d'informations sur des cibles importantes" },
+  'Conseiller':  { types: ['bounty','kill'], creditMult: 1.6, repMult: 1.0, flavor: "a besoin d'informations sur des cibles importantes" },
 }
 
 export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string, npcStation: string): Quest | null {

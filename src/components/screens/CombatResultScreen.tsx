@@ -11,8 +11,8 @@ export function CombatResultScreen() {
   const reward = gs.combatRewardData
   const enemy  = gs.combatEnemy
 
-  // 15% de chance de montrer l'option cannibal si l'ennemi est humanoïde
-  const [canShowCannibalism]   = useState(() => !gs.moralTags.includes('cannibal') && Math.random() < 0.15)
+  // 4% de chance de montrer l'option cannibal si l'ennemi est humanoïde
+  const [canShowCannibalism]   = useState(() => !gs.moralTags.includes('cannibal') && Math.random() < 0.04)
   const [cannibalPopup, setCannibalPopup] = useState(false)
 
   function gouter() {
@@ -165,9 +165,14 @@ export function CombatResultScreen() {
           </div>
         )}
 
-        <button className="px-btn px-btn--primary" onClick={() => goTo('station-hub')}>
-          Continuer →
-        </button>
+        {gs.isImprisoned
+          ? <button className="px-btn" style={{ borderColor: 'var(--red)', color: 'var(--red)' }} onClick={() => goTo('prison')}>
+              Retour en cellule →
+            </button>
+          : <button className="px-btn px-btn--primary" onClick={() => goTo('station-hub')}>
+              Continuer →
+            </button>
+        }
       </div>
     </div>
   )
