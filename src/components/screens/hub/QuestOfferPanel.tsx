@@ -5,11 +5,14 @@ interface Props {
   gs: GameState
   questOffer: Quest | null
   addQuest: (q: Quest) => void
+  rerollsLeft: number
+  onReroll: () => void
   onReturn: () => void
 }
 
-export function QuestOfferPanel({ gs, questOffer, addQuest, onReturn }: Props) {
+export function QuestOfferPanel({ gs, questOffer, addQuest, rerollsLeft, onReroll, onReturn }: Props) {
   const gossip = getGossip(gs.currentStation)
+  const forced = rerollsLeft <= 0
 
   return (
     <div className="layout">
@@ -32,6 +35,11 @@ export function QuestOfferPanel({ gs, questOffer, addQuest, onReturn }: Props) {
           <div className="t-xs t-gold mt8">
             Récompense : {questOffer.creditReward.toLocaleString()} cr · +{questOffer.repReward} rép
           </div>
+          {forced && (
+            <div className="t-xs t-dim mt4" style={{ fontStyle: 'italic' }}>
+              Tu as refusé trop de fois. Prends ce contrat ou pars.
+            </div>
+          )}
           <div className="row gap4 mt8">
             <button
               className="px-btn px-btn--primary"
@@ -41,16 +49,18 @@ export function QuestOfferPanel({ gs, questOffer, addQuest, onReturn }: Props) {
             >
               Accepter
             </button>
-            <button className="px-btn px-btn--danger" style={{ flex: 1 }} onClick={onReturn}>
-              Refuser
-            </button>
+            {!forced && (
+              <button className="px-btn" style={{ flex: 1 }} onClick={onReroll}>
+                Changer ({rerollsLeft} restant{rerollsLeft > 1 ? 's' : ''})
+              </button>
+            )}
           </div>
         </div>
       ) : (
         <div className="px-box t-dim t-xs">Aucun travail disponible ici pour l'instant.</div>
       )}
 
-      <button className="px-btn" onClick={onReturn}>← Retour</button>
+      {!forced && <button className="px-btn" onClick={onReturn}>← Retour</button>}
     </div>
   )
 }

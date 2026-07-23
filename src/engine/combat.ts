@@ -35,6 +35,9 @@ export function initCombat(enemy: Enemy): CombatState {
     enemySilencedTurns: 0,
     playerExposedTurns: 0,
     medicUses: 0,
+    turnCount: 0,
+    subBossShadowHits: 0,
+    subBossDefenseStacks: 0,
     log: [],
   }
 }
@@ -143,6 +146,7 @@ export function processCombatAction(
   action: CombatAction
 ): CombatResult {
   const newCs: CombatState = { ...cs, log: [] }
+  newCs.turnCount = (cs.turnCount ?? 0) + 1
   const newGs: Partial<GameState> = {}
   let playerHp = gs.playerHp
   let stamina  = gs.stamina
@@ -152,9 +156,25 @@ export function processCombatAction(
   let cargo = { ...gs.cargo }
 
   const weapon = equippedWeapon
+  const isSubBoss = !!enemy.isSubBoss
+  const sbTurn = newCs.turnCount
 
   function addLog(text: string, type: CombatLogEntry['type'] = 'info') {
     newCs.log.push(log(text, type))
+  }
+
+  // ── SUB-BOSS PRE-ATTACK — Le Vigie Immortel attaque en premier ────────
+  if (isSubBoss && enemy.name === 'Le Vigie Immortel') {
+    const preStrikeDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 0.4)
+    playerHp = Math.max(0, playerHp - preStrikeDmg)
+    addLog(`⚡ TIR PRÉVENTIF — Le Vigie frappe en premier ! ${preStrikeDmg} dégâts. PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+    if (playerHp <= 0) {
+      const r2 = Math.random() * 100
+      let outcome2: CombatOutcome = 'stunned'
+      if (r2 < enemy.killChance) outcome2 = 'dead'
+      else if (r2 < enemy.killChance + enemy.captureChance) outcome2 = 'captured'
+      return { newGs: { ...newGs, playerHp: outcome2 === 'captured' ? Math.floor(gs.playerMaxHp / 2) : 0, stamina, credits, reputation, equippedWeapon, cargo }, newCs, outcome: outcome2 }
+    }
   }
 
   // ── PLAYER ACTION ──────────────────────────────────────────────────────
@@ -167,6 +187,7 @@ export function processCombatAction(
     newCs.currentIntent = newCs.enemyCharging ? 'heavy' : generateIntent(enemy, newCs)
     if (newCs.enemyStunTurns > 0) {
       newCs.enemyStunTurns--
+      newCs.enemyCharging = false
       addLog(`${enemy.name} est étourdi — perd son tour.`, 'info')
     } else {
       const enemyDmg2 = Math.floor(rng(enemy.damageMin, enemy.damageMax) * (gs.class.combatDefenseMult ?? 1.0))
@@ -371,8 +392,9 @@ export function processCombatAction(
       newCs.classActionUsed = true
       switch (gs.class.name) {
         case 'Seigneur de guerre': {
-          const chance = 40 + Math.max(0, Math.floor(reputation / 5))
-          if (roll(chance)) {
+          const rawCh = 40 + Math.max(0, Math.floor(reputation / 5))
+          const cappedCh = Math.min(80, rawCh)
+          if (roll(cappedCh)) {
             newCs.enemyStunTurns = 1
             addLog('Ton aura écrase l\'ennemi. Il perd son tour.', 'player')
           } else addLog('L\'intimidation n\'a pas suffi.', 'info')
@@ -432,11 +454,21 @@ export function processCombatAction(
       break
     }
     case 'intimidate': {
-      const chance = Math.floor(reputation / 5) + (gs.class.name === 'Seigneur de guerre' ? 30 : 0)
+      // L'intimidation ne gagne JAMAIS le combat : elle affaiblit l'adversaire
+      // ou lui fait louper un tour. Les boss et sous-boss y résistent davantage.
+      const rawChance = Math.floor(reputation / 5) + (gs.class.name === 'Seigneur de guerre' ? 30 : 0)
+      const bossResist = enemy.isBoss ? 0.5 : 1
+      const chance = Math.min(enemy.isBoss ? 45 : 80, Math.floor((15 + rawChance) * bossResist))
       if (roll(chance)) {
-        addLog(`Ta réputation parle. ${enemy.name} recule.`, 'victory')
-        newCs.enemyHp = 0
-      } else addLog('Il n\'est pas impressionné.', 'enemy')
+        if (roll(50)) {
+          newCs.enemyStunTurns = Math.max(newCs.enemyStunTurns, 1)
+          addLog(`Ta réputation parle. ${enemy.name} hésite — il perd son prochain tour.`, 'victory')
+        } else {
+          const dur = enemy.isBoss ? 2 : 3
+          newCs.enemyWeakenedTurns = Math.max(newCs.enemyWeakenedTurns, dur)
+          addLog(`${enemy.name} est ébranlé — ses attaques sont affaiblies (-40%) pendant ${dur} tours.`, 'victory')
+        }
+      } else addLog(`${enemy.name} n'est pas impressionné.`, 'enemy')
       break
     }
     case 'heal': {
@@ -562,6 +594,117 @@ export function processCombatAction(
     }
   }
 
+  // ── SUB-BOSS DAMAGE MODIFIERS (after player deals damage) ──────────────
+  if (isSubBoss && newCs.lastPlayerDmg > 0) {
+    // Plafond anti-farm : peu importe la puissance accumulée par le joueur,
+    // un sous-boss ne peut jamais perdre plus de 12% de ses PV max en un seul
+    // coup. Il faut donc tenir la distance, pas juste frapper fort une fois.
+    const perHitCap = Math.ceil(enemy.maxHp * 0.12)
+    if (newCs.lastPlayerDmg > perHitCap) {
+      const excess = newCs.lastPlayerDmg - perHitCap
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + excess)
+      newCs.lastPlayerDmg = perHitCap
+      addLog(`${enemy.name} est trop aguerri pour tomber d'un seul coup — dégâts plafonnés à ${perHitCap}.`, 'info')
+    }
+    const dmgDealt = newCs.lastPlayerDmg
+
+    // Le Vigie Immortel — esquive auto tous les 3 tours
+    if (enemy.name === 'Le Vigie Immortel' && sbTurn % 3 === 0) {
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + dmgDealt)
+      newCs.lastPlayerDmg = 0
+      addLog('🎯 Le Vigie anticipe ton mouvement — esquive totale !', 'enemy')
+    }
+
+    // Le Fantôme des Ombres — invisible les tours impairs
+    if (enemy.name === 'Le Fantôme des Ombres' && sbTurn % 2 === 1) {
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + dmgDealt)
+      newCs.lastPlayerDmg = 0
+      const counterDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 0.5)
+      playerHp = Math.max(0, playerHp - counterDmg)
+      addLog(`👻 Le Fantôme est invisible — ton attaque passe à travers ! Contre-attaque : ${counterDmg} dégâts. PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+    }
+
+    // Le Passeur Sanguinaire — mode défensif tous les 2 tours pairs, réduit dégâts de 50%
+    if (enemy.name === 'Le Passeur Sanguinaire' && sbTurn % 4 < 2) {
+      const reduced = Math.floor(dmgDealt * 0.5)
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + reduced)
+      newCs.lastPlayerDmg = dmgDealt - reduced
+      addLog(`🛡 Le Passeur est en mode défensif — ${reduced} dégâts absorbés !`, 'enemy')
+    }
+
+    // Le Directeur Fantôme — redirige 30% des dégâts vers le joueur
+    if (enemy.name === 'Le Directeur Fantôme' && roll(30)) {
+      const redirected = Math.floor(dmgDealt * 0.3)
+      playerHp = Math.max(0, playerHp - redirected)
+      addLog(`👤 Le Directeur Fantôme redirige l'énergie — ${redirected} dégâts renvoyés ! PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
+    }
+
+    // La Veuve de Fer — réduit 40% des dégâts physiques (armes burn/shock ignorent)
+    if (enemy.name === 'La Veuve de Fer') {
+      const weaponEffect = gs.equippedWeapon?.effect
+      const ignoresArmor = weaponEffect === 'burn' || weaponEffect === 'shock'
+      if (!ignoresArmor) {
+        const absorbed = Math.floor(dmgDealt * 0.4)
+        newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + absorbed)
+        newCs.lastPlayerDmg = dmgDealt - absorbed
+        addLog(`🛡 L'Armure de deuil absorbe ${absorbed} dégâts ! Utilise des armes énergétiques.`, 'enemy')
+      }
+    }
+
+    // Le Spectre du 7e — immunisé aux attaques directes tous les 2 tours
+    if (enemy.name === 'Le Spectre du 7e' && sbTurn % 2 === 0) {
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + dmgDealt)
+      newCs.lastPlayerDmg = 0
+      addLog('👻 Le Spectre est en phase spectrale — ton attaque le traverse ! Attends le prochain tour.', 'enemy')
+    }
+
+    // Le Maréchal Osseux — réduit les critiques de 60%, rage croissante
+    if (enemy.name === 'Le Maréchal Osseux') {
+      const hpPct = 1 - (newCs.enemyHp / enemy.maxHp)
+      const rageBonus = Math.floor(hpPct / 0.25) * 15
+      if (rageBonus > 0) {
+        newCs.subBossDefenseStacks = rageBonus
+        addLog(`💀 Le Maréchal Osseux rugit — rage +${rageBonus}% dégâts !`, 'enemy')
+      }
+    }
+
+    // Le Roi de Nuit — ténèbres, 25% chance de rater complètement
+    if (enemy.name === 'Le Roi de Nuit' && roll(25)) {
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + dmgDealt)
+      newCs.lastPlayerDmg = 0
+      addLog('🌑 Les ténèbres t\'aveuglent — ton attaque ne touche rien !', 'enemy')
+    }
+
+    // Le Maître des Ombres — ombre absorbe 30% des dégâts, se brise après 3 coups
+    if (enemy.name === 'Le Maître des Ombres' && (cs.subBossShadowHits ?? 0) < 3) {
+      const absorbed = Math.floor(dmgDealt * 0.3)
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + absorbed)
+      newCs.lastPlayerDmg = dmgDealt - absorbed
+      newCs.subBossShadowHits = (cs.subBossShadowHits ?? 0) + 1
+      if (newCs.subBossShadowHits >= 3) {
+        addLog(`👥 L'ombre du Maître absorbe ${absorbed} dégâts — puis se BRISE ! Plus de protection.`, 'player')
+      } else {
+        addLog(`👥 L'ombre absorbe ${absorbed} dégâts. (${newCs.subBossShadowHits}/3 coups avant rupture)`, 'enemy')
+      }
+    }
+
+    // L'Archiviste sans Visage — copie les dégâts du joueur
+    if (enemy.name === "L'Archiviste sans Visage") {
+      const copyDmg = Math.floor(dmgDealt * 0.6)
+      playerHp = Math.max(0, playerHp - copyDmg)
+      addLog(`📋 L'Archiviste copie ton attaque — ${copyDmg} dégâts en miroir ! PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
+    }
+  }
+
+  // Oracle de la Singularité — inverse les soins (si le joueur s'est soigné ce tour)
+  if (isSubBoss && enemy.name === 'Oracle de la Singularité') {
+    const healedThisTurn = playerHp - gs.playerHp
+    if (healedThisTurn > 0) {
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + healedThisTurn)
+      addLog(`🔄 L'Oracle absorbe ton soin — +${healedThisTurn} PV pour l'ennemi ! (${newCs.enemyHp}/${enemy.maxHp})`, 'warning')
+    }
+  }
+
   // Check victory before enemy turn
   if (newCs.enemyHp <= 0) {
     const v = resolveVictory(gs, enemy)
@@ -601,6 +744,7 @@ export function processCombatAction(
 
   if (newCs.enemyStunTurns > 0) {
     newCs.enemyStunTurns--
+    newCs.enemyCharging = false   // une frappe en préparation est annulée par l'étourdissement
     addLog(`${enemy.name} est étourdi — perd son tour.`, 'info')
   } else if (newCs.enemyConfusedTurns > 0) {
     newCs.enemyConfusedTurns--
@@ -829,6 +973,53 @@ export function processCombatAction(
     }
   }
 
+  // ── SUB-BOSS PASSIVE EFFECTS (each enemy turn) ──────────────────────────
+  if (isSubBoss) {
+    // Le Ravitailleur de l'Ombre — auto-soin 15% tous les 4 tours
+    if (enemy.name === "Le Ravitailleur de l'Ombre" && sbTurn % 4 === 0) {
+      const healAmt = Math.floor(enemy.maxHp * 0.15)
+      newCs.enemyHp = Math.min(enemy.maxHp, newCs.enemyHp + healAmt)
+      addLog(`🔧 Le Ravitailleur déploie un drone de réparation — +${healAmt} PV ! (${newCs.enemyHp}/${enemy.maxHp})`, 'enemy')
+    }
+
+    // La Faucon — crit garanti tous les 5 tours + dégâts croissants
+    if (enemy.name === 'La Faucon' && sbTurn % 5 === 0) {
+      const bonusDmg = Math.floor(rng(enemy.damageMin, enemy.damageMax) * 1.0)
+      playerHp = Math.max(0, playerHp - bonusDmg)
+      addLog(`🦅 La Faucon entre en RAGE — coup critique garanti ! ${bonusDmg} dégâts supplémentaires ! PV : ${playerHp}/${gs.playerMaxHp}`, 'crit')
+    }
+
+    // La Marchande de Mort — vol de crédits chaque tour
+    if (enemy.name === 'La Marchande de Mort') {
+      const stolen = rng(200, 500)
+      credits = Math.max(0, credits - stolen)
+      addLog(`💀 La Marchande te dépouille — ${stolen} crédits volés ! Crédits : ${credits}`, 'warning')
+    }
+
+    // Le Sergent Cendré — double attaque chaque tour, pause tous les 4 tours
+    if (enemy.name === 'Le Sergent Cendré' && sbTurn % 4 !== 0) {
+      const bonusDmg = rng(enemy.damageMin, Math.floor(enemy.damageMax * 0.7))
+      playerHp = Math.max(0, playerHp - bonusDmg)
+      addLog(`🔥 Cadence de tir ! Le Sergent Cendré frappe une deuxième fois — ${bonusDmg} dégâts ! PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
+    }
+    if (enemy.name === 'Le Sergent Cendré' && sbTurn % 4 === 0) {
+      addLog('⏸ Le Sergent recharge — il ne peut pas attaquer ce tour.', 'info')
+    }
+
+    // Le Maréchal Osseux — sa rage augmente ses dégâts d'ennemi
+    if (enemy.name === 'Le Maréchal Osseux' && (newCs.subBossDefenseStacks ?? 0) > 0) {
+      const bonusDmg = Math.floor(enemyDmg * (newCs.subBossDefenseStacks ?? 0) / 100)
+      playerHp = Math.max(0, playerHp - bonusDmg)
+      if (bonusDmg > 0) addLog(`💀 Rage du Maréchal — +${bonusDmg} dégâts supplémentaires ! PV : ${playerHp}/${gs.playerMaxHp}`, 'warning')
+    }
+
+    // Directeur Pale — drain de stamina passif
+    if (enemy.name === 'Directeur Pale') {
+      stamina = Math.max(0, stamina - 15)
+      addLog(`💀 Le Directeur Pale draine ton énergie — -15 stamina. (${stamina}/${gs.maxStamina})`, 'warning')
+    }
+  }
+
   // Regen armor
   if (gs.equippedArmor?.effect === 'regen') {
     const r = gs.equippedArmor.effectValue
@@ -844,6 +1035,15 @@ export function processCombatAction(
     + ((newCs.playerStance as import('../types').CombatStance) === 'defensive' ? 10 : 0)
     + (gs.class.combatStaminaRegen ?? 0)
   stamina = Math.min(gs.maxStamina, stamina + staminaRegen)
+
+  // Victory check after enemy turn (thorns, sub-boss reflect, etc. may have killed the enemy)
+  if (newCs.enemyHp <= 0) {
+    const v = resolveVictory(gs, enemy)
+    return {
+      newGs: { ...newGs, playerHp: Math.max(1, playerHp), stamina, credits: credits + v.loot, reputation: reputation + 10, equippedWeapon, cargo, ...v.extra },
+      newCs, outcome: 'victory', reward: v.rewardInfo,
+    }
+  }
 
   if (playerHp <= 0) {
     addLog(`Tu tombes. ${enemy.name} se penche sur toi...`, 'enemy')
@@ -887,7 +1087,8 @@ function inferEnemyTier(enemy: Enemy): 1 | 2 | 3 | 4 {
 function resolveVictory(gs: GameState, enemy: Enemy): { loot: number; extra: Partial<GameState>; rewardInfo: { loot: number; weaponName?: string; armorName?: string; isBossKill: boolean } } {
   const fauconsRep = gs.factionReputation?.faucons ?? 0
   const lootMult = fauconsRep >= 80 ? 1.30 : fauconsRep >= 50 ? 1.20 : fauconsRep >= 20 ? 1.10 : 1.0
-  const loot = Math.floor(rng(enemy.lootMin, enemy.lootMax) * lootMult)
+  // Économie dure : butin de combat réduit (cf. ECONOMY dans quests.ts).
+  const loot = Math.floor(rng(enemy.lootMin, enemy.lootMax) * lootMult * 0.65)
   const extra: Partial<GameState> = {}
   const bossNames = ['Alanossa', 'La Faucon', 'Directeur Pale', 'Garde du Corps d\'Eliotis',
     'Le Boucher de Velkor', 'Oracle de la Singularité', 'Amiral Voss-Kheran', 'La Curatrice',

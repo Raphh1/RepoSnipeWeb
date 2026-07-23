@@ -23,6 +23,11 @@ import { isFactionBlockedAtStation, getStationFactionName } from '../../engine/f
 import { getArrivalSituation, type ArrivalSituation } from '../../engine/arrivalSituations'
 import { RUN_MODIFIERS } from '../../data/runModifiers'
 import { getRunObjective } from '../../data/runObjectives'
+import { getSubBossAtStation, isSubBossDefeated, getSubBossProgress, arePillarSubBossesCleared } from '../../data/subBosses'
+import { getAvailableClues, canCollectClue, collectClue } from '../../engine/nexus'
+import { getDailyExpenses, getDailyExpenseBreakdown } from '../../engine/expenses'
+import { getActiveEvents } from '../../engine/worldEvents'
+import { getQuestsAtStation, canStartQuest, completeQuest, type EquipmentQuest } from '../../data/equipmentQuests'
 import { ExploreResultPanel } from './hub/ExploreResultPanel'
 import { WanderResultPanel } from './hub/WanderResultPanel'
 import { QuestOfferPanel } from './hub/QuestOfferPanel'
@@ -78,12 +83,14 @@ export function StationHub() {
   type DealCondition = { id: string; label: string; desc: string; fuelAmount: number; available: boolean; whyNot?: string; accept: () => void }
   const [dealConditions, setDealConditions] = useState<DealCondition[] | null>(null)
   const [confirmRestart, setConfirmRestart] = useState(false)
+  const [clueMsg, setClueMsg] = useState<string | null>(null)
   const [arrivalSit, setArrivalSit] = useState<ArrivalSituation | null>(null)
   const [arrivalResult, setArrivalResult] = useState<string | null>(null)
   const [pendingDeliveryQuest, setPendingDeliveryQuest] = useState<ReturnType<typeof generateQuest>>(null)
   const [deliveryResult, setDeliveryResult] = useState<string | null>(null)
   const [negotiationBase]   = useState(() => Math.floor(Math.random() * 1500 + 600))
   const [negoResult, setNegoResult]         = useState<{ earned: number; label: string } | null>(null)
+  const [questRerollsLeft, setQuestRerollsLeft] = useState(3)
   const [navResult, setNavResult]           = useState<{ shipDamage: number; bonusCredits: number } | null>(null)
   const [customsResult, setCustomsResult]   = useState<{ confiscated: string[]; repChange: number } | null>(null)
   const [hoveredQuest, setHoveredQuest]     = useState<string | null>(null)
@@ -173,6 +180,7 @@ export function StationHub() {
 
   function lookForQuest() {
     spendAction()
+    setQuestRerollsLeft(3)
     // Priorité aux quêtes enchaînées en attente
     const chainPending = (gs.pendingChainQuests ?? [])
     if (chainPending.length > 0) {
@@ -183,6 +191,11 @@ export function StationHub() {
       setQuestOffer(generateQuest(gs))
     }
     setMode('quest-offer')
+  }
+
+  function rerollQuest() {
+    setQuestRerollsLeft(n => n - 1)
+    setQuestOffer(generateQuest(gs))
   }
 
   function openStationEvent(ev: StationEvent) {
@@ -396,6 +409,8 @@ export function StationHub() {
         gs={gs}
         questOffer={questOffer}
         addQuest={addQuest}
+        rerollsLeft={questRerollsLeft}
+        onReroll={rerollQuest}
         onReturn={() => setMode('menu')}
       />
     )
@@ -641,21 +656,32 @@ export function StationHub() {
 
   if (mode === 'negotiation') {
     if (negoResult) {
+      const failed = negoResult.label === 'ÉCHEC'
       return (
         <div className="layout">
           <div className="t-xs t-dim t-center">— NÉGOCIATION TERMINÉE —</div>
-          <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
+          <div className="px-box" style={{ borderColor: failed ? 'var(--red)' : 'var(--gold)' }}>
             <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
-              <div className="t-sm t-bright">Résultat : {negoResult.label}</div>
-              <div className="tag tag--gold t-xs">{negoResult.label}</div>
+              <div className={`t-sm ${failed ? 't-red' : 't-bright'}`}>Résultat : {negoResult.label}</div>
+              <div className={`tag t-xs ${failed ? 'tag--red' : 'tag--gold'}`}>{negoResult.label}</div>
             </div>
-            <div className="t-xs t-gold">+{negoResult.earned.toLocaleString()} cr — contrat conclu.</div>
+            {failed
+              ? <>
+                  <div className="t-xs t-red">Négociation rompue. Aucun crédit obtenu.</div>
+                  <div className="t-xs t-dim mt4">-10 réputation — le marchand ne veut plus entendre parler de toi.</div>
+                </>
+              : <div className="t-xs t-gold">+{negoResult.earned.toLocaleString()} cr — contrat conclu.</div>
+            }
           </div>
           <button className="px-btn px-btn--primary" onClick={() => {
-            patch({ credits: gs.credits + negoResult.earned })
+            if (failed) {
+              patch({ reputation: gs.reputation - 10 })
+            } else {
+              patch({ credits: gs.credits + negoResult.earned })
+            }
             setNegoResult(null)
             setMode('menu')
-          }}>Encaisser et continuer</button>
+          }}>{failed ? 'Partir' : 'Encaisser et continuer'}</button>
         </div>
       )
     }
@@ -742,6 +768,15 @@ export function StationHub() {
     <div style={{ display: 'flex', gap: '16px', maxWidth: '1300px', margin: '0 auto', padding: '20px', alignItems: 'flex-start' }}>
     <div className="scanlines" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <StatusBar gs={gs} />
+
+      {/* ── MODE CONQUÊTE (post-victoire) ──────────────────────────────────── */}
+      {gs.conquestMode && (
+        <div className="px-box" style={{ borderColor: 'var(--cyan)', background: 'rgba(0,20,30,0.5)' }}>
+          <div className="t-xs" style={{ color: 'var(--cyan)', letterSpacing: '2px' }}>
+            ⚑ CONQUÊTE EN COURS — Nexus restauré. Accomplis tous les objectifs pour parachever ta conquête.
+          </div>
+        </div>
+      )}
 
       {/* ── RÉSUMÉ FIN DE JOURNÉE ──────────────────────────────────────────── */}
       {gs.pendingDaySummary && (
@@ -888,9 +923,9 @@ export function StationHub() {
       )}
 
       {/* Événements mondiaux actifs */}
-      {(gs.activeWorldEvents ?? []).length > 0 && (
+      {getActiveEvents(gs).length > 0 && (
         <div className="col gap4">
-          {(gs.activeWorldEvents ?? []).map(evt => (
+          {getActiveEvents(gs).map(evt => (
             <div key={evt.id} className="px-box" style={{ borderColor: evt.color, padding: '6px 12px', background: 'rgba(0,0,0,0.35)' }}>
               <div className="row" style={{ alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: evt.color, fontSize: '9px', letterSpacing: '1px' }}>⚠ ÉVÉNEMENT MONDIAL — {evt.title}</span>
@@ -1028,7 +1063,7 @@ export function StationHub() {
           : 3
 
         const HINTS = [
-          { label: '① Commence ici', text: 'Cherche du travail pour une première quête, ou explore la zone pour trouver du butin. Le Marché te permet d\'acheter des armes et du carburant.' },
+          { label: '① Commence ici', text: 'Cherche du travail pour une première quête, ou explore la zone pour trouver du butin. Les armes et armures ne s\'achètent PAS au marché — elles se lootent sur les ennemis (plus l\'ennemi est fort, meilleure est l\'arme) ou s\'obtiennent via des quêtes majeures.' },
           { label: '② Tu prends le rythme', text: 'Tu peux maintenant traîner dans le coin pour rencontrer des personnages — et voyager vers d\'autres stations pour tes quêtes.' },
         ]
         const hint = tutPhase < 2 ? HINTS[tutPhase] : null
@@ -1118,6 +1153,163 @@ export function StationHub() {
           </div>
         </div>
       )}
+
+      {/* ── SOUS-BOSS ───────────────────────────────────────────────────── */}
+      {(() => {
+        const subBoss = getSubBossAtStation(gs.currentStation)
+        if (!subBoss) return null
+        const defeated = gs.subBossesDefeated ?? {}
+        const alreadyDone = isSubBossDefeated(defeated, subBoss.id)
+        const progress = getSubBossProgress(defeated, subBoss.pillar)
+        const prevDone = subBoss.order === 1 || (() => {
+          const pillarSubs = defeated[subBoss.pillar] ?? []
+          const prevId = `${subBoss.id.split('-')[0]}-${subBoss.order - 1}`
+          return pillarSubs.includes(prevId)
+        })()
+        const pName = subBoss.pillar.charAt(0).toUpperCase() + subBoss.pillar.slice(1)
+        return (
+          <div className="px-box" style={{ borderColor: alreadyDone ? 'var(--green)' : 'var(--red)', background: 'rgba(40,0,0,0.2)' }}>
+            <div className="t-xs mb4" style={{ color: alreadyDone ? 'var(--green)' : 'var(--gold)', letterSpacing: '2px' }}>
+              ⚔ LIEUTENANT DE {pName.toUpperCase()} ({progress.done}/{progress.total})
+            </div>
+            <div className="t-sm t-bright mb4">{subBoss.name}</div>
+            <div className="t-xs t-dim mb4" style={{ lineHeight: 1.6 }}>{subBoss.personality}</div>
+            <div className="t-xs mb4" style={{ color: 'var(--cyan)', lineHeight: 1.6 }}>« {subBoss.backstory.slice(0, 150)}... »</div>
+            <div className="t-xs t-dim mb8">Mécanique : {subBoss.combatMechanic}</div>
+            {alreadyDone ? (
+              <div className="t-xs t-green">✓ VAINCU</div>
+            ) : !prevDone ? (
+              <div className="t-xs t-red">⛔ Vaincre d'abord les lieutenants précédents</div>
+            ) : (
+              <div className="col gap4">
+                <button className="px-btn" style={{ borderColor: 'var(--red)', color: 'var(--red)' }}
+                  onClick={() => startCombat(subBoss.enemy)}>
+                  ⚔ Affronter {subBoss.name}
+                </button>
+                {subBoss.resolutions.includes('negotiate') && (
+                  <button className="px-btn" style={{ borderColor: 'var(--cyan)' }}
+                    disabled={gs.reputation < 30}
+                    onClick={() => {
+                      const newDefeated = { ...defeated, [subBoss.pillar]: [...(defeated[subBoss.pillar] ?? []), subBoss.id] }
+                      patch({ subBossesDefeated: newDefeated, reputation: gs.reputation + 10 })
+                    }}>
+                    🗣 Négocier {gs.reputation < 30 ? '(rép. 30 requise)' : ''}
+                  </button>
+                )}
+                {subBoss.resolutions.includes('manipulate') && (
+                  <button className="px-btn" style={{ borderColor: 'var(--orange)' }}
+                    disabled={gs.credits < 2000}
+                    onClick={() => {
+                      const ok = Math.random() < 0.5
+                      if (ok) {
+                        const newDefeated = { ...defeated, [subBoss.pillar]: [...(defeated[subBoss.pillar] ?? []), subBoss.id] }
+                        patch({ subBossesDefeated: newDefeated, credits: gs.credits - 2000 })
+                      } else {
+                        patch({ credits: gs.credits - 2000, playerHp: Math.max(1, gs.playerHp - 30) })
+                      }
+                    }}>
+                    🎭 Manipuler (-2000 cr, 50% succès)
+                  </button>
+                )}
+                {subBoss.resolutions.includes('sabotage') && (
+                  <button className="px-btn" style={{ borderColor: 'var(--text-dim)' }}
+                    disabled={!gs.cargo['Composants électroniques'] || gs.cargo['Composants électroniques'] < 2}
+                    onClick={() => {
+                      const newCargo = { ...gs.cargo }
+                      newCargo['Composants électroniques'] = (newCargo['Composants électroniques'] ?? 0) - 2
+                      if (newCargo['Composants électroniques'] <= 0) delete newCargo['Composants électroniques']
+                      const newDefeated = { ...defeated, [subBoss.pillar]: [...(defeated[subBoss.pillar] ?? []), subBoss.id] }
+                      patch({ subBossesDefeated: newDefeated, cargo: newCargo })
+                    }}>
+                    💣 Saboter (2× Composants électroniques)
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })()}
+
+      {/* ── INDICES ARC PERDU (PNJs) ──────────────────────────────────────── */}
+      {(() => {
+        const clues = getAvailableClues(gs)
+        if (clues.length === 0) return null
+        return (
+          <div className="px-box" style={{ borderColor: 'var(--purple)', background: 'rgba(100,0,160,0.06)' }}>
+            <div className="t-xs mb4" style={{ color: 'var(--purple)', letterSpacing: '2px' }}>◆ INFORMATEUR — L'ARC PERDU</div>
+            <div className="t-xs t-dim mb8" style={{ lineHeight: 1.8 }}>
+              Indices collectés : {(gs.arcPerduClues ?? []).length}/4
+            </div>
+            {clueMsg && (
+              <div className="px-box mb8" style={{ borderColor: clueMsg.includes('LOCALISÉ') ? 'var(--gold)' : 'var(--purple)' }}>
+                <div className="t-xs" style={{ color: clueMsg.includes('LOCALISÉ') ? 'var(--gold)' : 'var(--purple)', lineHeight: 2 }}>{clueMsg}</div>
+                <button className="px-btn px-btn--sm mt4" style={{ width: 'auto' }} onClick={() => setClueMsg(null)}>OK</button>
+              </div>
+            )}
+            {clues.map(clue => {
+              const check = canCollectClue(gs, clue)
+              return (
+                <div key={clue.id} className="col gap4 mb8" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '8px' }}>
+                  <div className="t-sm" style={{ color: 'var(--purple)' }}>{clue.npcName}</div>
+                  <div className="t-xs t-dim" style={{ lineHeight: 2, fontStyle: 'italic' }}>{clue.dialogue}</div>
+                  {!check.ok && <div className="t-xs t-red">{check.reason}</div>}
+                  <button
+                    className="px-btn px-btn--sm"
+                    style={{ borderColor: 'var(--purple)', color: 'var(--purple)', width: 'auto' }}
+                    disabled={!check.ok}
+                    onClick={() => {
+                      const result = collectClue(gs, clue.id)
+                      patch(result.gs)
+                      setClueMsg(result.message)
+                    }}
+                  >
+                    {clue.requirement?.credits ? `Écouter (-${clue.requirement.credits} cr)` : 'Écouter'}
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        )
+      })()}
+
+      {/* ── QUÊTES D'ÉQUIPEMENT ──────────────────────────────────────────── */}
+      {(() => {
+        const eqQuests = getQuestsAtStation(gs.currentStation)
+        if (eqQuests.length === 0) return null
+        const available = eqQuests.filter(q => !(gs.completedEquipmentQuests ?? []).includes(q.id))
+        if (available.length === 0) return null
+        return (
+          <div className="px-box" style={{ borderColor: 'var(--gold)', background: 'rgba(30,20,0,0.15)' }}>
+            <div className="t-xs t-gold mb8" style={{ letterSpacing: '2px' }}>🗡 QUÊTES D'ÉQUIPEMENT</div>
+            <div className="col gap8">
+              {available.map(q => {
+                const check = canStartQuest(gs, q)
+                const diffColors: Record<string, string> = { common: 'var(--text-dim)', rare: 'var(--cyan)', epic: 'var(--purple, #a855f7)', legendary: 'var(--gold)' }
+                return (
+                  <div key={q.id} className="col gap4" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px' }}>
+                    <div className="row" style={{ justifyContent: 'space-between' }}>
+                      <div className="t-sm" style={{ color: diffColors[q.difficulty] }}>{q.title}</div>
+                      <div className="tag t-xs" style={{ color: diffColors[q.difficulty], borderColor: 'currentColor' }}>{q.difficulty.toUpperCase()}</div>
+                    </div>
+                    <div className="t-xs t-dim" style={{ lineHeight: 1.6 }}>{q.description}</div>
+                    {!check.ok && (
+                      <div className="t-xs t-red">{check.missing.join(' · ')}</div>
+                    )}
+                    <button className="px-btn px-btn--sm" style={{ width: 'auto', borderColor: diffColors[q.difficulty], color: diffColors[q.difficulty], opacity: check.ok ? 1 : 0.4 }}
+                      disabled={!check.ok}
+                      onClick={() => {
+                        const result = completeQuest(gs, q)
+                        patch(result)
+                      }}>
+                      {check.ok ? '✓ Compléter' : 'Conditions manquantes'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* ── SERVICE EXCLUSIF ──────────────────────────────────────────────── */}
       {station.specialService && (() => {
@@ -1678,6 +1870,23 @@ export function StationHub() {
           </div>
         )
       })}
+      {/* Daily expenses */}
+      {(() => {
+        const breakdown = getDailyExpenseBreakdown(gs)
+        const total = breakdown.reduce((s, b) => s + b.amount, 0)
+        if (total <= 0) return null
+        return (
+          <div style={{ marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
+            <div style={{ fontSize: '8px', letterSpacing: '2px', color: 'var(--red)', marginBottom: '4px' }}>DÉPENSES /JOUR : {total} cr</div>
+            {breakdown.map(b => (
+              <div key={b.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: 'var(--dim)', lineHeight: 1.8 }}>
+                <span>{b.label}</span>
+                <span>−{b.amount}</span>
+              </div>
+            ))}
+          </div>
+        )
+      })()}
     </div>
 
   </div>

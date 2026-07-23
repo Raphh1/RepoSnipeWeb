@@ -9,20 +9,20 @@ import { CLASSES } from '../../data/classes'
 type WikiTab = 'classes' | 'stations' | 'armes' | 'armures' | 'factions' | 'marchandises'
 
 const GOODS_PRICES: Record<string, { buy: number; desc: string }> = {
-  'Médicaments':            { buy: 150, desc: 'Soigne 30 PV. Classe Médecin : vendus 50% plus cher.' },
-  'Médicaments premium':    { buy: 350, desc: 'Soigne tous les PV.' },
-  'Métaux bruts':           { buy: 80,  desc: 'Matière première industrielle.' },
-  'Nourriture synthétique': { buy: 60,  desc: '+10 PV, +20 stamina si consommé.' },
-  'Nourriture fraîche':     { buy: 85,  desc: '+20 PV, +20 stamina si consommé.' },
-  'Composants électroniques':{ buy: 200, desc: 'Base de nombreux marchés technologiques.' },
-  'Armes illégales':        { buy: 500, desc: 'Hauts profits, hauts risques.' },
-  'Drogues de synthèse':    { buy: 300, desc: 'Effets aléatoires si consommé. Profits élevés.' },
-  'Données volées':         { buy: 400, desc: 'Très demandées à Nexus Aldara.' },
-  'Métaux rares':           { buy: 350, desc: 'Nécessaires aux armures Tier 4+.' },
-  'Cristaux énergétiques':  { buy: 500, desc: 'Carburant de haute qualité.' },
-  'Artefacts':              { buy: 800, desc: 'Peuvent être consommés pour un effet aléatoire.' },
-  'Implants':               { buy: 600, desc: 'Demandés partout. Ne pas avaler.' },
-  'Or':                     { buy: 600, desc: 'Valeur universelle. Toujours rentable.' },
+  'Médicaments':            { buy: 250, desc: 'Soigne 30 PV. Classe Médecin : vendus 50% plus cher.' },
+  'Médicaments premium':    { buy: 580, desc: 'Soigne tous les PV.' },
+  'Métaux bruts':           { buy: 130, desc: 'Matière première industrielle.' },
+  'Nourriture synthétique': { buy: 100, desc: '+10 PV, +20 stamina si consommé.' },
+  'Nourriture fraîche':     { buy: 140, desc: '+20 PV, +20 stamina si consommé.' },
+  'Composants électroniques':{ buy: 320, desc: 'Base de nombreux marchés technologiques.' },
+  'Armes illégales':        { buy: 800, desc: 'Hauts profits, hauts risques.' },
+  'Drogues de synthèse':    { buy: 480, desc: 'Effets aléatoires si consommé. Profits élevés.' },
+  'Données volées':         { buy: 650, desc: 'Très demandées à Nexus Aldara.' },
+  'Métaux rares':           { buy: 560, desc: 'Nécessaires aux armures Tier 4+.' },
+  'Cristaux énergétiques':  { buy: 800, desc: 'Carburant de haute qualité.' },
+  'Artefacts':              { buy: 1300, desc: 'Peuvent être consommés pour un effet aléatoire.' },
+  'Implants':               { buy: 960, desc: 'Demandés partout. Ne pas avaler.' },
+  'Or':                     { buy: 950, desc: 'Valeur universelle. Toujours rentable.' },
 }
 
 export function WikiScreen() {

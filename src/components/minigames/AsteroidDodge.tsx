@@ -18,9 +18,24 @@ interface Asteroid {
   points: number[]  // offsets for rough polygon shape
 }
 
+interface EnemyShip {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  hp: number
+}
+
+interface Bullet {
+  x: number
+  y: number
+  vy: number
+}
+
 interface Props {
   dangerLevel?: number  // 0-3
-  onResult: (shipDamage: number, creditBonus: number) => void
+  // engaged = true si le joueur a abattu un vaisseau ennemi → combat pirate
+  onResult: (shipDamage: number, creditBonus: number, engaged: boolean) => void
 }
 
 function makeAsteroidPoints(): number[] {
@@ -45,11 +60,17 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const shipXRef     = useRef(W / 2)
   const asteroidsRef = useRef<Asteroid[]>([])
+  const enemiesRef   = useRef<EnemyShip[]>([])
+  const bulletsRef   = useRef<Bullet[]>([])
   const hitsRef      = useRef(0)
+  const killsRef     = useRef(0)      // vaisseaux ennemis abattus
+  const engagedRef   = useRef(false)  // un ennemi a été touché → combat pirate
   const frameRef     = useRef<number>(0)
   const lastSpawnRef = useRef(0)
+  const lastEnemyRef = useRef(0)
+  const lastFireRef  = useRef(0)
   const startRef     = useRef(0)
-  const keysRef      = useRef({ left: false, right: false })
+  const keysRef      = useRef({ left: false, right: false, fire: false })
   const phaseRef     = useRef<'countdown' | 'playing' | 'done'>('countdown')
   const doneCalledRef = useRef(false)
 
@@ -57,16 +78,19 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
   const [countdown, setCountdown] = useState(3)
   const [timeLeft, setTimeLeft]   = useState(15)
   const [hits, setHits]           = useState(0)
+  const [kills, setKills]         = useState(0)
 
-  // Flèches uniquement
+  // Flèches pour bouger, Espace pour tirer
   useEffect(() => {
     function dn(e: KeyboardEvent) {
       if (e.key === 'ArrowLeft')  { e.preventDefault(); keysRef.current.left  = true }
       if (e.key === 'ArrowRight') { e.preventDefault(); keysRef.current.right = true }
+      if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); keysRef.current.fire = true }
     }
     function up(e: KeyboardEvent) {
       if (e.key === 'ArrowLeft')  keysRef.current.left  = false
       if (e.key === 'ArrowRight') keysRef.current.right = false
+      if (e.key === ' ' || e.key === 'ArrowUp') keysRef.current.fire = false
     }
     window.addEventListener('keydown', dn)
     window.addEventListener('keyup', up)
@@ -94,8 +118,7 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const ctx = canvas.getContext('2d')!
 
     const baseSpeed    = 2.4 + dangerLevel * 1.1
     const spawnMs      = Math.max(200, 900 - dangerLevel * 200)
@@ -166,8 +189,60 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
       ctx.restore()
     }
 
+    // ── Vaisseaux ennemis (à abattre au tir) ──
+    const enemySpawnMs = Math.max(2200, 4200 - dangerLevel * 600)
+    function spawnEnemy(now: number) {
+      if (dangerLevel < 1) return
+      if (now - lastEnemyRef.current < enemySpawnMs) return
+      lastEnemyRef.current = now
+      const x = 24 + Math.random() * (W - 48)
+      enemiesRef.current.push({
+        x, y: -18,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: 1.1 + dangerLevel * 0.35 + Math.random() * 0.6,
+        hp: 2,
+      })
+    }
+
+    function fireBullet(now: number) {
+      if (!keysRef.current.fire) return
+      if (now - lastFireRef.current < 220) return
+      lastFireRef.current = now
+      bulletsRef.current.push({ x: shipXRef.current, y: SHIP_Y - SHIP_H / 2, vy: -7 })
+    }
+
+    function drawEnemy(e: EnemyShip) {
+      ctx.save()
+      ctx.translate(e.x, e.y)
+      ctx.beginPath()
+      // Coque hostile pointée vers le bas
+      ctx.moveTo(0, 11)
+      ctx.lineTo(13, -8)
+      ctx.lineTo(0, -3)
+      ctx.lineTo(-13, -8)
+      ctx.closePath()
+      ctx.fillStyle = '#ff3344'
+      ctx.shadowColor = '#ff3344'
+      ctx.shadowBlur = 8
+      ctx.fill()
+      ctx.restore()
+    }
+
+    function drawBullet(b: Bullet) {
+      ctx.fillStyle = '#ffe066'
+      ctx.shadowColor = '#ffe066'
+      ctx.shadowBlur = 6
+      ctx.fillRect(b.x - 1.5, b.y - 6, 3, 8)
+      ctx.shadowBlur = 0
+    }
+
     let flashFrames = 0
     let running = true
+
+    // Cap à 60 FPS — on n'avance la simulation que par pas fixes de 1000/60 ms.
+    // Sur un écran 144 Hz le vaisseau et les astéroïdes gardent la même vitesse.
+    const FRAME_MS = 1000 / 60
+    let lastFrameTs = 0
 
     function loop(now: number) {
       if (!running) return
@@ -176,6 +251,13 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
         frameRef.current = requestAnimationFrame(loop)
         return
       }
+
+      if (lastFrameTs === 0) lastFrameTs = now
+      if (now - lastFrameTs < FRAME_MS) {
+        frameRef.current = requestAnimationFrame(loop)
+        return
+      }
+      lastFrameTs = now
 
       const elapsed = now - startRef.current
       const remaining = Math.max(0, DURATION_MS - elapsed)
@@ -186,6 +268,8 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
       if (keysRef.current.right) shipXRef.current = Math.min(W - SHIP_W / 2, shipXRef.current + 5)
 
       spawnAsteroid(now)
+      spawnEnemy(now)
+      fireBullet(now)
 
       // Update + collision
       let newHit = false
@@ -198,6 +282,42 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
           hitsRef.current++
           setHits(hitsRef.current)
           newHit = true
+          flashFrames = 8
+          return false
+        }
+        return true
+      })
+
+      // Balles : remontent et touchent les vaisseaux ennemis
+      bulletsRef.current = bulletsRef.current.filter(b => {
+        b.y += b.vy
+        if (b.y < -10) return false
+        for (const e of enemiesRef.current) {
+          if (e.hp > 0 && Math.abs(b.x - e.x) < 14 && Math.abs(b.y - e.y) < 12) {
+            e.hp--
+            engagedRef.current = true   // toucher un ennemi = combat pirate imminent
+            return false
+          }
+        }
+        return true
+      })
+
+      // Vaisseaux ennemis : descendent, collision joueur, destruction
+      enemiesRef.current = enemiesRef.current.filter(e => {
+        if (e.hp <= 0) {
+          killsRef.current++
+          setKills(killsRef.current)
+          return false
+        }
+        e.x += e.vx
+        e.y += e.vy
+        if (e.x < 16 || e.x > W - 16) e.vx *= -1
+        if (e.y > H + 18) return false
+        // Collision avec le vaisseau joueur
+        if (Math.abs(e.x - shipXRef.current) < SHIP_W / 2 + 12 && Math.abs(e.y - SHIP_Y) < SHIP_H / 2 + 11) {
+          hitsRef.current++
+          setHits(hitsRef.current)
+          engagedRef.current = true
           flashFrames = 8
           return false
         }
@@ -218,6 +338,10 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
 
       // Asteroids
       asteroidsRef.current.forEach(drawAsteroid)
+
+      // Enemies & bullets
+      enemiesRef.current.forEach(drawEnemy)
+      bulletsRef.current.forEach(drawBullet)
 
       // Danger zone line
       ctx.strokeStyle = 'rgba(0,229,204,0.12)'
@@ -243,10 +367,16 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
       ctx.strokeStyle = '#004433'
       ctx.lineWidth = 1
       ctx.strokeRect(34, 9, W - 120, 6)
-      ctx.fillStyle = hitsRef.current > 0 ? '#ff4444' : '#44ff88'
-      ctx.font = 'bold 10px monospace'
       ctx.textAlign = 'right'
-      ctx.fillText(`${hitsRef.current} IMPACT${hitsRef.current !== 1 ? 'S' : ''}`, W - 8, 17)
+      if (killsRef.current > 0) {
+        ctx.fillStyle = '#ffe066'
+        ctx.font = 'bold 10px monospace'
+        ctx.fillText(`${killsRef.current} ABATTU${killsRef.current !== 1 ? 'S' : ''}`, W - 8, 17)
+      } else {
+        ctx.fillStyle = hitsRef.current > 0 ? '#ff4444' : '#44ff88'
+        ctx.font = 'bold 10px monospace'
+        ctx.fillText(`${hitsRef.current} IMPACT${hitsRef.current !== 1 ? 'S' : ''}`, W - 8, 17)
+      }
       ctx.textAlign = 'left'
 
       if (elapsed >= DURATION_MS && !doneCalledRef.current) {
@@ -255,8 +385,9 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
         phaseRef.current = 'done'
         setUiPhase('done')
         const dmg   = hitsRef.current * 12
-        const bonus = hitsRef.current === 0 ? 300 : hitsRef.current <= 2 ? 100 : 0
-        onResult(dmg, bonus)
+        // Bonus crédits seulement si aucun ennemi engagé (sinon place au combat)
+        const bonus = engagedRef.current ? 0 : hitsRef.current === 0 ? 300 : hitsRef.current <= 2 ? 100 : 0
+        onResult(dmg, bonus, engagedRef.current)
         return
       }
 
@@ -289,7 +420,8 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
             <div style={{ fontSize: '72px', color: 'var(--cyan)', fontFamily: 'monospace', lineHeight: 1, textShadow: '0 0 20px var(--cyan)' }}>
               {countdown}
             </div>
-            <div className="t-xs t-dim mt8">← → pour esquiver</div>
+            <div className="t-xs t-dim mt8">← → esquiver · ESPACE tirer</div>
+            <div className="t-xs t-dim mt4" style={{ color: 'var(--red)' }}>⚠ Tirer sur un vaisseau ennemi = combat de pirates</div>
           </div>
         )}
       </div>
@@ -297,8 +429,8 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
       <div className="px-box" style={{ width: W, maxWidth: '100%', padding: '6px 12px' }}>
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <span className="t-xs t-dim">Impacts : <span style={{ color: hits > 0 ? 'var(--red)' : 'var(--green)' }}>{hits}</span></span>
+          <span className="t-xs t-dim">Abattus : <span style={{ color: kills > 0 ? 'var(--gold)' : 'var(--dim)' }}>{kills}</span></span>
           <span className="t-xs t-dim">Temps : <span className="t-cyan">{timeLeft}s</span></span>
-          <span className="t-xs t-dim">0 impact = +300 cr · ≤2 = +100 cr</span>
         </div>
       </div>
     </div>

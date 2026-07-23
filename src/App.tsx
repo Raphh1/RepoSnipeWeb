@@ -209,8 +209,9 @@ function GameOver({ onMeta, showMeta, onBackFromMeta }: { onMeta: () => void; sh
 }
 
 function Victory({ onMeta, showMeta, onBackFromMeta }: { onMeta: () => void; showMeta: boolean; onBackFromMeta: () => void }) {
-  const gs      = useGameStore(s => s.gs!)
-  const newGame = useGameStore(s => s.newGame)
+  const gs               = useGameStore(s => s.gs!)
+  const newGame          = useGameStore(s => s.newGame)
+  const continueConquest = useGameStore(s => s.continueConquest)
   if (showMeta) return <MetaScreen onBack={onBackFromMeta} />
   return (
     <div className="layout scanlines" style={{ justifyContent: 'center', minHeight: '100vh' }}>
@@ -220,14 +221,30 @@ function Victory({ onMeta, showMeta, onBackFromMeta }: { onMeta: () => void; sho
           <div className="t-sm t-dim mb4">Le Nexus est restauré. Tu as survécu.</div>
           <div className="t-xs t-dim">Le vide se souviendra de ce nom.</div>
         </div>
+
+        {/* Continuation — la conquête spatiale */}
+        <div className="px-box mb8" style={{ borderColor: 'var(--cyan)' }}>
+          <div className="t-sm mb4" style={{ color: 'var(--cyan)' }}>ET MAINTENANT ?</div>
+          <div className="t-xs t-dim" style={{ lineHeight: '2' }}>
+            Le Nexus est entre tes mains, mais le secteur ne s'est pas incliné pour autant.
+            Tu peux <span className="t-cyan">continuer ta conquête spatiale</span> avec ce personnage :
+            accomplis <span className="t-bright">tous les objectifs</span>, abats les derniers boss et
+            grave ton nom dans le vide pour de bon. Ou repars de zéro.
+          </div>
+        </div>
+
         <PointsBadge />
         <NextUnlockBar />
         <RunStats gs={gs} />
+        <button className="px-btn px-btn--primary mb8" onClick={continueConquest}
+          style={{ width: '100%', borderColor: 'var(--cyan)', color: 'var(--cyan)' }}>
+          ⚑ CONTINUER LA CONQUÊTE →
+        </button>
         <div className="row gap4">
           <button className="px-btn" style={{ flex: 1, borderColor: 'var(--purple)', color: 'var(--purple)' }} onClick={onMeta}>
             ★ HÉRITAGE
           </button>
-          <button className="px-btn px-btn--primary" style={{ flex: 2 }} onClick={newGame}>
+          <button className="px-btn" style={{ flex: 2 }} onClick={newGame}>
             NOUVELLE RUN
           </button>
         </div>

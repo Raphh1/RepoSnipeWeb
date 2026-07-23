@@ -99,10 +99,13 @@ type NavProps = {
 // ── Composant ──────────────────────────────────────────────────────────────────
 export function ScenarioGame(props: NegoProps | NavProps) {
   const pool = props.mode === 'navigation' ? NAV_SCENARIOS : NEGO_SCENARIOS
-  const timerMax = props.mode === 'navigation' ? 12 : 10
+  const timerMax = props.mode === 'navigation' ? 12 : 7
 
   const [scenarios] = useState<Scenario[]>(() =>
-    [...pool].sort(() => Math.random() - 0.5).slice(0, 3)
+    [...pool]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map(s => ({ ...s, choices: [...s.choices].sort(() => Math.random() - 0.5) }))
   )
   const [idx, setIdx]           = useState(0)
   const [timeLeft, setTimeLeft] = useState(timerMax)
@@ -135,9 +138,17 @@ export function ScenarioGame(props: NegoProps | NavProps) {
       if (type === 'good') goodRef.current++
       setDmgSoFar(dmgRef.current)
     } else {
+      const badCount = perfRef.current.filter(p => p === 'bad').length
+      if (badCount >= 2) {
+        setFeedback(msg)
+        setTimeout(() => {
+          setPhase('done')
+          ;(props as NegoProps).onResult(0, 'ÉCHEC')
+        }, 900)
+        return
+      }
       const goodCount = perfRef.current.filter(p => p === 'good').length
-      const badCount  = perfRef.current.filter(p => p === 'bad').length
-      const newMult   = Math.max(0.2, 1.0 + goodCount * 0.3 - badCount * 0.2)
+      const newMult = badCount === 1 ? 0.4 : Math.min(1.5, 1.0 + goodCount * 0.25)
       multRef.current = newMult
       setDisplayMult(newMult)
     }
@@ -234,7 +245,7 @@ export function ScenarioGame(props: NegoProps | NavProps) {
       <div className="t-xs t-dim">
         {isNav
           ? '3 bonnes manœuvres = +500 cr · 2 bonnes = +200 cr · sinon rien'
-          : `Base : ${(props as NegoProps).baseCredits.toLocaleString()} cr · ×${displayMult.toFixed(1)} → ${Math.floor((props as NegoProps).baseCredits * displayMult).toLocaleString()} cr`
+          : `Base : ${(props as NegoProps).baseCredits.toLocaleString()} cr · ×${displayMult.toFixed(1)} → ${Math.floor((props as NegoProps).baseCredits * displayMult).toLocaleString()} cr · 2 erreurs = échec`
         }
       </div>
     </div>

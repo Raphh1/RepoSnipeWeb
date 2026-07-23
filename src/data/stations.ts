@@ -13,7 +13,7 @@ export const STATIONS: StationData[] = [
     description: "Hub commercial légal. Des agents de sécurité partout. Des marchands souriants qui te détestent.",
     danger: 0, type: 'peaceful',
     goods: ['Médicaments', 'Composants électroniques', 'Vêtements', 'Nourriture synthétique', 'Outils'],
-    fuelCostFrom: { 'La Carcasse': 2, 'Nexus Aldara': 2, 'Fort Kharos': 3, 'Les Bas-Fonds de Vega': 4, 'Colonie Perséphone': 3, 'Paradoxa Eterna': 4, 'Le Sanctuaire des Dérives': 3 },
+    fuelCostFrom: { 'La Carcasse': 2, 'Nexus Aldara': 2, 'Fort Kharos': 3, 'Les Bas-Fonds de Vega': 4, 'Colonie Perséphone': 3, 'Paradoxa Eterna': 4, 'Le Sanctuaire des Dérives': 3, 'Le Grand Bazar': 3 },
   },
   {
     name: 'Les Bas-Fonds de Vega',
@@ -35,7 +35,7 @@ export const STATIONS: StationData[] = [
     description: "Carrefour technologique. Les meilleurs hackers et ingénieurs y vivent — ou y meurent.",
     danger: 1, type: 'scientific',
     goods: ['Composants électroniques', 'Implants', 'Logiciels', 'Données'],
-    fuelCostFrom: { 'Port Méridien': 2, 'Fort Kharos': 3, 'Le Purgatoire': 3, 'Sanctum Machina': 2, "L'Œil du Faucon": 4 },
+    fuelCostFrom: { 'Port Méridien': 2, 'Fort Kharos': 3, 'Le Purgatoire': 3, 'Sanctum Machina': 2, "L'Œil du Faucon": 4, 'Le Grand Bazar': 3 },
     exclusiveGoods: ['Implants', 'Logiciels'],
   },
   {
@@ -87,7 +87,7 @@ export const STATIONS: StationData[] = [
     description: "Usine flottante illégale. Ils fabriquent des armes sans licence. Excellentes armes.",
     danger: 2, type: 'industrial',
     goods: ['Armes artisanales', "Composants d'armure", 'Matériaux interdits'],
-    fuelCostFrom: { 'Station Rocaille': 2, "L'Entrepôt Zéro": 3, 'La Forge des Damnés': 2 },
+    fuelCostFrom: { 'Station Rocaille': 2, "L'Entrepôt Zéro": 3, 'La Forge des Damnés': 2, 'Forge Alpha': 2 },
     specialService: 'weapon_forge',
     exclusiveGoods: ['Armes artisanales', "Composants d'armure"],
   },
@@ -230,7 +230,7 @@ export const STATIONS: StationData[] = [
     description: "Hub logistique de l'Emporium. Les marchandises transitent. Les secrets aussi.",
     danger: 1, type: 'industrial',
     goods: ['Pièces techniques', 'Composants divers', 'Carburant de récup'],
-    fuelCostFrom: { 'Emporium Requiem': 2, "L'Entrepôt Zéro": 2, 'Comptoir Sud': 2 } },
+    fuelCostFrom: { 'Emporium Requiem': 2, "L'Entrepôt Zéro": 2, 'Comptoir Sud': 2, 'Le Grand Bazar': 3 } },
 
   // ── HAUTE SOCIÉTÉ ─────────────────────────────────────────────────────────────
   { name: 'Résidence Orbitale',
@@ -294,13 +294,27 @@ export const STATIONS: StationData[] = [
     description: "Carrefour de routes commerciales. Ni riche ni pauvre. Juste au milieu de tout.",
     danger: 1, type: 'peaceful',
     goods: ['Médicaments', 'Vivres', 'Outils', 'Carburant de récup'],
-    fuelCostFrom: { 'Port Méridien': 3, 'Fort Kharos': 2, 'Colonie Perséphone': 4, 'La Balise': 3 } },
+    fuelCostFrom: { 'Port Méridien': 3, 'Fort Kharos': 2, 'Colonie Perséphone': 4, 'La Balise': 3, 'Le Grand Bazar': 2 } },
 
   { name: 'Port de Nuit',
     description: "Marché nocturne flottant. Tout ce que les Bas-Fonds vendent officiellement, Port de Nuit le vend discrètement.",
     danger: 2, type: 'dangerous',
     goods: ['Drogues de synthèse', 'Armes illégales', 'Informations monnayables'],
     fuelCostFrom: { 'Les Bas-Fonds de Vega': 2, 'Repaire Vega-Sud': 2, "L'Entrepôt Zéro": 3 } },
+
+  // ── GRAND MARCHÉ DE CRAFT ─────────────────────────────────────────────────────
+  { name: 'Le Grand Bazar',
+    description: "Un marché-monde gigantesque, neutre, où tout ce qui sert à fabriquer se vend. Des allées sans fin de matériaux, composants et ressources. Une règle : ici on vend de quoi CONSTRUIRE, jamais d'armes toutes faites.",
+    danger: 0, type: 'industrial',
+    goods: [
+      'Ferraille', 'Outils', 'Outils lourds', 'Métaux bruts', 'Métaux rares',
+      'Pièces techniques', 'Composants divers', 'Composants électroniques',
+      'Composants tactiques', "Composants d'armure", 'Composants expérimentaux',
+      'Cristaux énergétiques', 'Technologies avancées', 'Munitions', 'Munitions spéciales',
+      'Équipement tactique', 'Médicaments', 'Médicaments premium', 'Plantes médicinales',
+      'Eau purifiée', 'Nourriture fraîche', 'Données', 'Logiciels', 'Carburant de récup',
+    ],
+    fuelCostFrom: { 'Port Méridien': 3, 'Confluent': 2, 'Nexus Aldara': 3, 'Relais de Transit': 3 } },
 
   // ── SCIENTIFIQUES / EXPLORATION ───────────────────────────────────────────────
   { name: 'Station Zéphyr',
@@ -333,7 +347,7 @@ export const STATIONS: StationData[] = [
     description: "Plateforme de raffinage orbital. Chaleur, bruit, rendement. Les ouvriers repartent différents.",
     danger: 2, type: 'industrial',
     goods: ['Carburant premium', 'Métaux rares', 'Cristaux énergétiques'],
-    fuelCostFrom: { 'La Forge Noire': 1, 'Les Cavernes de Mira': 2, 'Station Rocaille': 4, 'Forge Alpha': 1 },
+    fuelCostFrom: { 'La Forge Noire': 1, 'Les Cavernes de Mira': 2, 'Station Rocaille': 4, 'Forge Alpha': 1, 'Station Fantôme': 3 },
     specialService: 'fuel_cheap',
     fuelDiscount: 0.35,
     exclusiveGoods: ['Carburant premium'] },
@@ -385,7 +399,7 @@ export const STATIONS: StationData[] = [
     description: "Complexe industriel qui ne s'arrête jamais. Trois équipes en rotation, chaque seconde d'inactivité une perte. Les ouvriers parlent en gestes entre les machines.",
     danger: 1, type: 'industrial',
     goods: ['Composants de précision', 'Matériaux industriels', 'Outils lourds', 'Pièces techniques'],
-    fuelCostFrom: { 'La Raffinerie': 1, 'Station Rocaille': 3, 'Les Cavernes de Mira': 3 },
+    fuelCostFrom: { 'La Raffinerie': 1, 'Station Rocaille': 3, 'Les Cavernes de Mira': 3, 'La Forge Noire': 2 },
     specialService: 'fuel_cheap',
     fuelDiscount: 0.35,
     exclusiveGoods: ['Composants de précision', 'Matériaux industriels'] },
@@ -457,6 +471,7 @@ export const FUEL_STATIONS = new Set([
   'Relais Noir',
   'Relais de Transit',
   'Fort Kharos',
+  'Le Grand Bazar',
 ])
 
 export const BOSS_STATIONS: Record<string, string> = {

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { StopTheBar, type StopResult } from '../minigames/StopTheBar'
 import { addJournal } from '../../engine/journal'
+import { tickWorldEventsMultipleDays } from '../../engine/worldEvents'
 import type { GameState, WeaponData, ArmorData } from '../../types'
 
 type EscapePhase = 'menu' | 'playing' | 'between' | 'caught' | 'escape-final-roll' | 'success' | 'execution'
@@ -196,9 +197,13 @@ export function PrisonScreen() {
     const itemPatch = buildItemRestore(gs, 0.5)
     const journalText = `J'ai purgé ${days} jour${days > 1 ? 's' : ''} à ${gs.currentStation}. ${days >= 5 ? 'Long. Trop long.' : "Chaque heure pesait son poids."}${expiredCount > 0 ? ` ${expiredCount} contrat${expiredCount > 1 ? 's' : ''} perdu${expiredCount > 1 ? 's' : ''} en prison.` : ''}`
 
+    const afterEvents = tickWorldEventsMultipleDays({ ...gs, day: gs.day + days }, days)
+
     patch({
       isImprisoned: false, prisonDaysLeft: 0,
       day: gs.day + days,
+      activeWorldEvents: afterEvents.activeWorldEvents,
+      stationAlerts: afterEvents.stationAlerts,
       playerHp: finalHp, playerMaxHp: newHpMax,
       stamina: finalSt,
       reputation: finalRep - (expiredCount * 5),

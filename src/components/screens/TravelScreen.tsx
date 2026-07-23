@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { getAccessibleStations, getFuelCost, getStation, findPath } from '../../data/stations'
-import { getWorldEventFuelBonus, getClosedStations } from '../../engine/worldEvents'
+import { getWorldEventFuelBonus, getClosedStations, getActiveEvents } from '../../engine/worldEvents'
+import { getEnemyByTier, scaleEnemy } from '../../data/enemies'
 import { AsteroidDodge } from '../minigames/AsteroidDodge'
 
 function NextHops({ stationName, currentName }: { stationName: string; currentName: string }) {
@@ -32,9 +33,12 @@ export function TravelScreen() {
   const patch       = useGameStore(s => s.patch)
   const goTo        = useGameStore(s => s.goTo)
   const setWaypoint = useGameStore(s => s.setWaypoint)
+  const startCombat = useGameStore(s => s.startCombat)
 
   const [pending, setPending] = useState<Pending | null>(null)
-  const accessible = getAccessibleStations(gs.currentStation)
+  const accessible = getAccessibleStations(gs.currentStation).filter(s =>
+    s.name !== "L'Arc Perdu" || gs.arcPerduUnlocked
+  )
 
   const waypoint     = gs.waypoint ?? null
   const waypointPath = useMemo(
@@ -47,7 +51,7 @@ export function TravelScreen() {
   // Seigneur de guerre banni des stations paisibles
   const PEACEFUL = new Set(['Port Méridien', 'Colonie Perséphone', 'Star Quest', 'Scotty Golden North'])
 
-  const events = gs.activeWorldEvents ?? []
+  const events = getActiveEvents(gs)
   const fuelBonus = getWorldEventFuelBonus(events)
   const closedByEvent = getClosedStations(events)
 
@@ -56,12 +60,20 @@ export function TravelScreen() {
     return (
       <AsteroidDodge
         dangerLevel={pending.danger}
-        onResult={(shipDamage, creditBonus) => {
-          // Appliquer les dégâts vaisseau avant de voyager
+        onResult={(shipDamage, creditBonus, engaged) => {
+          // Appliquer les dégâts vaisseau / bonus
           if (shipDamage > 0) patch({ shipHp: Math.max(1, gs.shipHp - shipDamage) })
           if (creditBonus > 0) patch({ credits: gs.credits + creditBonus })
+          const dest = pending
           setPending(null)
-          travel(pending.station, pending.fuelCost)
+          if (engaged) {
+            // Le joueur a ouvert le feu : des pirates l'interceptent. Voyage avorté.
+            const tier = Math.min(4, Math.max(1, dest.danger || 1)) as 1 | 2 | 3 | 4
+            const pirate = scaleEnemy({ ...getEnemyByTier(tier), name: 'Pirate intercepteur' }, Math.floor(gs.day / 15))
+            startCombat(pirate)
+          } else {
+            travel(dest.station, dest.fuelCost)
+          }
         }}
       />
     )

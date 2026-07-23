@@ -3,31 +3,43 @@ import { useGameStore } from '../../store/gameStore'
 import { playBuy, playSell } from '../../engine/sfx'
 import { getStation, FUEL_STATIONS } from '../../data/stations'
 import { getBuyDiscount } from '../../engine/factions'
-import { getWorldEventPriceMultiplier } from '../../engine/worldEvents'
+import { getWorldEventPriceMultiplier, getActiveEvents } from '../../engine/worldEvents'
 import { getCulteArtefactMult, getFactionSurchargeAtStation, getStationFactionName, getRepLevel, getFactionRep, STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getRunBuyMult } from '../../data/runModifiers'
 import { getFullBuyMult, getFullSellMult, getMarketContext, getPillarDiscount } from '../../engine/marketPricing'
+import { getBlackMarketOffers, isBlackMarketAvailable, buyBlackMarketOffer } from '../../engine/blackMarket'
 
 const BASE_PRICES: Record<string, number> = {
-  'Médicaments': 150, 'Médicaments premium': 350, 'Métaux bruts': 80,
-  'Nourriture synthétique': 60, 'Nourriture fraîche': 85, 'Carburant de récup': 240,
-  'Composants électroniques': 200, 'Vêtements': 90, 'Outils': 120, 'Outils lourds': 200,
-  'Armes illégales': 500, 'Drogues de synthèse': 300, 'Données volées': 400,
-  'Pièces de contrebande': 250, 'Équipements blindés': 450, 'Rations militaires': 70,
-  'Munitions': 180, 'Munitions spéciales': 350, 'Composants tactiques': 350,
-  'Implants': 600, 'Logiciels': 280, 'Données': 220, 'Données classifiées': 700,
-  'Matériel de pillage': 320, 'Butin de guerre': 450, 'Eau purifiée': 50,
-  'Minerais': 110, 'Équipement agricole': 140, 'Métaux rares': 350,
-  'Cristaux énergétiques': 500, 'Armes artisanales': 400, "Composants d'armure": 300,
-  'Matériaux interdits': 600, 'Marchandises volées': 250, 'Composants divers': 150,
-  'Informations monnayables': 350, 'Armes Tier 3': 900, 'Armures premium': 800,
-  'Luxe': 700, 'Informations VIP': 600, "Armures d'élite": 1200,
-  'Armes lourdes': 1000, 'Artefacts': 800, 'Composants expérimentaux': 900,
-  'Carburant premium': 120, 'Armes exotiques': 1500, 'Technologies avancées': 1100,
-  'Armes Tier 4': 2000, 'Armures Tier 4': 1800, 'Renseignements': 500,
-  'Intel faction': 400, 'Équipement tactique': 600, 'Armures Faucon': 1000,
-  'Rations': 70, 'Armures': 400, 'Ferraille': 50, 'Plantes médicinales': 180,
-  'Or': 600, 'Pièces techniques': 200, 'Vivres': 90,
+  'Médicaments': 250, 'Médicaments premium': 580, 'Métaux bruts': 130,
+  'Nourriture synthétique': 100, 'Nourriture fraîche': 140, 'Carburant de récup': 380,
+  'Composants électroniques': 320, 'Vêtements': 145, 'Outils': 190, 'Outils lourds': 320,
+  'Armes illégales': 800, 'Drogues de synthèse': 480, 'Données volées': 650,
+  'Pièces de contrebande': 400, 'Équipements blindés': 720, 'Rations militaires': 115,
+  'Munitions': 290, 'Munitions spéciales': 560, 'Composants tactiques': 560,
+  'Implants': 960, 'Logiciels': 450, 'Données': 350, 'Données classifiées': 1120,
+  'Matériel de pillage': 510, 'Butin de guerre': 720, 'Eau purifiée': 80,
+  'Minerais': 175, 'Équipement agricole': 225, 'Métaux rares': 560,
+  'Cristaux énergétiques': 800, 'Armes artisanales': 640, "Composants d'armure": 480,
+  'Matériaux interdits': 960, 'Marchandises volées': 400, 'Composants divers': 240,
+  'Informations monnayables': 560, 'Armes Tier 3': 1440, 'Armures premium': 1280,
+  'Luxe': 1120, 'Informations VIP': 960, "Armures d'élite": 1920,
+  'Armes lourdes': 1600, 'Artefacts': 1300, 'Composants expérimentaux': 1440,
+  'Carburant premium': 190, 'Armes exotiques': 2400, 'Technologies avancées': 1760,
+  'Armes Tier 4': 3200, 'Armures Tier 4': 2880, 'Renseignements': 800,
+  'Intel faction': 640, 'Équipement tactique': 960, 'Armures Faucon': 1600,
+  'Rations': 115, 'Armures': 640, 'Ferraille': 80, 'Plantes médicinales': 290,
+  'Or': 950, 'Pièces techniques': 320, 'Vivres': 145,
+  'Alcools exotiques': 480, 'Spécialités festives': 350, 'Divertissement': 280,
+  'Fruits rares': 400, 'Composants organiques': 350, 'Épices exotiques': 300,
+  'Fausses identités': 1200, 'Équipement de camouflage': 680,
+  'Composants de précision': 450, 'Matériaux industriels': 280,
+  'Équipement médical': 540, 'Médicaments expérimentaux': 780,
+  'Composants biologiques': 620, 'Implants cybernétiques': 1100,
+  'Stimulants de combat': 480, 'Reliques de la Grande Guerre': 1600,
+  'Artefacts de Nexus': 2200, 'Données pré-Fracture': 1800,
+  'Équipement militaire ancien': 900, 'Jetons de casino': 200,
+  'Implants militaires': 850, 'Matériel de guerre': 720,
+  'Objets de contrebande': 380, 'Médicaments bas de gamme': 100,
 }
 
 // Prix déterministes — la variation inter-station vient de stationPriceSeeds (persisté en GameState)
@@ -54,15 +66,27 @@ export const ITEM_CARGO_MAX: Record<string, number> = {
   'Données classifiées': 5,
 }
 
+const BAZAR_BUY_LIMIT = 3
+
 export function MarketScreen() {
   const gs        = useGameStore(s => s.gs!)
   const goTo      = useGameStore(s => s.goTo)
   const buyCargo          = useGameStore(s => s.buyCargo)
   const sellCargo         = useGameStore(s => s.sellCargo)
+  const patch             = useGameStore(s => s.patch)
+
+  const isBazar = gs.currentStation === 'Le Grand Bazar'
+
+  // Reset automatique des compteurs si 15j ou plus se sont écoulés
+  const bazarBought = useMemo(() => {
+    if (!isBazar) return {}
+    const daysSinceReset = gs.day - (gs.bazarLastResetDay ?? 1)
+    return daysSinceReset >= 15 ? {} : (gs.bazarPurchases ?? {})
+  }, [isBazar, gs.day, gs.bazarLastResetDay, gs.bazarPurchases])
 
   const station    = getStation(gs.currentStation)
   const discount   = getBuyDiscount(gs)
-  const events     = gs.activeWorldEvents ?? []
+  const events     = getActiveEvents(gs)
   const runBuyMult = getRunBuyMult(gs)
   const soutePct       = (gs.shipModules?.soute ?? 0) * 10
   const maxCargo       = 15 + (gs.shipModules?.soute ?? 0) * 5
@@ -93,6 +117,10 @@ export function MarketScreen() {
     ? { label: '▲ STATION CHÈRE', color: 'var(--red)' }
     : null
 
+  const bazarDaysUntilReset = isBazar
+    ? Math.max(0, 15 - (gs.day - (gs.bazarLastResetDay ?? 1)))
+    : 0
+
   return (
     <div className="layout">
       {/* Header */}
@@ -103,6 +131,7 @@ export function MarketScreen() {
         <div className="t-xs" style={{ color: totalCargo >= maxCargo ? 'var(--red)' : 'var(--dim)' }}>
           Soute {totalCargo}/{maxCargo}
         </div>
+        {isBazar && <div className="t-xs t-dim" style={{ fontSize: '9px', letterSpacing: '1px' }}>STOCK RESET J+{bazarDaysUntilReset}</div>}
         {priceTag && <div className="t-xs" style={{ color: priceTag.color, fontWeight: 'bold', fontSize: '9px', letterSpacing: '1px' }}>{priceTag.label}</div>}
         {factionSurcharge > 0 && <div className="t-xs" style={{ color: 'var(--red)', fontWeight: 'bold', fontSize: '9px', letterSpacing: '1px' }}>⚠ +{factionSurcharge}% {controllingFactionName?.toUpperCase()}</div>}
         {discount > 0 && <div className="tag tag--green t-xs">-{discount}% FACTION</div>}
@@ -188,20 +217,34 @@ export function MarketScreen() {
               const banned = gs.class.cannotBuyWeapons && (item.toLowerCase().includes('arme') || item.toLowerCase().includes('munitions'))
               const itemMax = ITEM_CARGO_MAX[item]
               const atMax = itemMax !== undefined && (gs.cargo[item] ?? 0) >= itemMax
-              const blocked = banned || atMax
+              const bazarCount = isBazar ? (bazarBought[item] ?? 0) : 0
+              const bazarMax = isBazar && bazarCount >= BAZAR_BUY_LIMIT
+              const blocked = banned || atMax || bazarMax
               return (
                 <button key={item} className="px-btn" disabled={!canBuy || blocked}
                   style={{ borderColor: station.exclusiveGoods?.includes(item) ? 'var(--gold)' : canBuy && !blocked ? 'var(--border)' : undefined }}
-                  onClick={() => { playBuy(); buyCargo(item, price) }}>
+                  onClick={() => {
+                    playBuy()
+                    buyCargo(item, price)
+                    if (isBazar) {
+                      const daysSinceReset = gs.day - (gs.bazarLastResetDay ?? 1)
+                      const currentPurchases = daysSinceReset >= 15 ? {} : (gs.bazarPurchases ?? {})
+                      patch({
+                        bazarPurchases: { ...currentPurchases, [item]: (currentPurchases[item] ?? 0) + 1 },
+                        bazarLastResetDay: daysSinceReset >= 15 ? gs.day : (gs.bazarLastResetDay ?? 1),
+                      })
+                    }
+                  }}>
                   <div className="row" style={{ justifyContent: 'space-between' }}>
                     <span className="t-xs">
                       {station.exclusiveGoods?.includes(item) && <span style={{ color: 'var(--gold)', marginRight: '5px', fontSize: '9px' }}>★</span>}
                       {item}
-                      {itemMax !== undefined && <span className="t-dim" style={{ marginLeft: '6px', fontSize: '9px' }}>({gs.cargo[item] ?? 0}/{itemMax})</span>}
+                      {isBazar && <span className="t-dim" style={{ marginLeft: '6px', fontSize: '9px' }}>({bazarCount}/{BAZAR_BUY_LIMIT})</span>}
+                      {!isBazar && itemMax !== undefined && <span className="t-dim" style={{ marginLeft: '6px', fontSize: '9px' }}>({gs.cargo[item] ?? 0}/{itemMax})</span>}
                     </span>
                     <span className="t-gold t-xs">
                       {banned ? <span className="t-red">INTERDIT</span>
-                        : atMax ? <span style={{ color: 'var(--dim)' }}>MAX</span>
+                        : (atMax || bazarMax) ? <span style={{ color: 'var(--dim)' }}>MAX</span>
                         : `${price} cr`}
                     </span>
                   </div>
@@ -244,7 +287,12 @@ export function MarketScreen() {
                 Aucune marchandise dans la soute.
               </div>
             )}
-            {Object.entries(gs.cargo).map(([item, qty]) => {
+            {(gs.cargo['Passager'] ?? 0) > 0 && (
+              <div className="px-box t-xs" style={{ border: 'none', background: 'transparent', color: 'var(--orange)' }}>
+                ⚠ Un passager n'est pas une marchandise — impossible de le vendre ici.
+              </div>
+            )}
+            {Object.entries(gs.cargo).filter(([item]) => item !== 'Passager').map(([item, qty]) => {
               const culteMult = ARTEFACT_ITEMS.has(item) ? culteArtefact : 1
               const sellPrice = Math.floor(getBasePrice(item) * stationSeed * getFullSellMult(gs, station.type, item) * getWorldEventPriceMultiplier(item, events) * (1 + soutePct / 100) * culteMult * (factionSurcharge > 0 ? 0.75 : 1))
               const medBonus  = gs.class.medicBonus && item === 'Médicaments'
@@ -265,6 +313,36 @@ export function MarketScreen() {
           </div>
         </div>
       </div>
+
+      {/* ── MARCHÉ NOIR ──────────────────────────────────────────────────── */}
+      {station.danger >= 1 && isBlackMarketAvailable(gs) && (() => {
+        const bmOffers = getBlackMarketOffers(gs)
+        return (
+          <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(60,0,0,0.15)' }}>
+            <div className="t-xs mb8" style={{ color: 'var(--red)', letterSpacing: '2px' }}>⛔ MARCHÉ NOIR</div>
+            <div className="t-xs t-dim mb8" style={{ lineHeight: 1.6 }}>Marchandises illégales. Pas de garanties. Pas de retours.</div>
+            <div className="col gap4">
+              {bmOffers.map(offer => (
+                <button key={offer.id} className="px-btn" style={{ borderColor: 'rgba(200,50,50,0.4)', textAlign: 'left' }}
+                  disabled={gs.credits < offer.price}
+                  onClick={() => {
+                    const result = buyBlackMarketOffer(gs, offer)
+                    if (result) { playBuy(); patch(result) }
+                  }}>
+                  <div className="row" style={{ justifyContent: 'space-between' }}>
+                    <span className="t-xs" style={{ color: offer.type === 'weapon' ? 'var(--orange)' : offer.type === 'armor' ? 'var(--blue)' : 'var(--red)' }}>
+                      {offer.name}
+                    </span>
+                    <span className="t-xs t-red">{offer.price.toLocaleString()} cr</span>
+                  </div>
+                  <div className="t-xs t-dim" style={{ lineHeight: 1.6, marginTop: '2px' }}>{offer.description}</div>
+                  {offer.itemQty && <div className="t-xs t-dim">Quantité : ×{offer.itemQty}</div>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

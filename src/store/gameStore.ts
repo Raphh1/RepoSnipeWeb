@@ -22,7 +22,11 @@ import { drawRunModifiers, getRunCombatCreditBonus, getRunCombatRepDelta, getRun
 import { drawRunObjective, getRunObjective } from '../data/runObjectives'
 import { createChainEvent, shouldCreateChainEvent, type ChainEvent } from '../engine/chainEvents'
 import { addJournal } from '../engine/journal'
-import { resolveNexusWars, HOLDER_BOUNTY_HUNTERS } from '../engine/nexus'
+import { resolveNexusWars, HOLDER_BOUNTY_HUNTERS, getSubBossKillConsequence } from '../engine/nexus'
+import { arePillarSubBossesCleared } from '../data/subBosses'
+import { shouldRaphazarusStrike, getRaphazarusWarrior } from '../engine/raphazarus'
+import { getSubBossAtStation } from '../data/subBosses'
+import { getDailyExpenses } from '../engine/expenses'
 
 function buildInitialState(playerClass: PlayerClass): GameState {
   return {
@@ -129,6 +133,11 @@ function buildInitialState(playerClass: PlayerClass): GameState {
        'Poste Vigie',"L'Arc Perdu",'Station Quarantaine','Relais Noir','Relais de Transit',
        'Scotty Golden North','La Tribosphère'].map(n => [n, 0.75 + Math.random() * 0.5])
     ),
+    subBossesDefeated: {},
+    completedEquipmentQuests: [],
+    arcPerduClues: [],
+    bazarPurchases: {},
+    bazarLastResetDay: 1,
   }
 }
 
@@ -175,6 +184,7 @@ interface Store {
   dismissChainEvent: () => void
   rest: () => void
   newGame: () => void
+  continueConquest: () => void
   worldEventPopup: import('../types').WorldEvent | null
   dismissWorldEventPopup: () => void
 }
@@ -220,6 +230,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     if (!gs) return
 
     const wear = Math.floor(Math.random() * 7) + 2
+    const dailyCost = getDailyExpenses(gs)
     const daySummary = { prevDay: gs.day, actionsUsed: gs.actionsToday, station: gs.currentStation }
     let newGs: GameState = {
       ...gs,
@@ -228,6 +239,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       shipHp: Math.max(1, gs.shipHp - wear),
       day: gs.day + 1,
       actionsToday: 0,
+      credits: Math.max(0, gs.credits - dailyCost),
       zoneDepth: 0,
       explorationFightsDone: 0,
       tournamentRound: 0,
@@ -424,9 +436,26 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       }
     }
 
+    // ── GUERRIERS DE RAPHAZARUS — il traque le porteur des fragments ─────────
+    // Priorité sur les rencontres mineures : seulement si rien d'autre n'a déjà
+    // saisi l'écran (combat/escorte). Surpuissant et de plus en plus fréquent.
+    if (newGs.screen === 'station-arrival' && shouldRaphazarusStrike(newGs)) {
+      const warrior = getRaphazarusWarrior(newGs)
+      newGs = {
+        ...newGs,
+        combatEnemy: warrior,
+        combatState: initCombat(warrior),
+        screen: 'combat',
+        stamina: newGs.maxStamina,
+        pillarStanding: { ...newGs.pillarStanding, raphazarus: (newGs.pillarStanding?.raphazarus ?? 0) - 5 },
+        journal: addJournal(newGs, `${warrior.name} m'a intercepté. Raphazarus a compris que je rassemble les fragments — et il a lâché ses guerriers.`, 'combat'),
+      }
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `☠ ${warrior.name} — Raphazarus a lancé ses guerriers à tes trousses.`
+    }
+
     // Situation d'arrivée (40% de chance)
     const arrival = getArrivalSituation(newGs)
-    if (arrival) {
+    if (arrival && newGs.screen === 'station-arrival') {
       newGs = { ...newGs, pendingArrival: true, pendingMessage: arrival.title }
     }
 
@@ -545,6 +574,9 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     const fragments = [...(s.gs.nexusFragments ?? []), index]
     const rallied = fragments.length
     let newGs = { ...s.gs, nexusFragments: fragments, stationPiecesRallied: rallied }
+    if (index !== 2 && !newGs.raphazarusActivated) {
+      newGs = { ...newGs, raphazarusActivated: true }
+    }
     if (rallied >= 4) {
       newGs = { ...newGs, screen: 'victory' as Screen }
       const summary = buildRunSummary(newGs, true)
@@ -735,16 +767,17 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     if (!s.gs) return s
     let debt = 0
     if (s.gs.class.dailyDebt) debt = s.gs.class.dailyDebt
-    return {
-      gs: {
-        ...s.gs,
-        playerHp: s.gs.playerMaxHp,
-        stamina: s.gs.maxStamina,
-        day: s.gs.day + 1,
-        actionsToday: 0,
-        credits: Math.max(0, s.gs.credits - debt),
-      }
+    const dailyCost = getDailyExpenses(s.gs)
+    const dayGs = {
+      ...s.gs,
+      playerHp: s.gs.playerMaxHp,
+      stamina: s.gs.maxStamina,
+      day: s.gs.day + 1,
+      actionsToday: 0,
+      credits: Math.max(0, s.gs.credits - debt - dailyCost),
     }
+    const { gs: tickedGs } = tickWorldEvents(dayGs)
+    return { gs: tickedGs }
   }),
 
   resolveVictory: () => {
@@ -768,6 +801,17 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
   },
 
   newGame: () => set({ gs: null, travelEventMessage: null, objectivePopup: null, worldEventPopup: null, combatVictoryPending: false, pendingVictoryData: null, playerDeathPending: false, pendingDeathCause: null, chainEventNotification: null }),
+
+  // Après la victoire, reprendre la partie en mode conquête (continuer à jouer).
+  continueConquest: () => set(s => s.gs ? {
+    gs: {
+      ...s.gs,
+      conquestMode: true,
+      screen: 'station-hub' as Screen,
+      pendingCombatOutcome: null,
+      pendingMessage: 'CONQUÊTE — Le Nexus est restauré, mais l\'espace reste à conquérir. Accomplis tous les objectifs et termine ce que tu as commencé.',
+    },
+  } : s),
 }), {
   name: 'snipeweb-save',
   partialize: (state) => ({ gs: state.gs }),
@@ -886,6 +930,30 @@ function handleCombatOutcome(
       ? `J'ai vaincu ${enemyName} à ${gs.currentStation}. Un adversaire qui méritait le respect.`
       : `J'ai vaincu ${enemyName} à ${gs.currentStation}.`
     newGs = { ...newGs, journal: addJournal(gs, victoryText, 'combat') }
+    // Sub-boss vaincu au combat
+    let subBossMsg: string | null = null
+    if (gs.combatEnemy?.isSubBoss) {
+      const sb = getSubBossAtStation(gs.currentStation)
+      if (sb && sb.enemy.name === gs.combatEnemy.name) {
+        const defeated = { ...(newGs.subBossesDefeated ?? {}) }
+        defeated[sb.pillar] = [...(defeated[sb.pillar] ?? []), sb.id]
+        newGs = { ...newGs, subBossesDefeated: defeated }
+        if (sb.reward.type === 'credits') {
+          newGs = { ...newGs, credits: newGs.credits + (sb.reward.value as number) }
+        } else if (sb.reward.type === 'rep') {
+          newGs = { ...newGs, reputation: newGs.reputation + (sb.reward.value as number) }
+        }
+        // Conséquences : on attire l'attention du boss du pilier (ralliements/discussions)
+        const fullyCleared = arePillarSubBossesCleared(defeated, sb.pillar)
+        const cons = getSubBossKillConsequence(newGs, sb.pillar, fullyCleared)
+        newGs = {
+          ...newGs,
+          pillarStanding: cons.patch.pillarStanding ?? newGs.pillarStanding,
+          pastDecisions: cons.patch.pastDecisions ?? newGs.pastDecisions,
+        }
+        subBossMsg = cons.message
+      }
+    }
     // Arc narratif en attente de victoire au combat
     if (newGs.pendingCombatArcId) {
       const arcId = newGs.pendingCombatArcId
@@ -927,7 +995,8 @@ function handleCombatOutcome(
     }
     // Montrer d'abord l'ennemi à 0 PV, puis transition différée vers combat-result
     const dyingGs = { ...gs, combatState: { ...cs, enemyHp: 0 }, pendingCombatOutcome: null }
-    set({ gs: dyingGs, combatVictoryPending: true, pendingVictoryData: { gs: newGs, objMsg } })
+    const finalObjMsg = [objMsg, subBossMsg].filter(Boolean).join('\n') || null
+    set({ gs: dyingGs, combatVictoryPending: true, pendingVictoryData: { gs: newGs, objMsg: finalObjMsg } })
   } else if (outcome === 'fled') {
     const fledGs = {
       ...newGs,

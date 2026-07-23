@@ -1,16 +1,20 @@
-Pour les prochains changement que tu vas faire, il va falloir
-que les medicaments soient achetables mais avec une limite de 5 medicaments
-peu importe la planete. 
-Il faut que le crafting soit plus intuitif et utilisable dans 
-le jeu, pour l'instant on a pas envie de l'utiliser parce que 
-on est pas bien guidé pour savoir comment l'utiliser.
-Ensuite il faut absolument que le joueur ne soit pas bloqué a une
-station peu importe le type de blocage, il faut couvrir tout les cas
-possibles. pas de cul sac dans les stations.
-il faut que les evenements mondiaux respectent leur limite de jour.
-le seigneur de guerre ne peut pas aller dans les planetes PACIFISTES.
-
-le jeu des negociations quand tu fais des mauvais choix il faut
-que tu perdes, t'es trop toujours gagnant peu importe ce qu'il se passe.
-Faudrait faire en sorte qu'on puisse avoir du carburant en trainant dans le coin 
-ou quand on bat quelqu'un. 
+je fais un message dédié pour le systeme de recuperation du nexus.
+Il faut donc abandonner tout ce qui a été fait actuellement pour recuperer les fragments et remplacer par ça.
+Pour recuperer les fragments qui sont detenus par Cesarion, Samy, Alanossa, et Raphazarus
+il y a donc plusieurs possibilités mais la possibilité numero 1 et la plus simple, 
+c'est battre les sous boss de CHACUN d'entre eux, sous boss qui ont un niveau croissant
+jusqu'a arriver au boss principal qu'il faut BATTRE pour obtenir le fragment.
+les sous boss sont donc bien séparé dans plusieurs stations differentes.
+On peut parler maintenant des autres mecaniques possible comme la negociation,
+l'alliance, la manipulation, la trahison. Etant donné que Cesarion et Alanossa sont
+plutot des guerriers sanguinaires, la manipulation et la negociation sont plus complexe,
+pas impossible mais leurs conditions peuvent etre assez radicale et dangereuse, ils peuvent demander
+une alliance contre une faction a aller decimé ou encore une alliance en te demandant d'aller
+tuer un autre des boss et ses sous boss pour prouver ta confiance et ta valeur, ce qui fait que tu peux donc trahir aussi. 
+Je pense que tu a saisi l'idée. Raphazarus est impitoyable et sa station l'arc perdu est introuvable, il s'activera uniquement 
+quand un premier fragment qui n'est pas le sien ducoup sera trouver.. Il enverra des guerriers sur ta route pour te recuperer le fragment et te tuer.
+pour trouver l'arc perdu il faudra faire des recherches et poser des questions a des PNJs locaux dans des stations, en leur parlan
+ils te donneront des indices sur qui aller voir pour des infos sur l'arc perdu pour au final debloquer la station.
+Pour Samy Scotty, le fragment peut etre recuperer en se battant de maniere classique avec les sous boss, mais la negociation est possible,
+etant donné que sa planete est basé sur le gambling il pourrait proposer de jouer a une serie de mini jeu ou il est forcement tres bon, le joueur doit galerer c'est important.
+Voila les infos que tu as pour les fragments, maintenant tu te fais plaisir a enrichir le lore au maximum et a me surprendre, je sais que tu peux.

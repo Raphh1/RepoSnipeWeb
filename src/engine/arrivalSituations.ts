@@ -195,7 +195,50 @@ export const INTERROGATION: ArrivalSituation = {
   ]
 }
 
+// Trafic d'êtres humains — on ne peut PAS vendre son passager au marché, mais
+// en cours de route un trafiquant peut proposer un très bon prix. Choix moral noir.
+function getTraffickingArrival(gs: GameState): ArrivalSituation | null {
+  if ((gs.cargo['Passager'] ?? 0) <= 0) return null
+  if (Math.random() > 0.5) return null   // pas à chaque escale
+  const offer = rng(3500, 6500) + gs.day * 120
+  return {
+    title: "Une offre qui ne se refuse pas",
+    description: `Pendant l'escale, un homme en costume sombre t'aborde sans bruit. « On m'a dit que tu transportes… de la marchandise vivante. Je paie bien. Très bien. ${offer.toLocaleString()} crédits, cash, et personne ne pose de questions. » Ton passager n'a rien entendu. Pour l'instant.`,
+    choices: [
+      {
+        label: `Vendre ton passager (+${offer.toLocaleString()} cr · trafic)`,
+        result: gs => {
+          const cargo = { ...gs.cargo }
+          const cur = cargo['Passager'] ?? 0
+          if (cur <= 1) delete cargo['Passager']; else cargo['Passager'] = cur - 1
+          const firstEscort = gs.activeQuests.find(q => q.type === 'escort')
+          const remaining = firstEscort ? gs.activeQuests.filter(q => q.id !== firstEscort.id) : gs.activeQuests
+          return {
+            gs: {
+              cargo,
+              credits: gs.credits + offer,
+              reputation: gs.reputation - 30,
+              activeQuests: remaining,
+              moralTags: [...(gs.moralTags ?? []).filter(t => t !== 'trafiquant'), 'trafiquant'],
+              pastDecisions: [...(gs.pastDecisions ?? []), 'sold-passenger'],
+            },
+            message: `L'homme glisse les crédits et disparaît avec sa « marchandise ». +${offer.toLocaleString()} cr. -30 rép. Tu ne dormiras pas bien.`,
+          }
+        },
+      },
+      {
+        label: "Refuser — un passager n'est pas une marchandise",
+        result: gs => ({ gs: { reputation: gs.reputation + 8 }, message: "Tu refuses net. L'homme hausse les épaules et s'évapore. +8 rép — quelqu'un t'a vu refuser." }),
+      },
+    ],
+  }
+}
+
 export function getArrivalSituation(gs: GameState, forced = false): ArrivalSituation | null {
+  // Le trafiquant est prioritaire : c'est une offre qui surgit, passager à bord.
+  const traffic = getTraffickingArrival(gs)
+  if (traffic) return traffic
+
   if (!forced && Math.random() > 0.40) return null
 
   const repSituation = getReputationArrival(gs)

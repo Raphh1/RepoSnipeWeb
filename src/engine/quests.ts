@@ -5,6 +5,9 @@ import { getRunQuestRewardMult } from '../data/runModifiers'
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
 
+// Économie volontairement dure : les quêtes rapportent nettement moins de crédits.
+const ECONOMY_MULT = 0.6
+
 const GIVER_NAMES = [
   'Marek','Sela','Donn','Yara','Pistis','Boro','Cael','Neva','Torvak','Lira',
   'Besh','Rook','Ysla','Ganz','Myrra','Sten','Orva','Kael','Fen','Drela',
@@ -207,7 +210,7 @@ export function generateQuest(gs: GameState): Quest | null {
   const type  = pickWeightedType(types)
 
   const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
-  const scale   = (base: number) => Math.round(base * dayMult)
+  const scale   = (base: number) => Math.round(base * dayMult * ECONOMY_MULT)
 
   switch (type) {
     case 'delivery': {
@@ -316,7 +319,7 @@ export function generateChainQuest(completed: Quest, gs: GameState): Quest | nul
 
   const id = Math.random().toString(36).slice(2, 8)
   const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
-  const scale = (base: number) => Math.round(base * dayMult * 1.25)
+  const scale = (base: number) => Math.round(base * dayMult * 1.25 * ECONOMY_MULT)
 
   const targetItem = ['delivery','extraction','heist'].includes(newType)
     ? pick(newType === 'delivery' ? DELIVERY_ITEMS : newType === 'extraction' ? EXTRACTION_ITEMS : HEIST_ITEMS)
@@ -475,7 +478,7 @@ export function generateFactionMission(gs: GameState, factionId: string): Quest 
   const giver   = FACTION_GIVERS[factionId] ?? 'Officier'
   const id      = Math.random().toString(36).slice(2, 8)
   const dayMult = +Math.min(2.5, 1 + (gs.day - 1) * 0.05).toFixed(2)
-  const scale   = (base: number) => Math.round(base * dayMult)
+  const scale   = (base: number) => Math.round(base * dayMult * ECONOMY_MULT)
 
   switch (type) {
     case 'kill': {
@@ -616,7 +619,7 @@ export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string
 
   const type = profile.types[Math.floor(Math.random() * profile.types.length)]
   const item  = profile.items ? profile.items[Math.floor(Math.random() * profile.items.length)] : undefined
-  const creditBase = rng(1200, 3500)
+  const creditBase = Math.round(rng(1200, 3500) * ECONOMY_MULT)
   const creditReward = Math.floor(creditBase * (profile.creditMult ?? 1.0))
   const repReward = Math.floor(rng(8, 20) * (profile.repMult ?? 1.0))
   const id = Math.random().toString(36).slice(2, 8)

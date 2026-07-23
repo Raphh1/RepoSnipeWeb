@@ -5,18 +5,19 @@ import { useMetaStore } from '../../store/metaStore'
 import {
   NEXUS_FRAGMENTS, attemptNexusFragment, canAttempt,
   isFragmentAvailable, getPillarStandingLabel, getWarAvailableFragments,
-  HOLDER_BOUNTY_HUNTERS,
+  HOLDER_BOUNTY_HUNTERS, ARC_PERDU_CLUES,
   type NexusAction
 } from '../../engine/nexus'
 import { BOSS_STATIONS } from '../../data/stations'
 import { TIER_BOSS } from '../../data/enemies'
+import { getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar } from '../../data/subBosses'
 
 type ViewState = 'list' | 'detail'
 
 const PILLAR_COLORS: Record<string, string> = {
   alanossa: 'var(--red)',
   cesarion: 'var(--cyan)',
-  maxance:  'var(--green)',
+  raphazarus: 'var(--purple)',
   scotty:   'var(--gold)',
 }
 
@@ -36,7 +37,7 @@ const ACTION_LABELS: Record<NexusAction, string> = {
 const ACTIONS_BY_FRAGMENT: Record<number, NexusAction[]> = {
   0: ['force', 'pay', 'alliance', 'steal', 'war', 'betray', 'manipulate'],
   1: ['force', 'pay', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
-  2: ['force', 'pay', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
+  2: ['force', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
   3: ['force', 'pay', 'alliance', 'gamble', 'war', 'betray', 'manipulate'],
 }
 
@@ -119,7 +120,7 @@ export function NexusScreen() {
 
     // Trahison — spawn bounty hunter immédiat
     if (result.spawnsBounty && !gs.stalker) {
-      const pillarMap: Record<number, string> = { 0: 'alanossa', 1: 'cesarion', 2: 'maxance', 3: 'scotty' }
+      const pillarMap: Record<number, string> = { 0: 'alanossa', 1: 'cesarion', 2: 'raphazarus', 3: 'scotty' }
       const pillar = pillarMap[idx]
       const bounty = HOLDER_BOUNTY_HUNTERS[pillar]
       if (bounty) {
@@ -193,6 +194,31 @@ export function NexusScreen() {
           </div>
         </div>
 
+        {/* Sub-boss progress */}
+        {(() => {
+          const sbProg = getSubBossProgress(gs.subBossesDefeated ?? {}, f.pillar)
+          const sbCleared = arePillarSubBossesCleared(gs.subBossesDefeated ?? {}, f.pillar)
+          const subs = getSubBossesForPillar(f.pillar)
+          return (
+            <div className="px-box" style={{ borderColor: sbCleared ? 'var(--green)' : 'var(--orange)' }}>
+              <div className="t-xs mb4" style={{ color: sbCleared ? 'var(--green)' : 'var(--orange)', letterSpacing: '1px' }}>
+                ⚔ LIEUTENANTS ({sbProg.done}/{sbProg.total})
+              </div>
+              {subs.map(sb => {
+                const done = (gs.subBossesDefeated?.[f.pillar] ?? []).includes(sb.id)
+                return (
+                  <div key={sb.id} className="t-xs" style={{ color: done ? 'var(--green)' : 'var(--dim)', lineHeight: 2 }}>
+                    {done ? '✓' : '○'} {sb.name} — {sb.station}
+                  </div>
+                )
+              })}
+              {!sbCleared && (
+                <div className="t-xs t-red mt4">⛔ Tu dois vaincre tous les lieutenants avant d'accéder au fragment</div>
+              )}
+            </div>
+          )
+        })()}
+
         {/* Statuts spéciaux */}
         {isAngered && (
           <div className="px-box" style={{ borderColor: 'var(--red)' }}>
@@ -223,6 +249,49 @@ export function NexusScreen() {
           <div className="px-box" style={{ borderColor: 'var(--gold)', textAlign: 'center' }}>
             <div className="t-gold">★ Fragment en ta possession</div>
             <div className="t-xs t-dim mt4">Obtenu {PATH_LABELS[nexusPath[selected]!] ?? ''}</div>
+          </div>
+        )}
+
+        {/* Raphazarus — progression Arc Perdu */}
+        {f.pillar === 'raphazarus' && !isOwned && (
+          <div className="px-box" style={{ borderColor: gs.arcPerduUnlocked ? 'var(--green)' : 'var(--purple)' }}>
+            <div className="t-xs mb4" style={{ color: gs.arcPerduUnlocked ? 'var(--green)' : 'var(--purple)', letterSpacing: '1px' }}>
+              {gs.arcPerduUnlocked ? '✓ L\'ARC PERDU LOCALISÉ' : '◆ RECHERCHE DE L\'ARC PERDU'}
+            </div>
+            {!gs.arcPerduUnlocked && (
+              <>
+                <div className="t-xs t-dim" style={{ lineHeight: 2 }}>
+                  L'Arc Perdu est introuvable. Parle aux PNJs dans les stations pour collecter des indices.
+                </div>
+                <div className="t-xs mt4" style={{ color: 'var(--purple)' }}>
+                  Indices : {(gs.arcPerduClues ?? []).length}/4
+                </div>
+                {ARC_PERDU_CLUES.filter(c => (gs.arcPerduClues ?? []).includes(c.id)).map(c => (
+                  <div key={c.id} className="t-xs" style={{ color: 'var(--dim)', lineHeight: 2 }}>
+                    ✓ {c.clueText}
+                  </div>
+                ))}
+              </>
+            )}
+            {gs.arcPerduUnlocked && !gs.raphazarusActivated && (
+              <div className="t-xs t-dim" style={{ lineHeight: 2 }}>
+                La station est sur ta carte. Raphazarus ne s'est pas encore manifesté.
+              </div>
+            )}
+            {gs.raphazarusActivated && (
+              <div className="t-xs t-red" style={{ lineHeight: 2 }}>
+                ⚠ Raphazarus est en alerte — ses guerriers te traquent sur les routes.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Scotty — progression gambling */}
+        {f.pillar === 'scotty' && !isOwned && (gs.scottyGambleWins ?? 0) > 0 && (
+          <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
+            <div className="t-xs" style={{ color: 'var(--gold)' }}>
+              🎲 Progression gambling : {gs.scottyGambleWins}/3 manches gagnées
+            </div>
           </div>
         )}
 
@@ -356,14 +425,36 @@ export function NexusScreen() {
                 </div>
               </div>
               <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{f.lore.slice(0, 90)}…</div>
-              {!owned && (
-                <div className="t-xs" style={{ marginTop: '4px', color: angered ? 'var(--red)' : standing >= 20 ? 'var(--green)' : 'var(--dim)' }}>
-                  {angered
-                    ? '🗡 Te cherche — combat uniquement'
-                    : `Standing ${f.pillar}: ${standing > 0 ? '+' : ''}${standing} — ${getPillarStandingLabel(gs, f.pillar as any)}`
-                  }
-                </div>
-              )}
+              {!owned && (() => {
+                const sbProg = getSubBossProgress(gs.subBossesDefeated ?? {}, f.pillar)
+                const sbCleared = arePillarSubBossesCleared(gs.subBossesDefeated ?? {}, f.pillar)
+                return (
+                  <>
+                    <div className="t-xs" style={{ marginTop: '4px', color: angered ? 'var(--red)' : standing >= 20 ? 'var(--green)' : 'var(--dim)' }}>
+                      {angered
+                        ? '🗡 Te cherche — combat uniquement'
+                        : `Standing ${f.pillar}: ${standing > 0 ? '+' : ''}${standing} — ${getPillarStandingLabel(gs, f.pillar as any)}`
+                      }
+                    </div>
+                    <div className="t-xs" style={{ marginTop: '2px', color: sbCleared ? 'var(--green)' : 'var(--orange)' }}>
+                      {sbCleared
+                        ? `✓ Lieutenants éliminés (${sbProg.done}/${sbProg.total})`
+                        : `⚔ Lieutenants : ${sbProg.done}/${sbProg.total} vaincus`
+                      }
+                    </div>
+                    {f.pillar === 'raphazarus' && !gs.arcPerduUnlocked && (
+                      <div className="t-xs" style={{ marginTop: '2px', color: 'var(--purple)' }}>
+                        ◆ Arc Perdu : {(gs.arcPerduClues ?? []).length}/4 indices
+                      </div>
+                    )}
+                    {f.pillar === 'scotty' && (gs.scottyGambleWins ?? 0) > 0 && (
+                      <div className="t-xs" style={{ marginTop: '2px', color: 'var(--gold)' }}>
+                        🎲 Gambling : {gs.scottyGambleWins}/3 manches
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
             </button>
           )
         })}

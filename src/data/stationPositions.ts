@@ -8,6 +8,7 @@ export const STATION_POSITIONS: Record<string, StationPos> = {
   'Confluent':                 { x: 430, y: 415 },
   'La Balise':                 { x: 380, y: 490 },
   "L'Oasis de Fer":            { x: 510, y: 400 },
+  'Le Grand Bazar':            { x: 470, y: 470 },
 
   // ── SCIENTIFIQUE ─────────────────────────────────────────────────────────
   'Fort Kharos':               { x: 455, y: 185 },

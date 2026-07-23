@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { addDecision, shiftPillar } from '../../engine/memoryEvents'
 import { addJournal } from '../../engine/journal'
+import { drawInterrogation, INTERROGATION_PASS_SCORE, INTERROGATION_TOTAL, type InterrogationQuestion } from '../../data/interrogationQuestions'
 
-type Phase = 'intro' | 'choices' | 'result'
+type Phase = 'intro' | 'choices' | 'quiz' | 'result'
 
 interface InterrogatorProfile {
   title: string
@@ -46,6 +47,12 @@ export function InterrogationScreen() {
 
   const [phase, setPhase]   = useState<Phase>('intro')
   const [result, setResult] = useState<{ text: string; free: boolean }>({ text: '', free: false })
+
+  // ── Quiz d'interrogatoire ──
+  const [quiz, setQuiz]       = useState<InterrogationQuestion[]>(() => drawInterrogation(INTERROGATION_TOTAL))
+  const [qIdx, setQIdx]       = useState(0)
+  const [score, setScore]     = useState(0)
+  const [picked, setPicked]   = useState<number | null>(null)
 
   const info = gs.pendingInterrogation ?? { faction: 'Autorités locales', captureStation: gs.currentStation }
   const profile = getInterrogatorProfile(info.faction)
@@ -98,9 +105,108 @@ export function InterrogationScreen() {
           </div>
         </div>
 
-        <button className="px-btn px-btn--primary" onClick={() => setPhase('choices')}>
-          Affronter l'interrogatoire →
+        <div className="px-box" style={{ padding: '8px 12px', borderColor: 'var(--dim)' }}>
+          <div className="t-xs t-dim" style={{ lineHeight: '1.9' }}>
+            Avant la cellule, ils tiennent à « vérifier que tu es bien un citoyen normal ».
+            Une série de {INTERROGATION_TOTAL} questions. Réponds correctement à au moins {INTERROGATION_PASS_SCORE} et
+            tu ressors libre. La plupart sont triviales… mais certaines n'ont aucune réponse possible. Bonne chance.
+          </div>
+        </div>
+
+        <button className="px-btn px-btn--primary" onClick={() => setPhase('quiz')}>
+          Subir l'interrogatoire culturel ({INTERROGATION_PASS_SCORE}/{INTERROGATION_TOTAL}) →
         </button>
+        <button className="px-btn" onClick={() => setPhase('choices')}>
+          Tenter une autre approche (soudoyer, nier, fuir…)
+        </button>
+      </div>
+    )
+  }
+
+  // ── QUIZ ─────────────────────────────────────────────────────────────────
+  if (phase === 'quiz') {
+    const question = quiz[qIdx]
+    const answered = picked !== null
+    const isLast   = qIdx >= quiz.length - 1
+
+    function choose(i: number) {
+      if (picked !== null) return
+      setPicked(i)
+      if (i === question.answer) setScore(s => s + 1)
+    }
+
+    function next() {
+      if (isLast) {
+        const finalScore = score
+        const passed = finalScore >= INTERROGATION_PASS_SCORE
+        if (passed) {
+          free(
+            `Tu as répondu juste à ${finalScore}/${INTERROGATION_TOTAL} questions. L'interrogateur soupire, déçu de ne pas pouvoir te garder. « Citoyen modèle, apparemment. » On te relâche.`,
+            { journal: addJournal(gs, `J'ai survécu à l'interrogatoire culturel de ${info.faction} (${finalScore}/${INTERROGATION_TOTAL}). Ils n'ont pas pu me garder.`, 'prison') }
+          )
+        } else {
+          prison(
+            `Seulement ${finalScore}/${INTERROGATION_TOTAL} bonnes réponses. « Soit tu es un espion, soit tu es inculte. Dans les deux cas, cellule. » Ils t'emmènent.`,
+            rng(3, 6),
+            { journal: addJournal(gs, `J'ai échoué à l'interrogatoire culturel de ${info.faction} (${finalScore}/${INTERROGATION_TOTAL}). Cellule.`, 'prison') }
+          )
+        }
+        return
+      }
+      setQIdx(i => i + 1)
+      setPicked(null)
+    }
+
+    return (
+      <div className="layout">
+        <div className="t-xs t-dim t-center" style={{ letterSpacing: '3px' }}>
+          — INTERROGATOIRE CULTUREL —
+        </div>
+
+        <div className="row" style={{ justifyContent: 'space-between' }}>
+          <span className="t-xs t-dim">Question {qIdx + 1}/{quiz.length}</span>
+          <span className="t-xs">Score : <span style={{ color: score >= INTERROGATION_PASS_SCORE ? 'var(--green)' : 'var(--dim)' }}>{score}</span> · seuil {INTERROGATION_PASS_SCORE}</span>
+        </div>
+
+        <div className="px-box" style={{ borderColor: profile.tone }}>
+          <div className="t-sm" style={{ lineHeight: '1.9' }}>{question.q}</div>
+        </div>
+
+        <div className="col gap4">
+          {question.choices.map((c, i) => {
+            const correct = answered && i === question.answer
+            const wrong   = answered && i === picked && i !== question.answer
+            return (
+              <button
+                key={i}
+                className="px-btn"
+                disabled={answered}
+                style={{
+                  borderColor: correct ? 'var(--green)' : wrong ? 'var(--red)' : undefined,
+                  color: correct ? 'var(--green)' : wrong ? 'var(--red)' : undefined,
+                  opacity: answered && !correct && !wrong ? 0.5 : 1,
+                }}
+                onClick={() => choose(i)}
+              >
+                {c}
+              </button>
+            )
+          })}
+        </div>
+
+        {answered && (
+          <>
+            <div className="px-box" style={{ padding: '6px 12px', borderColor: picked === question.answer ? 'var(--green)' : 'var(--red)' }}>
+              <span className="t-xs" style={{ color: picked === question.answer ? 'var(--green)' : 'var(--red)' }}>
+                {picked === question.answer ? '✓ Bonne réponse.' : '✗ Mauvaise réponse.'}
+                {question.impossible ? ' (Personne ne pouvait répondre à celle-là. C\'était le piège.)' : ''}
+              </span>
+            </div>
+            <button className="px-btn px-btn--primary" onClick={next}>
+              {isLast ? 'Voir le verdict →' : 'Question suivante →'}
+            </button>
+          </>
+        )}
       </div>
     )
   }

@@ -28,8 +28,19 @@ const TAG_COLOR: Record<string, string> = {
   mixed:  'var(--gold)',
 }
 
+// Tirage pondéré : le Seigneur de guerre (classe très forte) est rare.
+const CLASS_WEIGHTS: Record<string, number> = {
+  'Seigneur de guerre': 0.18,
+}
 function pickRandom() {
-  return CLASSES[Math.floor(Math.random() * CLASSES.length)]
+  const weighted = CLASSES.map(c => ({ c, w: CLASS_WEIGHTS[c.name] ?? 1 }))
+  const total = weighted.reduce((s, x) => s + x.w, 0)
+  let r = Math.random() * total
+  for (const { c, w } of weighted) {
+    r -= w
+    if (r <= 0) return c
+  }
+  return weighted[weighted.length - 1].c
 }
 
 function drawConditions(): { mods: RunModifier[]; obj: RunObjective } {

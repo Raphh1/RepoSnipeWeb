@@ -3,7 +3,7 @@ import { useGameStore } from '../../store/gameStore'
 import { STATIONS, getAccessibleStations, PEACEFUL_STATIONS, findPath } from '../../data/stations'
 import { STATION_POSITIONS } from '../../data/stationPositions'
 import { STATION_FACTION_CONTROL } from '../../engine/factionRep'
-import { getClosedStations, getWorldEventFuelBonus } from '../../engine/worldEvents'
+import { getClosedStations, getWorldEventFuelBonus, getActiveEvents } from '../../engine/worldEvents'
 
 const TYPE_COLORS: Record<string, string> = {
   peaceful:    '#40ff80',
@@ -21,7 +21,6 @@ const FACTION_COLORS: Record<string, string> = {
   alanossa:   '#ff4444',
   scotty:     '#40ff80',
   eliotis:    '#40d0ff',
-  maxance:    '#ff8040',
 }
 
 const DANGER_LABEL = ['Sûre', 'Risquée', 'Dangereuse', 'Zone de guerre']
@@ -59,7 +58,7 @@ export function MapScreen() {
   const svgRef                  = useRef<SVGSVGElement>(null)
   const didDragRef              = useRef(false)
 
-  const events         = gs.activeWorldEvents ?? []
+  const events         = getActiveEvents(gs)
   const closedStations = new Set(getClosedStations(events))
   const fuelBonus      = getWorldEventFuelBonus(events)
   const questStations  = new Set(gs.activeQuests.map(q => q.targetStation))
@@ -172,6 +171,7 @@ export function MapScreen() {
             const fp = STATION_POSITIONS[from]
             const tp = STATION_POSITIONS[to]
             if (!fp || !tp) return null
+            if ((from === "L'Arc Perdu" || to === "L'Arc Perdu") && !gs.arcPerduUnlocked) return null
 
             const isCurrentEdge = from === gs.currentStation || to === gs.currentStation
             const otherStation  = from === gs.currentStation ? to : to === gs.currentStation ? from : null
@@ -217,6 +217,7 @@ export function MapScreen() {
           {STATIONS.map(station => {
             const pos     = STATION_POSITIONS[station.name]
             if (!pos) return null
+            if (station.name === "L'Arc Perdu" && !gs.arcPerduUnlocked) return null
 
             const isCurrent   = station.name === gs.currentStation
             const isAccessible= accessibleNow.has(station.name)

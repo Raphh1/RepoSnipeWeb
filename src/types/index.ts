@@ -136,6 +136,25 @@ export interface Enemy {
   isBoss: boolean
   role: EnemyRole
   pillarAbility?: PillarAbility
+  isSubBoss?: boolean
+}
+
+export type SubBossResolution = 'kill' | 'negotiate' | 'manipulate' | 'betray' | 'ally' | 'sabotage'
+
+export interface SubBossData {
+  id: string
+  name: string
+  pillar: string
+  station: string
+  order: 1 | 2 | 3 | 4
+  personality: string
+  motivation: string
+  backstory: string
+  combatMechanic: string
+  specialAbility: string
+  reward: { type: 'weapon' | 'armor' | 'credits' | 'rep' | 'item'; value: string | number }
+  resolutions: SubBossResolution[]
+  enemy: Enemy
 }
 
 export type CombatOutcome = 'victory' | 'stunned' | 'captured' | 'dead' | 'fled'
@@ -165,6 +184,9 @@ export interface CombatState {
   enemySilencedTurns: number   // silence — ennemi limité aux attaques basiques
   playerExposedTurns: number   // après frappe concentrée — ennemi frappe ×1.5 ce tour
   medicUses: number            // soins utilisés ce combat (max 3)
+  turnCount: number            // compteur de tours pour mécaniques de sous-boss
+  subBossShadowHits: number    // Le Maître des Ombres — coups encaissés par l'ombre (se brise après 3)
+  subBossDefenseStacks: number
   log: CombatLogEntry[]
 }
 
@@ -513,6 +535,20 @@ export interface GameState {
   pendingEscortQuestId?: string
   // Waypoint — destination planifiée depuis la carte
   waypoint?: string
+  // Sous-boss vaincus par pilier { pillarKey: subBossId[] }
+  subBossesDefeated: Record<string, string[]>
+  // Quêtes d'équipement complétées
+  completedEquipmentQuests: string[]
+  conquestMode?: boolean
+  arcPerduUnlocked?: boolean
+  arcPerduClues: string[]
+  raphazarusActivated?: boolean
+  raphazarusWarriorDay?: number
+  scottyGambleWins?: number
+  scottyGambleRound?: number
+  // Grand Bazar — compteur d'achats (reset tous les 15j)
+  bazarPurchases: Record<string, number>
+  bazarLastResetDay: number
 }
 
 export type StationSpecialService =

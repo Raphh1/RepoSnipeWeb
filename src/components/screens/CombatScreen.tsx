@@ -452,7 +452,7 @@ export function CombatScreen() {
 
           {gs.reputation > 0 && (
             <button className="px-btn t-dim" disabled={isAnimating} onClick={() => act({ type: 'intimidate' })}>
-              😤 Intimider · {Math.floor(gs.reputation / 5)}% succès
+              😤 Intimider · {Math.min(75, Math.floor(gs.reputation / 5))}% succès
             </button>
           )}
           {enemy.isBoss
@@ -462,7 +462,7 @@ export function CombatScreen() {
               </button>
             )
             : (() => {
-              const chance = 20 + Math.max(0, Math.floor(gs.reputation / 8))
+              const chance = Math.min(70, 20 + Math.max(0, Math.floor(gs.reputation / 8)))
               return (
                 <button className="px-btn t-dim" disabled={isAnimating} onClick={() => {
                   if (Math.random() * 100 < chance) {

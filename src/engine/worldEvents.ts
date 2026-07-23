@@ -190,6 +190,19 @@ export function tickWorldEvents(gs: GameState): { gs: GameState; newWorldEvent: 
   return { gs: { ...gs, activeWorldEvents: newActive, stationAlerts }, newWorldEvent }
 }
 
+export function getActiveEvents(gs: GameState): WorldEvent[] {
+  return (gs.activeWorldEvents ?? []).filter(e => e.startDay + e.duration > gs.day)
+}
+
+export function tickWorldEventsMultipleDays(gs: GameState, days: number): GameState {
+  let current = gs
+  for (let i = 0; i < days; i++) {
+    const { gs: ticked } = tickWorldEvents(current)
+    current = ticked
+  }
+  return current
+}
+
 export function getWorldEventPriceMultiplier(item: string, events: WorldEvent[]): number {
   let mult = 1
   for (const evt of events) {
