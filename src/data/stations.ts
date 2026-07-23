@@ -35,7 +35,7 @@ export const STATIONS: StationData[] = [
     description: "Carrefour technologique. Les meilleurs hackers et ingénieurs y vivent — ou y meurent.",
     danger: 1, type: 'scientific',
     goods: ['Composants électroniques', 'Implants', 'Logiciels', 'Données'],
-    fuelCostFrom: { 'Port Méridien': 2, 'Fort Kharos': 3, 'Le Purgatoire': 3, 'Sanctum Machina': 2 },
+    fuelCostFrom: { 'Port Méridien': 2, 'Fort Kharos': 3, 'Le Purgatoire': 3, 'Sanctum Machina': 2, "L'Œil du Faucon": 4 },
     exclusiveGoods: ['Implants', 'Logiciels'],
   },
   {
@@ -43,7 +43,7 @@ export const STATIONS: StationData[] = [
     description: "Territoire d'Alanossa. Personne n'entre sans permission. Personne ne sort sans cicatrices.",
     danger: 3, type: 'dangerous',
     goods: ['Armes lourdes', 'Matériel de pillage', 'Butin de guerre'],
-    fuelCostFrom: { 'Les Bas-Fonds de Vega': 2, 'Le Nid des Faucons': 3 },
+    fuelCostFrom: { 'Les Bas-Fonds de Vega': 2, 'Le Nid des Faucons': 3, "L'Œil du Faucon": 2 },
   },
   {
     name: 'Le Purgatoire',
@@ -57,7 +57,7 @@ export const STATIONS: StationData[] = [
     description: "Quartier général des Faucons Noirs. Propre, militarisé, mortel.",
     danger: 3, type: 'military',
     goods: ['Équipement tactique', 'Armures Faucon', 'Intel faction'],
-    fuelCostFrom: { 'Arc Ouest Apocalypse': 3, 'La Citadelle Écarlate': 2 },
+    fuelCostFrom: { 'Arc Ouest Apocalypse': 3, 'La Citadelle Écarlate': 2, 'Fort de Cendres': 2 },
   },
   {
     name: 'Fort Ossian',
@@ -118,7 +118,7 @@ export const STATIONS: StationData[] = [
     description: "Bastion des Faucons Rouges. Une faction rivale des Faucons Noirs. Aussi violents.",
     danger: 3, type: 'military',
     goods: ["Armures d'élite", 'Armes lourdes', 'Munitions spéciales'],
-    fuelCostFrom: { 'Le Nid des Faucons': 2, 'Scotty Golden North': 4, 'La Forteresse Exilée': 4 },
+    fuelCostFrom: { 'Le Nid des Faucons': 2, 'Scotty Golden North': 4, 'La Forteresse Exilée': 4, 'Fort de Cendres': 4 },
   },
   {
     name: 'Les Abysses de Velkor',
@@ -132,7 +132,7 @@ export const STATIONS: StationData[] = [
     description: "Le royaume de Samy Scotty. Casino, jeux d'argent, paris sur tout et n'importe quoi — c'est ici que les crédits du secteur finissent leur vie. Loin de tout, mais bien réel.",
     danger: 2, type: 'peaceful',
     goods: ['Jetons de casino', 'Armes exotiques', 'Informations VIP', 'Luxe'],
-    fuelCostFrom: { 'La Citadelle Écarlate': 4, 'Les Abysses de Velkor': 3, "La Couronne d'Eos": 4, 'La Tribosphère': 3 },
+    fuelCostFrom: { 'La Citadelle Écarlate': 4, 'Les Abysses de Velkor': 3, "La Couronne d'Eos": 4, 'La Tribosphère': 3, 'Station Limite': 3 },
     specialService: 'gambling',
     exclusiveGoods: ['Jetons de casino', 'Armes exotiques'],
   },
@@ -156,13 +156,13 @@ export const STATIONS: StationData[] = [
     description: "Base d'opérations clandestines des Faucons. Officiellement inexistante.",
     danger: 3, type: 'dangerous',
     goods: ['Armes lourdes', 'Données volées', 'Équipement tactique', 'Matériel de guerre', 'Implants militaires'],
-    fuelCostFrom: { 'Le Nid des Faucons': 1, 'Le Perchoir': 2, 'La Tanière': 3 } },
+    fuelCostFrom: { 'Le Nid des Faucons': 1, 'Le Perchoir': 2, 'La Tanière': 3, 'Fort de Cendres': 2 } },
 
   { name: 'Relais Noir',
     description: "Point de ravitaillement Faucon. Ouvert à ceux qui savent comment demander.",
     danger: 1, type: 'industrial',
     goods: ['Carburant de récup', 'Munitions', 'Pièces techniques', 'Composants électroniques', 'Outils lourds'],
-    fuelCostFrom: { 'Arc Ouest Apocalypse': 2, 'Les Bas-Fonds de Vega': 3, 'Le Perchoir': 2 } },
+    fuelCostFrom: { 'Arc Ouest Apocalypse': 2, 'Les Bas-Fonds de Vega': 3, 'Le Perchoir': 2, "L'Œil du Faucon": 3 } },
 
   { name: 'La Tanière',
     description: "Ancien repaire pirate repris par Alanossa. Loyauté absolue requise pour entrer.",
@@ -174,7 +174,7 @@ export const STATIONS: StationData[] = [
     description: "Fortin Faucon sur les ruines d'un avant-poste militaire. Murs noirs. Soldats efficaces.",
     danger: 2, type: 'military',
     goods: ['Armures Faucon', 'Équipement tactique', 'Rations militaires'],
-    fuelCostFrom: { 'Le Nid des Faucons': 2, 'Station Ombre': 2, 'La Citadelle Écarlate': 4 } },
+    fuelCostFrom: { 'Le Nid des Faucons': 2, 'Station Ombre': 2, 'La Citadelle Écarlate': 4, 'Le Perchoir': 3 } },
 
   { name: "L'Œil du Faucon",
     description: "Station d'observation et d'écoute. Les Faucons voient tout depuis ici — ou presque.",
@@ -211,7 +211,7 @@ export const STATIONS: StationData[] = [
     description: "Ancien fort des Gardiens dont les occupants ont été bannis. Quelqu'un d'autre s'en est emparé.",
     danger: 3, type: 'military',
     goods: ['Armes lourdes', 'Munitions spéciales', 'Équipement tactique'],
-    fuelCostFrom: { 'La Citadelle Écarlate': 4, "L'Arsenal Écarlate": 3, 'La Forge Noire': 4 } },
+    fuelCostFrom: { 'La Citadelle Écarlate': 4, "L'Arsenal Écarlate": 3, 'La Forge Noire': 4, 'Station Limite': 4 } },
 
   // ── EMPORIUM ─────────────────────────────────────────────────────────────────
   { name: 'Comptoir Sud',
@@ -402,7 +402,7 @@ export const STATIONS: StationData[] = [
     description: "Les robots sont partout. ARIA-9, l'IA centrale, les coordonne en temps réel. À l'entrée, ton profil est créé en huit secondes. Elle t'a déjà évalué.",
     danger: 2, type: 'scientific',
     goods: ['Logiciels', 'Composants expérimentaux', 'Données', 'Implants cybernétiques'],
-    fuelCostFrom: { 'Nexus Aldara': 2, 'Station Zéphyr': 3, 'Le Berceau': 3 } },
+    fuelCostFrom: { 'Nexus Aldara': 2, 'Station Zéphyr': 3, 'Le Berceau': 3, 'La Bulle': 2 } },
 
   { name: 'La Bulle',
     description: "Station de recherche biomédicale aux activités créativement diversifiées. Le Docteur Flinch a compris que légal et illégal représentaient le même marché. Ses cliniques propres côtoient des arrière-salles dont les équipements sont trop précis pour être honnêtes.",
@@ -532,4 +532,29 @@ export const BOSS_STATIONS: Record<string, string> = {
   'Sanctum Machina':          'ARIA-9 Protocole Noir',
   'La Bulle':                 'Docteur Flinch',
   'La Forge des Damnés':      "L'Armurière Skade",
+}
+
+// BFS — chemin le plus court (en nombre de sauts) entre deux stations
+export function findPath(from: string, to: string): string[] {
+  if (from === to) return [from]
+  const adj: Record<string, string[]> = {}
+  for (const s of STATIONS) {
+    for (const src of Object.keys(s.fuelCostFrom)) {
+      if (!adj[src]) adj[src] = []
+      adj[src].push(s.name)
+    }
+  }
+  const visited = new Set<string>([from])
+  const queue: string[][] = [[from]]
+  while (queue.length > 0) {
+    const path = queue.shift()!
+    for (const next of adj[path[path.length - 1]] ?? []) {
+      if (next === to) return [...path, next]
+      if (!visited.has(next)) {
+        visited.add(next)
+        queue.push([...path, next])
+      }
+    }
+  }
+  return []
 }

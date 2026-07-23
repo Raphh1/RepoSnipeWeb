@@ -22,6 +22,7 @@ import { drawRunModifiers, getRunCombatCreditBonus, getRunCombatRepDelta, getRun
 import { drawRunObjective, getRunObjective } from '../data/runObjectives'
 import { createChainEvent, shouldCreateChainEvent, type ChainEvent } from '../engine/chainEvents'
 import { addJournal } from '../engine/journal'
+import { resolveNexusWars, HOLDER_BOUNTY_HUNTERS } from '../engine/nexus'
 
 function buildInitialState(playerClass: PlayerClass): GameState {
   return {
@@ -85,9 +86,12 @@ function buildInitialState(playerClass: PlayerClass): GameState {
     multiCombatState: null,
     nexusFragments: [],
     nexusPath: {},
+    nexusWars: [],
+    nexusAngered: [],
     stalker: undefined,
     pendingArrival: false,
     pendingDaySummary: null,
+    pillageBonusActive: false,
     moralTags: [],
     pastDecisions: [],
     pillarStanding: { cesarion: 0, raphazarus: 0, eliotis: 0, maxance: 0, alanossa: 0, scotty: 0 },
@@ -114,6 +118,7 @@ function buildInitialState(playerClass: PlayerClass): GameState {
     prisonCellmatePending: false,
     implantsBought: [],
     usedFreeRestStations: [],
+    usedLocalActivities: [],
     pendingChainQuests: [],
     stationAlerts: {},
     stationPriceSeeds: Object.fromEntries(
@@ -160,6 +165,7 @@ interface Store {
   spendAction: () => void
   joinFaction: (factionId: string) => void
   collectNexusFragment: (index: number) => void
+  setWaypoint: (name: string | null) => void
   patch: (partial: Partial<GameState>) => void
   advanceMajorQuests: () => void
   chainEventNotification: ChainEvent | null
@@ -225,6 +231,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       zoneDepth: 0,
       explorationFightsDone: 0,
       tournamentRound: 0,
+      usedLocalActivities: [],
       visitedStations: Array.from(new Set([...gs.visitedStations, station])),
       screen: 'station-arrival',
       pendingCombatOutcome: null,
@@ -363,6 +370,60 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       }
     }
 
+    // ── GUERRES ENTRE DÉTENTEURS — résolution après 4 jours ─────────────────
+    if ((newGs.nexusWars ?? []).some(w => !w.resolved)) {
+      const { gs: warGs, messages: warMsgs } = resolveNexusWars(newGs)
+      if (Object.keys(warGs).length > 0) {
+        newGs = { ...newGs, ...warGs }
+        if (warMsgs.length > 0) travelMsg = (travelMsg ? travelMsg + ' | ' : '') + warMsgs[0]
+      }
+    }
+
+    // ── BOUNTY HUNTERS DES DÉTENTEURS TRAHIS ─────────────────────────────────
+    if ((newGs.nexusAngered ?? []).length > 0 && !newGs.stalker) {
+      const angeredPillar = (newGs.nexusAngered ?? [])[Math.floor(Math.random() * (newGs.nexusAngered ?? []).length)]
+      const bountyData = HOLDER_BOUNTY_HUNTERS[angeredPillar]
+      if (bountyData && Math.random() < 0.25) {
+        newGs = {
+          ...newGs,
+          stalker: {
+            name: bountyData.name,
+            station: newGs.currentStation,
+            closingIn: true,
+            daysSinceLastSeen: newGs.day,
+            threatLevel: bountyData.threatLevel,
+            daysActive: 0,
+          },
+        }
+        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `⚠ ${bountyData.name} — ${bountyData.description}`
+      }
+    }
+
+    // ── CONSÉQUENCES DE RÉPUTATION FACTION ───────────────────────────────────
+    if (!newGs.stalker) {
+      const fRep = newGs.factionReputation
+      const hostileFactions: Array<{ faction: string; name: string }> = []
+      if (fRep.faucons <= -70)  hostileFactions.push({ faction: 'faucons',  name: 'L\'Assassin des Faucons' })
+      if (fRep.emporium <= -70) hostileFactions.push({ faction: 'emporium', name: 'L\'Exécuteur de l\'Emporium' })
+      if (fRep.gardiens <= -70) hostileFactions.push({ faction: 'gardiens', name: 'Le Bras Armé des Gardiens' })
+      if (fRep.culte <= -70)    hostileFactions.push({ faction: 'culte',    name: 'Le Serviteur du Vide' })
+      if (hostileFactions.length > 0 && Math.random() < 0.20) {
+        const chosen = hostileFactions[Math.floor(Math.random() * hostileFactions.length)]
+        newGs = {
+          ...newGs,
+          stalker: {
+            name: chosen.name,
+            station: newGs.currentStation,
+            closingIn: true,
+            daysSinceLastSeen: newGs.day,
+            threatLevel: 3,
+            daysActive: 0,
+          },
+        }
+        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `⚠ ${chosen.name} te traque — réputation ${chosen.faction} désastreuse.`
+      }
+    }
+
     // Situation d'arrivée (40% de chance)
     const arrival = getArrivalSituation(newGs)
     if (arrival) {
@@ -397,9 +458,12 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
         if (eff.reputation)  newGs = { ...newGs, reputation: newGs.reputation + eff.reputation }
         if (eff.fuel)        newGs = { ...newGs, fuel: Math.min(newGs.maxFuel, newGs.fuel + eff.fuel) }
         if (eff.cargo) {
+          const maxCargo = 15 + (newGs.shipModules?.soute ?? 0) * 5
           const newCargo = { ...newGs.cargo }
           for (const [item, qty] of Object.entries(eff.cargo)) {
-            newCargo[item] = (newCargo[item] ?? 0) + qty
+            const current = Object.values(newCargo).reduce((a, b) => a + b, 0)
+            const canAdd = Math.max(0, maxCargo - current)
+            if (canAdd > 0) newCargo[item] = (newCargo[item] ?? 0) + Math.min(qty, canAdd)
           }
           newGs = { ...newGs, cargo: newCargo }
         }
@@ -547,6 +611,16 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     const maxCargo = 15 + (s.gs.shipModules?.soute ?? 0) * 5
     const totalItems = Object.values(s.gs.cargo).reduce((a, b) => a + b, 0)
     if (totalItems >= maxCargo) return s
+    // Limites par item (protection anti-abus)
+    const CARGO_MAX: Record<string, number> = {
+      'Implants': 2, 'Implants militaires': 2,
+      'Médicaments premium': 4, 'Or': 5,
+      'Cristaux énergétiques': 6, 'Métaux rares': 8,
+      'Technologies avancées': 4, 'Composants expérimentaux': 4,
+      'Données classifiées': 5,
+    }
+    const itemMax = CARGO_MAX[item]
+    if (itemMax !== undefined && (s.gs.cargo[item] ?? 0) >= itemMax) return s
     const cargo = { ...s.gs.cargo, [item]: (s.gs.cargo[item] ?? 0) + 1 }
     return { gs: { ...s.gs, credits: s.gs.credits - price, cargo } }
   }),
@@ -642,9 +716,12 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
 
   joinFaction: (factionId) => set(s => {
     if (!s.gs) return s
-    return { gs: { ...s.gs, faction: factionId as GameState['faction'] } }
+    const withFaction = { ...s.gs, faction: factionId as GameState['faction'] }
+    const { newGs: majorGs } = checkMajorQuestAdvancement(withFaction)
+    return { gs: { ...withFaction, ...majorGs } }
   }),
 
+  setWaypoint: (name) => set(s => s.gs ? { gs: { ...s.gs, waypoint: name ?? undefined } } : s),
   patch: (partial) => set(s => s.gs ? { gs: { ...s.gs, ...partial } } : s),
 
   chainEventNotification: null,

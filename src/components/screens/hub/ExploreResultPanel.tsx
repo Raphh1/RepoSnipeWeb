@@ -61,10 +61,12 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
           {exploreResult.type === 'loot' && !resultMsg && (
             <button className="px-btn px-btn--primary" onClick={() => {
               const e = exploreResult as Extract<ExploreResult, { type: 'loot' }>
-              patch({ credits: gs.credits + e.credits })
-              setResultMsg(`+${e.credits} cr récupérés.`)
+              const mult = gs.pillageBonusActive ? 1.5 : 1
+              const gained = Math.floor(e.credits * mult)
+              patch({ credits: gs.credits + gained, pillageBonusActive: false })
+              setResultMsg(`+${gained} cr récupérés.${gs.pillageBonusActive ? ' (×1.5 pillage)' : ''}`)
             }}>
-              Ramasser (+{(exploreResult as Extract<ExploreResult, { type: 'loot' }>).credits} cr)
+              Ramasser (+{(exploreResult as Extract<ExploreResult, { type: 'loot' }>).credits} cr{gs.pillageBonusActive ? ' ×1.5' : ''})
             </button>
           )}
 

@@ -29,6 +29,7 @@ export type Screen =
   | 'interrogation'
   | 'journal'
   | 'escort-minigame'
+  | 'map'
 
 export type PlayerClassName =
   | 'Vagabond' | 'Ferrailleur' | 'Endetté' | 'Accro' | 'Maudit'
@@ -315,6 +316,18 @@ export interface MajorQuest {
 
 export type StationAlertType = 'siege' | 'festival' | 'lockdown' | 'epidemic'
 
+// ── GUERRE ENTRE DÉTENTEURS DU NEXUS ─────────────────────────────────────────
+
+export interface NexusWar {
+  holderA: string   // pillar key, ex: 'alanossa'
+  holderB: string   // pillar key, ex: 'cesarion'
+  startDay: number
+  resolved: boolean
+  winner?: string   // pillar key du vainqueur
+  loser?: string    // pillar key du perdant
+  fragIdxLoser?: number  // idx du fragment du perdant (maintenant dispo)
+}
+
 // ── ÉVÉNEMENTS MONDIAUX ───────────────────────────────────────────────────────
 
 export interface WorldEvent {
@@ -422,7 +435,9 @@ export interface GameState {
   multiCombatState: import('../engine/multiCombat').MultiCombatState | null
   // Nexus fragments (condition de victoire)
   nexusFragments: number[]
-  nexusPath: Partial<Record<number, 'force' | 'pay' | 'alliance' | 'legendary' | 'gamble' | 'steal' | 'lore'>>
+  nexusPath: Partial<Record<number, 'force' | 'pay' | 'alliance' | 'legendary' | 'gamble' | 'steal' | 'lore' | 'war' | 'betray' | 'manipulate'>>
+  nexusWars: NexusWar[]
+  nexusAngered: string[]  // pillar keys des détenteurs rendus ennemis permanents
   pendingCombatArcId: string | null
   // Stalker system
   stalker: import('../engine/stalker').StalkerState | undefined
@@ -430,6 +445,8 @@ export interface GameState {
   pendingArrival: boolean
   // Résumé fin de journée (montré à l'arrivée à la prochaine station)
   pendingDaySummary: { prevDay: number; actionsUsed: number; station: string } | null
+  // Bonus de pillage activé par Matériel de pillage (consommé à la prochaine exploration)
+  pillageBonusActive: boolean
   // Moral / tags narratifs
   moralTags: string[]
   // Mémoire des décisions importantes (identifiants uniques)
@@ -483,6 +500,7 @@ export interface GameState {
   // Services exclusifs des stations
   implantsBought: string[]         // identifiants implants achetés ce run
   usedFreeRestStations: string[]   // stations où le repos gratuit a été utilisé ce run
+  usedLocalActivities: string[]    // activités locales déjà faites (stationName-eventId), vidé à chaque voyage
   // Quêtes enchaînées
   pendingChainQuests: Quest[]
   // États dynamiques des stations
@@ -493,6 +511,8 @@ export interface GameState {
   lethalSurviveAvailable?: boolean
   // Mini-jeu escorte en attente
   pendingEscortQuestId?: string
+  // Waypoint — destination planifiée depuis la carte
+  waypoint?: string
 }
 
 export type StationSpecialService =

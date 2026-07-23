@@ -183,6 +183,56 @@ export const MAJOR_QUESTS: MajorQuest[] = [
       stage('rc6', "La vérité à Murn", "Retour aux Cendres. Murn attend depuis vingt ans. Il mérite la vérité — même si elle est plus compliquée qu'il ne l'imaginait.", "Retourner aux Cendres", { type: 'visitStation', station: 'Les Cendres' }, { credits: 9000, rep: 40, message: "★★ La Route des Cendres accomplie. +9000cr, +40 rép. Murn peut enfin partir d'ici." }),
     ],
   },
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 6. CARNAGE CONTRÔLÉ (Vix → bossesDefeated ≥ 1, rép ≥ 0)
+  // ─────────────────────────────────────────────────────────────────────────────
+  {
+    id: 'carnage_controle',
+    title: 'Carnage Contrôlé',
+    giver: 'Vix',
+    giverStation: 'La Carcasse',
+    lore: "Vix est ce qu'on appelle un fixeur indépendant — pas d'affiliation, pas de loyauté, juste du travail propre. Ce qu'il te propose est loin d'être propre : un contrat anonyme pour décapiter les quatre factions du secteur. Simultanément. Le commanditaire reste dans l'ombre. Le tarif, lui, est réel.",
+    currentStage: 0, completed: false, failed: false,
+    requiresReputation: 0,
+    stages: [
+      stage('cc1', 'La proposition de Vix',
+        "Vix t'attend à La Carcasse avec une enveloppe scellée. Un contrat : quatre factions, quatre chefs, quatre morts. Ordre libre. Paiement à l'issue. Il te donne des coordonnées et une phrase : 'Tu n'as pas besoin de savoir pourquoi. Tu as juste besoin d'être meilleur qu'eux.'",
+        "Parler à Vix à La Carcasse",
+        { type: 'visitStation', station: 'La Carcasse' },
+        { credits: 2000, message: "+2000cr — avance de Vix. Il te regarde partir sans un mot." }),
+
+      stage('cc2', "Alanossa — Faucons Noirs",
+        "Arc Ouest Apocalypse. Territoire d'Alanossa. Elle dirige les Faucons Noirs depuis cette station — tout le réseau passe par elle. Tu dois aller là-bas et finir ce qui a commencé.",
+        "Vaincre Alanossa à Arc Ouest Apocalypse",
+        { type: 'winCombatAt', station: 'Arc Ouest Apocalypse' },
+        { credits: 5000, rep: 20, message: "+5000cr, +20 rép. Les Faucons Noirs sont en état de choc. Un chef ça ne se remplace pas vite." }),
+
+      stage('cc3', "Commandante Zara Sable — Gardiens Écarlates",
+        "La Citadelle Écarlate. Commandante Zara Sable coordonne toutes les opérations militaires des Gardiens depuis ce bastion. Elle ne sortira pas d'elle-même — il faut entrer.",
+        "Vaincre la Commandante Zara Sable à La Citadelle Écarlate",
+        { type: 'winCombatAt', station: 'La Citadelle Écarlate' },
+        { credits: 5000, rep: 20, message: "+5000cr, +20 rép. La Citadelle est silencieuse. Pour la première fois depuis des années." }),
+
+      stage('cc4', "Le Négociant Fantôme — Emporium",
+        "Emporium Requiem. Le chef de l'Emporium opère dans l'ombre depuis ce hub commercial. Personne ne sait son vrai nom. Vix t'a donné assez d'informations pour le trouver.",
+        "Vaincre le Négociant Fantôme à Emporium Requiem",
+        { type: 'winCombatAt', station: 'Emporium Requiem' },
+        { credits: 6000, rep: 25, message: "+6000cr, +25 rép. L'Emporium s'effondre en interne. Les marchés sont en panique." }),
+
+      stage('cc5', "Directeur Pale — Culte du Vide",
+        "Les Abysses de Velkor. Le Directeur Pale contrôle le Culte depuis cette station perdue aux confins du secteur. Le voyage est long. Lui n'attend pas de visiteurs.",
+        "Vaincre le Directeur Pale aux Abysses de Velkor",
+        { type: 'winCombatAt', station: 'Les Abysses de Velkor' },
+        { credits: 6000, rep: 25, message: "+6000cr, +25 rép. Quatre factions. Quatre chefs. Zéro regret." }),
+
+      stage('cc6', "Le Compte est bon",
+        "Vix t'attend à La Carcasse. Il a l'air de déjà savoir. Le commanditaire a envoyé le solde — il ne se manifeste pas en personne. Évidemment. Tu as fait quelque chose que personne n'avait jamais fait : décapiter tout le secteur en une seule run.",
+        "Retourner à La Carcasse — collecter le solde",
+        { type: 'visitStation', station: 'La Carcasse' },
+        { credits: 30000, rep: 100, message: "★★ CARNAGE CONTRÔLÉ ACCOMPLI. +30000cr, +100 rép. Le secteur entier t'a entendu. Personne ne sait quoi faire de toi." }),
+    ],
+  },
+
 ]
 
 // Récupère les quêtes majeures disponibles pour un NPC donné

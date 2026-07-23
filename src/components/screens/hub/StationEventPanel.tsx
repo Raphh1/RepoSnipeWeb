@@ -16,13 +16,22 @@ interface Props {
 export function StationEventPanel({ gs, stationEvent, stationName, onReturn, startCombat, patch }: Props) {
   const [resultMsg, setResultMsg] = useState<string | null>(null)
 
+  function markUsed() {
+    const key = `${stationName}-${stationEvent.id}`
+    if (!(gs.usedLocalActivities ?? []).includes(key)) {
+      patch({ usedLocalActivities: [...(gs.usedLocalActivities ?? []), key] })
+    }
+  }
+
   function handleChoice(c: StationEvent['choices'][number]) {
     if (c.label === 'Participer (combat)') {
+      markUsed()
       startCombat(TIER_MID[Math.floor(Math.random() * TIER_MID.length)])
       return
     }
     const res = c.result(gs)
     if (res.message === 'TOURNAMENT_START') {
+      markUsed()
       patch({ tournamentRound: 1 })
       startCombat(getArenaEnemyForRound(1))
       return
@@ -32,6 +41,7 @@ export function StationEventPanel({ gs, stationEvent, stationName, onReturn, sta
       startCombat(getArenaEnemyForRound(round))
       return
     }
+    markUsed()
     if (Object.keys(res.gs).length > 0) patch(res.gs as Partial<GameState>)
     if (res.message) setResultMsg(res.message)
     else onReturn()

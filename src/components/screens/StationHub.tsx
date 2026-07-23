@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { TypewriterText } from '../ui/TypewriterText'
 import type { GameState, WeaponData } from '../../types'
 import { useGameStore } from '../../store/gameStore'
@@ -86,12 +86,17 @@ export function StationHub() {
   const [negoResult, setNegoResult]         = useState<{ earned: number; label: string } | null>(null)
   const [navResult, setNavResult]           = useState<{ shipDamage: number; bonusCredits: number } | null>(null)
   const [customsResult, setCustomsResult]   = useState<{ confiscated: string[]; repChange: number } | null>(null)
+  const [hoveredQuest, setHoveredQuest]     = useState<string | null>(null)
 
   const station      = getStation(gs.currentStation)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const ambianceText = useMemo(() => getAmbiance(gs.currentStation), [gs.currentStation])
   const factionBlocked     = isFactionBlockedAtStation(gs, gs.currentStation)
   const blockedFactionName = getStationFactionName(gs.currentStation)
   const outcome      = gs.pendingCombatOutcome
-  const stationEvts  = getStationEvents(gs)
+  const stationEvts  = getStationEvents(gs).filter(
+    ev => !(gs.usedLocalActivities ?? []).includes(`${gs.currentStation}-${ev.id}`)
+  )
   const localNpc     = NAMED_NPCS.find(n => n.station === gs.currentStation)
   const availableArcs = checkArcTriggers(gs)
   const hasArcs      = gs.activeArcs.length > 0 || availableArcs.length > 0 || gs.completedArcs.length > 0
@@ -734,7 +739,8 @@ export function StationHub() {
   // ── MENU PRINCIPAL ────────────────────────────────────────────────────────
 
   return (
-    <div className="layout scanlines">
+    <div style={{ display: 'flex', gap: '16px', maxWidth: '1300px', margin: '0 auto', padding: '20px', alignItems: 'flex-start' }}>
+    <div className="scanlines" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <StatusBar gs={gs} />
 
       {/* ── RÉSUMÉ FIN DE JOURNÉE ──────────────────────────────────────────── */}
@@ -952,7 +958,7 @@ export function StationHub() {
           <div className={`tag t-xs ${DANGER_CLS[station.danger]}`}>{DANGER_LABEL[station.danger]}</div>
         </div>
         <div className="t-xs t-dim" style={{ lineHeight: '2' }}>{station.description}</div>
-        {(() => { const a = getAmbiance(gs.currentStation); return a ? (
+        {(() => { const a = ambianceText; return a ? (
           <div className="t-xs t-dim mt8" style={{ lineHeight: '2.2', fontStyle: 'italic', borderLeft: '2px solid var(--border)', paddingLeft: '10px' }}>
             {a}
           </div>
@@ -1039,7 +1045,13 @@ export function StationHub() {
             {/* Grille de menus */}
             <div className="grid2">
               <div className="px-box col" style={{ gap: '8px' }}>
-                <div className="section-header">◆ NAVIGATION</div>
+                <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>◆ NAVIGATION</span>
+                  <button className="px-btn px-btn--sm" style={{ width: 'auto', fontSize: '8px', padding: '3px 8px', color: 'var(--cyan)', borderColor: 'var(--cyan)' }}
+                    onClick={() => goTo('map')}>
+                    ◎ CARTE
+                  </button>
+                </div>
                 {tutPhase >= 1 && (
                   <button className="px-btn" onClick={() => goTo('travel')} disabled={gs.fuel <= 0}>
                     Voyager{gs.fuel <= 0 ? ' (plus de carburant)' : ` — ${gs.fuel} carburant`}
@@ -1336,7 +1348,18 @@ export function StationHub() {
 
       <div className="grid2">
         <div className="col">
-          <div className="section-header">◆ INVENTAIRE</div>
+          <div className="section-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>◆ INVENTAIRE</span>
+            {(() => {
+              const maxCargo = 15 + (gs.shipModules?.soute ?? 0) * 5
+              const totalCargo = Object.values(gs.cargo).reduce((a, b) => a + b, 0)
+              return (
+                <span style={{ fontSize: '9px', letterSpacing: '1px', color: totalCargo >= maxCargo ? 'var(--red)' : 'var(--dim)' }}>
+                  SOUTE {totalCargo}/{maxCargo}{totalCargo >= maxCargo ? ' ▲ PLEINE' : ''}
+                </span>
+              )
+            })()}
+          </div>
           <button className="px-btn" onClick={() => goTo('inventory')} disabled={gs.weapons.length === 0 && gs.armors.length === 0}>
             Armes & Armures ({gs.weapons.length} / {gs.armors.length})
           </button>
@@ -1430,6 +1453,101 @@ export function StationHub() {
               ★ Distribuer de l'Or → +15 réputation · ×{gs.cargo['Or']}
             </button>
           )}
+          {/* Rations / Vivres → soin léger */}
+          {(['Rations', 'Vivres'] as const).map(key => (gs.cargo[key] ?? 0) > 0 && gs.playerHp < gs.playerMaxHp && (
+            <button key={key} className="px-btn px-btn--green" onClick={() => {
+              const qty = (gs.cargo[key] ?? 1) - 1
+              const nc = { ...gs.cargo, [key]: qty }
+              if (qty <= 0) delete (nc as Record<string,number>)[key]
+              patch({ playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 10), cargo: nc })
+            }}>
+              {key} +10 PV · ×{gs.cargo[key]}
+            </button>
+          ))}
+          {/* Rations militaires → soin + stamina */}
+          {(gs.cargo['Rations militaires'] ?? 0) > 0 && (gs.playerHp < gs.playerMaxHp || gs.stamina < gs.maxStamina) && (
+            <button className="px-btn px-btn--green" onClick={() => {
+              const qty = (gs.cargo['Rations militaires'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Rations militaires': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Rations militaires']
+              patch({ playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 15), stamina: Math.min(gs.maxStamina, gs.stamina + 1), cargo: nc })
+            }}>
+              Rations militaires +15 PV +1 Stamina · ×{gs.cargo['Rations militaires']}
+            </button>
+          )}
+          {/* Luxe → réputation */}
+          {(gs.cargo['Luxe'] ?? 0) > 0 && (
+            <button className="px-btn" style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }} onClick={() => {
+              const qty = (gs.cargo['Luxe'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Luxe': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Luxe']
+              patch({ cargo: nc, reputation: gs.reputation + 10, pendingMessage: '◆ Luxe distribué. +10 réputation.' })
+            }}>
+              ★ Distribuer du Luxe → +10 réputation · ×{gs.cargo['Luxe']}
+            </button>
+          )}
+          {/* Renseignements → réputation */}
+          {(gs.cargo['Renseignements'] ?? 0) > 0 && (
+            <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }} onClick={() => {
+              const qty = (gs.cargo['Renseignements'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Renseignements': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Renseignements']
+              patch({ cargo: nc, reputation: gs.reputation + 12, pendingMessage: '◆ Renseignements revendus. +12 réputation.' })
+            }}>
+              ◈ Renseignements → +12 réputation · ×{gs.cargo['Renseignements']}
+            </button>
+          )}
+          {/* Intel faction → réputation faction locale */}
+          {(gs.cargo['Intel faction'] ?? 0) > 0 && (() => {
+            const localFaction = STATION_FACTION_CONTROL[gs.currentStation]
+            if (!localFaction) return null
+            return (
+              <button className="px-btn" style={{ borderColor: 'var(--cyan)', color: 'var(--cyan)' }} onClick={() => {
+                const qty = (gs.cargo['Intel faction'] ?? 1) - 1
+                const nc = { ...gs.cargo, 'Intel faction': qty }
+                if (qty <= 0) delete (nc as Record<string,number>)['Intel faction']
+                patch({
+                  cargo: nc,
+                  factionReputation: { ...gs.factionReputation, [localFaction]: (gs.factionReputation?.[localFaction] ?? 0) + 20 },
+                  pendingMessage: `◈ Intel faction revendue. +20 réputation ${localFaction}.`,
+                })
+              }}>
+                ◈ Intel faction → +20 rép {localFaction} · ×{gs.cargo['Intel faction']}
+              </button>
+            )
+          })()}
+          {/* Informations monnayables / VIP → crédits */}
+          {(['Informations monnayables', 'Informations VIP'] as const).map(key => {
+            const qty = gs.cargo[key] ?? 0
+            if (qty === 0) return null
+            const gain = key === 'Informations VIP' ? 350 : 200
+            return (
+              <button key={key} className="px-btn" style={{ borderColor: 'var(--green)', color: 'var(--green)' }} onClick={() => {
+                const newQty = qty - 1
+                const nc = { ...gs.cargo, [key]: newQty }
+                if (newQty <= 0) delete (nc as Record<string,number>)[key]
+                patch({ cargo: nc, credits: gs.credits + gain, pendingMessage: `◆ ${key} converties. +${gain} cr.` })
+              }}>
+                {key} → +{gain} cr · ×{qty}
+              </button>
+            )
+          })}
+          {/* Matériel de pillage → bonus +50% loot prochaine exploration */}
+          {(gs.cargo['Matériel de pillage'] ?? 0) > 0 && !gs.pillageBonusActive && (
+            <button className="px-btn" style={{ borderColor: 'var(--orange)', color: 'var(--orange)' }} onClick={() => {
+              const qty = (gs.cargo['Matériel de pillage'] ?? 1) - 1
+              const nc = { ...gs.cargo, 'Matériel de pillage': qty }
+              if (qty <= 0) delete (nc as Record<string,number>)['Matériel de pillage']
+              patch({ cargo: nc, pillageBonusActive: true, pendingMessage: '◆ Matériel déployé. Prochain loot +50%.' })
+            }}>
+              ⚠ Matériel de pillage → prochain loot +50% · ×{gs.cargo['Matériel de pillage']}
+            </button>
+          )}
+          {gs.pillageBonusActive && (
+            <div className="px-box" style={{ borderColor: 'var(--orange)', padding: '5px 10px' }}>
+              <span className="t-xs" style={{ color: 'var(--orange)' }}>⚠ PILLAGE ACTIF — prochain loot +50%</span>
+            </div>
+          )}
         </div>
 
         <div className="col">
@@ -1476,60 +1594,6 @@ export function StationHub() {
         </div>
       )}
 
-      {/* Résumé quêtes */}
-      {gs.activeQuests.length > 0 && (
-        <div className="px-box">
-          <div className="t-xs t-dim mb4">QUÊTES EN COURS</div>
-          {gs.activeQuests.slice(0, 3).map(q => {
-            // Vérifier si la quête est livrable manuellement ici
-            const isDeliveryReady = q.targetStation === gs.currentStation
-              && q.type === 'delivery' && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0
-            const isHeistReady = q.targetStation === gs.currentStation
-              && q.type === 'heist' && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0
-            const canDeliver = isDeliveryReady || isHeistReady
-
-            const isPatrolHere = q.type === 'patrol' && q.targetStation === gs.currentStation
-            const patrolProgress = q.progress ?? 0
-            const patrolDone = patrolProgress >= 3
-
-            return (
-              <div key={q.id} className="t-xs" style={{ marginBottom: canDeliver || isPatrolHere ? '10px' : '0', lineHeight: '1.8' }}>
-                <div>
-                  <span className={`tag t-xs ${q.type === 'kill' ? 'tag--red' : q.type === 'patrol' ? 'tag--dim' : canDeliver ? 'tag--green' : 'tag--cyan'}`} style={{ marginRight: '8px' }}>
-                    {q.type.toUpperCase()}
-                  </span>
-                  {q.title} → <span className="t-dim">{q.targetStation}</span>
-                  {q.targetStation === gs.currentStation && !canDeliver && !isPatrolHere && <span className="t-gold"> ← ICI</span>}
-                </div>
-                {canDeliver && (
-                  <button
-                    className="px-btn px-btn--sm"
-                    style={{ width: 'auto', marginTop: '4px', color: 'var(--green)', borderColor: 'var(--green)' }}
-                    onClick={() => { setPendingDeliveryQuest(q); setDeliveryResult(null); setMode('delivery-event') }}
-                  >
-                    ▶ Livrer en main propre — {q.targetItem}
-                  </button>
-                )}
-                {isPatrolHere && !patrolDone && (
-                  <div className="t-xs t-dim" style={{ marginTop: '4px', borderLeft: '2px solid var(--cyan)', paddingLeft: '8px' }}>
-                    Patrouille en cours : {patrolProgress}/3 — utilise <span className="t-cyan">Explorer</span> ou <span className="t-cyan">Traîner</span> sur cette station
-                  </div>
-                )}
-                {isPatrolHere && patrolDone && (
-                  <button
-                    className="px-btn px-btn--sm"
-                    style={{ width: 'auto', marginTop: '4px', color: 'var(--gold)', borderColor: 'var(--gold)' }}
-                    onClick={() => manualCompleteQuest(q.id)}
-                  >
-                    ★ Terminer la patrouille — rapport accompli
-                  </button>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      )}
-
       {/* Recommencer */}
       {confirmRestart ? (
         <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(40,0,0,0.3)' }}>
@@ -1551,5 +1615,71 @@ export function StationHub() {
         </button>
       )}
     </div>
+
+    {/* ── SIDEBAR QUÊTES ────────────────────────────────────────────────────── */}
+    <div style={{ width: '240px', flexShrink: 0, position: 'sticky', top: '20px', alignSelf: 'flex-start', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <div style={{ fontSize: '9px', letterSpacing: '2px', color: 'var(--dim)', borderBottom: '1px solid var(--border)', paddingBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span>◆ QUÊTES</span>
+        <span style={{ color: 'var(--cyan)' }}>{gs.activeQuests.length}</span>
+      </div>
+      {gs.activeQuests.length === 0 && (
+        <div style={{ fontSize: '9px', color: 'var(--dim)', fontStyle: 'italic', padding: '8px 0' }}>Aucune quête active.</div>
+      )}
+      {gs.activeQuests.map(q => {
+        const isHere = q.targetStation === gs.currentStation
+        const isDeliveryReady = isHere && (q.type === 'delivery' || q.type === 'heist') && !!q.targetItem && (gs.cargo[q.targetItem!] ?? 0) > 0
+        const isPatrolHere = q.type === 'patrol' && isHere
+        const patrolProg = q.progress ?? 0
+        const isHov = hoveredQuest === q.id
+        const borderCol = isDeliveryReady ? 'var(--green)' : isHere ? 'var(--gold)' : 'var(--border)'
+        const typeCol = q.type === 'kill' || q.type === 'bounty' ? 'var(--red)' : q.type === 'patrol' ? 'var(--dim)' : isDeliveryReady ? 'var(--green)' : 'var(--cyan)'
+        return (
+          <div
+            key={q.id}
+            style={{ background: 'var(--bg-panel)', border: `2px solid ${borderCol}`, padding: '8px 10px', position: 'relative', cursor: 'default' }}
+            onMouseEnter={() => setHoveredQuest(q.id)}
+            onMouseLeave={() => setHoveredQuest(null)}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+              <span style={{ fontSize: '8px', letterSpacing: '1px', color: typeCol }}>{q.type.toUpperCase()}</span>
+              {isHere && !isDeliveryReady && !isPatrolHere && <span style={{ color: 'var(--gold)', fontSize: '8px' }}>← ICI</span>}
+              {isDeliveryReady && <span style={{ color: 'var(--green)', fontSize: '8px' }}>▶ LIVRER</span>}
+            </div>
+            <div style={{ fontSize: '9px', color: 'var(--text)', lineHeight: '1.6', marginBottom: '2px' }}>{q.title}</div>
+            <div style={{ fontSize: '8px', color: 'var(--dim)' }}>→ {q.targetStation}</div>
+            {isPatrolHere && patrolProg < 3 && (
+              <div style={{ marginTop: '4px', borderLeft: '2px solid var(--cyan)', paddingLeft: '6px', fontSize: '8px', color: 'var(--dim)' }}>
+                Patrouille {patrolProg}/3
+              </div>
+            )}
+            {isDeliveryReady && (
+              <button className="px-btn px-btn--sm" style={{ marginTop: '6px', color: 'var(--green)', borderColor: 'var(--green)', fontSize: '8px', padding: '4px 8px' }}
+                onClick={() => { setPendingDeliveryQuest(q); setDeliveryResult(null); setMode('delivery-event') }}>
+                ▶ Livrer {q.targetItem}
+              </button>
+            )}
+            {isPatrolHere && patrolProg >= 3 && (
+              <button className="px-btn px-btn--sm" style={{ marginTop: '6px', color: 'var(--gold)', borderColor: 'var(--gold)', fontSize: '8px', padding: '4px 8px' }}
+                onClick={() => manualCompleteQuest(q.id)}>
+                ★ Terminer la patrouille
+              </button>
+            )}
+            {isHov && (
+              <div style={{ position: 'absolute', right: '104%', top: 0, width: '210px', background: 'var(--bg-panel2)', border: '2px solid var(--border-hi)', padding: '10px 12px', zIndex: 50, fontSize: '9px', lineHeight: '1.8', boxShadow: '2px 2px 0 var(--border-hi)' }}>
+                <div style={{ color: 'var(--gold)', marginBottom: '6px' }}>{q.title}</div>
+                <div style={{ color: 'var(--dim)', marginBottom: '6px', lineHeight: '1.6', fontSize: '8px' }}>{q.description}</div>
+                <div style={{ color: 'var(--text)' }}>Donneur : <span style={{ color: 'var(--cyan)' }}>{q.giver}</span></div>
+                <div style={{ color: 'var(--text)' }}>→ {q.targetStation}</div>
+                {q.targetItem && <div style={{ color: 'var(--cyan)' }}>Item : {q.targetItem}</div>}
+                <div style={{ color: 'var(--gold)', marginTop: '4px' }}>+{q.creditReward} cr · +{q.repReward} rép</div>
+                {q.dayMult && <div style={{ color: 'var(--orange)', marginTop: '2px' }}>⏱ Limite de temps</div>}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+
+  </div>
   )
 }

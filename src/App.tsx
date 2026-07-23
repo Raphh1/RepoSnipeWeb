@@ -25,6 +25,7 @@ import { JournalScreen }        from './components/screens/JournalScreen'
 import { IntroScreen }          from './components/screens/IntroScreen'
 import { CinematicIntro }       from './components/screens/CinematicIntro'
 import { EscortMiniGameScreen } from './components/screens/EscortMiniGameScreen'
+import { MapScreen }           from './components/screens/MapScreen'
 import { OBJECTIVES }           from './engine/objectives'
 import { META_UNLOCKS }         from './data/metaUnlocks'
 
@@ -59,6 +60,7 @@ function renderScreen(screen: string) {
     case 'nexus':          return <NexusScreen />
     case 'journal':        return <JournalScreen />
     case 'escort-minigame': return <EscortMiniGameScreen />
+    case 'map':            return <MapScreen />
     default:               return <StationHub />
   }
 }

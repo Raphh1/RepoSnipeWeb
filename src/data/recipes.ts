@@ -71,7 +71,24 @@ export const RECIPES: Recipe[] = [
     output: { type: 'weapon_roll', tier: 4 },
   },
 
+  {
+    id: 'tactical_rifle',
+    name: 'Carabine tactique',
+    description: 'Récupérée sur du matériel de combat abandonné. Plus fiable qu\'une arme artisanale.',
+    category: 'arme',
+    ingredients: { 'Équipement tactique': 2, 'Munitions': 3 },
+    output: { type: 'weapon_roll', tier: 2 },
+  },
+
   // ── ARMURES ───────────────────────────────────────────────────────────────
+  {
+    id: 'tactical_armor',
+    name: 'Armure tactique',
+    description: 'Plaques de composants tactiques soudées sur une structure légère. Efficace en terrain hostile.',
+    category: 'armure',
+    ingredients: { 'Composants tactiques': 3, 'Métaux bruts': 2 },
+    output: { type: 'armor_roll', tier: 2 },
+  },
   {
     id: 'jacket_plated',
     name: 'Veste blindée',

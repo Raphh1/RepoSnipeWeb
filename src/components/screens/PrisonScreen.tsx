@@ -290,7 +290,7 @@ export function PrisonScreen() {
       const dmg = 20 + round * 15
       const addDays = TOTAL_ROUNDS - round + 1
       const newFailures = failures + 1
-      if (newFailures >= 3) {
+      if (newFailures >= 4) {
         patch({ playerHp: Math.max(1, gs.playerHp - dmg), prisonDaysLeft: days + addDays, prisonEscapeFailures: newFailures })
         setEscapePhase('execution')
       } else {
@@ -301,8 +301,6 @@ export function PrisonScreen() {
           prisonDaysLeft: days + addDays,
           prisonEscapeFailures: newFailures,
           ...itemPatch,
-          // On remet les items confisqués à null mais on recrée un set vide
-          // puisqu'on reste en prison — on reconstitue la confiscation
           prisonConfiscatedItems: itemFrac === 0 ? null : {
             weapons: [], armors: [], equippedWeapon: null, equippedArmor: null, cargo: {}
           },
@@ -336,7 +334,7 @@ export function PrisonScreen() {
       // Rattrapé au dernier moment
       const newFailures = failures + 1
       const dmg = 25 + Math.floor(Math.random() * 20)
-      if (newFailures >= 3) {
+      if (newFailures >= 4) {
         patch({ playerHp: Math.max(1, gs.playerHp - dmg), prisonDaysLeft: days + 2, prisonEscapeFailures: newFailures })
         setEscapePhase('execution')
       } else {
@@ -421,11 +419,13 @@ export function PrisonScreen() {
               30% de chances qu'ils t'attendent déjà.
             </div>
             <div className="t-xs t-dim mt8" style={{ fontStyle: 'italic' }}>
-              {failures >= 2
-                ? "⚠ C'est ta dernière chance. Un nouvel échec mène au couloir de la mort."
-                : failures >= 1
-                  ? "⚠ Deuxième tentative. Un nouvel échec et tu ne récupères rien."
-                  : "Premier essai. Un nouvel échec te coûtera 75% de tes items."
+              {failures >= 3
+                ? "⚠ TENTATIVE 4/4 — C'est ta dernière chance. Un échec ici, c'est la mort."
+                : failures >= 2
+                  ? "⚠ Tentative 3/4 — Il te reste une seule chance après celle-ci."
+                  : failures >= 1
+                    ? "Tentative 2/4 — Un nouvel échec et tu ne récupères plus rien."
+                    : "Tentative 1/4 — Un nouvel échec te coûtera 25% de tes items."
               }
             </div>
           </div>
@@ -489,9 +489,19 @@ export function PrisonScreen() {
               {round === 3 && "Si près. La porte ne s'ouvre pas à temps. Les lumières s'allument."}
             </div>
             <div className="t-xs t-red">+{addDays} jour{addDays > 1 ? 's' : ''} de peine. {itemLabel}.</div>
-            {failures >= 2 && (
-              <div className="t-xs t-red mt4" style={{ letterSpacing: '1px' }}>
-                ⚠ AVERTISSEMENT : une nouvelle tentative mène au couloir de la mort.
+            {failures >= 3 && (
+              <div className="t-xs mt4" style={{ color: 'var(--red)', letterSpacing: '1px', fontWeight: 'bold' }}>
+                ⚠ TENTATIVE {failures}/{failures} ÉCHOUÉE — LA PROCHAINE EST LA MORT.
+              </div>
+            )}
+            {failures === 2 && (
+              <div className="t-xs t-red mt4">
+                ⚠ Tentative 2/4 ratée — Il te reste 2 chances avant la mort.
+              </div>
+            )}
+            {failures === 1 && (
+              <div className="t-xs" style={{ color: 'var(--orange)' }}>
+                Tentative 1/4 ratée — 3 chances restantes.
               </div>
             )}
           </div>
@@ -577,7 +587,7 @@ export function PrisonScreen() {
           {failures > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="t-xs t-dim">Tentatives d'évasion ratées</span>
-              <span className="t-xs t-red">{failures}/2 {failures >= 2 ? '⚠ DERNIÈRE CHANCE' : ''}</span>
+              <span className="t-xs t-red">{failures}/3 {failures >= 3 ? '⚠ PROCHAINE = MORT' : failures >= 2 ? '⚠ 1 chance restante' : failures >= 1 ? '2 chances restantes' : ''}</span>
             </div>
           )}
         </div>
@@ -668,10 +678,11 @@ export function PrisonScreen() {
           </button>
           <button
             className="px-btn"
-            style={{ color: failures >= 2 ? 'var(--red)' : 'var(--orange)', borderColor: failures >= 2 ? 'var(--red)' : 'var(--orange)' }}
+            style={{ color: failures >= 3 ? 'var(--red)' : 'var(--orange)', borderColor: failures >= 3 ? 'var(--red)' : 'var(--orange)' }}
             onClick={() => { setRound(1); setEscapePhase('playing') }}
           >
-            ► Tenter une évasion {failures >= 2 ? '⚠ DERNIÈRE CHANCE' : failures >= 1 ? '(2e tentative — 0 item si raté)' : '(25% items si raté · 70% succès final)'}
+            ► Tenter une évasion — tentative {failures + 1}/4
+            {failures >= 3 ? ' ⚠ DERNIÈRE CHANCE · MORT SI RATÉ' : failures >= 2 ? ' · ⚠ 1 chance restante après' : failures >= 1 ? ' · 0 item si raté' : ' · 25% items si raté · 70% succès final'}
           </button>
         </div>
       )}

@@ -4,7 +4,8 @@ import { buildRunSummary } from '../../engine/meta'
 import { useMetaStore } from '../../store/metaStore'
 import {
   NEXUS_FRAGMENTS, attemptNexusFragment, canAttempt,
-  isFragmentAvailable, getPillarStandingLabel,
+  isFragmentAvailable, getPillarStandingLabel, getWarAvailableFragments,
+  HOLDER_BOUNTY_HUNTERS,
   type NexusAction
 } from '../../engine/nexus'
 import { BOSS_STATIONS } from '../../data/stations'
@@ -15,35 +16,48 @@ type ViewState = 'list' | 'detail'
 const PILLAR_COLORS: Record<string, string> = {
   alanossa: 'var(--red)',
   cesarion: 'var(--cyan)',
-  eliotis:  'var(--purple)',
+  maxance:  'var(--green)',
   scotty:   'var(--gold)',
 }
 
 const ACTION_LABELS: Record<NexusAction, string> = {
-  force:    '⚔ Forcer — affronter le gardien',
-  pay:      '💰 Payer — transaction directe',
-  alliance: '🤝 Alliance — standing & réputation',
-  legendary:'⚡ Offrir une arme légendaire (Tier 5)',
-  gamble:   '🎲 Parier — mise au casino (50/50)',
-  steal:    '🌑 Voler — classe voleur requise',
-  lore:     '◆ Mémoire — par la connaissance du Nexus',
+  force:      '⚔ Forcer — affronter le gardien en combat',
+  pay:        '💰 Payer — transaction directe',
+  alliance:   '🤝 Alliance — standing & réputation',
+  legendary:  '⚡ Offrir une arme légendaire (Tier 5)',
+  gamble:     '🎲 Parier — mise au casino (50/50)',
+  steal:      '🌑 Voler — classe voleur requise',
+  lore:       '◆ Mémoire — par la connaissance du Nexus',
+  war:        '⚔💥 Déclencher une guerre entre détenteurs',
+  betray:     '🗡 Trahir — exploiter la confiance acquise',
+  manipulate: '🎭 Entourloupe — convaincre sans combat',
 }
 
 const ACTIONS_BY_FRAGMENT: Record<number, NexusAction[]> = {
-  0: ['force', 'pay', 'alliance', 'steal'],
-  1: ['force', 'pay', 'alliance', 'legendary'],
-  2: ['force', 'alliance', 'legendary', 'lore'],
-  3: ['force', 'pay', 'alliance', 'gamble'],
+  0: ['force', 'pay', 'alliance', 'steal', 'war', 'betray', 'manipulate'],
+  1: ['force', 'pay', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
+  2: ['force', 'pay', 'alliance', 'legendary', 'war', 'betray', 'manipulate'],
+  3: ['force', 'pay', 'alliance', 'gamble', 'war', 'betray', 'manipulate'],
+}
+
+const ACTION_DANGER: Partial<Record<NexusAction, string>> = {
+  force:    'var(--red)',
+  war:      'var(--orange)',
+  betray:   'var(--orange)',
+  manipulate: 'var(--purple)',
 }
 
 const PATH_LABELS: Record<NexusAction, string> = {
-  force:    'Par la force',
-  pay:      'Par l\'argent',
-  alliance: 'Par l\'alliance',
-  legendary:'Par le sacrifice',
-  gamble:   'Par le hasard',
-  steal:    'Par la ruse',
-  lore:     'Par la mémoire',
+  force:      'Par la force',
+  pay:        "Par l'argent",
+  alliance:   'Par l\'alliance',
+  legendary:  'Par le sacrifice',
+  gamble:     'Par le hasard',
+  steal:      'Par la ruse',
+  lore:       'Par la mémoire',
+  war:        'Par la guerre',
+  betray:     'Par la trahison',
+  manipulate: 'Par la manipulation',
 }
 
 export function NexusScreen() {
@@ -64,8 +78,29 @@ export function NexusScreen() {
   function attempt(idx: number, action: NexusAction) {
     const result = attemptNexusFragment(gs, idx, action)
 
+    // Guerre déclenchée — succès = false mais on enregistre la guerre
+    if (result.triggersWar) {
+      const war = {
+        holderA: result.triggersWar.holderA,
+        holderB: result.triggersWar.holderB,
+        startDay: gs.day,
+        resolved: false,
+      }
+      patch({ ...(result.newGs ?? {}), nexusWars: [...(gs.nexusWars ?? []), war] })
+      setMsg(`⚔ GUERRE DÉCLENCHÉE — ${war.holderA} vs ${war.holderB}. Reviens dans 4 jours après ton prochain voyage. ${result.message}`)
+      setMsgOk(true)
+      return
+    }
+
     if (!result.success) {
       if (result.newGs) patch(result.newGs)
+      // Combat forcé après échec de manipulation
+      if (result.triggerCombat) {
+        const bossName = result.pillarBossName ?? 'Gardien du Fragment'
+        const boss = TIER_BOSS.find(b => b.name === bossName) ?? { ...TIER_BOSS[0], name: bossName }
+        startCombat({ ...boss, isBoss: true, captureChance: 0, killChance: 30 })
+        patch({ nexusPath: { ...nexusPath, [idx]: 'force' } })
+      }
       setMsg(result.message)
       setMsgOk(false)
       return
@@ -74,15 +109,33 @@ export function NexusScreen() {
     if (result.triggerCombat) {
       if (result.newGs) patch(result.newGs)
       const bossName = result.pillarBossName ?? 'Gardien du Fragment'
-      // Trouver le boss correspondant dans TIER_BOSS
       const boss = TIER_BOSS.find(b => b.name === bossName) ?? { ...TIER_BOSS[0], name: bossName }
       startCombat({ ...boss, isBoss: true, captureChance: 0, killChance: 30 })
-      // On marquera le fragment après le combat via la victoire
       patch({ nexusPath: { ...nexusPath, [idx]: action } })
       return
     }
 
     if (result.newGs) patch(result.newGs)
+
+    // Trahison — spawn bounty hunter immédiat
+    if (result.spawnsBounty && !gs.stalker) {
+      const pillarMap: Record<number, string> = { 0: 'alanossa', 1: 'cesarion', 2: 'maxance', 3: 'scotty' }
+      const pillar = pillarMap[idx]
+      const bounty = HOLDER_BOUNTY_HUNTERS[pillar]
+      if (bounty) {
+        patch({
+          stalker: {
+            name: bounty.name,
+            station: gs.currentStation,
+            closingIn: true,
+            daysSinceLastSeen: gs.day,
+            threatLevel: bounty.threatLevel,
+            daysActive: 0,
+          },
+        })
+      }
+    }
+
     collectFragment(idx)
     patch({ nexusPath: { ...nexusPath, [idx]: action } })
     setMsg(result.message)
@@ -94,8 +147,11 @@ export function NexusScreen() {
     const f = NEXUS_FRAGMENTS[selected]
     const isOwned = collected.includes(selected)
     const isHere = isFragmentAvailable(gs, selected)
+    const isWarAvailable = getWarAvailableFragments(gs).includes(selected)
     const color = PILLAR_COLORS[f.pillar] ?? 'var(--text)'
-    const standing = (gs.pillarStanding ?? {} as any)[f.pillar] ?? 0
+    const standing = ((gs.pillarStanding ?? {}) as Record<string, number>)[f.pillar] ?? 0
+    const isAngered = (gs.nexusAngered ?? []).includes(f.pillar)
+    const activeWar = (gs.nexusWars ?? []).find(w => !w.resolved && (w.holderA === f.pillar || w.holderB === f.pillar))
     const actions = ACTIONS_BY_FRAGMENT[selected] ?? []
 
     return (
@@ -137,6 +193,25 @@ export function NexusScreen() {
           </div>
         </div>
 
+        {/* Statuts spéciaux */}
+        {isAngered && (
+          <div className="px-box" style={{ borderColor: 'var(--red)' }}>
+            <div className="t-xs t-red">⚠ ENNEMI PERMANENT — {f.pillar.charAt(0).toUpperCase() + f.pillar.slice(1)} te cherche. Seul le combat est possible. Un chasseur est probablement déjà sur ta trace.</div>
+          </div>
+        )}
+        {activeWar && (
+          <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
+            <div className="t-xs" style={{ color: 'var(--orange)' }}>
+              ⚔ GUERRE EN COURS — {activeWar.holderA} vs {activeWar.holderB} · Jour {activeWar.startDay} → résolution dans {Math.max(0, 4 - (gs.day - activeWar.startDay))} voyage(s)
+            </div>
+          </div>
+        )}
+        {isWarAvailable && !isOwned && (
+          <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
+            <div className="t-xs" style={{ color: 'var(--orange)' }}>⚔ Fragment récupérable — le gardien a perdu la guerre que tu as déclenchée. Il est affaibli.</div>
+          </div>
+        )}
+
         {msg && (
           <div className="px-box" style={{ borderColor: msgOk ? 'var(--gold)' : 'var(--red)' }}>
             <div className="t-xs" style={{ color: msgOk ? 'var(--gold)' : 'var(--red)', lineHeight: '2' }}>{msg}</div>
@@ -151,7 +226,7 @@ export function NexusScreen() {
           </div>
         )}
 
-        {!isOwned && !isHere && (
+        {!isOwned && !isHere && !isWarAvailable && (
           <div className="px-box" style={{ borderColor: 'var(--dim)' }}>
             <div className="t-xs t-dim">Tu dois être à <span className="t-bright">{f.station}</span> pour tenter d'obtenir ce fragment.</div>
           </div>
@@ -162,15 +237,21 @@ export function NexusScreen() {
             <div className="t-xs t-dim" style={{ padding: '0 4px' }}>Méthodes disponibles :</div>
             {actions.map(action => {
               const check = canAttempt(gs, selected, action)
+              const dangerColor = ACTION_DANGER[action]
+              const isDanger = action === 'force' || !!dangerColor
               return (
                 <div key={action}>
                   <button
                     className={`px-btn ${action === 'force' ? 'px-btn--danger' : ''}`}
                     disabled={!check.ok}
-                    style={{ opacity: check.ok ? 1 : 0.5 }}
+                    style={{
+                      opacity: check.ok ? 1 : 0.5,
+                      ...(dangerColor && action !== 'force' ? { borderColor: dangerColor, color: dangerColor } : {}),
+                    }}
                     onClick={() => attempt(selected, action)}
                   >
                     {ACTION_LABELS[action]}
+                    {isDanger && action !== 'force' && <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>⚠ conséquences permanentes</span>}
                   </button>
                   {!check.ok && check.reason && (
                     <div className="t-xs t-dim" style={{ padding: '2px 8px' }}>↳ {check.reason}</div>
@@ -221,41 +302,66 @@ export function NexusScreen() {
         </div>
       )}
 
+      {/* Guerres actives */}
+      {(gs.nexusWars ?? []).filter(w => !w.resolved).length > 0 && (
+        <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
+          <div className="t-xs" style={{ color: 'var(--orange)', marginBottom: '4px' }}>⚔ GUERRES EN COURS</div>
+          {(gs.nexusWars ?? []).filter(w => !w.resolved).map((w, i) => (
+            <div key={i} className="t-xs t-dim">
+              {w.holderA.charAt(0).toUpperCase() + w.holderA.slice(1)} vs {w.holderB.charAt(0).toUpperCase() + w.holderB.slice(1)} — résolution dans {Math.max(0, 4 - (gs.day - w.startDay))} voyage(s)
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Fragments récupérables après guerre */}
+      {getWarAvailableFragments(gs).length > 0 && (
+        <div className="px-box" style={{ borderColor: 'var(--orange)', background: 'rgba(255,140,0,0.06)' }}>
+          <div className="t-xs" style={{ color: 'var(--orange)' }}>⚔ FRAGMENTS RÉCUPÉRABLES — Va sur place pour les prendre au vainqueur affaibli</div>
+        </div>
+      )}
+
       <div className="col gap4">
         {NEXUS_FRAGMENTS.map((f) => {
           const owned = collected.includes(f.idx)
           const here  = isFragmentAvailable(gs, f.idx)
+          const warAvail = getWarAvailableFragments(gs).includes(f.idx)
+          const angered = (gs.nexusAngered ?? []).includes(f.pillar)
           const color = PILLAR_COLORS[f.pillar] ?? 'var(--text)'
-          const standing = (gs.pillarStanding ?? {} as any)[f.pillar] ?? 0
+          const standing = ((gs.pillarStanding ?? {}) as Record<string, number>)[f.pillar] ?? 0
+          const borderCol = owned ? 'var(--gold)' : angered ? 'var(--red)' : warAvail ? 'var(--orange)' : here ? color : 'var(--border)'
 
           return (
             <button
               key={f.idx}
               className="px-box"
               style={{
-                borderColor: owned ? 'var(--gold)' : here ? color : 'var(--border)',
+                borderColor: borderCol,
                 textAlign: 'left', cursor: 'pointer',
-                background: owned ? 'rgba(180,140,0,0.06)' : 'transparent',
+                background: owned ? 'rgba(180,140,0,0.06)' : angered ? 'rgba(255,60,60,0.04)' : 'transparent',
                 width: '100%',
               }}
               onClick={() => { setSelected(f.idx); setView('detail'); setMsg(null) }}
             >
               <div className="row" style={{ justifyContent: 'space-between', marginBottom: '6px' }}>
-                <div className="t-sm" style={{ color: owned ? 'var(--gold)' : here ? color : 'var(--text-dim)' }}>
-                  {owned ? '★ ' : `${f.idx + 1}. `}{f.name}
+                <div className="t-sm" style={{ color: owned ? 'var(--gold)' : angered ? 'var(--red)' : here ? color : 'var(--text-dim)' }}>
+                  {owned ? '★ ' : angered ? '⚠ ' : `${f.idx + 1}. `}{f.name}
                 </div>
                 <div className="tag" style={{
-                  borderColor: owned ? 'var(--gold)' : here ? color : 'var(--dim)',
-                  color: owned ? 'var(--gold)' : here ? color : 'var(--dim)',
+                  borderColor: owned ? 'var(--gold)' : angered ? 'var(--red)' : warAvail ? 'var(--orange)' : here ? color : 'var(--dim)',
+                  color:       owned ? 'var(--gold)' : angered ? 'var(--red)' : warAvail ? 'var(--orange)' : here ? color : 'var(--dim)',
                   fontSize: '9px'
                 }}>
-                  {owned ? PATH_LABELS[nexusPath[f.idx]!] ?? 'COLLECTÉ' : here ? 'DISPONIBLE' : f.station}
+                  {owned ? PATH_LABELS[nexusPath[f.idx]!] ?? 'COLLECTÉ' : angered ? 'ENNEMI' : warAvail ? '⚔ RÉCUPÉRABLE' : here ? 'DISPONIBLE' : f.station}
                 </div>
               </div>
               <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{f.lore.slice(0, 90)}…</div>
               {!owned && (
-                <div className="t-xs" style={{ marginTop: '4px', color: standing >= 20 ? 'var(--green)' : 'var(--dim)' }}>
-                  Standing {f.pillar}: {standing > 0 ? '+' : ''}{standing} — {getPillarStandingLabel(gs, f.pillar as any)}
+                <div className="t-xs" style={{ marginTop: '4px', color: angered ? 'var(--red)' : standing >= 20 ? 'var(--green)' : 'var(--dim)' }}>
+                  {angered
+                    ? '🗡 Te cherche — combat uniquement'
+                    : `Standing ${f.pillar}: ${standing > 0 ? '+' : ''}${standing} — ${getPillarStandingLabel(gs, f.pillar as any)}`
+                  }
                 </div>
               )}
             </button>

@@ -30,12 +30,28 @@ const BASE_PRICES: Record<string, number> = {
   'Or': 600, 'Pièces techniques': 200, 'Vivres': 90,
 }
 
-// getPrice est appelé à l'init du composant (via useMemo implicite dans le JSX)
-// Le calcul complet intègre le profil de la station
+// Prix déterministes — la variation inter-station vient de stationPriceSeeds (persisté en GameState)
 function getBasePrice(item: string): number {
-  const base = BASE_PRICES[item] ?? 200
-  const jitter = 0.90 + Math.random() * 0.20   // jitter réduit, la variation vient du profil
-  return Math.floor(base * jitter)
+  return BASE_PRICES[item] ?? 200
+}
+
+// Armes et armures-cargo retirées du marché — loot only (ennemis, exploration, wander)
+const LOOT_ONLY_ITEMS = new Set([
+  'Armes lourdes', 'Armes artisanales', 'Armes Tier 3', 'Armes Tier 4', 'Armes exotiques',
+  'Armures Faucon', "Armures d'élite", 'Armures premium', 'Armures Tier 4',
+])
+
+// Limites de soute par item (protection anti-abus)
+export const ITEM_CARGO_MAX: Record<string, number> = {
+  'Implants': 2,
+  'Implants militaires': 2,
+  'Médicaments premium': 4,
+  'Or': 5,
+  'Cristaux énergétiques': 6,
+  'Métaux rares': 8,
+  'Technologies avancées': 4,
+  'Composants expérimentaux': 4,
+  'Données classifiées': 5,
 }
 
 export function MarketScreen() {
@@ -51,6 +67,7 @@ export function MarketScreen() {
   const soutePct       = (gs.shipModules?.soute ?? 0) * 10
   const maxCargo       = 15 + (gs.shipModules?.soute ?? 0) * 5
   const totalCargo     = Object.values(gs.cargo).reduce((a, b) => a + b, 0)
+  const soutePleine    = totalCargo >= maxCargo
   const culteArtefact  = getCulteArtefactMult(gs)
   const ARTEFACT_ITEMS = new Set(['Artefacts', 'Données classifiées', 'Composants expérimentaux', 'Technologies avancées'])
 
@@ -131,32 +148,61 @@ export function MarketScreen() {
         {/* ACHETER */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
           <div style={{
-            background: '#0d1a0d',
-            border: '2px solid var(--gold)',
+            background: soutePleine ? 'rgba(80,0,0,0.3)' : '#0d1a0d',
+            border: `2px solid ${soutePleine ? 'var(--red)' : 'var(--gold)'}`,
             borderBottom: 'none',
             padding: '8px 14px',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <span style={{ fontSize: '9px', color: 'var(--gold)', letterSpacing: '2px' }}>▼ ACHETER</span>
-            <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>disponible : {gs.credits.toLocaleString()} cr</span>
+            <span style={{ fontSize: '9px', color: soutePleine ? 'var(--red)' : 'var(--gold)', letterSpacing: '2px' }}>▼ ACHETER</span>
+            {soutePleine
+              ? <span style={{ fontSize: '9px', color: 'var(--red)', letterSpacing: '1px', fontWeight: 'bold' }}>⚠ SOUTE PLEINE — VENDEZ D'ABORD</span>
+              : <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>disponible : {gs.credits.toLocaleString()} cr</span>
+            }
           </div>
-          <div className="col list-zebra" style={{ border: '2px solid var(--gold)', padding: '6px', gap: '4px' }}>
-            {station.goods.map(item => {
+          {soutePleine && (
+            <div style={{
+              border: '2px solid var(--red)', borderTop: 'none', borderBottom: 'none',
+              background: 'rgba(60,0,0,0.25)', padding: '10px 14px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '11px', color: 'var(--red)', letterSpacing: '2px', fontWeight: 'bold', marginBottom: '4px' }}>
+                SOUTE PLEINE ({totalCargo}/{maxCargo})
+              </div>
+              <div style={{ fontSize: '9px', color: 'var(--dim)' }}>
+                Tu ne peux pas acheter tant que la soute n'est pas libérée. Vends des marchandises d'abord.
+              </div>
+            </div>
+          )}
+          <div className="col list-zebra" style={{
+            border: `2px solid ${soutePleine ? 'var(--red)' : 'var(--gold)'}`,
+            padding: '6px', gap: '4px',
+            opacity: soutePleine ? 0.45 : 1,
+            pointerEvents: soutePleine ? 'none' : 'auto',
+          }}>
+            {station.goods
+              .filter(item => !LOOT_ONLY_ITEMS.has(item))
+              .map(item => {
               const rawPrice = Math.floor((frozenBasePrices[item] ?? 200) * stationSeed * getWorldEventPriceMultiplier(item, events) * runBuyMult * getFullBuyMult(gs, station.type, item))
               const price = Math.floor(rawPrice * (1 - discount / 100) * (1 + factionSurcharge / 100))
               const canBuy = gs.credits >= price
               const banned = gs.class.cannotBuyWeapons && (item.toLowerCase().includes('arme') || item.toLowerCase().includes('munitions'))
+              const itemMax = ITEM_CARGO_MAX[item]
+              const atMax = itemMax !== undefined && (gs.cargo[item] ?? 0) >= itemMax
+              const blocked = banned || atMax
               return (
-                <button key={item} className="px-btn" disabled={!canBuy || banned}
-                  style={{ borderColor: station.exclusiveGoods?.includes(item) ? 'var(--gold)' : canBuy && !banned ? 'var(--border)' : undefined }}
+                <button key={item} className="px-btn" disabled={!canBuy || blocked}
+                  style={{ borderColor: station.exclusiveGoods?.includes(item) ? 'var(--gold)' : canBuy && !blocked ? 'var(--border)' : undefined }}
                   onClick={() => { playBuy(); buyCargo(item, price) }}>
                   <div className="row" style={{ justifyContent: 'space-between' }}>
                     <span className="t-xs">
                       {station.exclusiveGoods?.includes(item) && <span style={{ color: 'var(--gold)', marginRight: '5px', fontSize: '9px' }}>★</span>}
                       {item}
+                      {itemMax !== undefined && <span className="t-dim" style={{ marginLeft: '6px', fontSize: '9px' }}>({gs.cargo[item] ?? 0}/{itemMax})</span>}
                     </span>
                     <span className="t-gold t-xs">
-                      {banned ? <span className="t-red">INTERDIT</span> : `${price} cr`}
+                      {banned ? <span className="t-red">INTERDIT</span>
+                        : atMax ? <span style={{ color: 'var(--dim)' }}>MAX</span>
+                        : `${price} cr`}
                     </span>
                   </div>
                 </button>
@@ -200,8 +246,7 @@ export function MarketScreen() {
             )}
             {Object.entries(gs.cargo).map(([item, qty]) => {
               const culteMult = ARTEFACT_ITEMS.has(item) ? culteArtefact : 1
-              const stationSeedSell = gs.stationPriceSeeds?.[gs.currentStation] ?? 1.0
-              const sellPrice = Math.floor(getBasePrice(item) * stationSeedSell * getFullSellMult(gs, station.type, item) * getWorldEventPriceMultiplier(item, events) * (1 + soutePct / 100) * culteMult * (factionSurcharge > 0 ? 0.75 : 1))
+              const sellPrice = Math.floor(getBasePrice(item) * stationSeed * getFullSellMult(gs, station.type, item) * getWorldEventPriceMultiplier(item, events) * (1 + soutePct / 100) * culteMult * (factionSurcharge > 0 ? 0.75 : 1))
               const medBonus  = gs.class.medicBonus && item === 'Médicaments'
                 ? Math.floor(sellPrice * 0.5) : 0
               const total = sellPrice + medBonus
