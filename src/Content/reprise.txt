@@ -1,0 +1,50 @@
+ok c'est super, il faut créer plus de NPC, d'interactions et de quetes uniques, je voudrais des tres tres longues quetes qui te demandent plusieurs etapes plusieurs combats plusieurs voyages plusieurs discussion, des quetes ou il y a des contraintes (par exemple rejoindre une faction) tu vois le genre quoi
+Show less
+Bonne idée. Je vais créer un système de quêtes majeures multi-étapes distinct des quêtes simples existantes, avec des conditions variées (factions, réputation, NPCs visités, combats gagnés). Je commence par l'architecture complète.
+
+Plan : 5 quêtes majeures avec 4-6 étapes chacune :
+
+La Filière Noire (Boro, Bas-Fonds) — infiltration Faucon progressive
+L'Héritage de Velkor (Ysla, Abysses) — enquête archéologique dangereuse
+La Vengeance d'Ossian (Torvak, Fort Kharos) — horde de représailles
+La Couronne et le Vide (Ulmo, Couronne d'Eos) — espionnage de haut vol, faction Emporium requise
+La Route des Cendres (Murn, Les Cendres) — enquête sur l'incendie originel
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\types\index.ts
+Added 37 lines
+Que du style. Je continue — j'ajoute majorQuests à GameState, je crée le fichier de définitions, et je branche tout.
+
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\types\index.ts
+Added 2 lines
+Que du style. Je crée maintenant le moteur des quêtes majeures avec les 5 quêtes complètes.
+
+Write c:\Users\raphael.cau\RepoSnipeWeb\src\engine\majorQuests.ts
+195 lines
+Maintenant j'initialise majorQuests dans le store, je branche l'avancement, et j'ajoute le bouton dans le dialogue NPC.
+
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts
+Added 1 line
+Que du style. J'importe l'avancement dans le store et je l'appelle lors des voyages et des combats.
+
+Read c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts (lines 2-17)
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts
+Added 1 line
+Normal — je l'utilise maintenant dans travel et dans la victoire de combat.
+
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts
+Added 7 lines
+Je rewrite ce bloc pour le faire correctement et fusionner les messages.
+
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts
+Removed 1 line
+Je fais la même chose dans la victoire de combat.
+
+Read c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts (lines 438-457)
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\store\gameStore.ts
+Added 4 lines
+Maintenant le bouton NPC dans StationHub et l'affichage dans QuestsScreen.
+
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\components\screens\StationHub.tsx
+Added 1 line
+Que du style. J'ajoute le bouton quête majeure dans le dialogue NPC et je mets à jour QuestsScreen.
+
+Edit c:\Users\raphael.cau\RepoSnipeWeb\src\components\screens\StationHub.tsx tu etais ne train de faire ça donc reprend

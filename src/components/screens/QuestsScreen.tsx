@@ -1,0 +1,220 @@
+import { useGameStore } from '../../store/gameStore'
+import { NAMED_NPCS } from '../../engine/npcTracker'
+import type { MajorQuestCondition } from '../../types'
+
+function stageDestination(cond: MajorQuestCondition): string | null {
+  switch (cond.type) {
+    case 'visitStation': return cond.station
+    case 'winCombatAt':  return cond.station
+    case 'meetNpc':      return NAMED_NPCS.find(n => n.name === cond.npcName)?.station ?? null
+    case 'hasFaction':   return `Rejoindre faction : ${cond.faction}`
+    case 'bossKill':     return `Vaincre ${cond.bossName}`
+    default:             return null
+  }
+}
+
+const TYPE_LABEL: Record<string, string> = {
+  delivery:   'LIVRAISON',
+  kill:       'CONTRAT',
+  revenge:    'VENGEANCE',
+  info:       'RECO',
+  escort:     'ESCORTE',
+  sabotage:   'SABOTAGE',
+  heist:      'BRAQUAGE',
+  extraction: 'EXTRACTION',
+  bounty:     'PRIME',
+  patrol:     'PATROUILLE',
+}
+
+const TYPE_CLASS: Record<string, string> = {
+  delivery:   'tag--cyan',
+  kill:       'tag--red',
+  revenge:    'tag--orange',
+  info:       'tag--dim',
+  escort:     'tag--green',
+  sabotage:   'tag--red',
+  heist:      'tag--purple',
+  extraction: 'tag--cyan',
+  bounty:     'tag--gold',
+  patrol:     'tag--dim',
+}
+
+const TYPE_COMPLETE_HINT: Record<string, string> = {
+  delivery:   'Arriver à destination avec l\'item en cargo',
+  kill:       'Vaincre le boss à destination',
+  revenge:    'Gagner un combat à destination',
+  info:       'Arriver à destination',
+  escort:     'Arriver à destination avec le passager',
+  sabotage:   'Gagner un combat à destination',
+  heist:      'Arriver à destination avec l\'item acquis sur place',
+  extraction: 'Ramener l\'item ici depuis la destination',
+  bounty:     'Vaincre la cible à destination',
+  patrol:     'Arriver à destination',
+}
+
+export function QuestsScreen() {
+  const gs   = useGameStore(s => s.gs!)
+  const goTo = useGameStore(s => s.goTo)
+
+  return (
+    <div className="layout">
+      <div className="row" style={{ alignItems: 'center', gap: '16px' }}>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
+        <div className="t-sm t-bright">QUÊTES ACTIVES ({gs.activeQuests.length}/5)</div>
+        <div className="t-xs t-dim">{gs.completedQuestIds.length} complétées</div>
+      </div>
+
+      {gs.activeQuests.length === 0 && (
+        <div className="px-box t-dim t-xs">
+          Aucune quête active. Cherche du travail dans la station.
+        </div>
+      )}
+
+      {/* ── QUÊTES MAJEURES ─────────────────────────────────────── */}
+      {gs.majorQuests.length > 0 && (
+        <div className="col gap4">
+          <div className="t-xs t-dim" style={{ letterSpacing: '0.1em' }}>◆◆ MISSIONS MAJEURES ({gs.majorQuests.filter(q => !q.completed && !q.failed).length} actives)</div>
+          {gs.majorQuests.map(mq => {
+            const stage = mq.stages[mq.currentStage]
+            const pct = Math.round((mq.currentStage / mq.stages.length) * 100)
+            return (
+              <div key={mq.id} className="px-box" style={{
+                borderColor: mq.completed ? 'var(--green)' : mq.failed ? 'var(--red)' : 'var(--purple)',
+                background: mq.completed ? '#0a1a0a' : mq.failed ? '#1a0808' : '#0d0a18',
+              }}>
+                <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  <div className="t-sm" style={{ color: mq.completed ? 'var(--green)' : mq.failed ? 'var(--red)' : 'var(--purple)', flex: 1, marginRight: '8px' }}>
+                    {mq.completed ? '★★ ' : mq.failed ? '✗ ' : '◆◆ '}{mq.title}
+                  </div>
+                  <div className="tag t-xs" style={{ borderColor: 'var(--purple)', color: 'var(--purple)' }}>
+                    {mq.completed ? 'ACCOMPLIE' : mq.failed ? 'ÉCHOUÉE' : `${mq.currentStage}/${mq.stages.length}`}
+                  </div>
+                </div>
+
+                <div className="t-xs t-dim mb8" style={{ lineHeight: '1.8', fontStyle: 'italic' }}>
+                  {mq.lore.slice(0, 120)}{mq.lore.length > 120 ? '…' : ''}
+                </div>
+
+                {!mq.completed && !mq.failed && stage && (
+                  <>
+                    <div className="t-xs t-bright mb4" style={{ borderLeft: '2px solid var(--purple)', paddingLeft: '8px' }}>
+                      Étape {mq.currentStage + 1} — {stage.title}
+                    </div>
+                    <div className="t-xs mb4" style={{ lineHeight: '1.8' }}>{stage.description}</div>
+                    <div className="t-xs t-cyan mb4">
+                      ▶ {stage.objective}
+                    </div>
+                    {(() => {
+                      const dest = stageDestination(stage.condition)
+                      if (!dest) return null
+                      const isHere = gs.currentStation === dest
+                      return (
+                        <div className="t-xs mb8" style={{ color: isHere ? 'var(--green)' : 'var(--gold)', fontWeight: 'bold' }}>
+                          {isHere ? '★ TU ES SUR PLACE' : `→ Destination : ${dest}`}
+                        </div>
+                      )
+                    })()}
+                  </>
+                )}
+
+                {/* Barre de progression */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ flex: 1, height: '3px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${pct}%`, height: '100%', background: mq.completed ? 'var(--green)' : 'var(--purple)', transition: 'width 0.3s' }} />
+                  </div>
+                  <div className="t-xs t-dim">{pct}%</div>
+                </div>
+
+                {/* Étapes résumé */}
+                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                  {mq.stages.map((s, i) => (
+                    <div key={s.id} className="t-xs" style={{
+                      padding: '1px 5px',
+                      borderRadius: '2px',
+                      background: i < mq.currentStage ? 'var(--purple)' : i === mq.currentStage ? 'rgba(140,80,220,0.3)' : 'var(--surface)',
+                      color: i < mq.currentStage ? '#fff' : i === mq.currentStage ? 'var(--purple)' : 'var(--text-dim)',
+                      border: `1px solid ${i === mq.currentStage ? 'var(--purple)' : 'transparent'}`,
+                    }}>
+                      {i + 1}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="t-xs t-dim mt8">
+                  Donné par <span className="t-bright">{mq.giver}</span> à <span style={{ color: 'var(--cyan)' }}>{mq.giverStation}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ── QUÊTES SIMPLES ──────────────────────────────────────── */}
+      {gs.activeQuests.length > 0 && <div className="t-xs t-dim" style={{ letterSpacing: '0.1em' }}>◆ CONTRATS ({gs.activeQuests.length}/5)</div>}
+      <div className="col gap4">
+        {gs.activeQuests.map(q => {
+          const isAtTarget = gs.currentStation === q.targetStation
+          const isAtGiver  = gs.currentStation === q.giverStation
+          const hasItem    = q.targetItem ? (gs.cargo[q.targetItem] ?? 0) > 0 : false
+          const hasPassenger = (gs.cargo['Passager'] ?? 0) > 0
+
+          let statusColor = 'var(--text-dim)'
+          let statusText  = `→ ${q.targetStation}`
+          if (q.type === 'extraction') {
+            if (!isAtTarget && !hasItem) statusText = `→ Aller chercher à ${q.targetStation}`
+            else if (hasItem && !isAtGiver) statusText = `→ Ramener à ${q.giverStation}`
+            else if (hasItem && isAtGiver) { statusText = 'PRÊTE À COMPLÉTER ici'; statusColor = 'var(--green)' }
+          } else if (isAtTarget) {
+            statusText = 'À COMPLÉTER — tu es sur place'
+            statusColor = 'var(--gold)'
+          }
+
+          return (
+            <div key={q.id} className="px-box">
+              <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                <div className="t-sm t-bright" style={{ flex: 1, marginRight: '8px' }}>{q.title}</div>
+                <div className={`tag t-xs ${TYPE_CLASS[q.type]}`}>{TYPE_LABEL[q.type]}</div>
+              </div>
+
+              <div className="t-xs" style={{ lineHeight: '2', marginBottom: '8px' }}>{q.description}</div>
+
+              <div className="t-xs t-dim" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <div>
+                  Donné par <span className="t-bright">{q.giver}</span> à <span className="t-cyan">{q.giverStation}</span>
+                </div>
+                <div style={{ color: statusColor }}>{statusText}</div>
+                <div className="t-dim" style={{ fontStyle: 'italic', fontSize: '7px' }}>
+                  {TYPE_COMPLETE_HINT[q.type]}
+                </div>
+                {q.targetItem && q.type !== 'extraction' && (
+                  <div>
+                    Item requis : <span className="t-orange">{q.targetItem}</span>
+                    {' '}
+                    {hasItem
+                      ? <span className="t-green">(en cargo)</span>
+                      : q.type === 'escort'
+                        ? hasPassenger ? <span className="t-green">(passager à bord)</span> : <span className="t-red">(passager non embarqué)</span>
+                        : <span className="t-red">(à acquérir)</span>
+                    }
+                  </div>
+                )}
+                {q.type === 'extraction' && q.targetItem && (
+                  <div>
+                    À récupérer : <span className="t-orange">{q.targetItem}</span>
+                    {' '}
+                    {hasItem ? <span className="t-green">(en cargo)</span> : <span className="t-dim">(pas encore récupéré)</span>}
+                  </div>
+                )}
+              </div>
+
+              <div className="t-xs t-gold mt8">
+                Récompense : {q.creditReward.toLocaleString()} cr
+                {q.repReward > 0 ? ` · +${q.repReward} rép` : q.repReward < 0 ? ` · ${q.repReward} rép` : ''}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

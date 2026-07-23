@@ -1,0 +1,385 @@
+{
+  "La Carcasse": [
+    "Tu arrives dans La Carcasse par un sas rouillé qui devrait être soudé depuis des années. L'air pue le métal brûlé, le plastique fondu et quelque chose d'organique que tu préfères ne pas identifier. Quelqu'un a gravé 'BIENVENU' sur la paroi — sans le E final. Intentionnel ou pas, ça donne le ton.",
+    "Les niveaux inférieurs de La Carcasse grondent. Pas d'une machine — d'une communauté. Des familles vivent ici depuis des générations dans des chambres découpées dans la coque d'un cargo démantrelé il y a cinquante ans. Tout le monde sait tout sur tout le monde ici. Sauf toi.",
+    "Le marché de La Carcasse s'étend dans ce qui était la soute centrale. Des étals de caisses empilées, des vendeurs qui crient les prix en patois métallique, des gosses qui courent entre les jambes des adultes. Un type vend de la viande dont l'origine ne figure sur aucun panneau. Tu décides de ne pas poser la question.",
+    "Dans La Carcasse, les inconnus se repèrent à leur façon de marcher — trop droit, trop propre, trop hésitant. Tu t'efforces d'adopter le pas traînant des habitués, les épaules tombées, le regard flottant. Ça dupe personne mais ça réduit l'intérêt qu'on te porte.",
+    "Un néon clignotant indique BAR — la moitié des lettres manquent. À l'intérieur, quatre tables occupées par des gens qui n'ont l'air d'être partis nulle part depuis longtemps. Le barman a un bras de remplacement artisanal. Il te sert sans que tu aies demandé. 'T'as une tête à avoir besoin d'un verre.' Il a probablement raison.",
+    "Une odeur de métal chauffé monte des niveaux inférieurs. Des bruits de travail, réguliers, comme un cœur mécanique. La Carcasse ne dort jamais vraiment — elle somnole, et dans sa somnolence quelque chose continue toujours de se construire ou de se démanteler.",
+    "Des tuyaux courent au plafond à intervalles irréguliers, certains purgent de la vapeur, d'autres sont silencieux depuis si longtemps qu'on ne sait plus ce qu'ils transportaient. Un groupe d'enfants en équilibre sur des caisses renversées te regarde passer avec des yeux qui ont l'air d'avoir déjà vu bien pire que toi."
+  ],
+  "Les Bas-Fonds de Vega": [
+    "Les Bas-Fonds de Vega commencent là où les cartes officielles s'arrêtent. Techniquement, ce niveau n'existe pas. Personne n'a signé les permis, personne n'inspecte les structures. Les plafonds sont bas, la pression atmosphérique légèrement trop haute. Les gens ici sont compacts, tassés, comme adaptés.",
+    "Il y a des règles aux Bas-Fonds. Personne ne les a écrites mais tout le monde les connaît. On ne crie pas les noms dans la rue. On ne fixe pas les transactions des autres. On ne parle pas des gens qui ont disparu. Ce code tient la place debout depuis trois décennies. Les étrangers qui l'ignorent ont une durée de vie mesurable en heures.",
+    "Une procession silencieuse traverse la rue. Cinq personnes portent une caisse de métal sur les épaules, regardant droit devant. Personne ne s'écarte, personne ne regarde. Aux Bas-Fonds, les funérailles se font à voix basse. Tu t'écartes quand même.",
+    "L'odeur change à chaque carrefour dans les Bas-Fonds. Huile de friture ici. Solvant chimique là. Plus loin, quelque chose de doucement nauséabond. Une femme répare un drone avec des outils sortis d'une boîte à chaussures. Elle lève les yeux une seconde, évalue, rebaisse les yeux. Tu passes le test minimum.",
+    "Le bar qu'on appelle Le Fond est en sous-sol d'un sous-sol. Trois marches, une porte, et le monde officiel disparaît. Ici se traitent les affaires qui ne doivent pas avoir eu lieu. Les murs absorbent les conversations. C'est peut-être la règle la plus précieuse de tout Vega : un endroit où personne n'écoute.",
+    "Les néons ici ne tombent pas en panne — ils sont entretenus. Pas par fierté mais par nécessité : l'obscurité totale serait utilisée. La lumière diffuse maintient une surveillance mutuelle qui fait office de paix sociale. Tout le monde se voit. Personne ne se regarde vraiment.",
+    "Un marché illégal s'est installé dans un ancien couloir de service. Des vendeurs assis par terre avec leurs marchandises disposées sur des bâches. Des acheteurs qui s'accroupissent, négocient à voix basse, repartent vite. Aucune enseigne. Aucune trace. L'économie de l'invisible dans toute son efficacité."
+  ],
+  "Fort Kharos": [
+    "Fort Kharos ressemble à une cicatrice dans le tissu de l'espace. Les remparts extérieurs ont été modifiés, renforcés, réparés si souvent que la structure originale est méconnaissable. Personne ne devrait vivre ici. Deux mille personnes y vivent quand même.",
+    "Le Maréchal de Kharos n'est pas visible mais sa présence est partout. Des portraits peints à même la tôle. Des phrases gravées dans les couloirs — maximes militaires, dates de batailles que personne d'autre ne commémore. La milice locale patrouille en formation de trois, armée, silencieuse.",
+    "On dit que Fort Kharos n'a jamais capitulé. C'est vrai dans la mesure où personne n'a jamais essayé vraiment. Suffisamment isolé, armé, désespéré pour rendre toute offensive coûteuse. Les marchands qui s'y arrêtent font leur affaire et repartent vite.",
+    "La place centrale de Fort Kharos est une salle de parade reconvertie avec des gradins rouillés. Quelques gosses jouent à la guerre avec des bouts de ferraille. Une vieille femme leur crie de faire attention. Les gosses ne font pas attention.",
+    "L'air de Kharos sent la poudre et le minerai. Pas métaphoriquement — les systèmes de filtration étaient conçus pour un usage militaire intense et n'ont jamais été recalibrés pour la vie civile. Les habitants ne le remarquent plus depuis longtemps. Toi tu le remarques.",
+    "Des graffitis militaires couvrent certains couloirs — pas des tags d'adolescents mais des revendications, des allégeances, des deuils codifiés. Fort Kharos a sa propre épigraphie. Une histoire que les murs racontent à ceux qui savent lire ce vocabulaire particulier."
+  ],
+  "Arc Ouest Apocalypse": [
+    "Arc Ouest Apocalypse. Le nom n'est pas une exagération — les fondateurs avaient le sens du drame et une mémoire précise d'un événement qu'on n'évoque jamais en détail. L'entrée principale est une arche de métal tordu. Tu passes dessous, la tête légèrement baissée, comme tout le monde.",
+    "C'est la station d'Alanossa. Tout le monde ici sait ça. L'organisation dans le chaos apparent — les zones d'accès contrôlé, les signaux discrets entre inconnus, les espaces qui semblent vides mais ne le sont pas. Un pouvoir central invisible qui s'exprime dans les détails.",
+    "Dans les marchés d'Arc Ouest, on vend des choses qui n'ont pas de nom sur les étiquettes. Des caisses sellées avec des sangles militaires. Un homme en chapeau de pluie vend quelque chose dans sa paume fermée à des acheteurs qui vérifient d'abord à gauche, puis à droite.",
+    "Un groupe de Faucons Noirs occupe un angle de la place principale. Ils ne cherchent pas le combat — ils le possèdent. Les passants gardent leur trajectoire sans les regarder directement. C'est une chorégraphie sociale qui fonctionne parce que tout le monde connaît les règles.",
+    "Les néons d'Arc Ouest projettent une lumière rouge-orange sur tout. Ça donne à chaque visage l'air de quelqu'un qui planifie quelque chose. Peut-être parce que la plupart planifient effectivement quelque chose.",
+    "Un enfant d'une dizaine d'années monte la garde devant un couloir secondaire. Pas un jeu — une vraie faction d'enfants qui contrôlent un réseau de passages. Ils ont leurs propres règles, leurs propres taxes. Alanossa les tolère. Ils lui sont utiles de façons que les adultes ne voient pas."
+  ],
+  "Le Purgatoire": [
+    "Le Purgatoire est un ancien centre de détention qui a connu plusieurs vies depuis sa fermeture officielle. Les barreaux sont toujours là — certains comme décoration, certains encore fonctionnels. Le Geôlier a gardé ce qu'il trouvait utile et éliminé ce qu'il ne comprenait pas.",
+    "Quelque chose dans l'architecture du Purgatoire te rappelle que cet endroit a été conçu pour empêcher les gens de partir. Couloirs sans fenêtres. Intersections qui désorienteraient une personne paniquée. Portes qui s'ouvrent d'un seul côté. Tu notes mentalement les sorties.",
+    "Un homme te suit depuis trois couloirs. Pas discrètement — il ne cherche pas à être discret. Il est simplement là, derrière toi, à distance constante. Le Purgatoire a son propre système d'observation. Tu n'es pas en danger. Tu es étudié. C'est différent.",
+    "Les habitants ont deux visages distincts : ceux qui sont nés ici et ceux qui n'ont pas pu partir. Les premiers ont adapté leur psychologie à l'espace clos. Les seconds portent encore quelque chose de cassé dans leur façon de marcher.",
+    "La cafétéria du Purgatoire ressemble encore à une cafétéria de prison — plateaux en métal, tables boulonnées au sol, fenêtres grillagées. Les gens y mangent debout ou assis selon une hiérarchie non explicitée que les nouveaux arrivants apprennent rapidement.",
+    "Les cellules du niveau 4 sont encore occupées, mais pas comme prisons. Ce sont des appartements maintenant, avec des plantes dans les fenêtres et des dessins d'enfants collés aux barreaux. Il faut une certaine imagination pour vivre ainsi. Ou une absence d'imagination pour d'autres façons de vivre."
+  ],
+  "Port des Brumes": [
+    "Port des Brumes doit son nom aux émanations constantes de ses recycleurs défaillants. Une brume artificielle, froide et légèrement acide, flotte en permanence au niveau des genoux. Elle brouille les caméras. Elle cache les mains. Personne n'a jamais réparé les recycleurs.",
+    "Le port lui-même est un dédale de quais improvisés, de câbles de remorquage traînants, de vaisseaux amarrés à des points d'ancrage qui ne figurent sur aucun plan officiel. Les pilotes qui connaissent Port des Brumes s'y repèrent à des repères visuels — une tache de rouille particulière, une enseigne cassée.",
+    "On vend des identités à Port des Brumes. Pas métaphoriquement. De vrais papiers, de vrais historiques de voyage construits sur dix ans. Les meilleurs artisans du secteur opèrent ici. Leur travail est si bon que certains clients ont fini par croire eux-mêmes à leurs nouvelles vies.",
+    "Dans les bars de Port des Brumes, personne ne demande ton nom. Les conversations restent générales — météo spatiale, prix du carburant, destinations vagues. La précision serait une politesse mal venue.",
+    "La brume entre par les joints de la station et ressort par d'autres — la circulation de l'air est un mystère que les ingénieurs ont abandonné à expliquer. Tu suis sa direction comme un guide informel. Là où la brume va, quelque chose se passe.",
+    "Un remorqueur spatial à moitié désossé git dans le dock principal depuis si longtemps qu'il est devenu partie de l'architecture. Des gens y vivent. Des gosses y jouent. Il a ses propres numéros d'appartement maintenant — peints à la main en lettres inégales sur ce qui était autrefois des plaques d'immatriculation."
+  ],
+  "Nexus Aldara": [
+    "Nexus Aldara est propre. Trop propre pour une station spatiale. Les couloirs sont blancs, les panneaux lisibles, les systèmes de circulation fonctionnels. La Directrice Aldara a investi dans l'image avant l'infrastructure, mais l'image est si bonne qu'elle est devenue une forme d'infrastructure elle-même.",
+    "Le centre commercial de Nexus Aldara occupe trois niveaux entiers. Des boutiques légitimes côtoyant des boutiques dont le business model est flou. Des cafés avec des chaises design. La Directrice croit au standing. Ses habitants ont appris à y croire aussi.",
+    "Les agents de sécurité d'Aldara sont discrets et professionnels. Ils ne portent pas d'armes visibles mais tu en identifies au moins quatre dans le hall d'arrivée à leur façon de se tenir. Des civils bien entraînés qui passent pour des civils mal entraînés.",
+    "Une bannière annonce 'Innovation. Excellence. Prospérité.' en trois langues. En dessous, quelqu'un a tagué : 'Pour qui ?' Le tag a été partiellement effacé mais reste lisible. C'est peut-être intentionnel aussi.",
+    "Les écrans de Nexus Aldara diffusent des nouvelles locales 24h/24. Des nouvelles positives — inaugurations, partenariats, records de production. Aucune violence, aucun crime. La Directrice contrôle ce qui circule sur ses écrans avec la même attention qu'elle contrôle tout le reste."
+  ],
+  "Colonie Perséphone": [
+    "Colonie Perséphone sent le sol mouillé, les végétaux en croissance et la terre retournée. Dans l'espace, ces odeurs sont une anomalie presque choquante. Des bacs de culture s'étendent sur plusieurs niveaux. La colonie produit ce qu'elle consomme et un peu plus qu'elle vend.",
+    "Les habitants de Perséphone ont un rapport au temps différent. Leurs journées suivent les cycles d'irrigation, les saisons artificielles des cultures. Il n'y a pas d'urgence ici. Il y a un rythme. Tu te surprends à ralentir légèrement.",
+    "La place centrale de la colonie a de la vraie pelouse artificielle et de vrais arbres dans des bacs. Des enfants jouent. Des vieux lisent. Pour quelques minutes, si tu fermes les yeux sur les hublots et les systèmes de survie, tu pourrais être sur une planète.",
+    "Un marché de producteurs occupe le niveau 3 chaque matin à 6h. Des gens qui vendent ce qu'ils ont cultivé avec leurs propres mains, avec la fierté de quelqu'un qui connaît exactement l'origine de chaque chose. Les prix sont honnêtes parce que tout le monde se connaît."
+  ],
+  "Le Sanctuaire des Dérives": [
+    "Le Sanctuaire des Dérives est le seul endroit de l'espace connu où personne ne porte d'arme visible. Sœur Valkara l'a voulu ainsi. La règle tient non par force mais par consensus : ici on ne vient pas pour combattre. On vient parce qu'on n'a plus la force de combattre.",
+    "Les patients du Sanctuaire viennent de partout. Blessés de guerre, accidentés, gens que leur corps a trahis. Ils marchent dans les couloirs dans leurs tenues blanches, certains seuls, certains accompagnés. Pas de regards méfiants ici — juste la fatigue universelle de ceux qui guérissent.",
+    "Dans les jardins intérieurs, des gens assis silencieux regardent les plantes pousser. C'est une thérapie officielle ici. Sœur Valkara a étudié la psychologie spatiale avant de fonder cet endroit. Elle sait que la croissance intérieure guérit mieux que le vide extérieur.",
+    "L'infirmerie principale du Sanctuaire fonctionne avec un niveau de précision qui serait remarquable dans n'importe quel contexte. Ici il est aussi serein — les soignants travaillent sans précipitation, sans anxiété visible, comme si le temps lui-même était calibré différemment."
+  ],
+  "Forge Alpha": [
+    "Forge Alpha ne s'arrête jamais. Les chaînes de production tournent en continu, trois équipes en rotation, chaque seconde d'inactivité une perte. Le bruit est constant — métal frappant métal, systèmes pneumatiques, convoyeurs. Tu apprends à parler plus fort dans les dix premières minutes ou tu arrêtes de parler.",
+    "Les ouvriers de Forge Alpha ont un langage par gestes que les visiteurs ne comprennent pas. Impossible de s'entendre dans l'atelier principal. Au fil des années, ce langage est devenu culture. Des nuances, des plaisanteries, des confessions échangées en gestes entre deux postes de travail.",
+    "La cantine de Forge Alpha est la seule pause de la journée. Tout le monde mange en même temps, vingt minutes. Les conversations sont denses, rapides, comme comprimées pour tenir dans le temps disponible. Tu t'installes à une table libre. Personne ne te rejette. Personne ne t'inclut non plus.",
+    "Le secteur de stockage est impressionnant : des kilomètres de rayonnages contenant des pièces, des composants, des alliages. Dans les rangées profondes, là où les caméras ont des angles morts, on dit qu'il se passe des choses qui n'ont rien à voir avec l'inventaire.",
+    "Une sirène retentit toutes les quatre heures — changement d'équipe. En dix minutes, une vague de travailleurs épuisés sort et une vague de travailleurs reposés entre. Le flux est si précis qu'il ressemble à une respiration. Forge Alpha respire par ses ouvriers."
+  ],
+  "L'Arc du Pic de l'Est": [
+    "L'Arc du Pic de l'Est domine visuellement tout ce qu'il y a autour — une architecture ambitieuse qui écrase les structures voisines par la seule force de sa verticalité. Ramaster l'a conçu comme symbole avant tout.",
+    "L'atelier de Ramaster occupe le niveau inférieur de l'Arc. On entend les bruits de travail depuis les couloirs — des sons précis, méthodiques, jamais précipités. Les apprentis qui y travaillent ont cet air concentré de gens qui apprennent quelque chose qui résiste.",
+    "Le marché de pièces détachées de l'Arc est réputé dans tout le secteur. Ramaster a établi des standards de qualité qui ont rendu la station incontournable pour qui veut réparer un vaisseau correctement. La clientèle le sait et le paie en conséquence.",
+    "Les couloirs de l'Arc sont ornés d'outils anciens exposés comme des œuvres d'art. Des clés à molette de la taille d'un homme. Des soudures d'une précision qui n'existe plus dans la production industrielle. Ramaster a voulu que ses habitants comprennent d'où vient leur savoir-faire."
+  ],
+  "Sanctum Machina": [
+    "Dans Sanctum Machina, les robots sont partout — nettoyeurs, transporteurs, serveurs, gardes. L'IA centrale, qu'on appelle ARIA, les coordonne en temps réel. Tu les regardes passer. Plusieurs te regardent en retour. Ce n'est pas une impression.",
+    "Le silence de Sanctum Machina est différent du silence ordinaire. Pas d'absence de bruit — il y en a, des bruits mécaniques discrets. Mais aucun bruit humain superflu. Les humains qui vivent ici ont adapté leur comportement aux normes de la machine.",
+    "Il y a exactement soixante-douze humains permanents dans Sanctum Machina. ARIA connaît leur nom, leur historique médical, leur cycle de sommeil, leur humeur probable en ce moment. Quand tu entres, ton profil est créé en huit secondes.",
+    "La bibliothèque de données de Sanctum Machina contient l'historique complet de chaque événement majeur des deux cents dernières années. ARIA l'a compilée, indexée, corrélée. Mais ARIA choisit ce qu'elle montre. L'index est public. Les niveaux d'accès, non.",
+    "Un robot de maintenance s'arrête devant toi et attend. Tu t'écartes. Il passe. Tu n'étais pas dans son chemin — tu étais dans son champ de capteurs. Il t'évaluait. Il a décidé que tu n'étais pas une anomalie. Pour l'instant."
+  ],
+  "La Bulle": [
+    "La Bulle est une station de recherche biomédicale qui a diversifié ses activités de façon créative. Le Docteur Flinch a compris que les améliorations corporelles légales et illégales représentaient le même marché. Ses cliniques propres côtoient des arrière-salles dont les équipements sont trop sophistiqués pour être légaux.",
+    "Dans les couloirs de La Bulle, tu croises des gens à différents stades d'augmentation. Certains ont des implants discrets. D'autres ont fait des choix plus visibles, plus radicaux. Tout le monde ici a quelque chose qui n'est plus tout à fait naturel.",
+    "Le laboratoire principal de La Bulle est ouvert aux visiteurs — une vitrine pour les partenaires potentiels. Des techniciens en combinaisons blanches travaillent sur des choses que tu ne peux pas nommer. L'une des choses bouge. Flinch, quelque part dans la station, sait que tu l'as vu faire ça.",
+    "Un homme dans une salle d'attente a trois bras. Il lit un journal. Le troisième bras feuillette les pages pendant que les deux autres restent croisés. Il ne semble pas remarquer ton regard. Ou il a appris à ne pas le remarquer.",
+    "L'odeur de La Bulle est médicale, propre, légèrement antiseptique. Ça ne masque pas vraiment autre chose — les murs sont vraiment propres. Ce qui se passe derrière ces murs propres est une autre question."
+  ],
+  "Les Abysses de Velkor": [
+    "Les Abysses de Velkor descendent dans l'obscurité. Littéralement — la station est construite dans une faille géologique, et les niveaux les plus profonds ne reçoivent aucune lumière naturelle. Velkor a choisi cet endroit précisément pour cette raison.",
+    "On dit que Velkor teste les limites de la conscience. Pas comme métaphore — concrètement, avec des appareils, des protocoles, des sujets. Les gens qui ressortent des niveaux inférieurs ont parfois ce regard légèrement décalé, comme si la calibration de quelque chose en eux avait été ajustée.",
+    "Les couloirs des Abysses s'élargissent et se rétrécissent selon une logique qui ne suit pas les codes de construction standards. Velkor a conçu l'espace comme une expérience en soi. Tu t'en rends compte en remarquant que ton rythme cardiaque a changé depuis que tu es entré.",
+    "Au niveau -7, la gravité est légèrement différente. Pas assez pour tomber, mais assez pour que ta démarche soit légèrement décalée. Les habitués marchent avec une souplesse adaptée. Toi tu trébuches légèrement sur rien, et personne ne te demande si ça va."
+  ],
+  "L'Académie Stellaire": [
+    "L'Académie Stellaire est le seul endroit du secteur où les gens paient pour apprendre. Pas des formations pratiques — de la connaissance pure. L'Archiviste Zenn a construit quelque chose qui ressemble davantage à un temple de l'information qu'à une institution d'enseignement.",
+    "Les étudiants de l'Académie ont l'air d'avoir dormi peu et lu beaucoup. Ils errent dans les couloirs en consultant des terminaux portables, en débattant à voix basse. Tu te sens légèrement analphabète dans ce flux continu de gens qui semblent savoir des choses que tu ne sauras jamais.",
+    "La grande bibliothèque de l'Académie occupe cinq niveaux. Des rayonnages de données physiques — cristaux, disques, rouleaux de polymère imprimé. Zenn croit que l'information physique dure mieux que le numérique. Elle cite des catastrophes spécifiques. Personne ne la contredit.",
+    "Un débat est en cours dans l'amphithéâtre principal. Deux personnes s'affrontent sur quelque chose que tu ne comprends pas entièrement — l'éthique de l'exploration de conscience, peut-être, ou l'historicité de la Grande Guerre. La foule est silencieuse et attentive. La précision intellectuelle ici a la même intensité que la violence ailleurs."
+  ],
+  "Les Décombres de Vael": [
+    "Les Décombres de Vael sont tout ce qu'il reste d'une ville spatiale détruite pendant la Grande Guerre. Les structures partiellement effondrées ont été stabilisées juste assez pour éviter les effondrements catastrophiques, et les gens se sont installés dans les interstices.",
+    "L'architecture de Vael est une superposition. Le dessous — élégant, précis, prévu pour accueillir des dizaines de milliers. Par-dessus : des constructions improvisées, des bâches, des passerelles soudées entre des épaves. Tu marches sur de l'histoire.",
+    "Un vieux mural représente une cité spatiale florissante — des spires lumineuses, des vaisseaux en procession. La moitié est abîmée. Les couleurs restantes sont suffisamment vives pour te montrer ce que c'était. Tu restes devant plus longtemps que prévu.",
+    "L'Ancien est assis à sa place habituelle, dans un fauteuil récupéré qui doit avoir trente ans de service dans cette position exacte. Il ne regarde pas les passants — il les enregistre. Sa mémoire de Vael avant la guerre est la ressource la plus précieuse qui reste ici.",
+    "Des fouilles archéologiques ont lieu dans le secteur Est depuis deux ans. Une équipe de cinq personnes qui exhume ce que la guerre a enterré. Ils font des gestes méticuleux au-dessus de ce qui pourrait être des objets du quotidien ou des preuves de quelque chose d'autre."
+  ],
+  "Épave de l'Aurore Noire": [
+    "L'Aurore Noire était un croiseur de commandement. Long de deux kilomètres, construit pour durer cent ans, il en a fait trente avant d'être touché. L'épave dérive depuis. À l'intérieur, des générations de scavengers ont prélevé ce qu'ils pouvaient. Il reste encore des sections intactes.",
+    "L'intérieur de l'Aurore Noire est un labyrinthe. Les plans originaux circulent mais sont partiellement faux — le vaisseau a été modifié en urgence pendant la bataille. Les scavengers utilisent un système de marquage à la craie pour ne pas se perdre. Tu trouves des marquages anciens. Certains ont été effacés.",
+    "Dans la salle des communications, les systèmes sont HS mais les journaux de bord sont intacts. Des messages envoyés et jamais reçus. Des ordres dont les destinataires sont morts. Un dernier message personnel du capitaine à une adresse qui n'existe plus. Tu fermes le terminal.",
+    "La salle des officiers de l'Aurore Noire est restée en état anormal — des tables, des chaises, des cartes de navigation encore épinglées aux murs. Quelqu'un a nettoyé ici récemment. Il y a des traces de pas fraîches dans la poussière. Tu n'étais pas le premier aujourd'hui."
+  ],
+  "Le Vaisseau Fantôme Errant": [
+    "Le Vaisseau Fantôme Errant n'a pas de nom officiel. Il dérive sur une trajectoire elliptique connue depuis quarante ans. Personne ne sait qui l'a construit, qui l'a abandonné, pourquoi. Les théories varient. Les faits sont simples : le vaisseau est là, vide, et parfois il n'est pas tout à fait vide.",
+    "À l'intérieur du Vaisseau Fantôme, il y a de la nourriture. Périmée depuis des décennies, mais présente. Des tables mises, des verres posés comme si quelqu'un allait revenir. La qualité de la conservation est inexplicable compte tenu de l'état des systèmes.",
+    "Les scavengers qui ont séjourné dans le Vaisseau Fantôme rapportent des sons. Pas de machineries — le vaisseau est sans énergie. Des sons qui ressemblent à des voix lointaines, à des pas dans un couloir parallèle. Les rationaux expliquent par le gauchissement thermique. Les autres n'expliquent pas.",
+    "Il y a quelque chose dans l'air ici — pas une odeur, pas une présence, mais une résistance douce aux mouvements, comme si l'espace lui-même était légèrement plus dense. Des physiciens ont mesuré. Les mesures sont normales. Les physiciens sont repartis vite."
+  ],
+  "L'Arc Perdu": [
+    "L'Arc Perdu ne figure sur aucune carte officielle actualisée. Raphazarus y est pour quelque chose. Il ne parle pas de comment.",
+    "Les couloirs de L'Arc Perdu sont couverts de symboles que tu ne reconnais pas. Certains ressemblent à des langues mortes. D'autres à des schémas techniques. Raphazarus a marqué son territoire d'une façon qui précède le langage. Ou qui le dépasse.",
+    "Il y a une bibliothèque dans L'Arc Perdu. Des textes physiques — papier, plastique, métal gravé. Des millénaires de documents. Raphazarus n'est pas le premier à avoir habité ici. Ce qui précédait Raphazarus, il ne l'a pas détruit. Il l'a lu.",
+    "L'air de L'Arc Perdu est immobile d'une façon particulière. Pas mort — en attente. Comme une respiration retenue. Tu as cette sensation que si tu faisais du bruit maintenant, quelque chose très loin dans la station l'entendrait et ne l'oublierait pas."
+  ],
+  "Esmeralda": [
+    "Tu débarques sur Esmeralda et la première chose qui te frappe c'est l'air. Du vrai air, pas filtré, pas recyclé, qui sent les arbres et l'humidité et quelque chose de vivant qu'aucun système de survie n'a jamais su reproduire.",
+    "La forêt d'Esmeralda commence juste après les structures d'accueil. Abruptement. Un mur de végétation dense, ancienne, qui a eu des millénaires pour décider de sa forme sans aucune interférence humaine. Le Roi Maxance a établi des zones de non-intervention strictes.",
+    "Les marchés d'Esmeralda vendent des choses impossibles à trouver ailleurs. Des épices dont le goût n'a pas d'équivalent synthétique. Des textiles végétaux qui durent trente ans. Les marchands ici ne négocient pas — les prix sont fixes, les quantités limitées.",
+    "Une créature que tu ne saurais pas nommer traverse la rue devant toi, indifférente. Grande, lente. Les habitants d'Esmeralda s'écartent légèrement mais sans peur. Tu t'écartes aussi. Par politesse si non par prudence.",
+    "Une pluie artificielle commence au niveau 4. Des buses intégrées au plafond libèrent une bruine douce à intervalles réguliers — pas pour l'agriculture mais pour le bien-être. Marcher sous cette bruine tiède dans l'air végétal d'Esmeralda est la chose la plus proche d'une planète que tu as vécue depuis longtemps.",
+    "Les gosses d'Esmeralda jouent dans la forêt. Pas à des jeux d'adultes en miniature — à des jeux qui n'existent que dans cette forêt, avec des règles qu'ils n'expliquent pas aux adultes. Un enfant te regarde depuis une branche haute avec une expression d'évaluation qui ne devrait pas appartenir à quelqu'un de son âge."
+  ],
+  "Scotty Golden North": [
+    "Scotty Golden North est une promesse de lumière dans le noir de l'espace. Les enseignes dorées sont visibles à des kilomètres. À l'intérieur, tout est conçu pour que tu ne regardes pas ta montre, que tu ne penses pas à demain.",
+    "Le casino de Scotty est organisé en zones d'intensité croissante. La périphérie est douce — des jeux légers, des boissons offertes. Plus tu t'enfonces, plus les mises augmentent, plus le bruit diminue. Au centre, quelques salles privées dont les portes ne s'ouvrent que pour certains.",
+    "Les croupiers de Scotty sont formés à la psychologie autant qu'aux règles du jeu. Ils savent reconnaître quand quelqu'un perd plus qu'il ne devrait, quand la soirée bascule. La machine à profits la plus efficace se soucie de la santé de ses clients. Jusqu'à un certain point.",
+    "Samy Scotty est visible depuis son balcon à presque toutes les heures. Il observe. Pas par méfiance — par fascination. Il aime les gens qui jouent. Il a construit cet endroit pour les regarder. L'argent est le prétexte.",
+    "Le restaurant de l'étage supérieur de Scotty sert une cuisine que tu ne peux pas te permettre. Mais tu peux t'asseoir au bar qui le longe et regarder les plats passer. Parfois quelqu'un en laisse un intact et le serveur regarde ailleurs. C'est la seule façon d'obtenir de la vraie cuisine ici sans dix mille crédits."
+  ],
+  "Star Quest": [
+    "Star Quest vibre. La musique commence dès les sas d'entrée — pas agressive, juste présente, te préparant à quelque chose. Mister Eliotis a une théorie sur le tempo optimal pour la réception des nouvelles arrivées. Ce que tu entends est le résultat d'années de recherche hédonique.",
+    "La fête chez Eliotis n'est pas continue — elle est perpétuelle. Différents espaces, différentes ambiances, différentes intensités. Des cocktails dont les noms sont des mots inventés servant des attentes précises.",
+    "Tu croises des gens de tous les secteurs dans les couloirs de Star Quest. Des pilotes militaires en permission, des marchands qui célèbrent une bonne affaire, des criminels qui fêtent quelque chose qu'ils ne peuvent pas nommer publiquement. Eliotis accueille tout le monde avec le même sourire.",
+    "Il y a dans Star Quest un endroit qu'on appelle La Chambre Blanche. Pas sur les plans officiels. On y accède par un passage derrière les cuisines. Ce qui s'y passe dépend de qui tu es et de ce qu'Eliotis a décidé que tu mérites."
+  ],
+  "Emporium Requiem": [
+    "Emporium Requiem est une planète artificielle. La structure a été construite pour ressembler à une planète — surface habitable, atmosphère maintenue, gravité simulée à 0.98g. Marcher ici, c'est marcher sur quelque chose que des gens ont construit de toutes pièces.",
+    "Les marchés de l'Emporium couvrent des kilomètres. Chaque niveau est une spécialité — matériaux, artefacts, information, accès. Les prix sont affichés en or parce que les crédits manquent de prestige ici.",
+    "Il y a une règle à l'Emporium qu'on ne t'explique pas à l'entrée : la courtoisie est obligatoire. Les gens ici règlent leurs différends par d'autres moyens que la violence, et ces autres moyens sont souvent bien pires.",
+    "La douane de l'Emporium Requiem est réputée pour son inefficacité calculée. Les files sont longues, les vérifications minutieuses, les inspecteurs lents. C'est intentionnel — les délais génèrent des frais, les frais se négocient. Ce quelqu'un n'est pas toi.",
+    "Au niveau 9 de l'Emporium, là où l'éclairage est plus tamis et les enseignes moins grandes, se trouvent les vrais marchés. Les choses qui ne peuvent pas être affichées au niveau commercial. Des gens assis à des tables de café qui regardent leurs terminaux et ne te regardent pas. La transaction la plus discrète est la plus chère."
+  ],
+  "La Citadelle Écarlate": [
+    "La Citadelle Écarlate tire son nom des panneaux de revêtement en alliage rougeâtre qui couvrent ses parois extérieures. Grand Gardien Sorath gouverne cet endroit avec une rigueur qui serait excessive n'importe où ailleurs. Ici elle est la norme.",
+    "Les Gardiens Écarlates qui patrouillent ont cet air de gens qui croient en quelque chose. Pas juste un emploi — une mission. Sorath a cultivé ça consciencieusement. Une foi dans l'ordre, dans la protection, dans l'idée qu'une ligne peut être tenue si assez de gens décident de la tenir.",
+    "L'entraînement des recrues de la Citadelle est visible depuis les passerelles extérieures. Formations, exercices de combat, protocoles de réponse. C'est beau dans la façon que le mouvement précis peut être beau. Et légèrement effrayant pour la même raison."
+  ],
+  "Fort Ossian": [
+    "Fort Ossian est une machine de guerre parfaitement entretenue. Le Général Ossian a le culte du détail — chaque pièce d'équipement vérifiée, chaque protocole respecté. Le fort ne décroche jamais. Même en temps de paix, l'état d'alerte est maintenu à un niveau qui permettrait de passer en opérationnel en quatre-vingt secondes.",
+    "Le marché d'armement de Fort Ossian est légal, rigoureusement documenté et terriblement bien approvisionné. Ossian ne laisse pas vendre de mauvais équipement sur ses terres. Il considère que c'est une question morale.",
+    "Les soldats de Fort Ossian mangent ensemble à des horaires précis. Les repas sont équilibrés selon des spécifications nutritionnelles que le Général a lui-même validées. La nourriture est bonne. Pas délicieuse — précisément bonne. Fonctionnellement optimale."
+  ],
+  "Les Puits de Noctis": [
+    "Les Puits de Noctis descendent loin dans le roc. Les galeries s'enfoncent à des niveaux où la pression et la chaleur rendent le travail épuisant. Les mineurs travaillent par rotation forcée parce que personne ne tiendrait plus d'une semaine continue dans les niveaux profonds. Le Directeur Pale calcule que la rotation est moins chère que le remplacement.",
+    "La lumière naturelle n'arrive pas aux niveaux où travaillent les mineurs. Ils ne voient pas le ciel pendant des semaines. Certains finissent par ne plus en avoir besoin — leur cycle biologique s'adapte. C'est une forme d'adaptation que le Directeur Pale encourage activement.",
+    "Le bureau de contrôle des Puits est une pièce de verre au-dessus du niveau 1. On y voit tout ce qui entre et sort. Le Directeur Pale y est rarement visible mais ses représentants regardent en permanence. Les mineurs savent qu'ils sont regardés. Ils ont appris à travailler comme s'ils ne le savaient pas.",
+    "Un groupe de mineurs sortant du puits 7 passe devant toi. Leurs visages sont couverts de cette poussière noire particulière qui ne part pas facilement. Ils marchent en silence, les yeux dans le vide de quelqu'un qui rêve les yeux ouverts. Certains ont l'air très jeunes."
+  ],
+  "Terminus Sud": [
+    "Terminus Sud est l'endroit où les choses finissent. Les routes spatiales s'arrêtent ici, les cartes deviennent vagues, les services s'essoufflent. Yenna, l'informatrice locale, sait tout ce qu'il y a à savoir sur ce qui passe et ce qui ne passe pas.",
+    "Le bar de Terminus Sud est le seul endroit où tout le monde finit par passer. Pilotes en bout de route, marchands dont l'itinéraire s'est compliqué, gens qui cherchent une dernière chance avant de décider quoi faire de leur vie. Le barman a entendu toutes les histoires. Il n'en répète aucune.",
+    "À Terminus Sud, on peut acheter des routes. Pas des cartes — des routes vivantes, avec les checkpoints corrompus, les patrouilles qui regardent ailleurs à certaines heures, les caches de carburant non officielles. Yenna vend ça. Elle ne les invente pas. Elle les observe depuis des années."
+  ],
+  "Station Rocaille": [
+    "Station Rocaille a été construite sur un astéroïde qu'on n'avait pas prévu d'habiter. Les premiers occupants étaient des mineurs en attente d'extraction. L'extraction n'est jamais venue. Les mineurs ont construit autour d'eux. Deux générations plus tard, la station est un réseau de galeries taillées dans le minerai.",
+    "La population de Rocaille est dure. Pas agressive — dure. Il y a une différence. Les gens ici ne cherchent pas les problèmes mais ne les évitent pas non plus. Chaque main que tu serres a des callosités.",
+    "Petite Mara tient un marché de pièces au niveau 3. Ses prix sont justes, ses garanties réelles, et elle te dira en face si ce que tu veux acheter est une erreur. Elle règne sur son coin de station avec une autorité si naturelle qu'on oublie qu'elle n'a jamais été officiellement élue à rien."
+  ],
+  "Avant-Poste Kalem": [
+    "Avant-Poste Kalem est exactement ce que son nom suggère : un avant-poste. Petit, fonctionnel, sans espace perdu. Le Commandant Voss l'a conçu comme base opérationnelle plutôt que comme station de vie. Même le bar ressemble à un mess militaire.",
+    "Les mercenaires recrutés par Voss viennent de partout et ne restent en général pas longtemps. L'avant-poste est un point de départ, pas une destination. Tu croises des gens entre deux contrats.",
+    "Un tableau de missions est affiché à l'entrée du bureau de Voss. Des offensives commerciales déguisées en sécurité, des escortes qui ressemblent à des invasions, des 'récupérations' de propriété dont la légitimité est discutable. Les prix sont bons. Les questions ne sont pas encouragées."
+  ],
+  "La Forge des Damnés": [
+    "La Forge des Damnés produit des armes que les catalogues officiels ne listent pas. L'Armurière Skade travaille à la commande, sur spécification, sans questions. Ses armes ne portent pas de numéros de série. Ce n'est pas un défaut — c'est une feature.",
+    "Les travailleurs de la Forge ne sont pas tous là par choix. Certains ont des dettes, certains ont des familles que quelqu'un surveille. Tu peux le lire dans leurs mouvements — précis, efficaces, et complètement automatisés. Des gens dont la volonté a été retirée par pression.",
+    "L'espace de vente de la Forge est sobre — des armes sur des présentoirs, des prix affichés, personne pour faire de la vente active. Tu choisis, tu paies, tu pars. Skade croit que les bonnes armes se vendent elles-mêmes. Les siennes le font."
+  ],
+
+  "Port Méridien": [
+    "Port Méridien sent le propre. Un propre artificiel — des systèmes de filtration qui masquent autre chose. Des gardes en uniforme neutre qui sourient sans que ça atteigne les yeux. Le hub commercial le plus légal du secteur, ce qui ne veut pas dire grand chose.",
+    "La foule de Port Méridien est dense et silencieuse pour sa taille. Les marchands ont appris à ne pas crier les prix ici — l'image de la station exige une certaine sobriété. Les transactions se font à voix basse, les sourires restent calibrés, les tarifs restent insultants.",
+    "Des enseignes lumineuses, des couloirs larges, des boutiques qui donnent l'illusion d'une planète. Port Méridien a été conçu pour faire oublier qu'on est dans l'espace. Ça fonctionne presque. Sauf quand tu regardes par les hublots.",
+    "Un agent de sécurité te suit depuis l'entrée. Il est discret — professionnel. Il ne cherche pas un prétexte. Il cherche une certitude. À Port Méridien, les inconnus ont une durée de grâce. Tu es encore dans la tienne."
+  ],
+
+  "Le Nid des Faucons": [
+    "Le Nid des Faucons est propre. Militairement propre — pas un grain de poussière, pas un câble déplacé. Ce n'est pas de la fierté, c'est de la discipline. Quelqu'un inspecte ces couloirs régulièrement. Quelqu'un note ce qui sort de l'ordinaire.",
+    "Les Faucons Noirs en faction te regardent arriver depuis leurs postes. Pas avec méfiance — avec une évaluation froide. En dix secondes, chacun d'eux a décidé ce qu'il ferait si tu devenais un problème. Tu sens la conclusion dans leurs yeux avant qu'ils rebassent.",
+    "L'emblème des Faucons est partout ici — gravé dans les parois, brodé sur les uniformes, dessiné à la peinture noire sur le sol de la salle centrale. Ce n'est pas une marque, c'est une déclaration. Alanossa a construit cet endroit pour qu'on ne l'oublie pas.",
+    "Un silence particulier règne au Nid des Faucons. Pas l'absence de bruit — les machines tournent, des voix parlent — mais l'absence de bavardage inutile. Chaque parole a un but ici. La tienne aussi devra en avoir."
+  ],
+
+  "La Forge Noire": [
+    "L'air de La Forge Noire est chargé — métal chauffé, lubrifiant brûlé, la fumée particulière des alliages qu'on ne devrait pas travailler. Des ventilateurs industriels tentent de la filtrer. Ils font ce qu'ils peuvent.",
+    "Rook est quelque part dans les ateliers — tu l'entends avant de le voir. Un marteau sur une enclume, régulier comme un cœur. La Forge Noire tourne autour de ce rythme. Tout le reste s'organise autour de la production.",
+    "Les armes exposées dans le couloir principal ne portent pas d'étiquettes. Pas de noms, pas de codes, pas de numéros de série. La Forge Noire vend ce qu'elle fabrique à ceux qui savent ce qu'ils veulent. Si tu dois demander, tu n'es probablement pas le bon client.",
+    "Des travailleurs passent sans te regarder, portant des pièces d'un atelier à l'autre. Leurs mouvements sont précis, économiques. La Forge Noire ne tolère pas les pertes de temps. Même les visiteurs finissent par marcher plus vite."
+  ],
+
+  "L'Entrepôt Zéro": [
+    "L'Entrepôt Zéro n'a pas de propriétaire officiel depuis assez longtemps pour que la question ne se pose plus. Des gens l'utilisent. Des choses y transitent. Des accords s'y concluent dans des couloirs qui n'ont pas de nom.",
+    "Des caisses empilées jusqu'au plafond dans certains secteurs, des sections vides depuis si longtemps que quelqu'un y a installé un campement de fortune. L'Entrepôt Zéro est devenu une ville par accident. Personne n'a voté pour ce résultat.",
+    "La sécurité de l'Entrepôt Zéro fonctionne par équilibre des intérêts — trop de gens ont quelque chose à perdre ici pour qu'un seul groupe prenne le contrôle. Ça tient. Ça tient depuis assez longtemps pour que les habitants aient cessé de se demander jusqu'à quand.",
+    "Quelqu'un a installé une enseigne à l'entrée principale. Elle dit juste 'ZÉRO'. En dessous, quelqu'un d'autre a ajouté 'EXACTEMENT'. C'est la seule philosophie de l'endroit."
+  ],
+
+  "Le Perchoir": [
+    "Le Perchoir est exactement ce que son nom suggère : un point haut depuis lequel on observe. Des caméras partout, des gardes aux angles, et cette impression que tout le monde a déjà été catalogué avant d'entrer.",
+    "L'astéroïde vibre légèrement sous les pieds — des moteurs de stabilisation qui compensent en permanence. Les Faucons ont construit ce poste pour durer, pas pour être confortable.",
+    "Un Faucon en faction te regarde depuis le poste de contrôle. Il ne dit rien. Il note. Tout le monde qui entre ici est noté."
+  ],
+  "Station Ombre": [
+    "Station Ombre n'existe pas sur les cartes officielles. Tu es donc officiellement nulle part, ce qui est une pensée étrangement libératrice — jusqu'à ce que tu réalises ce que ça signifie pour ta sécurité.",
+    "Les couloirs de Station Ombre sont éclairés en rouge tamisé. Pas pour l'ambiance — pour que les caméras fonctionnent mieux dans le spectre infrarouge. Tu le comprends après quelques minutes.",
+    "Des opérateurs Faucon travaillent en silence à des terminaux dont les écrans sont orientés de façon à ce que tu ne puisses pas les lire. L'information qui circule ici n'est pas pour toi."
+  ],
+  "Relais Noir": [
+    "Le Relais Noir sent le carburant et l'efficacité. Personne ne vient ici pour flâner — on vient se ravitailler, livrer, repartir. Les Faucons ont conçu cet endroit pour que les transactions soient rapides.",
+    "Des techniciens en uniforme gris travaillent sur des vaisseaux amarrés dans un silence professionnel. Ils ne posent pas de questions. Tu n'en poseras pas non plus.",
+    "Un écran au-dessus de l'entrée affiche les tarifs. Carburant, munitions, rations. Pas de négociation. Pas de crédit. Paiement comptant uniquement."
+  ],
+  "La Tanière": [
+    "La Tanière a plusieurs couches — comme ses occupants. En surface, les signes d'une ancienne base militaire. En dessous, des modifications que seuls des pirates auraient pensé à faire. Alanossa a gardé les deux.",
+    "Des trophées de combat décorent les couloirs — pas comme dans un musée, comme dans un avertissement. Certains appartiennent à des factions qui existent encore. Elles savent que leurs emblèmes sont là.",
+    "L'atmosphère ici est dense d'une façon qui n'a rien à voir avec les systèmes de ventilation. C'est la pression de ceux qui ont tout à perdre et qui ont décidé que ça n'avait plus d'importance."
+  ],
+  "Fort de Cendres": [
+    "Fort de Cendres doit son nom à ce qu'il y avait avant — un avant-poste qui a brûlé dans un conflit dont personne ne parle plus. Les Faucons ont construit dessus. Les murs noirs absorbent tout.",
+    "Les recrues Faucons en formation dans la cour intérieure ne remarquent pas ton arrivée. Elles ont appris à ne remarquer que ce qu'on leur dit de remarquer.",
+    "L'efficacité ici est méticuleuse. Chaque chose à sa place, chaque personne à son rôle. Alanossa a imposé cette rigueur. Fort de Cendres en est l'expression la plus pure."
+  ],
+  "L'Œil du Faucon": [
+    "Depuis L'Œil du Faucon, on voit plusieurs secteurs simultanément. Des antennes orientables sur toute la coque externe. Des analystes qui traitent des données en continu. Quelqu'un ici sait ce que tu as fait la semaine dernière.",
+    "Lyss est à son poste habituel, entourée d'écrans. Elle ne lève pas les yeux quand tu entres. Elle a déjà ta silhouette dans ses capteurs depuis que tu t'es approché du périmètre.",
+    "Le silence de L'Œil est le silence de la concentration totale. Des gens qui écoutent tout ce qui passe sans jamais émettre eux-mêmes. Tu te demandes ce qu'ils ont entendu sur toi."
+  ],
+  "Repaire Vega-Sud": [
+    "Si les Bas-Fonds ont un sous-sol, c'est Repaire Vega-Sud. Ce qui est trop visible là-haut atterrit ici. Les gens qui y vivent ont fait des choix que même les habitants des Bas-Fonds trouvent discutables.",
+    "L'odeur ici est différente de Vega — plus concentrée, plus chimique. Des produits de synthèse traînent dans l'air. Les ventilateurs ne font pas leur travail, ou ils le font intentionnellement.",
+    "Mako derrière son comptoir te regarde sans expression. Il a vu tout type de client. Il a développé une philosophie : ce que tu veux est ton problème. Ce que tu peux payer est le sien."
+  ],
+  "Bastion Mineur": [
+    "Le Bastion Mineur ressemble à une Citadelle en miniature — mêmes codes, mêmes couleurs, même sérieux. C'est voulu. Les Gardiens croient en la cohérence de l'image.",
+    "Harek patrouille son poste avec la précision de quelqu'un qui a transformé la routine en art. Huit ans dans ce bastion. Il connaît chaque joint, chaque ombre, chaque bruit anormal.",
+    "Une plaque sur le mur liste les noms des Gardiens qui ont servi ici depuis l'ouverture. Certains ont été retirés. La plaque ne dit pas pourquoi."
+  ],
+  "Poste Vigie": [
+    "Poste Vigie est l'endroit le plus calme du territoire des Gardiens. Deux soldats. Une longue-vue. Un signal radio. Et Sera qui note tout dans un journal que personne d'autre ne lit.",
+    "La vue depuis les hublots de Poste Vigie couvre un couloir spatial entier. Sera peut te dire exactement combien de vaisseaux ont transité ici les six derniers mois. Elle le sait sans consulter ses notes.",
+    "L'ennui ici est structurel. Les Gardiens l'ont intégré dans le profil de poste. Ceux qui restent développent soit une patience extraordinaire, soit quelque chose d'autre."
+  ],
+  "L'Arsenal Écarlate": [
+    "L'Arsenal Écarlate sent le métal propre et l'huile de maintenance. Chaque arme ici est entretenue, répertoriée, calibrée. Drav connaît le numéro de série de chacune.",
+    "Des caisses de munitions dans des rangées parfaites. Des armures sur des présentoirs tournants. L'Arsenal Écarlate est le catalogue physique de la puissance des Gardiens.",
+    "Drav t'observe travailler sur quelque chose — même si tu ne travailles pas sur quelque chose. Il évalue les gens à la façon dont ils regardent ses armes. Tu ne sais pas encore ce qu'il a conclu."
+  ],
+  "La Forteresse Exilée": [
+    "La Forteresse Exilée a gardé les murs des Gardiens mais pas leur esprit. Quelque chose d'autre s'est installé à la place — moins de règles, plus de rancœur.",
+    "Keln se déplace dans ces couloirs comme s'il les connaissait depuis l'enfance — parce que c'est le cas, d'une certaine façon. Il a servi dans ce fort avant. Il n'était pas censé revenir.",
+    "Les emblèmes des Gardiens ont été en partie effacés sur les murs. En partie seulement. Keln a laissé les traces. Un rappel de ce qu'il a perdu, ou de ce qu'il a choisi de perdre."
+  ],
+  "Comptoir Sud": [
+    "Comptoir Sud est l'Emporium avec un budget moindre — moins de lustre, plus d'accessibilité. Mira derrière son comptoir sourit de la même façon que ses collègues du niveau supérieur, mais le sourire est légèrement moins répété.",
+    "Les marchandises ici sont de qualité correcte. Pas les articles rares du niveau commercial principal — ceux-là restent au-dessus. Mais une gamme honnête pour des transactions rapides.",
+    "Des transactions se concluent ici toutes les dix minutes en moyenne. Mira a compté. Elle compte tout, en fait."
+  ],
+  "Annexe Commerciale": [
+    "L'Annexe Commerciale est l'endroit où l'Emporium montre sa façade la plus présentable. Des couloirs propres, un personnel discret, une atmosphère qui ressemble à une banque privée.",
+    "Rexx te reçoit avec une précision professionnelle qui donne l'impression que ta visite était prévue depuis longtemps. Il travaille dans cet environnement depuis assez longtemps pour que la façade soit devenue naturelle.",
+    "Des réunions ont lieu dans des salles vitrées que tu peux voir mais pas entendre. Des gens en tenues soignées autour de tables lisses. Ce qui se décide ici concerne probablement des sommes importantes."
+  ],
+  "Relais de Transit": [
+    "Le Relais de Transit est le mécanisme caché de l'Emporium — le lieu où les flux logistiques s'organisent avant d'être visibles. Olin connaît le mouvement de chaque caisse.",
+    "Des chariots automatisés circulent en patterns précis. Des techniciens vérifient des manifestes. L'efficacité ici est fonctionnelle, pas esthétique.",
+    "Une section du Relais est hermétiquement fermée. Olin t'expliquera que c'est de la maintenance. Il aura l'air sincère. Il est probablement sincère."
+  ],
+  "Résidence Orbitale": [
+    "La Résidence Orbitale offre une chose que nulle part ailleurs dans le secteur ne peut offrir : le calme. Un calme acquis, préservé, et facturé en conséquence.",
+    "Lady Sonn t'observe depuis le salon commun avec la tranquillité de quelqu'un qui n'a plus rien à prouver à personne. Trente ans dans cette résidence. Elle en a vu partir beaucoup. Elle reste.",
+    "Les chambres de la Résidence ont de vrais hublots, pas des écrans. Regarder l'espace depuis ici est une expérience différente — sans alarmes, sans bruit de vaisseau, juste le vide qui attend."
+  ],
+  "Club Privé Éos": [
+    "Le Club Privé Éos n'a pas d'enseigne. Ceux qui doivent savoir où il est le savent. Ceux qui ne savent pas ne sont pas censés entrer.",
+    "Sael t'accueille avec une neutralité parfaite qui en dit plus que n'importe quelle expression. Dans ce club, l'hôte voit tout et révèle rien. C'est ce pour quoi il est payé.",
+    "Des conversations se tiennent en groupes de deux ou trois dans des alcôves séparées. La musique de fond est calibrée pour couvrir exactement la portée d'une voix normale. Rien ici n'est accidentel."
+  ],
+  "Les Cendres": [
+    "Les Cendres sentent encore la brûlure, vingt ans après. Les systèmes de filtration ne peuvent pas enlever ça — soit ils ne sont pas assez puissants, soit quelqu'un préfère que ça reste.",
+    "Murn te regarde comme quelqu'un qui a appris à évaluer rapidement si une personne sera un problème. Il était là quand ça a brûlé. Il a survécu à quelque chose qu'il ne décrit pas. Ça se voit.",
+    "Des sections entières sont condamnées — non pas parce qu'elles sont dangereuses, mais parce que personne n'a les ressources pour les remettre en état. Et parce que certains préfèrent ne pas voir ce qu'il y a derrière."
+  ],
+  "Station Quarantaine": [
+    "La quarantaine est officiellement levée. L'atmosphère ne semble pas avoir reçu le message. Quelque chose dans l'air de cette station donne une légère nausée — ou c'est l'imagination.",
+    "Docta te reçoit dans son infirmerie avec le calme de quelqu'un qui a traité des cas que les manuels ne couvrent pas. Il ne pose pas de questions sur ton état de santé. Il observe et note.",
+    "Les habitants de Station Quarantaine ont cet air particulier de ceux qui ont traversé quelque chose ensemble et n'ont pas besoin de l'expliquer aux autres. Un code implicite. Tu es en dehors de ce code."
+  ],
+  "Le Berceau": [
+    "Le Berceau est plus vieux que n'importe quel conflit actuel. Ses murs portent des systèmes de construction que personne ne fabrique plus — des technologies dont les plans ont été perdus ou détruits.",
+    "L'Archiviste Zal te regarde entrer avec la patience de quelqu'un qui attend depuis longtemps. Il garde des archives. Il sait des choses. La question est de savoir ce qu'il accepte de partager.",
+    "Quelque chose dans la gravité du Berceau est légèrement différent — pas assez pour affecter les mouvements, mais assez pour que le corps le remarque après quelques heures. Une anomalie que les scientifiques qui sont venus mesurer n'ont jamais expliquée."
+  ],
+  "L'Épave Vivante": [
+    "L'Épave Vivante a ses propres niveaux maintenant — des niveaux improvisés dans ce qui était autrefois la structure d'un cargo. Des câbles courent dans des directions qui ne correspondent à aucun plan original.",
+    "Le Capitaine Oss se déplace dans son épave avec l'assurance de quelqu'un chez soi — parce que c'est le cas, littéralement. Son vaisseau est devenu sa ville. Il a arrêté de faire la distinction.",
+    "Des familles vivent ici depuis deux générations. Leurs enfants sont nés dans les soutes reconverties et connaissent ces couloirs mieux que n'importe quel plan. Ils sont le plan."
+  ],
+  "Station Fantôme": [
+    "Station Fantôme émet un signal de navigation depuis dix ans. Le signal dit que la station est vide. Le signal est techniquement un mensonge.",
+    "Shel t'a vu arriver bien avant que tu passes le sas d'entrée. Elle te laisse entrer parce qu'elle a décidé que tu pouvais entrer. C'est une distinction importante ici.",
+    "Les habitants de Station Fantôme ont développé une économie de l'invisible — ils ne produisent rien qui puisse être tracé, ne commercent avec rien qui puisse être suivi. Ils existent dans les marges des marges."
+  ],
+  "L'Oasis de Fer": [
+    "L'Oasis de Fer est le seul endroit du secteur où des représentants de factions rivales se croisent sans se tirer dessus. L'accord qui maintient cette paix est oral, non écrit, et respecté par tous — parce que tout le monde a quelque chose à perdre.",
+    "Tonn gère cet équilibre avec la précision d'un diplomate et la franchise d'un soldat. Il a personnellement négocié les termes de la neutralité avec chaque faction. Il ne révèle jamais les détails.",
+    "Des marchands, des mercenaires, des agents de faction assis aux mêmes tables. Personne ne parle de son appartenance. Personne n'a besoin de le faire."
+  ],
+  "La Balise": [
+    "La Balise pulse. Un signal régulier qui oriente les pilotes du secteur depuis quarante ans. Rinn entretient ce signal avec un soin que d'autres réservent à des êtres vivants.",
+    "Depuis La Balise, tu peux entendre tout le trafic radio du secteur si tu sais comment régler les fréquences. Rinn sait comment. Elle écoute depuis des années. Elle note ce qui lui semble important.",
+    "L'équipe de La Balise est petite — cinq personnes qui se relaient pour maintenir le signal. Ils ont développé une culture propre, des rituels autour du signal, une façon d'être ensemble que les visiteurs ne comprennent pas toujours."
+  ],
+  "Confluent": [
+    "Confluent est l'endroit où les routes convergent — pas par hasard, par conception. Quelqu'un, il y a longtemps, a calculé l'intersection exacte des couloirs commerciaux les plus utilisés et a mis une station là.",
+    "Broxx connaît les prix courants de quarante stations. Il te le dit directement si tu lui poses la question. Il vend cette information autant que ses marchandises.",
+    "La population de Confluent tourne en permanence. Des résidents permanents, mais surtout des gens de passage. Chaque jour amène de nouvelles têtes. Broxx les mémorise toutes."
+  ],
+  "Port de Nuit": [
+    "Port de Nuit n'a pas de jour — l'éclairage reste constant à une intensité qui ressemble à celle d'un soir perpétuel. C'est une décision esthétique qui est aussi pratique : personne ne voit clairement ce qui change de mains.",
+    "La Reine de Nuit contrôle ce port depuis une table dans le coin le plus sombre du bar principal. Elle ne se lève que rarement. Ce n'est pas nécessaire — tout le monde vient à elle.",
+    "Les transactions à Port de Nuit suivent une étiquette non écrite mais stricte. Certaines choses ne se disent pas à voix haute. Certains noms ne se prononcent pas. Les infractions sont notées."
+  ],
+  "Station Zéphyr": [
+    "Station Zéphyr flotte dans la zone atmosphérique d'une géante gazeuse — assez haut pour être sûre, assez basse pour que les capteurs de recherche fonctionnent. Les chercheurs ont appris à ignorer les turbulences.",
+    "Drs. Vael est dans ses données, comme toujours. Il cherche quelque chose dans les compositions atmosphériques depuis douze ans. Il n'a pas encore trouvé. Il n'a pas non plus arrêté de chercher.",
+    "Les fenêtres de Station Zéphyr donnent sur des nuages de taille planétaire en mouvement constant. C'est à la fois beau et profondément inhospitalier. Les chercheurs ont cessé de le remarquer."
+  ],
+  "L'Observatoire": [
+    "L'Observatoire est à quatre heures de vol de la station la plus proche. C'est voulu. Elenne a choisi cet emplacement précisément pour son isolement — moins de pollution lumineuse, moins de vibrations parasites.",
+    "Elenne passe ses journées à regarder des étoiles que personne d'autre ne regarde. Elle note ce qu'elle voit dans des journaux que personne d'autre ne lit. Elle est en paix avec ça.",
+    "Le silence de L'Observatoire est le silence le plus complet que tu aies jamais connu dans l'espace. Quelque chose dans ce silence a une texture — comme si l'absence de bruit était elle-même une information."
+  ],
+  "Station Limite": [
+    "Station Limite est le dernier point sur la carte. Au-delà, les données deviennent rares, puis inexistantes. Kaed est l'un des rares à avoir poussé plus loin. Il n'en parle qu'à ceux qui lui posent la bonne question.",
+    "Les équipements de Station Limite montrent les signes d'une utilisation constante dans des conditions extrêmes. Tout est fonctionnel. Rien n'est beau. C'est la philosophie de la frontière.",
+    "Des pilotes font escale ici avant de continuer vers l'inconnu. Certains reviennent. Certains envoient un signal depuis très loin. Certains ne donnent plus de nouvelles. Kaed garde une liste."
+  ],
+  "Les Cavernes de Mira": [
+    "Les Cavernes de Mira descendent plus profondément dans l'astéroïde que n'importe quelle carte ne le montre. Les mineurs connaissent des niveaux qui n'existent pas officiellement.",
+    "Grelm dirige les opérations avec l'efficacité de quelqu'un qui a appris que la survie dépend de l'organisation. Il a repris le poste dans des circonstances qu'on évoque peu. Les mineurs le suivent.",
+    "Dans les niveaux profonds des Cavernes, la pression change. Les sons se propagent différemment. Les mineurs qui y travaillent depuis longtemps ont des habitudes, des rituels, une façon d'interagir avec le roc que les nouveaux venus ne comprennent pas."
+  ],
+  "La Raffinerie": [
+    "La Raffinerie est toujours chaude. Les systèmes thermiques gèrent l'excès de chaleur des processus de raffinage mais ne le neutralisent jamais complètement. On s'y habitue, disent les ouvriers. C'est vrai d'une façon inquiétante.",
+    "Brenn coordonne les équipes avec un minimum de mots. Tout le monde ici sait ce qu'il a à faire — répéter les instructions serait une insulte. La Raffinerie fonctionne comme un organisme rodé.",
+    "Des colonnes de carburant raffiné attendent dans des réservoirs pressurisés. La valeur de ce qui transite ici chaque semaine est astronomique. Les mesures de sécurité sont en proportion."
+  ],
+
+  "La Couronne d'Eos": [
+    "La Couronne d'Eos est suspendue au-dessus du reste — une station orbitale haute qui regarde les autres de loin. Ses couloirs sont larges, ses plafonds hauts, ses surfaces propres d'une façon qui coûte de l'argent. Beaucoup d'argent. Le genre qu'on ne compte plus.",
+    "Les gens qui viennent à La Couronne d'Eos ne portent pas leurs propres bagages. Ils ne font pas la queue non plus. Ils arrivent, quelqu'un les attend, les choses se règlent. Tu es probablement le seul ici à avoir regardé le prix du carburant avant de venir.",
+    "Des conversations se tiennent à voix basse dans des salons fermés. Des décisions qui concernent des milliers de personnes se prennent ici entre deux flûtes de quelque chose d'importé. La Couronne d'Eos n'a pas l'air d'un endroit où le pouvoir s'exerce. C'est exactement pour ça que c'en est un.",
+    "Un conseiller te regarde depuis l'autre côté d'un couloir vitré. Il te jauge avec la précision de quelqu'un qui a passé sa vie à évaluer ce que les autres valent. Tu ne saurais pas dire si tu as passé le test. Il repart avant que tu décides de le lui demander."
+  ]
+}
