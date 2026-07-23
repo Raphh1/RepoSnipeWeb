@@ -841,7 +841,7 @@ export function StationHub() {
   // ── MENU PRINCIPAL ────────────────────────────────────────────────────────
 
   return (
-    <div style={{ display: 'flex', gap: '16px', maxWidth: '1300px', margin: '0 auto', padding: '20px', alignItems: 'flex-start' }}>
+    <div className="hub-layout" style={{ maxWidth: '1300px', margin: '0 auto', padding: '20px' }}>
     <div className="scanlines" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <StatusBar gs={gs} />
 
@@ -1926,7 +1926,7 @@ export function StationHub() {
     </div>
 
     {/* ── SIDEBAR QUÊTES ────────────────────────────────────────────────────── */}
-    <div style={{ width: '240px', flexShrink: 0, position: 'sticky', top: '20px', alignSelf: 'flex-start', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <div className="hub-sidebar">
       <div style={{ fontSize: '9px', letterSpacing: '2px', color: 'var(--dim)', borderBottom: '1px solid var(--border)', paddingBottom: '6px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span>◆ QUÊTES</span>
         <span style={{ color: 'var(--cyan)' }}>{gs.activeQuests.length}</span>

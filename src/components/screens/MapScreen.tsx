@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react'
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { STATIONS, getAccessibleStations, PEACEFUL_STATIONS, findPath, FUEL_STATIONS } from '../../data/stations'
 import { STATION_POSITIONS } from '../../data/stationPositions'
@@ -49,6 +49,9 @@ export function MapScreen() {
   const setWaypoint = useGameStore(s => s.setWaypoint)
 
   const [hovered, setHovered]   = useState<string | null>(null)
+  // Sélection par clic/tap — séparée du survol souris pour éviter une course avec
+  // le mouseleave synthétique que les navigateurs génèrent après un tap tactile.
+  const [selected, setSelected] = useState<string | null>(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const [pan, setPan]           = useState({ x: 0, y: 0 })
   const [zoom, setZoom]         = useState(0.9)
@@ -57,6 +60,44 @@ export function MapScreen() {
   const panStartRef             = useRef({ x: 0, y: 0 })
   const svgRef                  = useRef<SVGSVGElement>(null)
   const didDragRef              = useRef(false)
+  const pinchStartDistRef       = useRef(0)
+  const pinchStartZoomRef       = useRef(1)
+
+  // ── ORIENTATION MOBILE ─────────────────────────────────────────────────
+  // La carte a besoin d'espace horizontal. Sur téléphone en portrait, on
+  // bloque l'accès avec un écran "tourne ton téléphone" plutôt que d'afficher
+  // une carte inutilisable. On tente aussi le vrai verrouillage d'orientation
+  // là où le navigateur le permet (Android/Chrome, en plein écran) — mais ça
+  // ne marche pas partout (Safari iOS ne le supporte pas du tout), donc le
+  // repli visuel reste le mécanisme fiable.
+  const isPortraitMobile = () =>
+    window.innerWidth < 900 && window.innerHeight > window.innerWidth
+
+  const [portraitBlocked, setPortraitBlocked] = useState(isPortraitMobile)
+
+  useEffect(() => {
+    const onResize = () => setPortraitBlocked(isPortraitMobile())
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', onResize)
+
+    // Tentative best-effort de verrouillage — échoue silencieusement si non supporté.
+    const attemptLock = async () => {
+      try {
+        const el = document.documentElement as HTMLElement & { requestFullscreen?: () => Promise<void> }
+        const orientation = (screen as Screen & { orientation?: { lock?: (o: string) => Promise<void> } }).orientation
+        if (el.requestFullscreen) await el.requestFullscreen()
+        if (orientation?.lock) await orientation.lock('landscape')
+      } catch {
+        // Ignoré — le repli "tourne ton téléphone" prend le relais.
+      }
+    }
+    attemptLock()
+
+    return () => {
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', onResize)
+    }
+  }, [])
 
   const events         = getActiveEvents(gs)
   const closedStations = new Set(getClosedStations(events))
@@ -107,20 +148,88 @@ export function MapScreen() {
 
   const handleMouseUp = useCallback(() => { draggingRef.current = false }, [])
 
+  // ── TACTILE (un doigt = pan + tap sélection, deux doigts = pincement zoom) ─
+  const touchDist = (a: React.Touch, b: React.Touch) => Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      draggingRef.current      = false
+      pinchStartDistRef.current = touchDist(e.touches[0], e.touches[1])
+      pinchStartZoomRef.current = zoom
+      return
+    }
+    if (e.touches.length !== 1) return
+    const t = e.touches[0]
+    draggingRef.current  = true
+    didDragRef.current   = false
+    dragStartRef.current = { x: t.clientX, y: t.clientY }
+    panStartRef.current  = { x: pan.x, y: pan.y }
+    setMousePos({ x: t.clientX, y: t.clientY })
+  }, [pan, zoom])
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      if (pinchStartDistRef.current > 0) {
+        const ratio = touchDist(e.touches[0], e.touches[1]) / pinchStartDistRef.current
+        setZoom(Math.min(3, Math.max(0.4, pinchStartZoomRef.current * ratio)))
+      }
+      didDragRef.current = true // évite qu'un pincement pose un waypoint en fin de geste
+      return
+    }
+    if (e.touches.length !== 1 || !draggingRef.current) return
+    const t = e.touches[0]
+    const dx = t.clientX - dragStartRef.current.x
+    const dy = t.clientY - dragStartRef.current.y
+    if (Math.abs(dx) > 4 || Math.abs(dy) > 4) didDragRef.current = true
+    setPan({ x: panStartRef.current.x + dx, y: panStartRef.current.y + dy })
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    pinchStartDistRef.current = 0
+    if (e.touches.length === 1) {
+      // Un doigt reste après un pincement à deux doigts — redémarre le pan proprement.
+      const t = e.touches[0]
+      draggingRef.current  = true
+      dragStartRef.current = { x: t.clientX, y: t.clientY }
+      panStartRef.current  = { x: pan.x, y: pan.y }
+    } else if (e.touches.length === 0) {
+      draggingRef.current = false
+    }
+  }, [pan])
+
   // ── TOOLTIP ─────────────────────────────────────────────────────────────
 
-  const hovStation = hovered ? STATIONS.find(s => s.name === hovered) ?? null : null
+  const activeStationName = hovered ?? selected
+  const hovStation = activeStationName ? STATIONS.find(s => s.name === activeStationName) ?? null : null
 
   // ── RENDER ──────────────────────────────────────────────────────────────
+
+  if (portraitBlocked) {
+    return (
+      <div style={{
+        width: '100%', height: '100vh', background: 'var(--bg)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        gap: '20px', padding: '20px', textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '48px', animation: 'rotateHint 1.6s ease-in-out infinite' }}>📱</div>
+        <style>{`@keyframes rotateHint { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }`}</style>
+        <div style={{ fontSize: '11px', color: 'var(--text-bright)', letterSpacing: '1px' }}>TOURNE TON TÉLÉPHONE</div>
+        <div style={{ fontSize: '9px', color: 'var(--dim)', lineHeight: '1.8', maxWidth: '280px' }}>
+          La carte du secteur a besoin d'espace horizontal. Passe en mode paysage pour naviguer, zoomer et poser des waypoints au doigt.
+        </div>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
+      </div>
+    )
+  }
 
   return (
     <div style={{ width: '100%', height: '100vh', background: 'var(--bg)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 20px', borderBottom: '2px solid var(--border)', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', padding: '12px 20px', borderBottom: '2px solid var(--border)', flexShrink: 0 }}>
         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
         <span style={{ fontSize: '10px', letterSpacing: '3px', color: 'var(--dim)' }}>CARTE DU SECTEUR</span>
-        <span style={{ fontSize: '9px', color: 'var(--cyan)', marginLeft: '8px' }}>Molette pour zoomer · Glisser pour naviguer · Clic pour poser un waypoint</span>
+        <span style={{ fontSize: '9px', color: 'var(--cyan)', marginLeft: '8px' }}>Molette ou pincement pour zoomer · Glisser pour naviguer · Tap/clic pour poser un waypoint</span>
         {events.length > 0 && (
           <span style={{ fontSize: '8px', color: 'var(--orange)', marginLeft: 'auto', letterSpacing: '1px' }}>
             ⚠ {events.length} ÉVÉNEMENT{events.length > 1 ? 'S' : ''} ACTIF{events.length > 1 ? 'S' : ''}
@@ -155,14 +264,19 @@ export function MapScreen() {
       </div>
 
       {/* SVG Map */}
+      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
       <svg
         ref={svgRef}
-        style={{ flex: 1, cursor: draggingRef.current ? 'grabbing' : 'grab', userSelect: 'none' }}
+        style={{ width: '100%', height: '100%', touchAction: 'none', cursor: draggingRef.current ? 'grabbing' : 'grab', userSelect: 'none' }}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={() => { if (!didDragRef.current) setSelected(null) }}
       >
         <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
 
@@ -247,9 +361,12 @@ export function MapScreen() {
                 style={{ cursor: isCurrent ? 'default' : 'pointer' }}
                 onMouseEnter={() => setHovered(station.name)}
                 onMouseLeave={() => setHovered(null)}
-                onClick={() => {
-                  if (didDragRef.current || isCurrent) return
-                  setWaypoint(isWaypoint ? null : station.name)
+                onClick={(e) => {
+                  e.stopPropagation()
+                  if (didDragRef.current) return
+                  // Tap/clic affiche toujours les infos — utile au tactile, qui n'a pas de survol.
+                  setSelected(station.name)
+                  if (!isCurrent) setWaypoint(isWaypoint ? null : station.name)
                 }}
               >
                 {/* Glow current */}
@@ -323,12 +440,14 @@ export function MapScreen() {
         </g>
       </svg>
 
+      </div>
+
       {/* ── TOOLTIP ─────────────────────────────────────────────────────────── */}
       {hovStation && (
         <div style={{
           position: 'fixed',
-          left: mousePos.x + 14,
-          top: mousePos.y - 10,
+          left: Math.min(mousePos.x + 14, window.innerWidth - 274),
+          top: Math.max(8, Math.min(mousePos.y - 10, window.innerHeight - 200)),
           background: 'var(--bg-panel2)',
           border: `2px solid ${TYPE_COLORS[hovStation.type] ?? 'var(--border)'}`,
           padding: '10px 14px',

@@ -281,3 +281,25 @@ html, body, #root {
   padding-left: 8px;
   margin-bottom: 4px;
 }
+
+/* ── STATUS BAR GRID ── */
+.status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; align-items: center; }
+.status-grid--folie { grid-template-columns: repeat(5, 1fr); }
+
+/* ── STATION HUB — contenu + sidebar quêtes ── */
+.hub-layout { display: flex; gap: 16px; align-items: flex-start; }
+.hub-sidebar { width: 240px; flex-shrink: 0; position: sticky; top: 20px; align-self: flex-start; display: flex; flex-direction: column; gap: 8px; }
+
+/* ── MOBILE ── au-delà de ce qui est déjà fluide (colonne flex par défaut),
+   on resserre le layout et on recompose les grilles fixes qui ne tiennent
+   pas sur un écran de téléphone. N'affecte rien au-dessus de 600px. */
+@media (max-width: 600px) {
+  .layout { padding: 12px; gap: 14px; }
+  .px-box { padding: 12px 14px; }
+  .grid2, .grid3 { grid-template-columns: 1fr; }
+  .status-grid, .status-grid--folie { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .px-btn { padding: 14px 16px; }
+  .px-btn--sm { padding: 11px 14px; }
+  .hub-layout { flex-direction: column; padding: 12px !important; gap: 14px; }
+  .hub-sidebar { width: 100%; position: static; }
+}

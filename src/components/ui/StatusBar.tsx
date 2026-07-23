@@ -16,7 +16,7 @@ export function StatusBar({ gs }: Props) {
     : gs.moralTags.includes('cannibal') ? 'FOLIE 🩸' : 'FOLIE'
 
   return (
-    <div className="px-box" style={{ display: 'grid', gridTemplateColumns: showFolie ? '1fr 1fr 1fr 1fr 1fr' : '1fr 1fr 1fr 1fr', gap: '12px', alignItems: 'center' }}>
+    <div className={`px-box status-grid ${showFolie ? 'status-grid--folie' : ''}`}>
       <div>
         <div className="t-dim t-xs mb4">PV</div>
         <div className={`bar bar--hp ${low ? 'low' : ''}`}>
