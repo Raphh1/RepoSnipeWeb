@@ -2,30 +2,35 @@ import { useState } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { ARC_DEFINITIONS, getCurrentStep, getCurrentStepBlocked, advanceArc } from '../../engine/narrativeArcs'
 import type { NarrativeArc, Enemy } from '../../types'
-import { TIER_MID } from '../../data/enemies'
+import { TIER_MID, TIER_BOSS } from '../../data/enemies'
+
+// Réutilise les vraies stats des boss (data/enemies.ts) — sinon un arc narratif
+// et le combat "normal" (exploration/sous-boss) faisaient combattre deux versions
+// différentes du même personnage, avec des PV et dégâts qui ne correspondaient pas.
+const findBoss = (name: string, fallback: Enemy): Enemy => TIER_BOSS.find(e => e.name === name) ?? fallback
 
 const ARC_BOSSES: Record<string, Enemy> = {
-  raphazarus: {
+  raphazarus: findBoss('Raphazarus', {
     name: 'Raphazarus le Prophète',
     maxHp: 130, damageMin: 18, damageMax: 32,
     lootMin: 2500, lootMax: 6000,
     description: 'Il combat avec la conviction de quelqu\'un qui croit vraiment. C\'est le plus dangereux des adversaires.',
     captureChance: 5, killChance: 30, isBoss: true, role: 'ranged',
-  },
-  alanossa: {
+  }),
+  alanossa: findBoss('Alanossa', {
     name: 'Alanossa',
     maxHp: 160, damageMin: 22, damageMax: 38,
     lootMin: 3000, lootMax: 7000,
     description: 'Elle se bat comme quelqu\'un qui n\'a jamais perdu. Elle ne compte pas sur la chance.',
     captureChance: 5, killChance: 35, isBoss: true, role: 'tank',
-  },
-  vael: {
+  }),
+  vael: findBoss('Directeur Pale', {
     name: 'Directeur Pale',
     maxHp: 110, damageMin: 15, damageMax: 28,
     lootMin: 2000, lootMax: 5000,
     description: 'Il a effacé des traces toute sa vie. Il sait aussi effacer des gens.',
     captureChance: 10, killChance: 25, isBoss: true, role: 'normal',
-  },
+  }),
 }
 
 const ARC_COLORS: Record<string, string> = {
@@ -57,12 +62,12 @@ export function NarrativeArcsScreen() {
     if (!choice) return
 
     const result = choice.effect(gs)
-    const { message, advancesArc, failsArc, ...gsChanges } = result
+    const { message, advancesArc, failsArc, triggerCombat, ...gsChanges } = result
 
     setMsg(message)
 
     // Si combat requis — on garde l'arc dans activeArcs, on le complétera après victoire
-    if (message.toLowerCase().includes('combat')) {
+    if (triggerCombat) {
       const enemy = ARC_BOSSES[arc.id] ?? TIER_MID[Math.floor(Math.random() * TIER_MID.length)]
       const existingArcs = gs.activeArcs.filter(a => a.id !== arc.id)
       const updatedArc = { ...arc }

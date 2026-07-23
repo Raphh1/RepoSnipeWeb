@@ -1945,9 +1945,10 @@ export function StationHub() {
         return (
           <div
             key={q.id}
-            style={{ background: 'var(--bg-panel)', border: `2px solid ${borderCol}`, padding: '8px 10px', position: 'relative', cursor: 'default' }}
+            style={{ background: 'var(--bg-panel)', border: `2px solid ${borderCol}`, padding: '8px 10px', position: 'relative', cursor: 'pointer' }}
             onMouseEnter={() => setHoveredQuest(q.id)}
             onMouseLeave={() => setHoveredQuest(null)}
+            onClick={() => goTo('quests')}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
               <span style={{ fontSize: '8px', letterSpacing: '1px', color: typeCol }}>{q.type.toUpperCase()}</span>
@@ -1963,13 +1964,13 @@ export function StationHub() {
             )}
             {isDeliveryReady && (
               <button className="px-btn px-btn--sm" style={{ marginTop: '6px', color: 'var(--green)', borderColor: 'var(--green)', fontSize: '8px', padding: '4px 8px' }}
-                onClick={() => { setPendingDeliveryQuest(q); setDeliveryResult(null); setMode('delivery-event') }}>
+                onClick={(e) => { e.stopPropagation(); setPendingDeliveryQuest(q); setDeliveryResult(null); setMode('delivery-event') }}>
                 ▶ Livrer {q.targetItem}
               </button>
             )}
             {isPatrolHere && patrolProg >= 3 && (
               <button className="px-btn px-btn--sm" style={{ marginTop: '6px', color: 'var(--gold)', borderColor: 'var(--gold)', fontSize: '8px', padding: '4px 8px' }}
-                onClick={() => manualCompleteQuest(q.id)}>
+                onClick={(e) => { e.stopPropagation(); manualCompleteQuest(q.id) }}>
                 ★ Terminer la patrouille
               </button>
             )}

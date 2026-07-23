@@ -1,4 +1,5 @@
 import type { GameState, NarrativeArc, ArcId } from '../types'
+import { arePillarSubBossesCleared } from '../data/subBosses'
 
 export interface ArcStep {
   title: string
@@ -11,7 +12,10 @@ export interface ArcStep {
 export interface ArcChoice {
   label: string
   available?: (gs: GameState) => boolean
-  effect: (gs: GameState) => Partial<GameState> & { message: string; advancesArc?: boolean; failsArc?: boolean }
+  // triggerCombat : déclenche un vrai combat via un flag explicite plutôt qu'en
+  // devinant depuis le texte du message (fragile — un message parlant de "combat"
+  // sans le vouloir déclenchait un affrontement par accident).
+  effect: (gs: GameState) => Partial<GameState> & { message: string; advancesArc?: boolean; failsArc?: boolean; triggerCombat?: boolean }
 }
 
 export interface ArcDefinition {
@@ -89,7 +93,12 @@ const ARC_ALANOSSA: ArcDefinition = {
     },
     {
       title: "La Confrontation",
-      description: "Tu es face à Alanossa. Ses yeux t'évaluent comme une marchandise. 'Tu as quelque chose qui m'appartient. Ou quelqu'un qui te protège. L'un ou l'autre explique pourquoi tu es encore en vie.'",
+      // Alanossa ne reçoit personne qui n'a pas fait ses preuves — les quatre
+      // lieutenants gardent l'accès à sa personne. Sans ça, pas de négociation
+      // possible : ce serait juste te laisser tuer pour rien.
+      condition: gs => arePillarSubBossesCleared(gs.subBossesDefeated ?? {}, 'alanossa'),
+      conditionHint: "Alanossa ne reçoit personne qui n'a pas fait ses preuves — vaincs d'abord ses quatre lieutenants à travers le secteur avant de pouvoir l'affronter, le convaincre ou négocier avec lui.",
+      description: "Tu es face à Alanossa. Ses yeux t'évaluent différemment maintenant — tu as brisé quatre de ses lieutenants pour arriver jusqu'ici. 'Tu as quelque chose qui m'appartient. Ou quelqu'un qui te protège. Ou alors tu es juste doué. On va voir laquelle de ces raisons explique pourquoi tu es encore en vie.'",
       choices: [
         {
           label: "Négocier — proposer un arrangement",
@@ -106,6 +115,7 @@ const ARC_ALANOSSA: ArcDefinition = {
           effect: gs => ({
             message: "Combat avec Alanossa.",
             advancesArc: true,
+            triggerCombat: true,
           }),
         },
         {
@@ -123,11 +133,16 @@ const ARC_ALANOSSA: ArcDefinition = {
 }
 
 // ── ARC 2 : RAPHAZARUS ────────────────────────────────────────────────────────
+// Cet arc ne se déclenche qu'après la découverte de L'Arc Perdu par le système
+// d'indices (nexus.ts, ARC_PERDU_CLUES — 6 pistes disséminées dans le secteur).
+// Avant ça, Raphazarus n'est qu'une rumeur : personne ne confirme qu'il existe
+// vraiment. L'arc raconte l'approche finale et la rencontre, pas la découverte —
+// celle-ci a déjà eu lieu, indice par indice, avant que ce texte n'apparaisse.
 const ARC_RAPHAZARUS: ArcDefinition = {
   id: 'raphazarus',
   title: 'Le Prophète du Vide',
-  intro: "Des graffitis apparaissent sur toutes les stations. Le même symbole. Le même nom : Raphazarus.",
-  triggerCondition: gs => gs.day >= 10 && gs.visitedStations.length >= 4,
+  intro: "Les indices convergent enfin. L'Arc Perdu n'est pas une légende — il dérive vraiment quelque part dans la Nébuleuse Noire. Ce que tu vas y trouver ne ressemble à rien de ce qu'on t'a raconté.",
+  triggerCondition: gs => !!gs.arcPerduUnlocked,
   completionMessage: "Tu as rencontré Raphazarus à L'Arc Perdu. Le Culte du Vide t'attend — ou te craint. Raphazarus peut être affronté là-bas si tu veux régler ça définitivement.",
   completionReward: gs => ({
     credits: gs.credits + (gs.pastDecisions?.includes('raphazarus_joined') ? 4000 : 1500),
@@ -135,21 +150,21 @@ const ARC_RAPHAZARUS: ArcDefinition = {
   }),
   steps: [
     {
-      title: "Le Symbole",
-      description: "Partout où tu vas, le même symbole gravé sur les murs : un cercle avec une ligne brisée. Les habitants baissent la voix. 'Raphazarus annonce la fin des routes commerciales. Il dit que le vide a faim.'",
+      title: "L'Approche",
+      description: "Tu captes enfin le signal — le vrai, pas une rumeur de bar. Une station qui ne devrait pas exister, immobile dans le noir. Plus tu t'en approches, plus tu comprends pourquoi personne n'en revient jamais vraiment convaincu de ce qu'il a vu.",
       choices: [
         {
-          label: "Chercher à comprendre ce symbole",
+          label: "Scanner la station avant d'approcher",
           effect: gs => ({
             reputation: gs.reputation + 8,
-            message: "Tu poses des questions. Les gens t'évitent après. Mais tu sais maintenant que Raphazarus opère depuis L'Arc Perdu — un vieux fragment militaire dérivant. +8 rép.",
+            message: "Les scans ne disent presque rien. La station absorbe plus qu'elle ne réfléchit. Ce que tu vois ne colle pas avec ce que les instruments mesurent. +8 rép (prudence).",
             advancesArc: true,
           }),
         },
         {
-          label: "Ignorer — c'est une secte de plus",
+          label: "Foncer — les questions attendront",
           effect: gs => ({
-            message: "Tu continues. Le symbole aussi. Il semble te suivre.",
+            message: "Tu n'attends pas. L'Arc Perdu grossit dans le viseur, silencieux, comme s'il t'attendait aussi.",
             advancesArc: true,
           }),
         },
@@ -157,12 +172,12 @@ const ARC_RAPHAZARUS: ArcDefinition = {
     },
     {
       title: "Le Premier Disciple",
-      description: "Une femme t'aborde dans un couloir. Robe sombre, regard absent. 'Raphazarus a vu ton nom dans les étoiles. Il demande à te rencontrer à L'Arc Perdu. C'est une invitation — pas une convocation.'",
+      description: "Une femme t'accueille au sas. Robe sombre, regard absent. 'On m'a dit que tu viendrais. Peu y arrivent — la plupart abandonnent la piste avant, ou n'y croient jamais vraiment. Raphazarus t'attend. C'est une invitation — pas une convocation.'",
       choices: [
         {
-          label: "Accepter l'invitation — se rendre à L'Arc Perdu",
+          label: "Entrer — voir enfin la vérité par toi-même",
           effect: gs => ({
-            message: "Tu suis la disciple. Direction L'Arc Perdu.",
+            message: "Tu suis la disciple dans les entrailles de la station.",
             advancesArc: true,
           }),
         },
@@ -170,14 +185,14 @@ const ARC_RAPHAZARUS: ArcDefinition = {
           label: "Interroger la disciple — qui est vraiment Raphazarus ?",
           effect: gs => ({
             reputation: gs.reputation + 5,
-            message: "Elle parle pendant des heures. Tu gardes ce qui est utile : Raphazarus s'est installé à L'Arc Perdu, ancien fragment militaire de la Grande Guerre. +5 rép.",
+            message: "Elle sourit à peine. 'Vous voulez tous savoir qui il est. Vous verrez. Les mots ne suffisent pas.' Elle ne dit rien de plus. +5 rép.",
             advancesArc: true,
           }),
         },
         {
-          label: "Décliner — ce n'est pas ton problème",
+          label: "Hésiter — tout ça est encore difficile à croire",
           effect: gs => ({
-            message: "Elle sourit. 'Raphazarus pensait que tu dirais ça. Il attend à L'Arc Perdu quand même.' Elle disparaît.",
+            message: "'C'est normal,' dit-elle. 'Presque personne n'y croit avant de le voir en face. Il t'attend quand même.'",
             advancesArc: true,
           }),
         },
@@ -215,7 +230,7 @@ const ARC_RAPHAZARUS: ArcDefinition = {
           label: "Refuser — ce n'est pas ta voie",
           effect: gs => ({
             pastDecisions: [...(gs.pastDecisions ?? []), 'raphazarus_refused'],
-            message: "Tu déclines. Il n'insiste pas. 'Le vide n'oublie pas les refus. Mais il pardonne les honnêtes.' Il te laisse partir. Tu sais maintenant où le trouver.",
+            message: "Tu déclines. Il n'insiste pas. 'Le vide n'oublie pas les refus. Mais il pardonne les honnêtes.' Il te laisse partir.",
             advancesArc: true,
           }),
         },
