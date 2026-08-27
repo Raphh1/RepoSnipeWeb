@@ -1,13 +1,17 @@
 import type { GameState, WorldEvent, StationAlertType } from '../types'
+import i18n from '../i18n/config'
 
 type EventTemplate = Omit<WorldEvent, 'startDay'>
 
-const EVENT_POOL: EventTemplate[] = [
+const we = (id: string, key: string) => i18n.t(`${id}.${key}`, { ns: 'worldEvents' })
+
+function getEventPool(): EventTemplate[] {
+  return [
   {
     id: 'faucon_war',
-    title: 'Guerre des Faucons',
-    description: 'Les Faucons Noirs ont lancé une offensive totale contre les Gardiens Écarlates. Les routes militaires sont coupées.',
-    shortDesc: 'Armes & armures +50% · Fort Kharos et Citadelle bloqués · +15% combat',
+    title: we('faucon_war', 'title'),
+    description: we('faucon_war', 'description'),
+    shortDesc: we('faucon_war', 'shortDesc'),
     duration: 7,
     color: 'var(--red)',
     effects: {
@@ -19,9 +23,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'emporium_blockade',
-    title: 'Blocus de l\'Emporium',
-    description: "L'Emporium Requiem a fermé ses routes commerciales en représailles d'un incident non confirmé. Les vivres se raréfient.",
-    shortDesc: 'Nourriture & médicaments +70% · +1 carburant par trajet',
+    title: we('emporium_blockade', 'title'),
+    description: we('emporium_blockade', 'description'),
+    shortDesc: we('emporium_blockade', 'shortDesc'),
     duration: 5,
     color: 'var(--orange)',
     effects: {
@@ -32,9 +36,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'epidemic',
-    title: 'Épidémie en expansion',
-    description: 'Un pathogène inconnu se propage depuis Station Quarantaine. Les autorités tentent de contenir la situation.',
-    shortDesc: 'Médicaments ×4 · Station Quarantaine bloquée',
+    title: we('epidemic', 'title'),
+    description: we('epidemic', 'description'),
+    shortDesc: we('epidemic', 'shortDesc'),
     duration: 6,
     color: 'var(--green)',
     effects: {
@@ -45,9 +49,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'cosmic_storm',
-    title: 'Tempête cosmique',
-    description: 'Une tempête de particules ionisées balaye le secteur. Les systèmes de navigation sont perturbés, les voyages plus dangereux.',
-    shortDesc: '+2 carburant par trajet · +10% risque combat en voyage',
+    title: we('cosmic_storm', 'title'),
+    description: we('cosmic_storm', 'description'),
+    shortDesc: we('cosmic_storm', 'shortDesc'),
     duration: 4,
     color: 'var(--cyan)',
     effects: {
@@ -57,9 +61,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'bounty_hunt',
-    title: 'Chasse à la prime',
-    description: "Une organisation inconnue a placé des primes sur des voyageurs indépendants dans ce secteur. Des chasseurs de primes opèrent partout.",
-    shortDesc: '+25% risque combat partout · Chasseurs de primes actifs',
+    title: we('bounty_hunt', 'title'),
+    description: we('bounty_hunt', 'description'),
+    shortDesc: we('bounty_hunt', 'shortDesc'),
     duration: 5,
     color: 'var(--red)',
     effects: {
@@ -68,9 +72,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'colonial_famine',
-    title: 'Famine coloniale',
-    description: 'Les colonies agricoles ont subi de mauvaises récoltes. Les vivres et l\'eau sont devenus une denrée précieuse dans tout le secteur.',
-    shortDesc: 'Nourriture & eau ×3 en vente · Opportunité commerciale',
+    title: we('colonial_famine', 'title'),
+    description: we('colonial_famine', 'description'),
+    shortDesc: we('colonial_famine', 'shortDesc'),
     duration: 6,
     color: 'var(--yellow)',
     effects: {
@@ -80,9 +84,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'market_crash',
-    title: 'Effondrement du marché',
-    description: "Une manipulation financière massive a fait s'effondrer les cours. Tout se vend et s'achète pour une bouchée de pain.",
-    shortDesc: 'Tous les prix −35% · Bonne période pour acheter',
+    title: we('market_crash', 'title'),
+    description: we('market_crash', 'description'),
+    shortDesc: we('market_crash', 'shortDesc'),
     duration: 4,
     color: 'var(--text-dim)',
     effects: {
@@ -91,9 +95,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'artifact_rush',
-    title: 'Ruée vers les artefacts',
-    description: 'Des découvertes dans les zones de ruines ont déclenché une ruée. Collectionneurs et factions se battent pour les artefacts anciens.',
-    shortDesc: 'Artefacts & données classifiées ×3 · Explorations plus rentables',
+    title: we('artifact_rush', 'title'),
+    description: we('artifact_rush', 'description'),
+    shortDesc: we('artifact_rush', 'shortDesc'),
     duration: 5,
     color: 'var(--gold)',
     effects: {
@@ -103,9 +107,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'military_coup',
-    title: 'Coup d\'état militaire',
-    description: 'Un putsch interne secoue les forces militaires du secteur. Les bases sont en état de siège, les civils interdits d\'accès.',
-    shortDesc: 'Forts militaires bloqués · Armures & munitions +60%',
+    title: we('military_coup', 'title'),
+    description: we('military_coup', 'description'),
+    shortDesc: we('military_coup', 'shortDesc'),
     duration: 7,
     color: 'var(--orange)',
     effects: {
@@ -116,9 +120,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'guild_truce',
-    title: 'Trêve des guildes',
-    description: 'Un accord de paix temporaire entre les grandes factions a été signé. Le commerce reprend librement, les tensions s\'apaisent.',
-    shortDesc: 'Tous les prix −20% · −15% risque combat · Bonne période pour voyager',
+    title: we('guild_truce', 'title'),
+    description: we('guild_truce', 'description'),
+    shortDesc: we('guild_truce', 'shortDesc'),
     duration: 4,
     color: 'var(--green)',
     effects: {
@@ -128,9 +132,9 @@ const EVENT_POOL: EventTemplate[] = [
   },
   {
     id: 'grand_festival',
-    title: 'Grand Festival Orbital',
-    description: 'La Tribosphère et Scotty Golden North organisent un festival inter-sectoriel. Les foules affluent, les crédits coulent.',
-    shortDesc: 'Luxe & divertissements ×2 · Tribosphère et Scotty en fête · -10% combat',
+    title: we('grand_festival', 'title'),
+    description: we('grand_festival', 'description'),
+    shortDesc: we('grand_festival', 'shortDesc'),
     duration: 5,
     color: 'var(--gold)',
     effects: {
@@ -140,7 +144,8 @@ const EVENT_POOL: EventTemplate[] = [
       festivalStations: ['La Tribosphère', 'Scotty Golden North'],
     },
   },
-]
+  ]
+}
 
 // Mapping event → alertes de stations
 const EVENT_STATION_ALERTS: Record<string, { stations: string[]; alert: StationAlertType }> = {
@@ -170,7 +175,7 @@ export function tickWorldEvents(gs: GameState): { gs: GameState; newWorldEvent: 
     Math.random() < EVENT_CHANCE_PER_DAY
   ) {
     const activeIds = active.map(e => e.id)
-    const pool = EVENT_POOL.filter(e => !activeIds.includes(e.id))
+    const pool = getEventPool().filter(e => !activeIds.includes(e.id))
     if (pool.length > 0) {
       const template = pool[Math.floor(Math.random() * pool.length)]
       newWorldEvent = { ...template, startDay: gs.day }

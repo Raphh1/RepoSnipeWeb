@@ -1,0 +1,133 @@
+{
+  "cadorReturns": {
+    "title": "Cador — debt honored",
+    "description": "You recognize him before he sees you. Cador. In better shape than last time. He gives you a discreet sign from an alcove. 'Didn't think I'd run into you this soon. I haven't forgotten.'",
+    "c0": "See what he can offer",
+    "c0Msg": "He gives you a solid lead. +10 rep, new quest{{targetSuffix}}.",
+    "c0TargetSuffix": " on {{station}}",
+    "c1": "Ask him for info on the area",
+    "c1Msg": "He briefs you on the local situation. Info worth its weight in gold. +credits.",
+    "c2": "Just nod and move on",
+    "c2Msg": "He nods. 'You saved my skin once. That's enough for mutual respect.' He leaves.",
+    "questTitle": "Favor from Cador — {{station}}",
+    "questGiver": "Cador",
+    "questDesc": "Cador has a target on {{station}}. 'With my tactical help, you've got 30% better odds. I owe you one.' He gives you all the info you need."
+  },
+  "transfugeVengeance": {
+    "title": "Someone's looking for the informant",
+    "description": "A poster. Your rough description. 'Wanted for betrayal — reward'. She survived. And she knows it was you. These people have networks.",
+    "c0": "Ignore it and hope she doesn't find you",
+    "c0Msg": "You pass by. For now, she doesn't see you. But the poster is fresh.",
+    "c1": "Try to talk to her — attempt an explanation",
+    "c1Success": "She listens. She doesn't forget — but she understands the context. Tension lowered. +8 rep.",
+    "c1Fail": "The conversation goes badly. She wasn't alone. -HP, -10 rep.",
+    "c2": "Pay her to take down the poster (500 cr)",
+    "c2Insufficient": "Not enough credits. The poster stays.",
+    "c2Msg": "-500 cr. She takes the money. The poster disappears. The grudge, less certain."
+  },
+  "scientistGift": {
+    "title": "A package with no sender",
+    "description": "A kid hands you a package. No name. No address. Just a scribbled note: 'For the one who gave me a chance. I don't forget.' Inside, something useful.",
+    "c0": "Open it",
+    "c0Implant": "A quality implant. Lab work. Genuine value. +1 Implant.",
+    "c0Credits": "{{amount}} credits in cash. He's done well for himself since.",
+    "c0Data": "Confidential research data. +15 rep and something exploitable."
+  },
+  "delateurReputation": {
+    "title": "Word travels",
+    "description": "A contact you knew by sight looks at you differently now. He looks away as you approach. An informant's reputation travels fast in this world.",
+    "c0": "Approach him directly",
+    "c0Success": "He listens. He's not convinced, but he lets you talk. +5 rep (effort acknowledged).",
+    "c0Fail": "He doesn't want to hear it. He leaves. -12 rep. These people talk to each other.",
+    "c1": "Own it and lean into it",
+    "c1Msg": "A faction contacts you — they're looking for exactly someone unscrupulous. Morally shaky, financially interesting. -8 rep, +credits.",
+    "c2": "Ignore it — not your problem",
+    "c2Msg": "You move on. Reputations take time to build and time to fade."
+  },
+  "escapeLegend": {
+    "title": "The escape rumor",
+    "description": "Someone in a bar tells a story — an escape from an interrogation post. The details match what you lived through. Your legend precedes you.",
+    "c0": "Let the rumor spread",
+    "c0Msg": "+12 rep. An escape reputation is an asset in some circles.",
+    "c1": "Deny it — too dangerous to be known",
+    "c1Msg": "You dispute the rumor. Some believe you. Others less so. -5 rep (you seem nervous).",
+    "c2": "Capitalize — present yourself as an escape consultant",
+    "c2NoTarget": "Someone pays for your advice. +credits.",
+    "c2Msg": "A serious client. Extraction on {{station}}. +credits upfront.",
+    "questTitle": "Extraction — {{station}}",
+    "questGiver": "Discreet client",
+    "questDesc": "Your escape reputation earned you a contract. Someone wants out of {{station}} quietly. High pay, real risk."
+  },
+  "pistisRecommends": {
+    "title": "Recommendation from Pistis",
+    "description": "A man in a plain suit approaches. 'Pistis gave me your name. He says you're someone reliable.' He has something to propose.",
+    "c0": "Listen",
+    "c0Msg": "A mission via Pistis's channels. +10 Cesarion standing, +8 Emporium rep.",
+    "c1": "Politely decline",
+    "c1Msg": "He nods. 'Another time, perhaps.'",
+    "questTitle": "Emporium mission — {{station}}",
+    "questGiver": "Pistis's contact",
+    "questDesc": "Through Pistis, an Emporium contact entrusts you with a delivery to {{station}}. Absolute discretion. Above-market pay."
+  },
+  "caelMessage": {
+    "title": "Message from Cael",
+    "description": "An encrypted message on your ship's terminal. Black Falcons signature. Cael. Short: 'I need an outsider. Interested?'",
+    "c0": "Reply yes",
+    "c0Msg": "Mission received from the Falcons. +12 Falcon rep.",
+    "c1": "Ignore the message",
+    "c1Msg": "You don't reply. He might send it again another time.",
+    "questTitle": "Falcon operation — {{station}}",
+    "questGiver": "Cael",
+    "questDesc": "Cael needs an outsider for an operation the Falcons can't officially run on {{station}}. Real risk. Exceptional pay."
+  },
+  "opportunistRep": {
+    "title": "The opportunist reputation",
+    "description": "Someone approaches with a calculating smile. 'I've heard about you. Someone who knows how to take advantage of a situation. Exactly the profile I need.'",
+    "c0": "Listen to the offer",
+    "c0Msg": "A mission that matches your reputation. High pay.",
+    "c1": "Reject it — you want to change your image",
+    "c1Msg": "He shrugs. You feel slightly better about yourself. +5 rep (effort).",
+    "questTitle": "Gray operation — {{station}}",
+    "questGiver": "Anonymous recruiter",
+    "questDesc": "A job with no name on {{station}}. Legal in the details. Morally murky overall. Pay well above market."
+  },
+  "defectorGratitude": {
+    "title": "A message from the other side",
+    "description": "The defector you had smuggled aboard found you. A short voice message: 'I made it. I'm safe. If you're ever out that way, you have a friend.'",
+    "c0": "Reply",
+    "c0Msg": "+15 rep. You now have a contact in a defector network. Could come in handy.",
+    "c1": "Don't reply — keep your distance",
+    "c1Msg": "You read the message. You don't reply. She'll understand."
+  },
+  "cesarionBountyHunter": {
+    "title": "Hunter sent by the Emporium",
+    "description": "He wears an imperial accreditation badge. Your name is on his list. Cesarion's Emporium doesn't forget those who wronged them.",
+    "c0": "Flee before he sees you (40%)",
+    "c0Success": "You vanish into the crowd. He keeps searching.",
+    "c0Fail": "He saw you. Reinforcements arrive fast. Cell.",
+    "c1": "Confront him",
+    "c1Msg": "He draws his weapon. Fight.",
+    "c2": "Pay to have your name erased (800 cr)",
+    "c2Insufficient": "Not enough credits. He watches you. He waits.",
+    "c2Msg": "-800 cr. He passes the message along. Emporium standing recovers slightly."
+  },
+  "raphazarusFavor": {
+    "title": "Courier from L'Arc Perdu",
+    "description": "A messenger in discreet armor. He doesn't give his name. He hands you a sealed cylinder. 'From the one who holds L'Arc Perdu. You behaved properly there.'",
+    "c0": "Open the cylinder",
+    "c0Relics": "Artifacts from the Great War. Authentic. Priceless. +Relics, +Artifacts.",
+    "c0Credits": "{{amount}} credits and a letter of recommendation. +20 rep. Raphazarus remembers.",
+    "c1": "Refuse — no obligations to anyone",
+    "c1Msg": "The messenger leaves without a word. Refusing a gesture from Raphazarus is paid for differently. -10 standing."
+  },
+  "scottyNetwork": {
+    "title": "Scotty's network",
+    "description": "A vaguely familiar face. An employee of Scotty Golden North. He slips you something discreetly. 'Mr. Scotty says friends of the house are well taken care of.'",
+    "c0": "Accept",
+    "c0Credits": "An envelope of credits. Scotty's network works well. +credits.",
+    "c0Goods": "Some Scotty Golden North specialties. +2 Festive specialties.",
+    "c0Medical": "Casino-quality medical supplies. +HP, +stamina.",
+    "c1": "Decline",
+    "c1Msg": "He leaves. Scotty never pushes."
+  }
+}

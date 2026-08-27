@@ -1,13 +1,14 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
-import { ARC_DEFINITIONS, getCurrentStep, getCurrentStepBlocked, advanceArc } from '../../engine/narrativeArcs'
+import { getArcDefinitions, getCurrentStep, getCurrentStepBlocked, advanceArc } from '../../engine/narrativeArcs'
 import type { NarrativeArc, Enemy } from '../../types'
-import { TIER_MID, TIER_BOSS } from '../../data/enemies'
+import { getTierMid, getTierBoss } from '../../data/enemies'
 
 // Réutilise les vraies stats des boss (data/enemies.ts) — sinon un arc narratif
 // et le combat "normal" (exploration/sous-boss) faisaient combattre deux versions
 // différentes du même personnage, avec des PV et dégâts qui ne correspondaient pas.
-const findBoss = (name: string, fallback: Enemy): Enemy => TIER_BOSS.find(e => e.name === name) ?? fallback
+const findBoss = (name: string, fallback: Enemy): Enemy => getTierBoss().find(e => e.name === name) ?? fallback
 
 const ARC_BOSSES: Record<string, Enemy> = {
   raphazarus: findBoss('Raphazarus', {
@@ -41,6 +42,8 @@ const ARC_COLORS: Record<string, string> = {
 }
 
 export function NarrativeArcsScreen() {
+  const { t } = useTranslation('narrativeArcsScreen')
+  const { t: tc } = useTranslation('common')
   const gs          = useGameStore(s => s.gs!)
   const goTo        = useGameStore(s => s.goTo)
   const patch       = useGameStore(s => s.patch)
@@ -48,13 +51,14 @@ export function NarrativeArcsScreen() {
   const [activeArc, setActiveArc] = useState<NarrativeArc | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
 
-  const allArcs = [...gs.activeArcs, ...ARC_DEFINITIONS
+  const arcDefs = getArcDefinitions()
+  const allArcs = [...gs.activeArcs, ...arcDefs
     .filter(d => !gs.activeArcs.find(a => a.id === d.id) && !gs.completedArcs.includes(d.id) && d.triggerCondition(gs))
     .map(d => ({ id: d.id, title: d.title, step: 0, maxSteps: d.steps.length, completed: false, failed: false }))
   ]
 
   function handleChoice(arc: NarrativeArc, choiceIdx: number) {
-    const def = ARC_DEFINITIONS.find(d => d.id === arc.id)
+    const def = arcDefs.find(d => d.id === arc.id)
     if (!def) return
     const step = def.steps[arc.step]
     if (!step) return
@@ -68,7 +72,8 @@ export function NarrativeArcsScreen() {
 
     // Si combat requis — on garde l'arc dans activeArcs, on le complétera après victoire
     if (triggerCombat) {
-      const enemy = ARC_BOSSES[arc.id] ?? TIER_MID[Math.floor(Math.random() * TIER_MID.length)]
+      const tierMid = getTierMid()
+      const enemy = ARC_BOSSES[arc.id] ?? tierMid[Math.floor(Math.random() * tierMid.length)]
       const existingArcs = gs.activeArcs.filter(a => a.id !== arc.id)
       const updatedArc = { ...arc }
       patch({ ...gsChanges, activeArcs: [...existingArcs, updatedArc], pendingCombatArcId: arc.id })
@@ -105,30 +110,30 @@ export function NarrativeArcsScreen() {
   }
 
   if (activeArc) {
-    const def = ARC_DEFINITIONS.find(d => d.id === activeArc.id)
+    const def = arcDefs.find(d => d.id === activeArc.id)
     const step = getCurrentStep(activeArc, gs)
     const blockedHint = !step && !activeArc.completed ? getCurrentStepBlocked(activeArc, gs) : null
 
     return (
       <div className="layout">
-        <div className="t-xs t-dim t-center">— ARC NARRATIF —</div>
+        <div className="t-xs t-dim t-center">{t('arcLabel')}</div>
         <div className="px-box" style={{ borderColor: ARC_COLORS[activeArc.id] }}>
           <div className="t-sm t-bright mb4" style={{ color: ARC_COLORS[activeArc.id] }}>
             {def?.title}
           </div>
-          <div className="t-xs t-dim mb8">Étape {activeArc.step + 1}/{activeArc.maxSteps}</div>
+          <div className="t-xs t-dim mb8">{t('step', { current: activeArc.step + 1, max: activeArc.maxSteps })}</div>
         </div>
 
         {msg && (
           <div className="px-box">
             <div className="t-xs t-green">{msg}</div>
-            <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={() => setMsg(null)}>Continuer</button>
+            <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={() => setMsg(null)}>{t('continue')}</button>
           </div>
         )}
 
         {!msg && blockedHint && (
           <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
-            <div className="t-xs t-dim mb4">⚠ PRÉREQUIS NON REMPLIS</div>
+            <div className="t-xs t-dim mb4">{t('blockedTitle')}</div>
             <div className="t-xs" style={{ color: 'var(--orange)' }}>{blockedHint}</div>
           </div>
         )}
@@ -151,10 +156,10 @@ export function NarrativeArcsScreen() {
         )}
 
         {!msg && !step && !blockedHint && activeArc.completed && (
-          <div className="px-box t-gold t-sm">★ Arc complété !</div>
+          <div className="px-box t-gold t-sm">{t('completed')}</div>
         )}
 
-        <button className="px-btn" onClick={() => { setActiveArc(null); setMsg(null) }}>← Retour</button>
+        <button className="px-btn" onClick={() => { setActiveArc(null); setMsg(null) }}>{t('back')}</button>
       </div>
     )
   }
@@ -162,23 +167,23 @@ export function NarrativeArcsScreen() {
   return (
     <div className="layout">
       <div className="row" style={{ alignItems: 'center', gap: '16px' }}>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
-        <div className="t-sm t-bright">ARCS NARRATIFS</div>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{tc('buttons.back')}</button>
+        <div className="t-sm t-bright">{t('header')}</div>
       </div>
 
       {allArcs.length === 0 && gs.completedArcs.length === 0 && (
         <div className="px-box t-dim t-xs">
-          Aucun arc narratif disponible pour l'instant. Explore davantage le secteur.
+          {t('empty')}
         </div>
       )}
 
       {/* Arcs actifs / disponibles */}
       {allArcs.length > 0 && (
         <>
-          <div className="t-xs t-dim">DISPONIBLES</div>
+          <div className="t-xs t-dim">{t('available')}</div>
           <div className="col gap4">
             {allArcs.filter(a => !a.completed && !a.failed).map(arc => {
-              const def = ARC_DEFINITIONS.find(d => d.id === arc.id)
+              const def = arcDefs.find(d => d.id === arc.id)
               const step = getCurrentStep(arc, gs)
               const hint = !step ? getCurrentStepBlocked(arc, gs) : null
               return (
@@ -189,9 +194,9 @@ export function NarrativeArcsScreen() {
                     <div className="tag tag--dim t-xs">{arc.step}/{arc.maxSteps}</div>
                   </div>
                   <div className="t-xs t-dim mb4">{def?.intro}</div>
-                  {step && <div className="t-xs t-bright">Étape actuelle : {step.title}</div>}
+                  {step && <div className="t-xs t-bright">{t('currentStep', { title: step.title })}</div>}
                   {hint && <div className="t-xs" style={{ color: 'var(--orange)' }}>⚠ {hint}</div>}
-                  <div className="t-xs t-cyan mt8">→ Cliquer pour voir les détails</div>
+                  <div className="t-xs t-cyan mt8">{t('seeDetails')}</div>
                 </div>
               )
             })}
@@ -202,10 +207,10 @@ export function NarrativeArcsScreen() {
       {/* Arcs complétés */}
       {gs.completedArcs.length > 0 && (
         <>
-          <div className="t-xs t-dim mt8">COMPLÉTÉS</div>
+          <div className="t-xs t-dim mt8">{t('completedSection')}</div>
           <div className="col gap4">
             {gs.completedArcs.map(id => {
-              const def = ARC_DEFINITIONS.find(d => d.id === id)
+              const def = arcDefs.find(d => d.id === id)
               return (
                 <div key={id} className="px-box" style={{ opacity: 0.6 }}>
                   <div className="t-xs t-dim">✓ {def?.title ?? id}</div>

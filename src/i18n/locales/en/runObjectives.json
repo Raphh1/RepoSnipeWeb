@@ -1,0 +1,12 @@
+{
+  "magnat": { "name": "Void Magnate", "desc": "Accumulate 12,000 cr in a single run.", "progress": "{{credits}} / 12,000 cr" },
+  "machineGuerre": { "name": "War Machine", "desc": "Win 12 fights in this run.", "progress": "{{count}} / 12 fights" },
+  "nomade": { "name": "Stellar Nomad", "desc": "Survive until day 20.", "progress": "Day {{day}} / 20" },
+  "diplomate": { "name": "Shadow Diplomat", "desc": "Meet 10 different NPCs.", "progress": "{{count}} / 10 NPCs" },
+  "soldatFaction": { "name": "Faction Soldier", "desc": "Complete 6 faction missions.", "progress": "{{count}} / 6 missions" },
+  "artisan": { "name": "Void Artisan", "desc": "Craft 6 items.", "progress": "{{count}} / 6 crafts" },
+  "contractuel": { "name": "Contractor", "desc": "Complete 8 quests.", "progress": "{{count}} / 8 quests" },
+  "legendaire": { "name": "Living Legend", "desc": "Reach 60 reputation.", "progress": "{{rep}} / 60 rep" },
+  "chasseurBoss": { "name": "Bounty Hunter", "desc": "Defeat 3 bosses.", "progress": "{{count}} / 3 bosses" },
+  "collectionneur": { "name": "Collector", "desc": "Have 5 different item types in cargo at once.", "progress": "{{count}} / 5 types in cargo" }
+}

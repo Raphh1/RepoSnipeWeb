@@ -1,0 +1,163 @@
+{
+  "briefingLabel": "— BRIEFING —",
+  "difficultTag": "⚠ Difficult class",
+  "advancedTag": "★ Advanced class",
+  "balancedTag": "◆ Balanced class",
+  "startInfo": "Starting station: {{station}} · Credits: {{credits}} cr · Fuel: {{fuel}}/{{maxFuel}}",
+  "mainMissionLabel": "★★ MAIN MISSION",
+  "mainMissionTitle": "Rally the 4 Nexus Fragments",
+  "mainMissionDesc": "Fragments of an unknown technology are scattered across the sector. Some stations guard them. Some NPCs know where they are. Finding all 4 fragments is the ultimate goal of a run.",
+  "fragmentsCollected": "Fragments collected this run: {{count}} / 4",
+  "startRun": "Start the run →",
+  "defaultIntro": {
+    "lines": ["The sector awaits you.", "Start by exploring the station and looking for work."],
+    "objective": "Objective: survive and prosper."
+  },
+  "classIntros": {
+    "vagabond": {
+      "lines": [
+        "You're a Drifter. Congratulations — that's the polite term.",
+        "500 credits. 3 units of fuel. No particular skills.",
+        "The sector has seen thousands of people like you pass through.",
+        "Most didn't stay long.",
+        "But you'll surely make it. No. Probably not.",
+        "Try anyway."
+      ],
+      "objective": "Objective: survive long enough to have a story to tell."
+    },
+    "ferrailleur": {
+      "lines": [
+        "Your ship holds together with glue, wire, and your excessive optimism.",
+        "30% chance you lose your cargo on every trip.",
+        "You still decided to trade in space.",
+        "That's brave. It's also deeply irrational.",
+        "We'd like to wish you good luck.",
+        "We're going to do it anyway."
+      ],
+      "objective": "Objective: generate enough profit to offset your losses in transit."
+    },
+    "endette": {
+      "lines": [
+        "You owe someone money. A lot of money.",
+        "50 credits a day. Every day. No exceptions.",
+        "You don't really know who to. It's the kind of debt you'd rather not trace.",
+        "The good news: you start with 1,200 credits.",
+        "The bad news: you get it.",
+        "Run."
+      ],
+      "objective": "Objective: earn faster than you lose. This isn't a metaphor."
+    },
+    "accro": {
+      "lines": [
+        "Every trip costs you 100 credits more than everyone else.",
+        "We won't ask why. Not our business.",
+        "What we know: you have off-the-charts stamina and unpredictable reflexes.",
+        "And needs. Regular. Costly.",
+        "It can work. If the credits come in fast enough.",
+        "It can also end very badly. The margin is thin."
+      ],
+      "objective": "Objective: maintain the flow of credits to fund the road — and the rest."
+    },
+    "maudit": {
+      "lines": [
+        "The universe doesn't like you.",
+        "That's not a figure of speech — it's a mechanical reality of your existence.",
+        "One good thing out of two will backfire on you.",
+        "Other pilots have luck or skill.",
+        "You have... perseverance? We suppose.",
+        "Good luck. No, seriously this time."
+      ],
+      "objective": "Objective: find a path that doesn't involve too many good things."
+    },
+    "marchand": {
+      "lines": [
+        "The sector runs on a simple rule: buy low, sell high.",
+        "Faction wars make prices fluctuate. So do world events.",
+        "You start at Port Méridien — a stable trade hub.",
+        "Explore the local market. Look for work. Identify profitable routes.",
+        "The first runs are for understanding the flows. After that, you optimize."
+      ],
+      "objective": "Objective: reach 10,000 credits. Then aim for 100,000. Then the stars."
+    },
+    "mecanicien": {
+      "lines": [
+        "You know engines better than you know yourself.",
+        "Your ship has superior fuel capacity — that opens routes others can't reach.",
+        "Start by exploring. Understanding the sector's geography is your edge.",
+        "Distant stations pay better. Deep zones reward endurance.",
+        "Your ship is your tool. Maintain it."
+      ],
+      "objective": "Objective: map the sector and profit from it. You're built for long-range exploration."
+    },
+    "explorateur": {
+      "lines": [
+        "Space holds no more secrets for you — or almost none.",
+        "Neutral zones reward you better than others. Explore often.",
+        "Every station has a story. Some hold fragments of something bigger.",
+        "Narrative arcs trigger based on what you do and where you go.",
+        "Follow the threads. The sector has a memory."
+      ],
+      "objective": "Objective: see what the sector hides from those who don't dare look."
+    },
+    "medecin": {
+      "lines": [
+        "You heal in clinics that don't officially exist.",
+        "Medicine earns you 50% more than others — that's your trade.",
+        "You can also heal yourself more effectively in combat.",
+        "Start at Port Méridien. Build up stock. Find routes with high medical demand.",
+        "Conflict zones pay the best. That's an uncomfortable reality."
+      ],
+      "objective": "Objective: build a distribution network in a sector that needs it."
+    },
+    "contrebandier": {
+      "lines": [
+        "You buy 20% cheaper than everyone else. That's a considerable edge.",
+        "In exchange: pirates know you. They show up twice as often.",
+        "You start at the Bas-Fonds de Vega — where good deals and bad encounters coexist.",
+        "Watch your route. Some corridors are more watched than others.",
+        "And if you get caught, you already know what to do."
+      ],
+      "objective": "Objective: exploit your price edge before your enemies exploit you."
+    },
+    "veteran": {
+      "lines": [
+        "Thirty years of wars. You survived things that killed better people than you.",
+        "You hit harder. You take less. You start with momentum.",
+        "The Citadelle Écarlate is your base — a place that suits you.",
+        "Combat quests pay you more. Station bosses are your specialty.",
+        "The sector needs people like you. Or fears them. Same thing."
+      ],
+      "objective": "Objective: clean up the sector, faction by faction, boss by boss."
+    },
+    "heritier": {
+      "lines": [
+        "You don't know how to fight. You don't need to.",
+        "300 credits arrive every 5 days, automatically. Your inheritance works for you.",
+        "The catch: you can't buy weapons. It's not in your upbringing.",
+        "Start at the Citadelle Écarlate. Build your trade network.",
+        "Money opens doors that force can't force open."
+      ],
+      "objective": "Objective: become the sector's economic pillar without ever touching a weapon."
+    },
+    "hackeur": {
+      "lines": [
+        "You see station prices before you arrive. That's information others pay dearly for.",
+        "In combat you can hack enemy equipment. Systems hold no secrets for you.",
+        "Physically, you're vulnerable. Compensate with preparation.",
+        "Start at the Citadelle Écarlate. Identify the sector's information flows.",
+        "Everything is connected. You're the only one who can read the connections."
+      ],
+      "objective": "Objective: exploit information the way others exploit brute force."
+    },
+    "seigneurDeGuerre": {
+      "lines": [
+        "Pirates avoid you. That's not luck — it's your reputation.",
+        "You hit 50% harder. You start combat with momentum.",
+        "Peaceful stations don't want you. Not your problem.",
+        "You start at Fort Kharos — a place that understands what you are.",
+        "The sector has targets. Some carry bounties. Go get them."
+      ],
+      "objective": "Objective: impose your dominance over the sector, one boss at a time."
+    }
+  }
+}

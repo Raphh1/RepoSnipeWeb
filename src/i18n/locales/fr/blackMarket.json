@@ -1,0 +1,19 @@
+{
+  "weaponDesc": "Arme Tier {{tier}} — {{effect}}",
+  "noSpecialEffect": "Pas d'effet spécial.",
+  "armorDesc": "Armure Tier {{tier}} — {{desc}}",
+  "contraband": {
+    "stolenData":   { "name": "Lot de données volées", "desc": "Provenance inconnue." },
+    "illegalArms":  { "name": "Armes de contrebande", "desc": "Sans numéro de série." },
+    "milStims":     { "name": "Stimulants militaires", "desc": "Effet garanti. Effets secondaires aussi." },
+    "classifiedComponents": { "name": "Composants classifiés", "desc": "Volés à un convoi militaire." },
+    "preFractureData": { "name": "Données pré-Fracture", "desc": "Des archives que certains tueraient pour avoir." },
+    "premiumFakeId": { "name": "Faux papiers premium", "desc": "Identité complète. Aucune traçabilité." },
+    "smuggledImplants": { "name": "Implants de contrebande", "desc": "Installation non garantie." },
+    "rawCrystals":  { "name": "Cristaux bruts", "desc": "Non raffinés. Explosifs si mal stockés." }
+  },
+  "intel": {
+    "name": "Renseignement faction",
+    "desc": "Informations sur les mouvements des factions. +15 réputation."
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "services": {
+    "ferrailleur": {
+      "label": "🔧 Réparer le vaisseau",
+      "costText": "500 cr",
+      "whyNotIntact": "Vaisseau intact",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "message": "Il jette un œil à la coque et sort ses outils. -500 cr · Vaisseau réparé ({{max}}/{{max}} PV)."
+    },
+    "medecin": {
+      "label": "💊 Soins complets",
+      "costText": "300 cr",
+      "whyNotFull": "Tu es en pleine forme",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "message": "-300 cr · Soins complets. PV restaurés à {{max}}."
+    },
+    "hackeuse": {
+      "label": "⚡ Effacer le casier",
+      "costText": "800 cr",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "whyNotClean": "Casier déjà propre",
+      "message": "-800 cr · Elle tape quelques lignes sans te regarder. \"C'est fait.\" +40 réputation."
+    },
+    "dealer": {
+      "label": "📦 Ravitaillement clandestin",
+      "costText": "400 cr",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "message": "-400 cr · Il sort une caisse de sous le comptoir. +2 Médicaments · +1 Stimulant."
+    },
+    "forgeron": {
+      "label": "⚔ Améliorer l'arme équipée",
+      "costText": "Outils ×2 + 400 cr",
+      "whyNotNoWeapon": "Aucune arme équipée",
+      "whyNotTools": "Il faut Outils ×2",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "noWeaponMsg": "Aucune arme.",
+      "message": "Il retravaille la lame en silence. -400 cr · -Outils ×2 · {{weapon}} : +2 dégâts min/max."
+    },
+    "piloteRetraite": {
+      "label": "🛸 Route secrète",
+      "costText": "200 cr",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "whyNotFull": "Réservoir plein",
+      "message": "-200 cr · \"Prends ce raccourci — personne d'autre le connaît encore.\" +2 carburant."
+    },
+    "veteran": {
+      "label": "🏋 Entraînement intensif",
+      "costText": "1 action",
+      "whyNotNothing": "Rien à améliorer",
+      "message": "Une heure avec lui. Pas de mots, juste de la sueur. Stamina max · +8 réputation."
+    },
+    "courtier": {
+      "label": "💼 Transaction secrète",
+      "costText": "500 cr",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "message": "-500 cr · Il fait glisser une caisse par-dessus le comptoir. +1 {{item}}."
+    },
+    "marchande": {
+      "label": "💼 Stock exclusif",
+      "costText": "400 cr",
+      "whyNotCredits": "Manque {{amount}} cr",
+      "message": "-400 cr · \"Ça vient d'arriver, pas encore au catalogue.\" +1 {{item}}."
+    },
+    "chercheuse": {
+      "label": "🔬 Expertise d'artefacts / données",
+      "costText": "Données ou Artefact requis",
+      "whyNotNone": "Aucune donnée ni artefact en soute (Données, Données volées, Artefacts…)",
+      "message": "Elle examine longuement le spécimen. Longue pause. \"C'est rare — vraiment rare.\" Elle te paie sans marchander. -1 {{key}} · +{{reward}} cr · +{{rep}} rép."
+    },
+    "survivante": {
+      "label": "🤝 Troc de survie",
+      "costText": "1 Nourriture",
+      "whyNotNone": "Aucune nourriture disponible",
+      "message": "Elle échange sans un mot. -1 {{key}} · +2 Médicaments · +15 PV."
+    }
+  },
+  "greetings": {
+    "ally": [
+      "Toujours en vie. Bonne nouvelle.",
+      "Je savais que tu reviendrais.",
+      "Tu m'as manqué, d'une certaine façon."
+    ],
+    "friendly": [
+      "Tiens, te revoilà.",
+      "Bon retour. Tu veux quelque chose à boire ?",
+      "Encore toi. C'est pas une plainte."
+    ],
+    "hostile": [
+      "On a un problème non réglé.",
+      "T'aurais pas dû revenir.",
+      "Je t'attendais."
+    ],
+    "cold": [
+      "...",
+      "Tu veux quoi.",
+      "Je t'ai pas invité."
+    ]
+  },
+  "folieCallback": [
+    "{{name}} recule d'un pas en te voyant approcher. \"T'as... du sang séché. Là, sur la mâchoire.\" Il évite ton regard le reste de la conversation.",
+    "{{name}} renifle l'air, mal à l'aise. \"Ça sent quoi, cette odeur...\" Il ne finit pas sa phrase.",
+    "\"Les gens racontent des trucs sur toi,\" dit {{name}} à voix basse. \"Le genre de trucs qu'on préfère pas croire. Sauf que là, en te regardant...\"",
+    "{{name}} garde ses distances, mains visibles. \"Je vais pas te poser de questions. Fais juste vite.\""
+  ],
+  "pillarCallback": {
+    "fear": [
+      "{{npc}} se fige une seconde. \"On dit que {{name}} a juré ta perte. Les gens comme moi évitent les gens comme toi.\"",
+      "\"Tu es celui qui a défié {{name}},\" souffle {{npc}}, sans te regarder en face. \"Fais vite ce que tu as à faire et pars.\"",
+      "{{npc}} recule d'un pas. \"Je veux pas d'ennui avec {{name}}. Et toi, t'en es un ambulant.\""
+    ],
+    "betray": [
+      "{{npc}} te dévisage froidement. \"Alanossa raconte partout que tu l'as trahie. Ici, sa parole pèse lourd.\"",
+      "\"On m'a dit de pas te faire confiance,\" lâche {{npc}}. \"Quelqu'un proche d'Alanossa. Tu vois le genre.\""
+    ],
+    "respect": [
+      "{{npc}} hoche la tête avec déférence. \"On murmure que {{name}} te tient en haute estime. Ça ouvre des portes, par ici.\"",
+      "\"T'es proche de {{name}}, pas vrai ?\" {{npc}} baisse d'un ton, presque respectueux. \"Ça change tout.\""
+    ]
+  },
+  "greeting": {
+    "stalker": [
+      "{{name}} baisse la voix. \"Y'a quelqu'un qui posait des questions sur toi tout à l'heure. Méfie-toi.\"",
+      "{{name}} jette un coup d'œil derrière toi avant de parler. \"Tu as quelqu'un aux trousses ?\"",
+      "\"T'as l'air de quelqu'un qu'on cherche,\" dit {{name}} sans sourire."
+    ],
+    "hurt": [
+      "{{name}} te regarde arriver. \"T'as pris des coups. Ça se voit de loin.\"",
+      "\"T'es encore en vie ? À peine.\" {{name}} plisse les yeux.",
+      "\"Assieds-toi,\" dit {{name}}. \"T'as l'air d'un mort qui marche encore.\""
+    ],
+    "famous": [
+      "{{name}} te reconnaît immédiatement. \"Tout le monde parle de toi dans le secteur.\"",
+      "\"Ah. Toi.\" {{name}} a l'air impressionné malgré lui.",
+      "\"J'avais entendu que tu passerais par ici,\" dit {{name}}. \"Le secteur a une mémoire.\""
+    ],
+    "badRep": [
+      "{{name}} regarde ailleurs. \"Je suis pas sûr de vouloir être vu en ta compagnie ici.\"",
+      "\"T'as une sale réputation,\" dit {{name}} à voix basse. \"Quelques personnes aimeraient te parler. Le genre de personnes qu'on préfère éviter.\""
+    ],
+    "traque": "{{name}} remarque quelque chose. \"Tu regardes derrière toi depuis que t'es entré. C'est quoi ton problème ?\"",
+    "regular": [
+      "{{name}} lève les yeux sans surprise. \"T'es encore là. Tu fais partie des meubles maintenant.\"",
+      "\"Toi encore.\" {{name}} dit ça sans malice. C'est presque chaleureux.",
+      "\"Je t'attendais presque,\" dit {{name}}. \"T'es prévisible. C'est pas un reproche.\""
+    ],
+    "day20": "\"T'es toujours en vie,\" dit {{name}}. \"C'est pas rien, par ici.\"",
+    "poor": "{{name}} te jette un coup d'œil. \"T'as l'air à court. Ça se voit.\"",
+    "lore": "{{name}} te regarde différemment. \"T'as l'air de quelqu'un qui cherche quelque chose de précis. Ou de quelqu'un qui a déjà trop trouvé.\"",
+    "neutral": [
+      "{{name}} lève les yeux. Pas d'enthousiasme, pas d'hostilité. Il t'attend.",
+      "{{name}} te jauge une seconde, puis reprend ce qu'il faisait. Il t'a vu.",
+      "{{name}} te fait un signe de tête bref. Le genre qui dit : \"t'es là, j'ai vu, c'est bon.\"",
+      "{{name}} s'arrête une seconde. Te regarde. Continue. Le silence est neutre.",
+      "\"Tiens.\" {{name}} ne dit rien d'autre. Mais il t'a reconnu."
+    ]
+  },
+  "rival": {
+    "fightMsg": "{{name}} sort son arme. Combat.",
+    "apologizeSuccess": "Il écoute. Ses épaules se relâchent. 'Ça n'efface rien. Mais...' Il repart. +20 rép.",
+    "apologizeFail": "{{name}} n'est pas prêt à écouter. Combat inévitable.",
+    "payInsufficient": "Pas assez de crédits ({{amount}} cr requis). Il n'attend plus.",
+    "paySuccess": "-{{amount}} cr. Il prend l'argent et repart. La rancœur a un prix.",
+    "fleeSuccess": "Tu te tires. -1 carburant. Il sera là la prochaine fois.",
+    "fleeFail": "Il est plus rapide que prévu. Combat."
+  },
+  "rivalEnemyDesc": "Il se bat avec la rage de quelqu'un qui attendait depuis longtemps.",
+  "namedNpcs": {
+    "marek": "Il répare des vaisseaux depuis trente ans. Il sait des choses.",
+    "sela": "Souriante. Efficace. Jamais vraiment honnête.",
+    "torvak": "Soixante ans de service. Il a vu des choses qu'il ne raconte plus.",
+    "lira": "Elle connaît tes mots de passe. Elle ne les utilise pas — encore.",
+    "boro": "Il vend des choses dont tu n'as pas besoin mais que tu voudras quand même.",
+    "cael": "Bras droit d'Alanossa. Efficace. Discret. Mortel.",
+    "neva": "Elle est là depuis l'époque où c'était encore une vraie prison.",
+    "pistis": "Il fait le lien entre ceux qui veulent vendre et ceux qui veulent pas savoir d'où ça vient.",
+    "ganz": "Il gère les paris, les arènes, et les secrets des riches.",
+    "myrra": "Elle commande les Gardiens Écarlates sur cette station. Elle juge vite.",
+    "ysla": "Elle cherche quelque chose dans les ruines. Elle pense l'avoir trouvé.",
+    "drela": "Il a volé partout. Maintenant il boit et regarde les étoiles.",
+    "rook": "Il fabrique des armes. Il pose pas de questions. Il fait des prix.",
+    "vance": "Calme. Mais ses yeux ont vu quelque chose que le calme cache mal.",
+    "vosh": "Il évalue les candidats pour Alanossa. Un regard. Une seconde. Il a déjà décidé.",
+    "orva": "Elle tient le fort quand Ossian dort. Soit elle te respecte, soit tu pars.",
+    "besh": "Il garde des choses qui n'appartiennent à personne — et il en tire profit.",
+    "ulmo": "Il conseille ceux qui décident. Ce qu'il pense lui-même, personne ne le sait.",
+    "vael": "Il compte les vaisseaux qui passent. Il n'en laisse pas passer beaucoup.",
+    "kross": "Il sait des choses sur tout le monde ici. Il choisit soigneusement ce qu'il garde.",
+    "setta": "Elle gère le stock, les prix, et les personnes non désirables. Dans cet ordre.",
+    "fenn": "Il a connu Alanossa avant qu'elle soit Alanossa. Il s'en souvient différemment.",
+    "torq": "Discipline et loyauté. Dans cet ordre. Il ne sourit pas souvent.",
+    "lyss": "Elle voit des patterns dans des données que personne d'autre ne lit.",
+    "mako": "Il tient le bar le plus risqué du secteur avec une sérénité déconcertante.",
+    "harek": "Il tient son poste depuis huit ans. Il n'a pas demandé à en partir.",
+    "sera": "Elle a vu tout ce qui passe dans ce couloir spatial depuis cinq ans. Tout.",
+    "drav": "Ce qu'il ne peut pas réparer, il ne l'a pas encore rencontré.",
+    "keln": "Il dirigeait une garnison des Gardiens. Il n'en parle pas.",
+    "mira-c": "Elle sourit à tout le monde et se souvient de chaque prix.",
+    "rexx": "Costume propre, mots choisis. Ce qu'il pense, il le garde pour lui.",
+    "olin": "Il sait où chaque caisse est. Il sait aussi où certaines ne devraient pas être.",
+    "sonn": "Elle vit ici depuis trente ans. Elle a vu assez de gens pour ne plus s'étonner de rien.",
+    "sael": "Il sait tout ce qui se dit dans ce club. Il ne le répètera jamais. Sauf une fois.",
+    "murn": "Il était là quand ça a brûlé. Il est encore là. Il y a une raison.",
+    "docta": "Il soigne les résidents depuis la fin de la quarantaine officielle. Personne ne lui a dit de partir.",
+    "zal": "Il protège des archives qui précèdent la mémoire collective du secteur.",
+    "oss": "Son vaisseau est devenu une ville. Il s'y est adapté lentement.",
+    "shel": "Si tu la vois, c'est qu'elle a décidé que tu pouvais la voir.",
+    "tonn": "Il a un accord avec toutes les factions. Il ne dit jamais comment il l'a obtenu.",
+    "rinn": "Elle entretient le signal. Elle écoute tout ce qui passe. Elle note beaucoup de choses.",
+    "broxx": "Il connaît les prix de quarante stations. Il sait exactement ce que tu paies en trop.",
+    "reine": "Son nom réel n'est pas connu. Son autorité sur ce port, si.",
+    "vael-s": "Il étudie les gaz des géantes depuis douze ans. Il n'a pas trouvé ce qu'il cherchait. Il continue.",
+    "elenne": "Elle regarde les étoiles. Elle a arrêté de regarder les gens il y a longtemps.",
+    "kaed": "Il est allé plus loin que cette station. Deux fois. Il n'en parle qu'avec parcimonie.",
+    "grelm": "Il dirige les mineurs depuis que l'ancien chef est parti. On ne demande pas pourquoi.",
+    "brenn": "Il gère les hommes, les machines, et la chaleur. Pas nécessairement dans cet ordre.",
+    "kaur": "Quarante ans dans les mines. Ses mains sont plus dures que la roche qu'il a taillée."
+  }
+}

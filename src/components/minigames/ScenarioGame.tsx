@@ -1,89 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Scenario {
   desc: string
   choices: { label: string; type: 'good' | 'neutral' | 'bad' }[]
 }
-
-// ── Scénarios négo ────────────────────────────────────────────────────────────
-const NEGO_SCENARIOS: Scenario[] = [
-  {
-    desc: `Le marchand t'examine, bras croisés. "Ces prix sont standard. Tout le monde paie pareil ici."`,
-    choices: [
-      { label: `"Je cherche une relation long terme — ça vaut un effort mutuel."`, type: 'good' },
-      { label: `"Je veux juste savoir si vous avez de la marge."`, type: 'neutral' },
-      { label: `"C'est trop cher. Changez vos prix ou je repars."`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Il hésite. "J'ai d'autres acheteurs intéressés exactement par la même chose."`,
-    choices: [
-      { label: `"Mes contacts parleront de cette transaction. Votre réputation y gagne aussi."`, type: 'good' },
-      { label: `"Alors décidez vite — moi aussi j'ai d'autres options."`, type: 'neutral' },
-      { label: `"Vous bluffez. Personne d'autre ne paiera ce prix."`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Il te regarde droit dans les yeux. "Donnez-moi une bonne raison de vous faire un prix."`,
-    choices: [
-      { label: `"Cash, maintenant, sans paperasse ni vérifications. Propre et rapide."`, type: 'good' },
-      { label: `"Parce que les deux on y gagne, non ?"`, type: 'neutral' },
-      { label: `"Parce que vous avez besoin de vendre et je suis là."`, type: 'bad' },
-    ],
-  },
-]
-
-// ── Scénarios navigation ───────────────────────────────────────────────────────
-const NAV_SCENARIOS: Scenario[] = [
-  {
-    desc: `Un champ d'astéroïdes bloque la route directe. Les débris dérivent lentement — mais certains sont rapides.`,
-    choices: [
-      { label: `Réduire les moteurs et naviguer avec précision`, type: 'good' },
-      { label: `Contourner par le secteur nord (chemin plus long)`, type: 'neutral' },
-      { label: `Accélérer au maximum et passer en force`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Un vaisseau abandonné dérive sur ta trajectoire. Ses systèmes d'urgence clignotent encore.`,
-    choices: [
-      { label: `Ajuster la trajectoire, s'écarter doucement`, type: 'good' },
-      { label: `Envoyer un signal de reconnaissance avant de dévier`, type: 'neutral' },
-      { label: `Maintenir le cap — le vaisseau passera`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Un signal non identifié te suit depuis plusieurs minutes. Fréquence irrégulière — probablement un chasseur.`,
-    choices: [
-      { label: `Couper les émissions et se dissimuler dans les débris proches`, type: 'good' },
-      { label: `Envoyer une identification standard et continuer`, type: 'neutral' },
-      { label: `Ignorer et maintenir la vitesse`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Une tempête de particules solaires approche. Les capteurs indiquent une fenêtre de 90 secondes.`,
-    choices: [
-      { label: `Activer les boucliers frontaux et ralentir`, type: 'good' },
-      { label: `Virer à tribord — route plus longue mais sûre`, type: 'neutral' },
-      { label: `Accélérer pour passer avant le front`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Une patrouille militaire scanne le secteur. Ton cargo pourrait attirer l'attention.`,
-    choices: [
-      { label: `Couper les propulseurs et dériver lentement hors du cône de scan`, type: 'good' },
-      { label: `Répondre normalement à leur hail et espérer`, type: 'neutral' },
-      { label: `Accélérer pour sortir de la zone de scan`, type: 'bad' },
-    ],
-  },
-  {
-    desc: `Un tunnel de débris d'une ancienne bataille croise ta route. Métal tordu, plaques flottantes.`,
-    choices: [
-      { label: `Passer lentement, boucliers actifs, pleine attention`, type: 'good' },
-      { label: `Contourner — ça prend 20 minutes de plus`, type: 'neutral' },
-      { label: `Passer en vitesse — moins de temps dans la zone dangereuse`, type: 'bad' },
-    ],
-  },
-]
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type NegoProps = {
@@ -98,18 +19,29 @@ type NavProps = {
 
 // ── Composant ──────────────────────────────────────────────────────────────────
 export function ScenarioGame(props: NegoProps | NavProps) {
-  const pool = props.mode === 'navigation' ? NAV_SCENARIOS : NEGO_SCENARIOS
+  const { t } = useTranslation('scenarioGame')
+  const negoScenarios = t('negoScenarios', { returnObjects: true }) as unknown as Scenario[]
+  const navScenarios  = t('navScenarios', { returnObjects: true }) as unknown as Scenario[]
+  const pool = props.mode === 'navigation' ? navScenarios : negoScenarios
   const timerMax = props.mode === 'navigation' ? 12 : 7
 
-  const [scenarios] = useState<Scenario[]>(() =>
-    [...pool]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3)
-      .map(s => ({ ...s, choices: [...s.choices].sort(() => Math.random() - 0.5) }))
+  // On ne fige que des indices (stables quelle que soit la langue, la structure
+  // des tableaux traduits est identique fr/en) — jamais le texte lui-même, sinon
+  // un changement de langue en cours de mini-jeu resterait figé dans l'ancienne.
+  const [pickedIdx] = useState<number[]>(() =>
+    pool.map((_, i) => i).sort(() => Math.random() - 0.5).slice(0, 3)
   )
+  const [choiceOrders] = useState<number[][]>(() =>
+    pickedIdx.map(pIdx => pool[pIdx].choices.map((_, i) => i).sort(() => Math.random() - 0.5))
+  )
+  const scenarios: Scenario[] = pickedIdx.map((pIdx, i) => ({
+    desc: pool[pIdx].desc,
+    choices: choiceOrders[i].map(cIdx => pool[pIdx].choices[cIdx]),
+  }))
   const [idx, setIdx]           = useState(0)
   const [timeLeft, setTimeLeft] = useState(timerMax)
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [feedbackType, setFeedbackType] = useState<'good' | 'neutral' | 'bad'>('neutral')
   const [phase, setPhase]       = useState<'playing' | 'done'>('playing')
   const [dmgSoFar, setDmgSoFar] = useState(0)
   const [displayMult, setDisplayMult] = useState(1.0)
@@ -141,9 +73,10 @@ export function ScenarioGame(props: NegoProps | NavProps) {
       const badCount = perfRef.current.filter(p => p === 'bad').length
       if (badCount >= 2) {
         setFeedback(msg)
+        setFeedbackType(type)
         setTimeout(() => {
           setPhase('done')
-          ;(props as NegoProps).onResult(0, 'ÉCHEC')
+          ;(props as NegoProps).onResult(0, t('resultLabels.fail'))
         }, 900)
         return
       }
@@ -154,6 +87,7 @@ export function ScenarioGame(props: NegoProps | NavProps) {
     }
 
     setFeedback(msg)
+    setFeedbackType(type)
     setTimeout(() => {
       setFeedback(null)
       if (perfRef.current.length >= scenarios.length) {
@@ -164,7 +98,7 @@ export function ScenarioGame(props: NegoProps | NavProps) {
         } else {
           const earned   = Math.floor((props as NegoProps).baseCredits * multRef.current)
           const goodCnt  = perfRef.current.filter(p => p === 'good').length
-          const lbl      = goodCnt >= 2 ? 'EXCELLENT' : goodCnt >= 1 ? 'BON' : 'MÉDIOCRE'
+          const lbl      = goodCnt >= 2 ? t('resultLabels.excellent') : goodCnt >= 1 ? t('resultLabels.good') : t('resultLabels.mediocre')
           props.onResult(earned, lbl)
         }
       } else {
@@ -181,9 +115,7 @@ export function ScenarioGame(props: NegoProps | NavProps) {
     intervalRef.current = setInterval(() => setTimeLeft(t => Math.max(0, t - 1)), 1000)
     timeoutRef.current = setTimeout(() => {
       if (activeRef.current) {
-        const timeoutMsg = props.mode === 'navigation'
-          ? 'Trop lent — le vaisseau encaisse.'
-          : 'Temps écoulé — tu hésites trop. Il perd patience.'
+        const timeoutMsg = props.mode === 'navigation' ? t('timeoutNav') : t('timeoutNego')
         applyChoice('bad', timeoutMsg)
       }
     }, timerMax * 1000)
@@ -197,20 +129,20 @@ export function ScenarioGame(props: NegoProps | NavProps) {
   const accentColor = isNav ? 'var(--orange)' : 'var(--cyan)'
 
   const MSGS: Record<'good' | 'neutral' | 'bad', string> = isNav
-    ? { good: 'Manœuvre réussie. Aucun dommage.', neutral: 'Chemin alternatif — résultat acceptable. -5 PV vaisseau.', bad: 'Impact. Le vaisseau tremble. -13 PV vaisseau.' }
-    : { good: 'Bonne approche. Il hoche la tête lentement.', neutral: 'Réponse correcte. Il reste sur la réserve.', bad: 'Mauvaise approche. Il se raidit visiblement.' }
+    ? { good: t('navMsgs.good'), neutral: t('navMsgs.neutral'), bad: t('navMsgs.bad') }
+    : { good: t('negoMsgs.good'), neutral: t('negoMsgs.neutral'), bad: t('negoMsgs.bad') }
 
   return (
     <div className="layout">
       <div className="t-xs t-dim t-center">
-        {isNav ? '— NAVIGATION DANGEREUSE —' : '— MINI-JEU : NÉGOCIATION —'}
+        {isNav ? t('navHeader') : t('negoHeader')}
       </div>
       <div className="px-box" style={{ borderColor: accentColor }}>
         <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div className="t-xs t-dim">Situation {idx + 1}/3</div>
+          <div className="t-xs t-dim">{t('situation', { current: idx + 1 })}</div>
           <div className="t-xs" style={{ color: timeLeft <= 2 ? 'var(--red)' : accentColor }}>⏱ {timeLeft}s</div>
           {isNav
-            ? <div className="t-xs t-red">Dégâts vaisseau : -{dmgSoFar} PV</div>
+            ? <div className="t-xs t-red">{t('shipDamage', { value: dmgSoFar })}</div>
             : <div className="t-xs" style={{ color: accentColor }}>×{displayMult.toFixed(1)}</div>
           }
         </div>
@@ -229,8 +161,7 @@ export function ScenarioGame(props: NegoProps | NavProps) {
         </div>
         {feedback
           ? <div className="t-xs" style={{
-              color: (feedback.includes('Trop lent') || feedback.includes('Impact') || feedback.includes('perd patience') || feedback.includes('Mauvaise'))
-                ? 'var(--red)' : 'var(--green)',
+              color: feedbackType === 'bad' ? 'var(--red)' : 'var(--green)',
               lineHeight: '2',
             }}>{feedback}</div>
           : <div className="col gap4">
@@ -244,8 +175,8 @@ export function ScenarioGame(props: NegoProps | NavProps) {
       </div>
       <div className="t-xs t-dim">
         {isNav
-          ? '3 bonnes manœuvres = +500 cr · 2 bonnes = +200 cr · sinon rien'
-          : `Base : ${(props as NegoProps).baseCredits.toLocaleString()} cr · ×${displayMult.toFixed(1)} → ${Math.floor((props as NegoProps).baseCredits * displayMult).toLocaleString()} cr · 2 erreurs = échec`
+          ? t('navFooter')
+          : t('negoFooter', { base: (props as NegoProps).baseCredits.toLocaleString(), mult: displayMult.toFixed(1), result: Math.floor((props as NegoProps).baseCredits * displayMult).toLocaleString() })
         }
       </div>
     </div>

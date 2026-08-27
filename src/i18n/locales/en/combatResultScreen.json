@@ -1,0 +1,31 @@
+{
+  "cannibal": {
+    "title": "CANNIBAL",
+    "line1": "You tasted it.",
+    "line2": "There's a line no one crosses the same way twice.",
+    "line3": "You just crossed it.",
+    "line4": "Your body remembers.",
+    "line5": "Your mind does too — differently.",
+    "line6": "Your life will never be the same.",
+    "footer": "The hunger will come back. It always does."
+  },
+  "continueArrow": "Continue →",
+  "victoryHeader": "— VICTORY —",
+  "bossKilled": "★ BOSS ELIMINATED",
+  "enemyDefeated": "◆ ENEMY DEFEATED",
+  "loot": "LOOT",
+  "creditsRecovered": "Credits recovered",
+  "reputation": "Reputation",
+  "weaponFound": "Weapon found",
+  "armorFound": "Armor found",
+  "currentStatus": "CURRENT STATUS",
+  "hp": "HP",
+  "credits": "Credits",
+  "madness": "Madness",
+  "cannibalPrompt": "{{name}} is down. Something in you — something very old — notices you're hungry.",
+  "tasteButton": "Taste {{name}}",
+  "hungerPrompt": "The hunger is here. {{name}} is here.",
+  "consumeButton": "Consume (−50 madness)",
+  "ok": "OK",
+  "backToCell": "Back to cell →"
+}

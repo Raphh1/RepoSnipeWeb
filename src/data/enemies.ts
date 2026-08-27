@@ -1,180 +1,191 @@
 import type { Enemy } from '../types'
+import i18n from '../i18n/config'
 
-export const TIER_LOW: Enemy[] = [
-  { name: 'Pickpocket désespéré',     maxHp: 20, damageMin: 3,  damageMax: 8,  lootMin: 50,  lootMax: 180, description: 'Un gamin avec un couteau rouillé.',                  captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
-  { name: 'Ivrogne agressif',         maxHp: 25, damageMin: 2,  damageMax: 7,  lootMin: 40,  lootMax: 120, description: 'Il sent le carburant frelaté.',                      captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
-  { name: 'Garde corrompu',           maxHp: 35, damageMin: 5,  damageMax: 12, lootMin: 120,  lootMax: 360, description: 'Il a oublié pour qui il travaille.',                 captureChance: 25, killChance: 10, isBoss: false, role: 'normal' },
-  { name: 'Vagabond armé',            maxHp: 30, damageMin: 4,  damageMax: 10, lootMin: 60,  lootMax: 240, description: 'Il veut juste survivre.',                            captureChance: 20, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Scavenger opportuniste',   maxHp: 28, damageMin: 4,  damageMax: 11, lootMin: 90,  lootMax: 300, description: 'Il récupère des armes dans des épaves.',             captureChance: 20, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Milicien de pacotille',    maxHp: 32, damageMin: 4,  damageMax: 10, lootMin: 70,  lootMax: 270, description: 'Mal entraîné, mal équipé, dangereux quand même.',   captureChance: 30, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Chasseur de primes novice',maxHp: 38, damageMin: 5,  damageMax: 13, lootMin: 110,  lootMax: 330, description: 'Ta tête vaut quelque chose apparemment.',           captureChance: 35, killChance: 10, isBoss: false, role: 'normal' },
-  { name: 'Gamin de la zone',         maxHp: 18, damageMin: 2,  damageMax: 6,  lootMin: 20,  lootMax: 110, description: 'Douze ans et une brique de métal. Dangereux.',       captureChance: 10, killChance: 3,  isBoss: false, role: 'normal' },
-  { name: 'Ouvrier en colère',        maxHp: 40, damageMin: 5,  damageMax: 11, lootMin: 50,  lootMax: 210, description: 'Il n\'a pas été payé. C\'est toi le fautif.',        captureChance: 25, killChance: 5,  isBoss: false, role: 'normal' },
-  { name: 'Mendiant armé',            maxHp: 22, damageMin: 3,  damageMax: 8,  lootMin: 20,  lootMax: 100, description: 'Il a trouvé un couteau dans une poubelle.',          captureChance: 15, killChance: 4,  isBoss: false, role: 'normal' },
-  { name: 'Pilote raté',              maxHp: 28, damageMin: 3,  damageMax: 9,  lootMin: 60,  lootMax: 240, description: 'Son vaisseau est détruit. Il te tient responsable.', captureChance: 20, killChance: 7,  isBoss: false, role: 'normal' },
-  { name: 'Toxicomane sous injection',maxHp: 15, damageMin: 4,  damageMax: 14, lootMin: 30,  lootMax: 150, description: 'Imprévisible. Les drogues lui donnent de la force.',  captureChance: 10, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Rat de cargaison',         maxHp: 24, damageMin: 2,  damageMax: 7,  lootMin: 40,  lootMax: 180, description: 'Il vivait dans tes soutes depuis des semaines.',      captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
-  { name: 'Sous-officier véreux',     maxHp: 36, damageMin: 6,  damageMax: 12, lootMin: 120,  lootMax: 360, description: 'Militaire mi-retraité, mi-criminel.',                captureChance: 30, killChance: 10, isBoss: false, role: 'normal' },
-  { name: 'Fuyarde paniquée',         maxHp: 20, damageMin: 3,  damageMax: 9,  lootMin: 50,  lootMax: 180, description: 'Elle fuit quelque chose de pire que toi.',          captureChance: 15, killChance: 3,  isBoss: false, role: 'normal' },
-  { name: 'Réparateur jaloux',        maxHp: 33, damageMin: 4,  damageMax: 10, lootMin: 70,  lootMax: 250, description: 'Tu as acheté son pièce rare. Il le veut en retour.',  captureChance: 20, killChance: 6,  isBoss: false, role: 'normal' },
-  { name: 'Drogué au Synth',          maxHp: 26, damageMin: 5,  damageMax: 15, lootMin: 40,  lootMax: 130, description: 'Le Synth coupe la douleur. Et la raison.',           captureChance: 10, killChance: 9,  isBoss: false, role: 'normal' },
-  { name: 'Éclaireur Faucon',         maxHp: 32, damageMin: 4,  damageMax: 11, lootMin: 90,  lootMax: 300, description: 'Recrue des Faucons Noirs. Rapide, peu fiable, zélée.',  captureChance: 20, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Recrue Gardienne',         maxHp: 35, damageMin: 5,  damageMax: 11, lootMin: 80,  lootMax: 290, description: 'Première patrouille Gardienne. Elle est nerveuse.',      captureChance: 25, killChance: 7,  isBoss: false, role: 'normal' },
-  { name: 'Vigile Emporium',          maxHp: 30, damageMin: 3,  damageMax: 10, lootMin: 70,  lootMax: 250, description: 'Vigile sous-payé de l\'Emporium. Agressif par frustration.', captureChance: 25, killChance: 6, isBoss: false, role: 'normal' },
-  { name: 'Mineur agressif',          maxHp: 42, damageMin: 5,  damageMax: 12, lootMin: 60,  lootMax: 230, description: 'Les galeries l\'ont rendu brutal.',                      captureChance: 20, killChance: 8,  isBoss: false, role: 'tank'   },
-  { name: 'Survivant des ruines',     maxHp: 26, damageMin: 4,  damageMax: 11, lootMin: 50,  lootMax: 190, description: 'Il ne reste rien de la station. Juste lui.',             captureChance: 15, killChance: 9,  isBoss: false, role: 'normal' },
-  { name: 'Déserteur en errance',     maxHp: 35, damageMin: 5,  damageMax: 12, lootMin: 80,  lootMax: 270, description: 'Il a abandonné sa faction. Maintenant il se bat pour manger.', captureChance: 15, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Junkie aux implants',      maxHp: 28, damageMin: 6,  damageMax: 16, lootMin: 50,  lootMax: 180, description: 'Des implants bon marché mal intégrés. Il souffre et ça le rend imprévisible.', captureChance: 10, killChance: 12, isBoss: false, role: 'normal' },
-  { name: 'Messager intercepté',      maxHp: 24, damageMin: 3,  damageMax: 8,  lootMin: 90,  lootMax: 300, description: 'Il transportait quelque chose. Il défend sa mission jusqu\'à la fin.', captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
-  { name: 'Récupérateur de dettes',   maxHp: 38, damageMin: 6,  damageMax: 14, lootMin: 120,  lootMax: 360, description: 'Quelqu\'un lui a envoyé récupérer ce que tu lui dois. Ou ce qu\'il croit que tu lui dois.', captureChance: 30, killChance: 8, isBoss: false, role: 'normal' },
-  { name: 'Contrebandier junior',     maxHp: 30, damageMin: 4,  damageMax: 10, lootMin: 70,  lootMax: 240, description: 'Première livraison, premier problème. Lui comme toi.', captureChance: 20, killChance: 7, isBoss: false, role: 'normal' },
-  { name: 'Garde-frontière véreux',   maxHp: 36, damageMin: 5,  damageMax: 12, lootMin: 110,  lootMax: 330, description: 'Il contrôle un passage. Il taxe tout ce qui passe.', captureChance: 25, killChance: 9,  isBoss: false, role: 'normal' },
-  { name: 'Pilote sabordé',           maxHp: 28, damageMin: 4,  damageMax: 10, lootMin: 60,  lootMax: 230, description: 'Son vaisseau a coulé. Il a tout perdu. Il veut récupérer quelque chose.', captureChance: 18, killChance: 7, isBoss: false, role: 'normal' },
-  { name: 'Enfant soldat recyclé',    maxHp: 22, damageMin: 5,  damageMax: 14, lootMin: 40,  lootMax: 130, description: 'Il avait dix ans quand la guerre a commencé. Dix ans de formation depuis.', captureChance: 10, killChance: 10, isBoss: false, role: 'normal' },
-  { name: 'Garde pénitentiaire rogue',maxHp: 40, damageMin: 5,  damageMax: 13, lootMin: 100,  lootMax: 300, description: 'Les prisons ferment. Les gardiens restent armés.', captureChance: 25, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Chasseur de tête local',   maxHp: 34, damageMin: 6,  damageMax: 14, lootMin: 120,  lootMax: 360, description: 'Il opère dans son coin. Efficace sur son territoire.', captureChance: 20, killChance: 10, isBoss: false, role: 'normal' },
-  { name: 'Soldat de faction blessé', maxHp: 32, damageMin: 4,  damageMax: 11, lootMin: 80,  lootMax: 270, description: 'Blessé au combat, pas assez pour arrêter.', captureChance: 20, killChance: 7,  isBoss: false, role: 'normal' },
+const en = (key: string) => i18n.t(key, { ns: 'enemies' })
+
+export function getTierLow(): Enemy[] {
+  return [
+  { name: 'Pickpocket désespéré',     maxHp: 20, damageMin: 3,  damageMax: 8,  lootMin: 50,  lootMax: 180, description: en('lowTier.pickpocketDesespere'),                  captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
+  { name: 'Ivrogne agressif',         maxHp: 25, damageMin: 2,  damageMax: 7,  lootMin: 40,  lootMax: 120, description: en('lowTier.ivrogneAgressif'),                      captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
+  { name: 'Garde corrompu',           maxHp: 35, damageMin: 5,  damageMax: 12, lootMin: 120,  lootMax: 360, description: en('lowTier.gardeCorrompu'),                 captureChance: 25, killChance: 10, isBoss: false, role: 'normal' },
+  { name: 'Vagabond armé',            maxHp: 30, damageMin: 4,  damageMax: 10, lootMin: 60,  lootMax: 240, description: en('lowTier.vagabondArme'),                            captureChance: 20, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Scavenger opportuniste',   maxHp: 28, damageMin: 4,  damageMax: 11, lootMin: 90,  lootMax: 300, description: en('lowTier.scavengerOpportuniste'),             captureChance: 20, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Milicien de pacotille',    maxHp: 32, damageMin: 4,  damageMax: 10, lootMin: 70,  lootMax: 270, description: en('lowTier.milicienDePacotille'),   captureChance: 30, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Chasseur de primes novice',maxHp: 38, damageMin: 5,  damageMax: 13, lootMin: 110,  lootMax: 330, description: en('lowTier.chasseurDePrimesNovice'),           captureChance: 35, killChance: 10, isBoss: false, role: 'normal' },
+  { name: 'Gamin de la zone',         maxHp: 18, damageMin: 2,  damageMax: 6,  lootMin: 20,  lootMax: 110, description: en('lowTier.gaminDeLaZone'),       captureChance: 10, killChance: 3,  isBoss: false, role: 'normal' },
+  { name: 'Ouvrier en colère',        maxHp: 40, damageMin: 5,  damageMax: 11, lootMin: 50,  lootMax: 210, description: en('lowTier.ouvrierEnColere'),        captureChance: 25, killChance: 5,  isBoss: false, role: 'normal' },
+  { name: 'Mendiant armé',            maxHp: 22, damageMin: 3,  damageMax: 8,  lootMin: 20,  lootMax: 100, description: en('lowTier.mendiantArme'),          captureChance: 15, killChance: 4,  isBoss: false, role: 'normal' },
+  { name: 'Pilote raté',              maxHp: 28, damageMin: 3,  damageMax: 9,  lootMin: 60,  lootMax: 240, description: en('lowTier.piloteRate'), captureChance: 20, killChance: 7,  isBoss: false, role: 'normal' },
+  { name: 'Toxicomane sous injection',maxHp: 15, damageMin: 4,  damageMax: 14, lootMin: 30,  lootMax: 150, description: en('lowTier.toxicomaneSousInjection'),  captureChance: 10, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Rat de cargaison',         maxHp: 24, damageMin: 2,  damageMax: 7,  lootMin: 40,  lootMax: 180, description: en('lowTier.ratDeCargaison'),      captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
+  { name: 'Sous-officier véreux',     maxHp: 36, damageMin: 6,  damageMax: 12, lootMin: 120,  lootMax: 360, description: en('lowTier.sousOfficierVereux'),                captureChance: 30, killChance: 10, isBoss: false, role: 'normal' },
+  { name: 'Fuyarde paniquée',         maxHp: 20, damageMin: 3,  damageMax: 9,  lootMin: 50,  lootMax: 180, description: en('lowTier.fuyardePaniquee'),          captureChance: 15, killChance: 3,  isBoss: false, role: 'normal' },
+  { name: 'Réparateur jaloux',        maxHp: 33, damageMin: 4,  damageMax: 10, lootMin: 70,  lootMax: 250, description: en('lowTier.reparateurJaloux'),  captureChance: 20, killChance: 6,  isBoss: false, role: 'normal' },
+  { name: 'Drogué au Synth',          maxHp: 26, damageMin: 5,  damageMax: 15, lootMin: 40,  lootMax: 130, description: en('lowTier.drogueAuSynth'),           captureChance: 10, killChance: 9,  isBoss: false, role: 'normal' },
+  { name: 'Éclaireur Faucon',         maxHp: 32, damageMin: 4,  damageMax: 11, lootMin: 90,  lootMax: 300, description: en('lowTier.eclaireurFaucon'),  captureChance: 20, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Recrue Gardienne',         maxHp: 35, damageMin: 5,  damageMax: 11, lootMin: 80,  lootMax: 290, description: en('lowTier.recrueGardienne'),      captureChance: 25, killChance: 7,  isBoss: false, role: 'normal' },
+  { name: 'Vigile Emporium',          maxHp: 30, damageMin: 3,  damageMax: 10, lootMin: 70,  lootMax: 250, description: en('lowTier.vigileEmporium'), captureChance: 25, killChance: 6, isBoss: false, role: 'normal' },
+  { name: 'Mineur agressif',          maxHp: 42, damageMin: 5,  damageMax: 12, lootMin: 60,  lootMax: 230, description: en('lowTier.mineurAgressif'),                      captureChance: 20, killChance: 8,  isBoss: false, role: 'tank'   },
+  { name: 'Survivant des ruines',     maxHp: 26, damageMin: 4,  damageMax: 11, lootMin: 50,  lootMax: 190, description: en('lowTier.survivantDesRuines'),             captureChance: 15, killChance: 9,  isBoss: false, role: 'normal' },
+  { name: 'Déserteur en errance',     maxHp: 35, damageMin: 5,  damageMax: 12, lootMin: 80,  lootMax: 270, description: en('lowTier.deserteurEnErrance'), captureChance: 15, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Junkie aux implants',      maxHp: 28, damageMin: 6,  damageMax: 16, lootMin: 50,  lootMax: 180, description: en('lowTier.junkieAuxImplants'), captureChance: 10, killChance: 12, isBoss: false, role: 'normal' },
+  { name: 'Messager intercepté',      maxHp: 24, damageMin: 3,  damageMax: 8,  lootMin: 90,  lootMax: 300, description: en('lowTier.messagerIntercepte'), captureChance: 20, killChance: 5,  isBoss: false, role: 'normal' },
+  { name: 'Récupérateur de dettes',   maxHp: 38, damageMin: 6,  damageMax: 14, lootMin: 120,  lootMax: 360, description: en('lowTier.recuperateurDeDettes'), captureChance: 30, killChance: 8, isBoss: false, role: 'normal' },
+  { name: 'Contrebandier junior',     maxHp: 30, damageMin: 4,  damageMax: 10, lootMin: 70,  lootMax: 240, description: en('lowTier.contrebandierJunior'), captureChance: 20, killChance: 7, isBoss: false, role: 'normal' },
+  { name: 'Garde-frontière véreux',   maxHp: 36, damageMin: 5,  damageMax: 12, lootMin: 110,  lootMax: 330, description: en('lowTier.gardeFrontiereVereux'), captureChance: 25, killChance: 9,  isBoss: false, role: 'normal' },
+  { name: 'Pilote sabordé',           maxHp: 28, damageMin: 4,  damageMax: 10, lootMin: 60,  lootMax: 230, description: en('lowTier.piloteSaborde'), captureChance: 18, killChance: 7, isBoss: false, role: 'normal' },
+  { name: 'Enfant soldat recyclé',    maxHp: 22, damageMin: 5,  damageMax: 14, lootMin: 40,  lootMax: 130, description: en('lowTier.enfantSoldatRecycle'), captureChance: 10, killChance: 10, isBoss: false, role: 'normal' },
+  { name: 'Garde pénitentiaire rogue',maxHp: 40, damageMin: 5,  damageMax: 13, lootMin: 100,  lootMax: 300, description: en('lowTier.gardePenitentiaireRogue'), captureChance: 25, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Chasseur de tête local',   maxHp: 34, damageMin: 6,  damageMax: 14, lootMin: 120,  lootMax: 360, description: en('lowTier.chasseurDeTeteLocal'), captureChance: 20, killChance: 10, isBoss: false, role: 'normal' },
+  { name: 'Soldat de faction blessé', maxHp: 32, damageMin: 4,  damageMax: 11, lootMin: 80,  lootMax: 270, description: en('lowTier.soldatDeFactionBlesse'), captureChance: 20, killChance: 7,  isBoss: false, role: 'normal' },
 ]
+}
 
-export const TIER_MID: Enemy[] = [
-  { name: 'Pirate solitaire',          maxHp: 50, damageMin: 8,  damageMax: 18, lootMin: 240,  lootMax: 540,  description: 'Freelance du crime. Expérimenté.',              captureChance: 25, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Mercenaire bas de gamme',   maxHp: 55, damageMin: 9,  damageMax: 20, lootMin: 300,  lootMax: 600, description: 'Payé pour te faire mal.',                      captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Contrebandier défensif',    maxHp: 45, damageMin: 7,  damageMax: 16, lootMin: 210,  lootMax: 480,  description: 'Il transporte quelque chose d\'illégal.',       captureChance: 20, killChance: 15, isBoss: false, role: 'normal' },
-  { name: 'Chasseur de primes',        maxHp: 60, damageMin: 10, damageMax: 22, lootMin: 360,  lootMax: 720, description: 'Il a ta tête dans sa liste.',                  captureChance: 35, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Gang de rue spatial',       maxHp: 65, damageMin: 8,  damageMax: 19, lootMin: 270,  lootMax: 570,  description: 'Trois contre un.',                             captureChance: 20, killChance: 18, isBoss: false, role: 'normal' },
-  { name: 'Déserteur armé',            maxHp: 58, damageMin: 9,  damageMax: 21, lootMin: 290,  lootMax: 600, description: 'Il a trahi sa faction. Rien à perdre.',        captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Assassin de bas étage',     maxHp: 48, damageMin: 12, damageMax: 25, lootMin: 330,  lootMax: 660, description: 'Rapide. Dangereux. Pas cher.',                 captureChance: 10, killChance: 30, isBoss: false, role: 'normal' },
-  { name: 'Pirate reconverti',         maxHp: 52, damageMin: 8,  damageMax: 17, lootMin: 240,  lootMax: 510,  description: 'Il dit qu\'il est dans le commerce légal.',     captureChance: 25, killChance: 15, isBoss: false, role: 'normal' },
-  { name: 'Officier renégat',          maxHp: 70, damageMin: 11, damageMax: 23, lootMin: 360,  lootMax: 780, description: 'Jadis respecté. Aujourd\'hui, juste dangereux.',captureChance: 20, killChance: 22, isBoss: false, role: 'normal' },
-  { name: 'Trafiquant d\'organes',     maxHp: 55, damageMin: 9,  damageMax: 20, lootMin: 420,  lootMax: 900, description: 'Il est intéressé par ce que tu as à l\'intérieur.', captureChance: 30, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Tireur embusqué',           maxHp: 42, damageMin: 13, damageMax: 28, lootMin: 300,  lootMax: 600, description: 'Il t\'attendait.',                             captureChance: 10, killChance: 30, isBoss: false, role: 'ranged' },
-  { name: 'Sergent des bas-fonds',     maxHp: 75, damageMin: 10, damageMax: 20, lootMin: 330,  lootMax: 660, description: 'Il dirige son quartier à la force du poing.',  captureChance: 25, killChance: 18, isBoss: false, role: 'tank' },
-  { name: 'Hacker de rue',             maxHp: 44, damageMin: 7,  damageMax: 15, lootMin: 270,  lootMax: 540,  description: 'Il a saboté ton équipement avant que tu t\'en rendes compte.', captureChance: 20, killChance: 15, isBoss: false, role: 'ranged' },
-  { name: 'Dresseur de bêtes mutantes',maxHp: 62, damageMin: 10, damageMax: 22, lootMin: 300,  lootMax: 600, description: 'Sa créature mord. Lui aussi.',                captureChance: 15, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Caïd de station',           maxHp: 68, damageMin: 9,  damageMax: 19, lootMin: 360,  lootMax: 720, description: 'Il taxe tout le monde sur cette station. Même toi maintenant.', captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Agent double',              maxHp: 50, damageMin: 10, damageMax: 22, lootMin: 390,  lootMax: 840, description: 'Il travaille pour trois factions. Aucune ne le sait encore.', captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Gladiateur sans contrat',   maxHp: 80, damageMin: 12, damageMax: 24, lootMin: 300,  lootMax: 600, description: 'Il se bat pour survivre. Plus aucune arène ne le veut.',       captureChance: 10, killChance: 20, isBoss: false, role: 'tank' },
-  { name: 'Agent Faucon infiltré',     maxHp: 52, damageMin: 10, damageMax: 22, lootMin: 330,  lootMax: 660, description: 'Opérateur des Faucons en couverture. Il a des ordres.',          captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Soldat Gardien Écarlate',   maxHp: 68, damageMin: 9,  damageMax: 20, lootMin: 300,  lootMax: 630, description: 'Combattant des Gardiens Écarlates. Discipliné, efficace.',       captureChance: 25, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Garde Emporium armé',       maxHp: 60, damageMin: 11, damageMax: 23, lootMin: 360,  lootMax: 720, description: 'Sécurité haut de gamme. Payé pour tuer proprement.',             captureChance: 30, killChance: 18, isBoss: false, role: 'normal' },
-  { name: 'Scavenger vétéran',         maxHp: 55, damageMin: 8,  damageMax: 19, lootMin: 290,  lootMax: 600, description: 'Des années dans les épaves. Il connaît les angles morts.',      captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Mercenaire des ruines',     maxHp: 62, damageMin: 10, damageMax: 22, lootMin: 310,  lootMax: 630, description: 'Il squatte les stations mortes. Pas pour de la philosophie.',   captureChance: 20, killChance: 22, isBoss: false, role: 'normal' },
-  { name: 'Chasseur de reliques',      maxHp: 58, damageMin: 9,  damageMax: 20, lootMin: 330,  lootMax: 660, description: 'Les ruines l\'intéressent. Et toi tu l\'intéresses aussi.',          captureChance: 15, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Vétéran de la Purge',       maxHp: 72, damageMin: 12, damageMax: 24, lootMin: 360,  lootMax: 720, description: 'Il a survécu à une purge. Il n\'a pas de morale à perdre.',           captureChance: 10, killChance: 28, isBoss: false, role: 'normal' },
-  { name: 'Technomercenaire',          maxHp: 52, damageMin: 10, damageMax: 22, lootMin: 300,  lootMax: 630, description: 'Il te sabote avant même de dégainer. Ses gadgets font le gros du travail.', captureChance: 15, killChance: 22, isBoss: false, role: 'ranged' },
-  { name: 'Recéleur défensif',         maxHp: 45, damageMin: 8,  damageMax: 17, lootMin: 360,  lootMax: 780, description: 'Son stock vaut plus que sa vie. Il en est parfaitement conscient.',   captureChance: 25, killChance: 15, isBoss: false, role: 'normal' },
-  { name: 'Soldat de fortune Faucon',  maxHp: 65, damageMin: 11, damageMax: 22, lootMin: 310,  lootMax: 630, description: 'Pas un Faucon officiel. Équipé et payé comme un.',                     captureChance: 15, killChance: 22, isBoss: false, role: 'normal' },
-  { name: 'Ingénieur de sabotage',     maxHp: 55, damageMin: 10, damageMax: 22, lootMin: 310,  lootMax: 630, description: 'Il te neutralise avant de combattre. Les gadgets font le gros du travail.', captureChance: 15, killChance: 20, isBoss: false, role: 'ranged' },
-  { name: 'Trafiquant en réseau',      maxHp: 50, damageMin: 9,  damageMax: 19, lootMin: 360,  lootMax: 750, description: 'Ses connexions le rendent plus dangereux que son équipement.', captureChance: 20, killChance: 18, isBoss: false, role: 'normal' },
-  { name: 'Espion retourné',           maxHp: 52, damageMin: 10, damageMax: 21, lootMin: 350,  lootMax: 690, description: 'Il a changé de camp trop de fois. Il ne sait plus qui il est vraiment.', captureChance: 15, killChance: 22, isBoss: false, role: 'normal' },
-  { name: 'Commandant de milice',      maxHp: 70, damageMin: 11, damageMax: 23, lootMin: 360,  lootMax: 720, description: 'Il règne sur son quartier depuis dix ans. Il n\'a pas l\'intention de changer.', captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Chasseur mutant',           maxHp: 65, damageMin: 13, damageMax: 26, lootMin: 290,  lootMax: 590,  description: 'Il a cessé d\'être humain par étapes. L\'instinct de chasse a survécu.', captureChance: 10, killChance: 28, isBoss: false, role: 'normal' },
-  { name: 'Artilleur de section',      maxHp: 60, damageMin: 12, damageMax: 25, lootMin: 330,  lootMax: 660, description: 'Il avait une section. Maintenant il a juste son arme.', captureChance: 15, killChance: 25, isBoss: false, role: 'ranged' },
+export function getTierMid(): Enemy[] {
+  return [
+  { name: 'Pirate solitaire',          maxHp: 50, damageMin: 8,  damageMax: 18, lootMin: 240,  lootMax: 540,  description: en('midTier.pirateSolitaire'),              captureChance: 25, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Mercenaire bas de gamme',   maxHp: 55, damageMin: 9,  damageMax: 20, lootMin: 300,  lootMax: 600, description: en('midTier.mercenaireBasDeGamme'),                      captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Contrebandier défensif',    maxHp: 45, damageMin: 7,  damageMax: 16, lootMin: 210,  lootMax: 480,  description: en('midTier.contrebandierDefensif'),       captureChance: 20, killChance: 15, isBoss: false, role: 'normal' },
+  { name: 'Chasseur de primes',        maxHp: 60, damageMin: 10, damageMax: 22, lootMin: 360,  lootMax: 720, description: en('midTier.chasseurDePrimes'),                  captureChance: 35, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Gang de rue spatial',       maxHp: 65, damageMin: 8,  damageMax: 19, lootMin: 270,  lootMax: 570,  description: en('midTier.gangDeRueSpatial'),                             captureChance: 20, killChance: 18, isBoss: false, role: 'normal' },
+  { name: 'Déserteur armé',            maxHp: 58, damageMin: 9,  damageMax: 21, lootMin: 290,  lootMax: 600, description: en('midTier.deserteurArme'),        captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Assassin de bas étage',     maxHp: 48, damageMin: 12, damageMax: 25, lootMin: 330,  lootMax: 660, description: en('midTier.assassinDeBasEtage'),                 captureChance: 10, killChance: 30, isBoss: false, role: 'normal' },
+  { name: 'Pirate reconverti',         maxHp: 52, damageMin: 8,  damageMax: 17, lootMin: 240,  lootMax: 510,  description: en('midTier.pirateReconverti'),     captureChance: 25, killChance: 15, isBoss: false, role: 'normal' },
+  { name: 'Officier renégat',          maxHp: 70, damageMin: 11, damageMax: 23, lootMin: 360,  lootMax: 780, description: en('midTier.officierRenegat'),captureChance: 20, killChance: 22, isBoss: false, role: 'normal' },
+  { name: 'Trafiquant d\'organes',     maxHp: 55, damageMin: 9,  damageMax: 20, lootMin: 420,  lootMax: 900, description: en('midTier.trafiquantDOrganes'), captureChance: 30, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Tireur embusqué',           maxHp: 42, damageMin: 13, damageMax: 28, lootMin: 300,  lootMax: 600, description: en('midTier.tireurEmbusque'),                             captureChance: 10, killChance: 30, isBoss: false, role: 'ranged' },
+  { name: 'Sergent des bas-fonds',     maxHp: 75, damageMin: 10, damageMax: 20, lootMin: 330,  lootMax: 660, description: en('midTier.sergentDesBasFonds'),  captureChance: 25, killChance: 18, isBoss: false, role: 'tank' },
+  { name: 'Hacker de rue',             maxHp: 44, damageMin: 7,  damageMax: 15, lootMin: 270,  lootMax: 540,  description: en('midTier.hackerDeRue'), captureChance: 20, killChance: 15, isBoss: false, role: 'ranged' },
+  { name: 'Dresseur de bêtes mutantes',maxHp: 62, damageMin: 10, damageMax: 22, lootMin: 300,  lootMax: 600, description: en('midTier.dresseurDeBetesMutantes'),                captureChance: 15, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Caïd de station',           maxHp: 68, damageMin: 9,  damageMax: 19, lootMin: 360,  lootMax: 720, description: en('midTier.caidDeStation'), captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Agent double',              maxHp: 50, damageMin: 10, damageMax: 22, lootMin: 390,  lootMax: 840, description: en('midTier.agentDouble'), captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Gladiateur sans contrat',   maxHp: 80, damageMin: 12, damageMax: 24, lootMin: 300,  lootMax: 600, description: en('midTier.gladiateurSansContrat'),       captureChance: 10, killChance: 20, isBoss: false, role: 'tank' },
+  { name: 'Agent Faucon infiltré',     maxHp: 52, damageMin: 10, damageMax: 22, lootMin: 330,  lootMax: 660, description: en('midTier.agentFauconInfiltre'),          captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Soldat Gardien Écarlate',   maxHp: 68, damageMin: 9,  damageMax: 20, lootMin: 300,  lootMax: 630, description: en('midTier.soldatGardienEcarlate'),       captureChance: 25, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Garde Emporium armé',       maxHp: 60, damageMin: 11, damageMax: 23, lootMin: 360,  lootMax: 720, description: en('midTier.gardeEmporiumArme'),             captureChance: 30, killChance: 18, isBoss: false, role: 'normal' },
+  { name: 'Scavenger vétéran',         maxHp: 55, damageMin: 8,  damageMax: 19, lootMin: 290,  lootMax: 600, description: en('midTier.scavengerVeteran'),      captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Mercenaire des ruines',     maxHp: 62, damageMin: 10, damageMax: 22, lootMin: 310,  lootMax: 630, description: en('midTier.mercenaireDesRuines'),   captureChance: 20, killChance: 22, isBoss: false, role: 'normal' },
+  { name: 'Chasseur de reliques',      maxHp: 58, damageMin: 9,  damageMax: 20, lootMin: 330,  lootMax: 660, description: en('midTier.chasseurDeReliques'),          captureChance: 15, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Vétéran de la Purge',       maxHp: 72, damageMin: 12, damageMax: 24, lootMin: 360,  lootMax: 720, description: en('midTier.veteranDeLaPurge'),           captureChance: 10, killChance: 28, isBoss: false, role: 'normal' },
+  { name: 'Technomercenaire',          maxHp: 52, damageMin: 10, damageMax: 22, lootMin: 300,  lootMax: 630, description: en('midTier.technomercenaire'), captureChance: 15, killChance: 22, isBoss: false, role: 'ranged' },
+  { name: 'Recéleur défensif',         maxHp: 45, damageMin: 8,  damageMax: 17, lootMin: 360,  lootMax: 780, description: en('midTier.receleurDefensif'),   captureChance: 25, killChance: 15, isBoss: false, role: 'normal' },
+  { name: 'Soldat de fortune Faucon',  maxHp: 65, damageMin: 11, damageMax: 22, lootMin: 310,  lootMax: 630, description: en('midTier.soldatDeFortuneFaucon'),                     captureChance: 15, killChance: 22, isBoss: false, role: 'normal' },
+  { name: 'Ingénieur de sabotage',     maxHp: 55, damageMin: 10, damageMax: 22, lootMin: 310,  lootMax: 630, description: en('midTier.ingenieurDeSabotage'), captureChance: 15, killChance: 20, isBoss: false, role: 'ranged' },
+  { name: 'Trafiquant en réseau',      maxHp: 50, damageMin: 9,  damageMax: 19, lootMin: 360,  lootMax: 750, description: en('midTier.trafiquantEnReseau'), captureChance: 20, killChance: 18, isBoss: false, role: 'normal' },
+  { name: 'Espion retourné',           maxHp: 52, damageMin: 10, damageMax: 21, lootMin: 350,  lootMax: 690, description: en('midTier.espionRetourne'), captureChance: 15, killChance: 22, isBoss: false, role: 'normal' },
+  { name: 'Commandant de milice',      maxHp: 70, damageMin: 11, damageMax: 23, lootMin: 360,  lootMax: 720, description: en('midTier.commandantDeMilice'), captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Chasseur mutant',           maxHp: 65, damageMin: 13, damageMax: 26, lootMin: 290,  lootMax: 590,  description: en('midTier.chasseurMutant'), captureChance: 10, killChance: 28, isBoss: false, role: 'normal' },
+  { name: 'Artilleur de section',      maxHp: 60, damageMin: 12, damageMax: 25, lootMin: 330,  lootMax: 660, description: en('midTier.artilleurDeSection'), captureChance: 15, killChance: 25, isBoss: false, role: 'ranged' },
 ]
+}
 
-export const TIER_HIGH: Enemy[] = [
-  { name: 'Élite des Faucons Noirs',     maxHp: 120, damageMin: 20, damageMax: 40, lootMin: 600,  lootMax: 1500, description: 'Entraîné, équipé, motivé.',               captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Garde de l\'Emporium',        maxHp: 130, damageMin: 18, damageMax: 38, lootMin: 480,  lootMax: 1200, description: 'Armure lourde, zéro humour.',              captureChance: 40, killChance: 5,  isBoss: false, role: 'tank' },
-  { name: 'Assassin du Conclave',        maxHp: 100, damageMin: 25, damageMax: 48, lootMin: 900,  lootMax: 2100, description: 'Tu ne l\'as pas vu venir.',                captureChance: 10, killChance: 35, isBoss: false, role: 'ranged' },
-  { name: 'Garde du corps impitoyable',  maxHp: 140, damageMin: 22, damageMax: 42, lootMin: 720,  lootMax: 1800, description: 'Il a survécu à des dizaines de combats.',  captureChance: 20, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Soldat de Noctis',            maxHp: 115, damageMin: 20, damageMax: 38, lootMin: 540,  lootMax: 1320, description: 'Fanatique.',                               captureChance: 10, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Médecin de guerre ennemi',    maxHp: 90,  damageMin: 15, damageMax: 30, lootMin: 600,  lootMax: 1500, description: 'Il soigne ses alliés et te détruit.',      captureChance: 20, killChance: 15, isBoss: false, role: 'support' },
-  { name: 'Chasseur de trophées',        maxHp: 110, damageMin: 22, damageMax: 44, lootMin: 660,  lootMax: 1680, description: 'Ta tête décorera son cockpit.',            captureChance: 5,  killChance: 40, isBoss: false, role: 'ranged' },
-  { name: 'Ingénieur de guerre',         maxHp: 105, damageMin: 18, damageMax: 36, lootMin: 600,  lootMax: 1440, description: 'Ses gadgets font aussi mal que ses poings.', captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
-  { name: 'Commandant renégat',          maxHp: 150, damageMin: 24, damageMax: 45, lootMin: 840,  lootMax: 2100, description: 'Il a mené des batailles. Il connaît les faiblesses.', captureChance: 20, killChance: 28, isBoss: false, role: 'normal' },
-  { name: 'Fantôme de la Garde Noire',   maxHp: 95,  damageMin: 26, damageMax: 50, lootMin: 960,  lootMax: 2280, description: 'Unité d\'élite dissoute. Ils n\'ont pas rendu les armes.', captureChance: 5, killChance: 40, isBoss: false, role: 'ranged' },
-  { name: 'Berserker augmenté',          maxHp: 160, damageMin: 25, damageMax: 50, lootMin: 720,  lootMax: 1800, description: 'Implants militaires illégaux. Il ne ressent plus la douleur.', captureChance: 5, killChance: 35, isBoss: false, role: 'tank' },
-  { name: 'Exécuteur du Tribunal',       maxHp: 125, damageMin: 22, damageMax: 42, lootMin: 780,  lootMax: 1920, description: 'Une sentence de mort t\'a été prononcée. Il l\'applique.', captureChance: 20, killChance: 30, isBoss: false, role: 'normal' },
-  { name: 'Pilote de combat au sol',     maxHp: 108, damageMin: 20, damageMax: 40, lootMin: 570,  lootMax: 1380, description: 'Son vaisseau est détruit. Il t\'en tient responsable.', captureChance: 10, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Sniper des abysses',          maxHp: 85,  damageMin: 28, damageMax: 55, lootMin: 900,  lootMax: 2100, description: 'Un kilomètre de distance minimum. Aujourd\'hui c\'est plus proche.', captureChance: 5, killChance: 45, isBoss: false, role: 'ranged' },
-  { name: 'Garde d\'honneur brisé',      maxHp: 135, damageMin: 20, damageMax: 40, lootMin: 660,  lootMax: 1620, description: 'Son seigneur est mort. Il cherche qui tuer pour ça.', captureChance: 15, killChance: 28, isBoss: false, role: 'tank' },
-  { name: 'Ancien du Vide',              maxHp: 118, damageMin: 22, damageMax: 43, lootMin: 720,  lootMax: 1740, description: 'Des années dans l\'espace l\'ont changé. Pas en mieux.', captureChance: 10, killChance: 30, isBoss: false, role: 'normal' },
-  { name: 'Traqueur de factions',        maxHp: 102, damageMin: 23, damageMax: 46, lootMin: 780,  lootMax: 1860, description: 'Sa faction l\'a envoyé. Il ne revient qu\'avec ta tête.', captureChance: 10, killChance: 35, isBoss: false, role: 'normal' },
-  { name: 'Commandant Faucon Noir',      maxHp: 135, damageMin: 22, damageMax: 44, lootMin: 780,  lootMax: 1920, description: 'Officier des Faucons. Chaque ordre de lui a coûté des vies.',  captureChance: 15, killChance: 30, isBoss: false, role: 'normal' },
-  { name: 'Capitaine Gardien Écarlate',  maxHp: 145, damageMin: 20, damageMax: 40, lootMin: 720,  lootMax: 1800, description: 'Cheffe de garnison. Elle a tenu des forteresses seule.',       captureChance: 20, killChance: 25, isBoss: false, role: 'tank'   },
-  { name: "Exécuteur de l'Emporium",    maxHp: 120, damageMin: 25, damageMax: 48, lootMin: 900,  lootMax: 2100, description: 'Il règle les problèmes de l\'Emporium. Tu es un problème.',    captureChance: 10, killChance: 35, isBoss: false, role: 'ranged' },
-  { name: 'Baron des bas-fonds',         maxHp: 130, damageMin: 22, damageMax: 43, lootMin: 840,  lootMax: 1980, description: 'Il contrôle un quartier entier. Hors de question de te laisser passer.', captureChance: 15, killChance: 30, isBoss: false, role: 'normal' },
-  { name: 'Vétéran des ruines',          maxHp: 110, damageMin: 24, damageMax: 46, lootMin: 720,  lootMax: 1740, description: 'Des décennies dans les stations mortes. Il a tout vu, tout survécu.', captureChance: 10, killChance: 32, isBoss: false, role: 'normal' },
-  { name: 'Thanatonaute',               maxHp: 108, damageMin: 24, damageMax: 47, lootMin: 720,  lootMax: 1740, description: 'Il a fait le vide en lui. Le combat est sa seule présence.',             captureChance: 5,  killChance: 38, isBoss: false, role: 'normal' },
-  { name: 'Fanatique de la Fracture',   maxHp: 115, damageMin: 22, damageMax: 44, lootMin: 660,  lootMax: 1680, description: 'Il croit que la Grande Guerre n\'est pas finie. Il a raison d\'une façon.', captureChance: 10, killChance: 32, isBoss: false, role: 'normal' },
-  { name: 'Garde augmenté du Nexus',    maxHp: 128, damageMin: 20, damageMax: 40, lootMin: 600,  lootMax: 1500, description: 'Implants Nexus-grade intégrés. Il n\'a pas besoin de dormir.',           captureChance: 20, killChance: 20, isBoss: false, role: 'tank'   },
-  { name: 'Lame fantôme',              maxHp: 92,  damageMin: 28, damageMax: 54, lootMin: 840,  lootMax: 2040, description: 'Tu ne le vois qu\'une fois. En général c\'est trop tard.',               captureChance: 5,  killChance: 42, isBoss: false, role: 'ranged' },
-  { name: 'Artificier dérangé',         maxHp: 105, damageMin: 22, damageMax: 42, lootMin: 660,  lootMax: 1620, description: 'Il fabrique ses armes et les teste sur les gens qu\'il rencontre.',     captureChance: 10, killChance: 30, isBoss: false, role: 'normal' },
-  { name: 'Général de la Dernière Guerre', maxHp: 140, damageMin: 23, damageMax: 45, lootMin: 780,  lootMax: 1860, description: 'Il se bat encore la même guerre. Pour lui, elle n\'a jamais pris fin.',   captureChance: 10, killChance: 32, isBoss: false, role: 'normal' },
-  { name: 'Bioingénieur de combat',    maxHp: 112, damageMin: 20, damageMax: 40, lootMin: 660,  lootMax: 1620, description: 'Il s\'est lui-même modifié pour le combat. Chaque modification a un but précis.', captureChance: 15, killChance: 28, isBoss: false, role: 'normal' },
-  { name: 'Chevalier Écarlate renégat',maxHp: 145, damageMin: 22, damageMax: 44, lootMin: 720,  lootMax: 1800, description: 'Il portait le rouge et le défendait. Il a vu quelque chose qui a tout changé.', captureChance: 10, killChance: 35, isBoss: false, role: 'tank'   },
-  { name: 'Infiltrateur de haut rang', maxHp: 98,  damageMin: 26, damageMax: 50, lootMin: 900,  lootMax: 2100, description: 'Trois identités. Aucune vraie. Le combat est la seule chose réelle pour lui.', captureChance: 8, killChance: 40, isBoss: false, role: 'ranged' },
-  { name: 'Exécuteur de la Purge',     maxHp: 130, damageMin: 22, damageMax: 43, lootMin: 720,  lootMax: 1800, description: 'La Purge est terminée officiellement. Il continue quand même.',                captureChance: 10, killChance: 35, isBoss: false, role: 'normal' },
-  { name: 'Pilote Nexus au sol',       maxHp: 118, damageMin: 20, damageMax: 40, lootMin: 600,  lootMax: 1500, description: 'Son vaisseau est détruit, ses implants de navigation toujours actifs.',       captureChance: 15, killChance: 28, isBoss: false, role: 'normal' },
+export function getTierHigh(): Enemy[] {
+  return [
+  { name: 'Élite des Faucons Noirs',     maxHp: 120, damageMin: 20, damageMax: 40, lootMin: 600,  lootMax: 1500, description: en('highTier.eliteDesFauconsNoirs'),               captureChance: 15, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Garde de l\'Emporium',        maxHp: 130, damageMin: 18, damageMax: 38, lootMin: 480,  lootMax: 1200, description: en('highTier.gardeDeLEmporium'),              captureChance: 40, killChance: 5,  isBoss: false, role: 'tank' },
+  { name: 'Assassin du Conclave',        maxHp: 100, damageMin: 25, damageMax: 48, lootMin: 900,  lootMax: 2100, description: en('highTier.assassinDuConclave'),                captureChance: 10, killChance: 35, isBoss: false, role: 'ranged' },
+  { name: 'Garde du corps impitoyable',  maxHp: 140, damageMin: 22, damageMax: 42, lootMin: 720,  lootMax: 1800, description: en('highTier.gardeDuCorpsImpitoyable'),  captureChance: 20, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Soldat de Noctis',            maxHp: 115, damageMin: 20, damageMax: 38, lootMin: 540,  lootMax: 1320, description: en('highTier.soldatDeNoctis'),                               captureChance: 10, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Médecin de guerre ennemi',    maxHp: 90,  damageMin: 15, damageMax: 30, lootMin: 600,  lootMax: 1500, description: en('highTier.medecinDeGuerreEnnemi'),      captureChance: 20, killChance: 15, isBoss: false, role: 'support' },
+  { name: 'Chasseur de trophées',        maxHp: 110, damageMin: 22, damageMax: 44, lootMin: 660,  lootMax: 1680, description: en('highTier.chasseurDeTrophees'),            captureChance: 5,  killChance: 40, isBoss: false, role: 'ranged' },
+  { name: 'Ingénieur de guerre',         maxHp: 105, damageMin: 18, damageMax: 36, lootMin: 600,  lootMax: 1440, description: en('highTier.ingenieurDeGuerre'), captureChance: 20, killChance: 20, isBoss: false, role: 'normal' },
+  { name: 'Commandant renégat',          maxHp: 150, damageMin: 24, damageMax: 45, lootMin: 840,  lootMax: 2100, description: en('highTier.commandantRenegat'), captureChance: 20, killChance: 28, isBoss: false, role: 'normal' },
+  { name: 'Fantôme de la Garde Noire',   maxHp: 95,  damageMin: 26, damageMax: 50, lootMin: 960,  lootMax: 2280, description: en('highTier.fantomeDeLaGardeNoire'), captureChance: 5, killChance: 40, isBoss: false, role: 'ranged' },
+  { name: 'Berserker augmenté',          maxHp: 160, damageMin: 25, damageMax: 50, lootMin: 720,  lootMax: 1800, description: en('highTier.berserkerAugmente'), captureChance: 5, killChance: 35, isBoss: false, role: 'tank' },
+  { name: 'Exécuteur du Tribunal',       maxHp: 125, damageMin: 22, damageMax: 42, lootMin: 780,  lootMax: 1920, description: en('highTier.executeurDuTribunal'), captureChance: 20, killChance: 30, isBoss: false, role: 'normal' },
+  { name: 'Pilote de combat au sol',     maxHp: 108, damageMin: 20, damageMax: 40, lootMin: 570,  lootMax: 1380, description: en('highTier.piloteDeCombatAuSol'), captureChance: 10, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Sniper des abysses',          maxHp: 85,  damageMin: 28, damageMax: 55, lootMin: 900,  lootMax: 2100, description: en('highTier.sniperDesAbysses'), captureChance: 5, killChance: 45, isBoss: false, role: 'ranged' },
+  { name: 'Garde d\'honneur brisé',      maxHp: 135, damageMin: 20, damageMax: 40, lootMin: 660,  lootMax: 1620, description: en('highTier.gardeDHonneurBrise'), captureChance: 15, killChance: 28, isBoss: false, role: 'tank' },
+  { name: 'Ancien du Vide',              maxHp: 118, damageMin: 22, damageMax: 43, lootMin: 720,  lootMax: 1740, description: en('highTier.ancienDuVide'), captureChance: 10, killChance: 30, isBoss: false, role: 'normal' },
+  { name: 'Traqueur de factions',        maxHp: 102, damageMin: 23, damageMax: 46, lootMin: 780,  lootMax: 1860, description: en('highTier.traqueurDeFactions'), captureChance: 10, killChance: 35, isBoss: false, role: 'normal' },
+  { name: 'Commandant Faucon Noir',      maxHp: 135, damageMin: 22, damageMax: 44, lootMin: 780,  lootMax: 1920, description: en('highTier.commandantFauconNoir'),  captureChance: 15, killChance: 30, isBoss: false, role: 'normal' },
+  { name: 'Capitaine Gardien Écarlate',  maxHp: 145, damageMin: 20, damageMax: 40, lootMin: 720,  lootMax: 1800, description: en('highTier.capitaineGardienEcarlate'),       captureChance: 20, killChance: 25, isBoss: false, role: 'tank'   },
+  { name: "Exécuteur de l'Emporium",    maxHp: 120, damageMin: 25, damageMax: 48, lootMin: 900,  lootMax: 2100, description: en('highTier.executeurDeLEmporium'),    captureChance: 10, killChance: 35, isBoss: false, role: 'ranged' },
+  { name: 'Baron des bas-fonds',         maxHp: 130, damageMin: 22, damageMax: 43, lootMin: 840,  lootMax: 1980, description: en('highTier.baronDesBasFonds'), captureChance: 15, killChance: 30, isBoss: false, role: 'normal' },
+  { name: 'Vétéran des ruines',          maxHp: 110, damageMin: 24, damageMax: 46, lootMin: 720,  lootMax: 1740, description: en('highTier.veteranDesRuines'), captureChance: 10, killChance: 32, isBoss: false, role: 'normal' },
+  { name: 'Thanatonaute',               maxHp: 108, damageMin: 24, damageMax: 47, lootMin: 720,  lootMax: 1740, description: en('highTier.thanatonaute'),             captureChance: 5,  killChance: 38, isBoss: false, role: 'normal' },
+  { name: 'Fanatique de la Fracture',   maxHp: 115, damageMin: 22, damageMax: 44, lootMin: 660,  lootMax: 1680, description: en('highTier.fanatiqueDeLaFracture'), captureChance: 10, killChance: 32, isBoss: false, role: 'normal' },
+  { name: 'Garde augmenté du Nexus',    maxHp: 128, damageMin: 20, damageMax: 40, lootMin: 600,  lootMax: 1500, description: en('highTier.gardeAugmenteDuNexus'),           captureChance: 20, killChance: 20, isBoss: false, role: 'tank'   },
+  { name: 'Lame fantôme',              maxHp: 92,  damageMin: 28, damageMax: 54, lootMin: 840,  lootMax: 2040, description: en('highTier.lameFantome'),               captureChance: 5,  killChance: 42, isBoss: false, role: 'ranged' },
+  { name: 'Artificier dérangé',         maxHp: 105, damageMin: 22, damageMax: 42, lootMin: 660,  lootMax: 1620, description: en('highTier.artificierDerange'),     captureChance: 10, killChance: 30, isBoss: false, role: 'normal' },
+  { name: 'Général de la Dernière Guerre', maxHp: 140, damageMin: 23, damageMax: 45, lootMin: 780,  lootMax: 1860, description: en('highTier.generalDeLaDerniereGuerre'),   captureChance: 10, killChance: 32, isBoss: false, role: 'normal' },
+  { name: 'Bioingénieur de combat',    maxHp: 112, damageMin: 20, damageMax: 40, lootMin: 660,  lootMax: 1620, description: en('highTier.bioingenieurDeCombat'), captureChance: 15, killChance: 28, isBoss: false, role: 'normal' },
+  { name: 'Chevalier Écarlate renégat',maxHp: 145, damageMin: 22, damageMax: 44, lootMin: 720,  lootMax: 1800, description: en('highTier.chevalierEcarlateRenegat'), captureChance: 10, killChance: 35, isBoss: false, role: 'tank'   },
+  { name: 'Infiltrateur de haut rang', maxHp: 98,  damageMin: 26, damageMax: 50, lootMin: 900,  lootMax: 2100, description: en('highTier.infiltrateurDeHautRang'), captureChance: 8, killChance: 40, isBoss: false, role: 'ranged' },
+  { name: 'Exécuteur de la Purge',     maxHp: 130, damageMin: 22, damageMax: 43, lootMin: 720,  lootMax: 1800, description: en('highTier.executeurDeLaPurge'),                captureChance: 10, killChance: 35, isBoss: false, role: 'normal' },
+  { name: 'Pilote Nexus au sol',       maxHp: 118, damageMin: 20, damageMax: 40, lootMin: 600,  lootMax: 1500, description: en('highTier.piloteNexusAuSol'),       captureChance: 15, killChance: 28, isBoss: false, role: 'normal' },
 ]
+}
 
-export const TIER_BOSS: Enemy[] = [
-  { name: 'Alanossa',                    maxHp: 200, damageMin: 30, damageMax: 55, lootMin: 2400,  lootMax: 4800, description: 'Le pirate le plus dangereux de l\'univers connu.',      captureChance: 10, killChance: 40, isBoss: true, role: 'normal' },
-  { name: 'La Faucon',                   maxHp: 180, damageMin: 28, damageMax: 52, lootMin: 2100,  lootMax: 4200, description: 'Cheffe des Faucons Noirs. Calculée. Implacable.',        captureChance: 15, killChance: 35, isBoss: true, role: 'normal' },
-  { name: 'Directeur Pale',              maxHp: 160, damageMin: 25, damageMax: 48, lootMin: 1800,  lootMax: 3600, description: 'Il est calme. C\'est pire.',                             captureChance: 30, killChance: 25, isBoss: true, role: 'normal' },
-  { name: 'Garde du Corps d\'Eliotis',   maxHp: 150, damageMin: 22, damageMax: 45, lootMin: 1500,  lootMax: 3300, description: 'Eliotis ne pardonne pas.',                              captureChance: 5,  killChance: 45, isBoss: true, role: 'tank' },
-  { name: 'Le Boucher de Velkor',        maxHp: 220, damageMin: 32, damageMax: 58, lootMin: 2700,  lootMax: 5400, description: 'On raconte qu\'il a détruit une station entière. Seul.', captureChance: 5,  killChance: 50, isBoss: true, role: 'tank' },
-  { name: 'Oracle de la Singularité',   maxHp: 140, damageMin: 35, damageMax: 65, lootMin: 3000,  lootMax: 6000, description: 'Il prédit tes mouvements. Il les a déjà vus.',         captureChance: 10, killChance: 40, isBoss: true, role: 'ranged' },
-  { name: 'Amiral Voss-Kheran',         maxHp: 190, damageMin: 28, damageMax: 50, lootMin: 2280,  lootMax: 4500, description: 'Commandant de la flotte des Ombres. Intraitable.',       captureChance: 20, killChance: 30, isBoss: true, role: 'normal' },
-  { name: 'La Curatrice',              maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 2400,  lootMax: 4800, description: 'Elle collectionne les âmes. La tienne l\'intéresse.',    captureChance: 25, killChance: 30, isBoss: true, role: 'support' },
-  { name: 'Frère Ossian le Dernier',   maxHp: 210, damageMin: 30, damageMax: 54, lootMin: 2520,  lootMax: 5100, description: 'Dernier survivant d\'un ordre de guerriers-moines.',     captureChance: 10, killChance: 42, isBoss: true, role: 'normal' },
-  { name: 'La Mère Mecanique',         maxHp: 250, damageMin: 25, damageMax: 45, lootMin: 3000,  lootMax: 7200, description: 'Mi-humaine mi-machine. Ses enfants l\'adorent.',        captureChance: 5,  killChance: 35, isBoss: true, role: 'tank' },
-  { name: 'Veilleur du Bout du Monde',  maxHp: 175, damageMin: 33, damageMax: 60, lootMin: 2700,  lootMax: 5400, description: 'Il garde quelque chose. Tu n\'aurais pas dû t\'approcher.', captureChance: 8, killChance: 45, isBoss: true, role: 'normal' },
-  { name: 'L\'Architecte du Chaos',    maxHp: 165, damageMin: 30, damageMax: 58, lootMin: 2880,  lootMax: 5700, description: 'Chaque guerre des cent dernières années — c\'était lui.',  captureChance: 15, killChance: 38, isBoss: true, role: 'ranged' },
-  { name: 'Commandante Zara Sable',    maxHp: 185, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: 'Elle a perdu sa flotte. Elle a gagné une obsession.',     captureChance: 20, killChance: 32, isBoss: true, role: 'normal' },
-  { name: 'Le Colosse de Ferraille',   maxHp: 280, damageMin: 28, damageMax: 50, lootMin: 2400,  lootMax: 4800, description: 'Un homme dans une armure de fortune de deux mètres.',          captureChance: 5,  killChance: 30, isBoss: true, role: 'tank' },
-  { name: 'Le Fantôme des Ombres',    maxHp: 130, damageMin: 35, damageMax: 62, lootMin: 1920,  lootMax: 3900, description: 'Opérateur Faucon. Tu ne le vois pas venir. C\'est son travail.', captureChance: 5,  killChance: 40, isBoss: true, role: 'ranged' },
-  { name: 'La Bête Noire',            maxHp: 230, damageMin: 35, damageMax: 60, lootMin: 2100,  lootMax: 4200, description: 'Berserker Faucon. Plus de raison. Que de la brutalité.',         captureChance: 3,  killChance: 50, isBoss: true, role: 'tank' },
-  { name: 'La Veuve de Vega',         maxHp: 155, damageMin: 28, damageMax: 52, lootMin: 2280,  lootMax: 4500, description: 'Reine pirate des bas-fonds. Elle a survécu à tout. Dont toi.',   captureChance: 12, killChance: 35, isBoss: true, role: 'normal' },
-  { name: "L'Exilé Écarlate",         maxHp: 195, damageMin: 26, damageMax: 48, lootMin: 1800,  lootMax: 3600, description: 'Gardien banni. Il a retourné sa foi contre ses anciens frères.', captureChance: 10, killChance: 32, isBoss: true, role: 'normal' },
-  { name: 'Patient Zéro',             maxHp: 145, damageMin: 22, damageMax: 44, lootMin: 1680,  lootMax: 3300, description: 'Survivant de la quarantaine. Ce qu\'il a vécu l\'a transformé.',  captureChance: 20, killChance: 28, isBoss: true, role: 'support' },
-  { name: "L'Ombre du Vide",          maxHp: 160, damageMin: 30, damageMax: 55, lootMin: 2100,  lootMax: 4200, description: 'Personne ne sait qui il est. Il préfère ça.',                    captureChance: 8,  killChance: 42, isBoss: true, role: 'ranged' },
-  { name: 'Le Roi de Nuit',              maxHp: 175, damageMin: 25, damageMax: 46, lootMin: 2400,  lootMax: 4800, description: 'Il dirige Port de Nuit depuis l\'ombre. Il n\'en sort jamais.',          captureChance: 15, killChance: 30, isBoss: true, role: 'normal' },
-  { name: 'Le Ferrailleur des Épaves',  maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 1920,  lootMax: 3900, description: 'Roi de La Carcasse. Il a grandi dans les épaves. Il en est devenu une.',   captureChance: 10, killChance: 38, isBoss: true, role: 'tank'   },
-  { name: "L'Inspecteur Véreux",        maxHp: 155, damageMin: 24, damageMax: 46, lootMin: 1800,  lootMax: 3600, description: 'Chef de la sécurité de Port Méridien. Les lois, c\'est lui qui les tord.', captureChance: 20, killChance: 30, isBoss: true, role: 'normal' },
-  { name: 'Le Baron de Vega',           maxHp: 190, damageMin: 28, damageMax: 52, lootMin: 2280,  lootMax: 4500, description: 'Seigneur des bas-fonds. Tout ce qui se vend dans les Bas-Fonds lui appartient.', captureChance: 10, killChance: 40, isBoss: true, role: 'normal' },
-  { name: 'Le Général de Fer',          maxHp: 200, damageMin: 28, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: 'Commandant de Fort Kharos. Discipline de fer. Aucune exception.',           captureChance: 25, killChance: 30, isBoss: true, role: 'tank'   },
-  { name: 'Protocole ΔX-7',            maxHp: 145, damageMin: 35, damageMax: 62, lootMin: 2700,  lootMax: 5400, description: 'IA de sécurité de Nexus Aldara. Elle a décidé que l\'humanité était la menace.', captureChance: 5, killChance: 45, isBoss: true, role: 'ranged' },
-  { name: 'Le Geôlier des Morts',       maxHp: 175, damageMin: 27, damageMax: 50, lootMin: 1980,  lootMax: 3900, description: 'L\'ancien directeur du Purgatoire. Il n\'est jamais parti. Ni ses méthodes.',captureChance: 15, killChance: 35, isBoss: true, role: 'normal' },
-  { name: 'La Matriarche de Perséphone',maxHp: 165, damageMin: 25, damageMax: 47, lootMin: 1800,  lootMax: 3600, description: 'Elle a nourri la colonie pendant trente ans. Elle la défend maintenant à coups d\'armes.', captureChance: 20, killChance: 28, isBoss: true, role: 'support' },
-  { name: 'Le Titan Mineur',            maxHp: 220, damageMin: 30, damageMax: 55, lootMin: 2400,  lootMax: 4800, description: 'Superviseur de Station Rocaille. Augmenté pour porter des tonnes. Il porte aussi les coups.', captureChance: 5, killChance: 40, isBoss: true, role: 'tank' },
-  { name: 'Le Maître-Forgeron Maudit',  maxHp: 185, damageMin: 29, damageMax: 53, lootMin: 2280,  lootMax: 4500, description: 'Artisan de La Forge Noire. Chaque arme qu\'il crée, il en teste la qualité sur quelqu\'un.', captureChance: 10, killChance: 38, isBoss: true, role: 'normal' },
-  { name: "L'Archiviste sans Visage",   maxHp: 150, damageMin: 32, damageMax: 58, lootMin: 2400,  lootMax: 4800, description: 'Gardien de L\'Entrepôt Zéro. Il connaît tous les secrets. Il enterre le reste.',captureChance: 8, killChance: 42, isBoss: true, role: 'ranged' },
-  { name: 'Le Vigie Immortel',          maxHp: 160, damageMin: 28, damageMax: 52, lootMin: 1920,  lootMax: 3900, description: 'Opérateur Faucon du Perchoir. Il surveille depuis si longtemps qu\'il ne sait plus rien faire d\'autre.', captureChance: 8, killChance: 40, isBoss: true, role: 'ranged' },
-  { name: "Le Ravitailleur de l'Ombre", maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 1980,  lootMax: 3960, description: 'Logisticien des Faucons au Relais Noir. Sans lui la faction s\'effondre. Il le sait.',captureChance: 15, killChance: 32, isBoss: true, role: 'normal' },
-  { name: 'Commandant Garant',          maxHp: 195, damageMin: 27, damageMax: 50, lootMin: 2160,  lootMax: 4320, description: 'Commandant du Bastion Mineur. La frontière Gardienne, c\'est lui.',            captureChance: 20, killChance: 30, isBoss: true, role: 'tank'   },
-  { name: 'La Marchande de Mort',       maxHp: 155, damageMin: 30, damageMax: 55, lootMin: 2100,  lootMax: 4200, description: 'Commerçante du Comptoir Sud. Ce qu\'elle vend tue toujours, même les contrats d\'assurance.', captureChance: 12, killChance: 38, isBoss: true, role: 'ranged' },
-  { name: 'Le Directeur Fantôme',       maxHp: 140, damageMin: 27, damageMax: 50, lootMin: 1800,  lootMax: 3600, description: 'Responsable de l\'Annexe Commerciale. Officiellement un bureaucrate. Officieusement, un fantôme.', captureChance: 15, killChance: 35, isBoss: true, role: 'normal' },
-  { name: 'Le Passeur Sanguinaire',     maxHp: 165, damageMin: 27, damageMax: 50, lootMin: 1980,  lootMax: 3900, description: 'Il contrôle le Relais de Transit. Tout ce qui passe, il le taxe. Ou il le prend.', captureChance: 10, killChance: 36, isBoss: true, role: 'normal' },
-  { name: 'Lord Daekar',                maxHp: 180, damageMin: 28, damageMax: 52, lootMin: 2400,  lootMax: 4800, description: 'Noble déchu de la Résidence Orbitale. Il a tout perdu. Sauf sa violence.',         captureChance: 15, killChance: 34, isBoss: true, role: 'normal' },
-  { name: 'Le Maître des Ombres',       maxHp: 160, damageMin: 32, damageMax: 58, lootMin: 2700,  lootMax: 5400, description: 'Organisateur du Club Privé Éos. Les secrets qu\'il détient valent des armées.',  captureChance: 10, killChance: 40, isBoss: true, role: 'ranged' },
-  { name: 'Le Survivant des Cendres',   maxHp: 175, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: 'Seul habitant des Cendres. Ce qui l\'a laissé en vie l\'a aussi transformé.',    captureChance: 8,  killChance: 40, isBoss: true, role: 'tank'   },
-  { name: 'Le Gardien Originel',        maxHp: 200, damageMin: 30, damageMax: 55, lootMin: 2700,  lootMax: 5400, description: 'Gardien du Berceau depuis l\'origine. Il ne laissera personne profaner ce lieu.',captureChance: 10, killChance: 38, isBoss: true, role: 'normal' },
-  { name: 'Le Capitaine Amalgame',      maxHp: 210, damageMin: 28, damageMax: 50, lootMin: 2400,  lootMax: 4800, description: 'Capitaine de L\'Épave Vivante. Mi-homme, mi-machine. Il a fusionné avec son vaisseau.', captureChance: 5, killChance: 35, isBoss: true, role: 'tank' },
-  { name: 'Le Médiateur de Fer',        maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 1920,  lootMax: 3900, description: 'Arbitre de L\'Oasis de Fer. Il maintient la paix. Avec des méthodes peu pacifiques.', captureChance: 18, killChance: 30, isBoss: true, role: 'normal' },
-  { name: 'Le Gardien du Signal',       maxHp: 155, damageMin: 24, damageMax: 45, lootMin: 1800,  lootMax: 3600, description: 'Opérateur de La Balise. Il contrôle les routes navales. Il en abuse.',            captureChance: 20, killChance: 28, isBoss: true, role: 'normal' },
-  { name: 'Le Seigneur des Routes',     maxHp: 180, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: 'Péagiste du Confluent. Tous les carrefours lui appartiennent. Surtout celui-ci.', captureChance: 15, killChance: 32, isBoss: true, role: 'normal' },
-  { name: 'Le Chercheur Fracturé',      maxHp: 150, damageMin: 30, damageMax: 55, lootMin: 2280,  lootMax: 4500, description: 'Ancien scientifique de Zéphyr. Son expérience a mal tourné. Sa tête aussi.',      captureChance: 12, killChance: 38, isBoss: true, role: 'support' },
-  { name: "L'Astronome des Abysses",    maxHp: 165, damageMin: 33, damageMax: 60, lootMin: 2400,  lootMax: 4800, description: 'Observateur de L\'Observatoire. Trop longtemps seul dans le vide. Ça laisse des traces.', captureChance: 8, killChance: 42, isBoss: true, role: 'ranged' },
-  { name: 'La Créature de Mira',        maxHp: 230, damageMin: 32, damageMax: 58, lootMin: 2700,  lootMax: 5400, description: 'Ce que les mineurs de Mira ont trouvé dans les galeries. Ce n\'est plus tout à fait humain.', captureChance: 3, killChance: 50, isBoss: true, role: 'tank' },
-  { name: 'Le Contremaître Infernal',   maxHp: 195, damageMin: 28, damageMax: 52, lootMin: 2280,  lootMax: 4500, description: 'Patron de La Raffinerie. Les ouvriers l\'appellent Enfer-sur-Roues. Pas en sa présence.', captureChance: 10, killChance: 38, isBoss: true, role: 'tank' },
-  { name: 'Le Fantôme des Brumes',     maxHp: 170, damageMin: 30, damageMax: 55, lootMin: 2280,  lootMax: 4500, description: 'Maître de Port des Brumes. Personne ne sait qui il est. Il a acheté cette incertitude.', captureChance: 5, killChance: 40, isBoss: true, role: 'ranged' },
-  { name: 'Le Contremaître de Forge',  maxHp: 185, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: 'Il a construit Forge Alpha de ses propres mains. Il la défend de la même façon.', captureChance: 10, killChance: 35, isBoss: true, role: 'tank' },
-  { name: 'Sœur Valkara',             maxHp: 155, damageMin: 24, damageMax: 46, lootMin: 1920,  lootMax: 3900, description: 'Elle soigne. Elle tue aussi, si c\'est ce qu\'il faut pour protéger son sanctuaire.', captureChance: 20, killChance: 28, isBoss: true, role: 'support' },
-  { name: 'ARIA-9 Protocole Noir',     maxHp: 145, damageMin: 35, damageMax: 62, lootMin: 2700,  lootMax: 5400, description: 'L\'IA de Sanctum a décidé que l\'objectif est la protection. La définition de \'menace\' a évolué.', captureChance: 5, killChance: 45, isBoss: true, role: 'ranged' },
-  { name: 'Docteur Flinch',            maxHp: 160, damageMin: 28, damageMax: 52, lootMin: 2400,  lootMax: 4800, description: 'Il expérimente sur tout ce qui entre. Tu viens d\'entrer.', captureChance: 15, killChance: 35, isBoss: true, role: 'support' },
-  { name: "L'Armurière Skade",         maxHp: 175, damageMin: 32, damageMax: 58, lootMin: 2520,  lootMax: 5100, description: 'Chaque arme qu\'elle porte, elle l\'a conçue. Elles sont parfaites.', captureChance: 5, killChance: 42, isBoss: true, role: 'normal' },
+export function getTierBoss(): Enemy[] {
+  return [
+  { name: 'Alanossa',                    maxHp: 200, damageMin: 30, damageMax: 55, lootMin: 2400,  lootMax: 4800, description: en('bossTier.alanossa'),      captureChance: 10, killChance: 40, isBoss: true, role: 'normal' },
+  { name: 'La Faucon',                   maxHp: 180, damageMin: 28, damageMax: 52, lootMin: 2100,  lootMax: 4200, description: en('bossTier.laFaucon'),        captureChance: 15, killChance: 35, isBoss: true, role: 'normal' },
+  { name: 'Directeur Pale',              maxHp: 160, damageMin: 25, damageMax: 48, lootMin: 1800,  lootMax: 3600, description: en('bossTier.directeurPale'),                             captureChance: 30, killChance: 25, isBoss: true, role: 'normal' },
+  { name: 'Garde du Corps d\'Eliotis',   maxHp: 150, damageMin: 22, damageMax: 45, lootMin: 1500,  lootMax: 3300, description: en('bossTier.gardeDuCorpsDEliotis'),                              captureChance: 5,  killChance: 45, isBoss: true, role: 'tank' },
+  { name: 'Le Boucher de Velkor',        maxHp: 220, damageMin: 32, damageMax: 58, lootMin: 2700,  lootMax: 5400, description: en('bossTier.leBoucherDeVelkor'), captureChance: 5,  killChance: 50, isBoss: true, role: 'tank' },
+  { name: 'Oracle de la Singularité',   maxHp: 140, damageMin: 35, damageMax: 65, lootMin: 3000,  lootMax: 6000, description: en('bossTier.oracleDeLaSingularite'),         captureChance: 10, killChance: 40, isBoss: true, role: 'ranged' },
+  { name: 'Amiral Voss-Kheran',         maxHp: 190, damageMin: 28, damageMax: 50, lootMin: 2280,  lootMax: 4500, description: en('bossTier.amiralVossKheran'),       captureChance: 20, killChance: 30, isBoss: true, role: 'normal' },
+  { name: 'La Curatrice',              maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 2400,  lootMax: 4800, description: en('bossTier.laCuratrice'),    captureChance: 25, killChance: 30, isBoss: true, role: 'support' },
+  { name: 'Frère Ossian le Dernier',   maxHp: 210, damageMin: 30, damageMax: 54, lootMin: 2520,  lootMax: 5100, description: en('bossTier.frereOssianLeDernier'),     captureChance: 10, killChance: 42, isBoss: true, role: 'normal' },
+  { name: 'La Mère Mecanique',         maxHp: 250, damageMin: 25, damageMax: 45, lootMin: 3000,  lootMax: 7200, description: en('bossTier.laMereMecanique'),        captureChance: 5,  killChance: 35, isBoss: true, role: 'tank' },
+  { name: 'Veilleur du Bout du Monde',  maxHp: 175, damageMin: 33, damageMax: 60, lootMin: 2700,  lootMax: 5400, description: en('bossTier.veilleurDuBoutDuMonde'), captureChance: 8, killChance: 45, isBoss: true, role: 'normal' },
+  { name: 'L\'Architecte du Chaos',    maxHp: 165, damageMin: 30, damageMax: 58, lootMin: 2880,  lootMax: 5700, description: en('bossTier.lArchitecteDuChaos'),  captureChance: 15, killChance: 38, isBoss: true, role: 'ranged' },
+  { name: 'Commandante Zara Sable',    maxHp: 185, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: en('bossTier.commandanteZaraSable'),     captureChance: 20, killChance: 32, isBoss: true, role: 'normal' },
+  { name: 'Le Colosse de Ferraille',   maxHp: 280, damageMin: 28, damageMax: 50, lootMin: 2400,  lootMax: 4800, description: en('bossTier.leColosseDeFerraille'),          captureChance: 5,  killChance: 30, isBoss: true, role: 'tank' },
+  { name: 'Le Fantôme des Ombres',    maxHp: 130, damageMin: 35, damageMax: 62, lootMin: 1920,  lootMax: 3900, description: en('bossTier.leFantomeDesOmbres'), captureChance: 5,  killChance: 40, isBoss: true, role: 'ranged' },
+  { name: 'La Bête Noire',            maxHp: 230, damageMin: 35, damageMax: 60, lootMin: 2100,  lootMax: 4200, description: en('bossTier.laBeteNoire'),         captureChance: 3,  killChance: 50, isBoss: true, role: 'tank' },
+  { name: 'La Veuve de Vega',         maxHp: 155, damageMin: 28, damageMax: 52, lootMin: 2280,  lootMax: 4500, description: en('bossTier.laVeuveDeVega'),   captureChance: 12, killChance: 35, isBoss: true, role: 'normal' },
+  { name: "L'Exilé Écarlate",         maxHp: 195, damageMin: 26, damageMax: 48, lootMin: 1800,  lootMax: 3600, description: en('bossTier.lExileEcarlate'), captureChance: 10, killChance: 32, isBoss: true, role: 'normal' },
+  { name: 'Patient Zéro',             maxHp: 145, damageMin: 22, damageMax: 44, lootMin: 1680,  lootMax: 3300, description: en('bossTier.patientZero'),  captureChance: 20, killChance: 28, isBoss: true, role: 'support' },
+  { name: "L'Ombre du Vide",          maxHp: 160, damageMin: 30, damageMax: 55, lootMin: 2100,  lootMax: 4200, description: en('bossTier.lOmbreDuVide'),                    captureChance: 8,  killChance: 42, isBoss: true, role: 'ranged' },
+  { name: 'Le Roi de Nuit',              maxHp: 175, damageMin: 25, damageMax: 46, lootMin: 2400,  lootMax: 4800, description: en('bossTier.leRoiDeNuit'),          captureChance: 15, killChance: 30, isBoss: true, role: 'normal' },
+  { name: 'Le Ferrailleur des Épaves',  maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 1920,  lootMax: 3900, description: en('bossTier.leFerrailleurDesEpaves'),   captureChance: 10, killChance: 38, isBoss: true, role: 'tank'   },
+  { name: "L'Inspecteur Véreux",        maxHp: 155, damageMin: 24, damageMax: 46, lootMin: 1800,  lootMax: 3600, description: en('bossTier.lInspecteurVereux'), captureChance: 20, killChance: 30, isBoss: true, role: 'normal' },
+  { name: 'Le Baron de Vega',           maxHp: 190, damageMin: 28, damageMax: 52, lootMin: 2280,  lootMax: 4500, description: en('bossTier.leBaronDeVega'), captureChance: 10, killChance: 40, isBoss: true, role: 'normal' },
+  { name: 'Le Général de Fer',          maxHp: 200, damageMin: 28, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: en('bossTier.leGeneralDeFer'),           captureChance: 25, killChance: 30, isBoss: true, role: 'tank'   },
+  { name: 'Protocole ΔX-7',            maxHp: 145, damageMin: 35, damageMax: 62, lootMin: 2700,  lootMax: 5400, description: en('bossTier.protocoleX7'), captureChance: 5, killChance: 45, isBoss: true, role: 'ranged' },
+  { name: 'Le Geôlier des Morts',       maxHp: 175, damageMin: 27, damageMax: 50, lootMin: 1980,  lootMax: 3900, description: en('bossTier.leGeolierDesMorts'),captureChance: 15, killChance: 35, isBoss: true, role: 'normal' },
+  { name: 'La Matriarche de Perséphone',maxHp: 165, damageMin: 25, damageMax: 47, lootMin: 1800,  lootMax: 3600, description: en('bossTier.laMatriarcheDePersephone'), captureChance: 20, killChance: 28, isBoss: true, role: 'support' },
+  { name: 'Le Titan Mineur',            maxHp: 220, damageMin: 30, damageMax: 55, lootMin: 2400,  lootMax: 4800, description: en('bossTier.leTitanMineur'), captureChance: 5, killChance: 40, isBoss: true, role: 'tank' },
+  { name: 'Le Maître-Forgeron Maudit',  maxHp: 185, damageMin: 29, damageMax: 53, lootMin: 2280,  lootMax: 4500, description: en('bossTier.leMaitreForgeronMaudit'), captureChance: 10, killChance: 38, isBoss: true, role: 'normal' },
+  { name: "L'Archiviste sans Visage",   maxHp: 150, damageMin: 32, damageMax: 58, lootMin: 2400,  lootMax: 4800, description: en('bossTier.lArchivisteSansVisage'),captureChance: 8, killChance: 42, isBoss: true, role: 'ranged' },
+  { name: 'Le Vigie Immortel',          maxHp: 160, damageMin: 28, damageMax: 52, lootMin: 1920,  lootMax: 3900, description: en('bossTier.leVigieImmortel'), captureChance: 8, killChance: 40, isBoss: true, role: 'ranged' },
+  { name: "Le Ravitailleur de l'Ombre", maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 1980,  lootMax: 3960, description: en('bossTier.leRavitailleurDeLOmbre'),captureChance: 15, killChance: 32, isBoss: true, role: 'normal' },
+  { name: 'Commandant Garant',          maxHp: 195, damageMin: 27, damageMax: 50, lootMin: 2160,  lootMax: 4320, description: en('bossTier.commandantGarant'),            captureChance: 20, killChance: 30, isBoss: true, role: 'tank'   },
+  { name: 'La Marchande de Mort',       maxHp: 155, damageMin: 30, damageMax: 55, lootMin: 2100,  lootMax: 4200, description: en('bossTier.laMarchandeDeMort'), captureChance: 12, killChance: 38, isBoss: true, role: 'ranged' },
+  { name: 'Le Directeur Fantôme',       maxHp: 140, damageMin: 27, damageMax: 50, lootMin: 1800,  lootMax: 3600, description: en('bossTier.leDirecteurFantome'), captureChance: 15, killChance: 35, isBoss: true, role: 'normal' },
+  { name: 'Le Passeur Sanguinaire',     maxHp: 165, damageMin: 27, damageMax: 50, lootMin: 1980,  lootMax: 3900, description: en('bossTier.lePasseurSanguinaire'), captureChance: 10, killChance: 36, isBoss: true, role: 'normal' },
+  { name: 'Lord Daekar',                maxHp: 180, damageMin: 28, damageMax: 52, lootMin: 2400,  lootMax: 4800, description: en('bossTier.lordDaekar'),         captureChance: 15, killChance: 34, isBoss: true, role: 'normal' },
+  { name: 'Le Maître des Ombres',       maxHp: 160, damageMin: 32, damageMax: 58, lootMin: 2700,  lootMax: 5400, description: en('bossTier.leMaitreDesOmbres'),  captureChance: 10, killChance: 40, isBoss: true, role: 'ranged' },
+  { name: 'Le Survivant des Cendres',   maxHp: 175, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: en('bossTier.leSurvivantDesCendres'),    captureChance: 8,  killChance: 40, isBoss: true, role: 'tank'   },
+  { name: 'Le Gardien Originel',        maxHp: 200, damageMin: 30, damageMax: 55, lootMin: 2700,  lootMax: 5400, description: en('bossTier.leGardienOriginel'),captureChance: 10, killChance: 38, isBoss: true, role: 'normal' },
+  { name: 'Le Capitaine Amalgame',      maxHp: 210, damageMin: 28, damageMax: 50, lootMin: 2400,  lootMax: 4800, description: en('bossTier.leCapitaineAmalgame'), captureChance: 5, killChance: 35, isBoss: true, role: 'tank' },
+  { name: 'Le Médiateur de Fer',        maxHp: 170, damageMin: 26, damageMax: 48, lootMin: 1920,  lootMax: 3900, description: en('bossTier.leMediateurDeFer'), captureChance: 18, killChance: 30, isBoss: true, role: 'normal' },
+  { name: 'Le Gardien du Signal',       maxHp: 155, damageMin: 24, damageMax: 45, lootMin: 1800,  lootMax: 3600, description: en('bossTier.leGardienDuSignal'),            captureChance: 20, killChance: 28, isBoss: true, role: 'normal' },
+  { name: 'Le Seigneur des Routes',     maxHp: 180, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: en('bossTier.leSeigneurDesRoutes'), captureChance: 15, killChance: 32, isBoss: true, role: 'normal' },
+  { name: 'Le Chercheur Fracturé',      maxHp: 150, damageMin: 30, damageMax: 55, lootMin: 2280,  lootMax: 4500, description: en('bossTier.leChercheurFracture'),      captureChance: 12, killChance: 38, isBoss: true, role: 'support' },
+  { name: "L'Astronome des Abysses",    maxHp: 165, damageMin: 33, damageMax: 60, lootMin: 2400,  lootMax: 4800, description: en('bossTier.lAstronomeDesAbysses'), captureChance: 8, killChance: 42, isBoss: true, role: 'ranged' },
+  { name: 'La Créature de Mira',        maxHp: 230, damageMin: 32, damageMax: 58, lootMin: 2700,  lootMax: 5400, description: en('bossTier.laCreatureDeMira'), captureChance: 3, killChance: 50, isBoss: true, role: 'tank' },
+  { name: 'Le Contremaître Infernal',   maxHp: 195, damageMin: 28, damageMax: 52, lootMin: 2280,  lootMax: 4500, description: en('bossTier.leContremaitreInfernal'), captureChance: 10, killChance: 38, isBoss: true, role: 'tank' },
+  { name: 'Le Fantôme des Brumes',     maxHp: 170, damageMin: 30, damageMax: 55, lootMin: 2280,  lootMax: 4500, description: en('bossTier.leFantomeDesBrumes'), captureChance: 5, killChance: 40, isBoss: true, role: 'ranged' },
+  { name: 'Le Contremaître de Forge',  maxHp: 185, damageMin: 27, damageMax: 50, lootMin: 2100,  lootMax: 4200, description: en('bossTier.leContremaitreDeForge'), captureChance: 10, killChance: 35, isBoss: true, role: 'tank' },
+  { name: 'Sœur Valkara',             maxHp: 155, damageMin: 24, damageMax: 46, lootMin: 1920,  lootMax: 3900, description: en('bossTier.soeurValkara'), captureChance: 20, killChance: 28, isBoss: true, role: 'support' },
+  { name: 'ARIA-9 Protocole Noir',     maxHp: 145, damageMin: 35, damageMax: 62, lootMin: 2700,  lootMax: 5400, description: en('bossTier.aria9ProtocoleNoir'), captureChance: 5, killChance: 45, isBoss: true, role: 'ranged' },
+  { name: 'Docteur Flinch',            maxHp: 160, damageMin: 28, damageMax: 52, lootMin: 2400,  lootMax: 4800, description: en('bossTier.docteurFlinch'), captureChance: 15, killChance: 35, isBoss: true, role: 'support' },
+  { name: "L'Armurière Skade",         maxHp: 175, damageMin: 32, damageMax: 58, lootMin: 2520,  lootMax: 5100, description: en('bossTier.lArmuriereSkade'), captureChance: 5, killChance: 42, isBoss: true, role: 'normal' },
 
   // ── PERSONNAGES PILIERS ───────────────────────────────────────────────────────
-  { name: 'Cesarion',       maxHp: 480, damageMin: 48, damageMax: 85, lootMin: 6000,  lootMax: 15000, description: 'Empereur de l\'Emporium Requiem. Derrière les douanes et les marchands d\'armes se cache un stratège militaire sans égal. Sa salve impériale ne laisse pas le temps de respirer.',                                   captureChance: 2,  killChance: 45, isBoss: true, role: 'tank',   pillarAbility: 'imperial_barrage' },
-  { name: 'Raphazarus',     maxHp: 580, damageMin: 52, damageMax: 95, lootMin: 7200,  lootMax: 18000, description: 'Général légendaire de la Grande Guerre. 47 ans dans l\'Arc Perdu ne l\'ont pas brisé — ils l\'ont affiné. Il a survécu à des choses que personne d\'autre n\'aurait traversées. Il attendait quelqu\'un.',             captureChance: 1,  killChance: 60, isBoss: true, role: 'normal', pillarAbility: 'phantom_strike'   },
-  { name: 'Eliotis',        maxHp: 370, damageMin: 44, damageMax: 78, lootMin: 4800,  lootMax: 12000, description: 'Gouverneur de la Tribosphère. Il sourit toujours. Le sourire disparaît quand on trouble sa fête. La transformation est instantanée — et terrifiante.',                                                                   captureChance: 6,  killChance: 40, isBoss: true, role: 'normal', pillarAbility: 'party_over'       },
-  { name: 'Le Roi Maxance', maxHp: 340, damageMin: 40, damageMax: 72, lootMin: 4200,  lootMax: 10800, description: 'Roi de Paradoxa Eterna. Pacifiste de nature, redoutable par nécessité. Les toxines de sa planète ne pardonnent pas.',                                                                                                   captureChance: 10, killChance: 30, isBoss: true, role: 'support', pillarAbility: 'flora_toxin'      },
-  { name: 'Samy Scotty',    maxHp: 320, damageMin: 42, damageMax: 76, lootMin: 5400,  lootMax: 13200, description: 'Patron du casino de Scotty Golden North. Chaque crédit du secteur est passé par ses mains. Il mise tout ou rien — et quand il mise tout, les conséquences sont dévastatrices.',                                          captureChance: 4,  killChance: 44, isBoss: true, role: 'normal', pillarAbility: 'all_in'           },
+  { name: 'Cesarion',       maxHp: 480, damageMin: 48, damageMax: 85, lootMin: 6000,  lootMax: 15000, description: en('bossTier.cesarion'),                                   captureChance: 2,  killChance: 45, isBoss: true, role: 'tank',   pillarAbility: 'imperial_barrage' },
+  { name: 'Raphazarus',     maxHp: 580, damageMin: 52, damageMax: 95, lootMin: 7200,  lootMax: 18000, description: en('bossTier.raphazarus'),             captureChance: 1,  killChance: 60, isBoss: true, role: 'normal', pillarAbility: 'phantom_strike'   },
+  { name: 'Eliotis',        maxHp: 370, damageMin: 44, damageMax: 78, lootMin: 4800,  lootMax: 12000, description: en('bossTier.eliotis'),                                                                   captureChance: 6,  killChance: 40, isBoss: true, role: 'normal', pillarAbility: 'party_over'       },
+  { name: 'Le Roi Maxance', maxHp: 340, damageMin: 40, damageMax: 72, lootMin: 4200,  lootMax: 10800, description: en('bossTier.leRoiMaxance'),                                                                                                   captureChance: 10, killChance: 30, isBoss: true, role: 'support', pillarAbility: 'flora_toxin'      },
+  { name: 'Samy Scotty',    maxHp: 320, damageMin: 42, damageMax: 76, lootMin: 5400,  lootMax: 13200, description: en('bossTier.samyScotty'),                                          captureChance: 4,  killChance: 44, isBoss: true, role: 'normal', pillarAbility: 'all_in'           },
 ]
+}
 
 export function getEnemyByTier(tier: 1 | 2 | 3 | 4): Enemy {
-  const pools = { 1: TIER_LOW, 2: TIER_MID, 3: TIER_HIGH, 4: TIER_BOSS }
+  const pools = { 1: getTierLow(), 2: getTierMid(), 3: getTierHigh(), 4: getTierBoss() }
   const pool = pools[tier]
   return pool[Math.floor(Math.random() * pool.length)]
 }
@@ -188,22 +199,24 @@ export function getEnemyForDepth(depth: number, day: number): Enemy {
 
 // ── COMBATTANTS DE L'ARÈNE DE KORSUN ─────────────────────────────────────────
 // 10 adversaires en escalade pour le tournoi
-export const ARENA_FIGHTERS: Enemy[] = [
-  { name: 'Recrue des arènes',        maxHp: 50,  damageMin: 7,  damageMax: 15, lootMin: 0,  lootMax: 0, description: 'Premier combat, premier sang. Il tremble à peine.',             captureChance: 0, killChance: 5,  isBoss: false, role: 'normal' },
-  { name: 'Gladiateur local',         maxHp: 70,  damageMin: 10, damageMax: 20, lootMin: 0,  lootMax: 0, description: 'Il combat pour nourrir sa famille. Motivé.',                    captureChance: 0, killChance: 8,  isBoss: false, role: 'normal' },
-  { name: 'Boucher de quartier',      maxHp: 90,  damageMin: 13, damageMax: 25, lootMin: 0,  lootMax: 0, description: 'Spécialiste des corps à corps. Il aime ça.',                   captureChance: 0, killChance: 12, isBoss: false, role: 'tank'   },
-  { name: 'Duelliste expérimenté',    maxHp: 105, damageMin: 16, damageMax: 30, lootMin: 0,  lootMax: 0, description: 'Vingt victoires au compteur. Il te lit comme un livre.',        captureChance: 0, killChance: 15, isBoss: false, role: 'normal' },
-  { name: 'Sniper de l\'arène',       maxHp: 85,  damageMin: 20, damageMax: 38, lootMin: 0,  lootMax: 0, description: 'Arme à distance dans une cage fermée. Mauvais plan pour toi.', captureChance: 0, killChance: 18, isBoss: false, role: 'ranged' },
-  { name: 'Berserker dopé',           maxHp: 130, damageMin: 22, damageMax: 42, lootMin: 0,  lootMax: 0, description: 'Stimulants illégaux. Il ne ressent plus rien.',                captureChance: 0, killChance: 22, isBoss: false, role: 'tank'   },
-  { name: 'Executeur masqué',         maxHp: 145, damageMin: 24, damageMax: 46, lootMin: 0,  lootMax: 0, description: 'Personne ne connaît son visage. Seuls ses adversaires le voient.', captureChance: 0, killChance: 25, isBoss: false, role: 'normal' },
-  { name: 'Chasseur de champions',    maxHp: 160, damageMin: 26, damageMax: 50, lootMin: 0,  lootMax: 0, description: 'Il collectionne les crânes de vainqueurs. Tu arrives au bon moment.', captureChance: 0, killChance: 30, isBoss: false, role: 'ranged' },
-  { name: 'Finaliste implacable',     maxHp: 185, damageMin: 30, damageMax: 55, lootMin: 0,  lootMax: 0, description: 'Finaliste de trois tournois. Il n\'a jamais perdu le dernier round.', captureChance: 0, killChance: 35, isBoss: false, role: 'tank'   },
-  { name: 'Le Champion des Arènes',   maxHp: 230, damageMin: 36, damageMax: 62, lootMin: 0,  lootMax: 0, description: 'Champion en titre. Invaincu depuis deux ans. La foule l\'adore. Il te déteste déjà.', captureChance: 0, killChance: 40, isBoss: true,  role: 'normal' },
+export function getArenaFighters(): Enemy[] {
+  return [
+  { name: 'Recrue des arènes',        maxHp: 50,  damageMin: 7,  damageMax: 15, lootMin: 0,  lootMax: 0, description: en('arenaFighters.recrueDesArenes'),             captureChance: 0, killChance: 5,  isBoss: false, role: 'normal' },
+  { name: 'Gladiateur local',         maxHp: 70,  damageMin: 10, damageMax: 20, lootMin: 0,  lootMax: 0, description: en('arenaFighters.gladiateurLocal'),                    captureChance: 0, killChance: 8,  isBoss: false, role: 'normal' },
+  { name: 'Boucher de quartier',      maxHp: 90,  damageMin: 13, damageMax: 25, lootMin: 0,  lootMax: 0, description: en('arenaFighters.boucherDeQuartier'),                   captureChance: 0, killChance: 12, isBoss: false, role: 'tank'   },
+  { name: 'Duelliste expérimenté',    maxHp: 105, damageMin: 16, damageMax: 30, lootMin: 0,  lootMax: 0, description: en('arenaFighters.duellisteExperimente'),        captureChance: 0, killChance: 15, isBoss: false, role: 'normal' },
+  { name: 'Sniper de l\'arène',       maxHp: 85,  damageMin: 20, damageMax: 38, lootMin: 0,  lootMax: 0, description: en('arenaFighters.sniperDeLArene'), captureChance: 0, killChance: 18, isBoss: false, role: 'ranged' },
+  { name: 'Berserker dopé',           maxHp: 130, damageMin: 22, damageMax: 42, lootMin: 0,  lootMax: 0, description: en('arenaFighters.berserkerDope'),                captureChance: 0, killChance: 22, isBoss: false, role: 'tank'   },
+  { name: 'Executeur masqué',         maxHp: 145, damageMin: 24, damageMax: 46, lootMin: 0,  lootMax: 0, description: en('arenaFighters.executeurMasque'), captureChance: 0, killChance: 25, isBoss: false, role: 'normal' },
+  { name: 'Chasseur de champions',    maxHp: 160, damageMin: 26, damageMax: 50, lootMin: 0,  lootMax: 0, description: en('arenaFighters.chasseurDeChampions'), captureChance: 0, killChance: 30, isBoss: false, role: 'ranged' },
+  { name: 'Finaliste implacable',     maxHp: 185, damageMin: 30, damageMax: 55, lootMin: 0,  lootMax: 0, description: en('arenaFighters.finalisteImplacable'), captureChance: 0, killChance: 35, isBoss: false, role: 'tank'   },
+  { name: 'Le Champion des Arènes',   maxHp: 230, damageMin: 36, damageMax: 62, lootMin: 0,  lootMax: 0, description: en('arenaFighters.leChampionDesArenes'), captureChance: 0, killChance: 40, isBoss: true,  role: 'normal' },
 ]
+}
 
 export function getArenaEnemyForRound(round: number): Enemy {
   const idx = Math.max(0, Math.min(9, round - 1))
-  return ARENA_FIGHTERS[idx]
+  return getArenaFighters()[idx]
 }
 
 export function scaleEnemy(enemy: Enemy, level: number): Enemy {
@@ -225,132 +238,152 @@ type StationPool = { low: Enemy[], mid: Enemy[], high: Enemy[] }
 
 // Cherche des ennemis par nom dans les trois tiers
 function _pick(...names: string[]): Enemy[] {
-  const all = [...TIER_LOW, ...TIER_MID, ...TIER_HIGH]
-  return names.map(n => all.find(e => e.name === n) ?? TIER_LOW[0])
+  const all = [...getTierLow(), ...getTierMid(), ...getTierHigh()]
+  return names.map(n => all.find(e => e.name === n) ?? getTierLow()[0])
 }
 
-const POOL_FAUCON: StationPool = {
+function poolFaucon(): StationPool {
+  return {
   low:  _pick('Éclaireur Faucon', 'Milicien de pacotille', 'Garde corrompu', 'Rat de cargaison'),
   mid:  _pick('Agent Faucon infiltré', 'Déserteur armé', 'Officier renégat', 'Hacker de rue'),
   high: _pick('Commandant Faucon Noir', 'Élite des Faucons Noirs', 'Assassin du Conclave', 'Fantôme de la Garde Noire'),
+  }
 }
 
-const POOL_GARDIEN: StationPool = {
+function poolGardien(): StationPool {
+  return {
   low:  _pick('Recrue Gardienne', 'Garde corrompu', 'Milicien de pacotille', 'Sous-officier véreux'),
   mid:  _pick('Soldat Gardien Écarlate', 'Chasseur de primes', 'Officier renégat', 'Déserteur armé'),
   high: _pick('Capitaine Gardien Écarlate', 'Garde du corps impitoyable', 'Commandant renégat', 'Exécuteur du Tribunal'),
+  }
 }
 
-const POOL_EMPORIUM: StationPool = {
+function poolEmporium(): StationPool {
+  return {
   low:  _pick('Vigile Emporium', 'Garde corrompu', 'Milicien de pacotille', 'Sous-officier véreux'),
   mid:  _pick("Garde Emporium armé", "Trafiquant d'organes", 'Caïd de station', 'Agent double'),
   high: _pick("Exécuteur de l'Emporium", "Garde de l'Emporium", 'Assassin du Conclave', 'Exécuteur du Tribunal'),
+  }
 }
 
-const POOL_CRIMINEL: StationPool = {
+function poolCriminel(): StationPool {
+  return {
   low:  _pick('Pickpocket désespéré', 'Ivrogne agressif', 'Drogué au Synth', 'Toxicomane sous injection', 'Rat de cargaison'),
   mid:  _pick('Pirate solitaire', 'Contrebandier défensif', 'Gang de rue spatial', 'Hacker de rue', 'Caïd de station'),
   high: _pick('Baron des bas-fonds', 'Commandant renégat', 'Fantôme de la Garde Noire', 'Traqueur de factions'),
+  }
 }
 
-const POOL_MILITAIRE: StationPool = {
+function poolMilitaire(): StationPool {
+  return {
   low:  _pick('Milicien de pacotille', 'Garde corrompu', 'Sous-officier véreux', 'Chasseur de primes novice'),
   mid:  _pick('Officier renégat', 'Déserteur armé', 'Chasseur de primes', 'Sergent des bas-fonds'),
   high: _pick('Commandant renégat', 'Garde du corps impitoyable', 'Exécuteur du Tribunal', 'Berserker augmenté'),
+  }
 }
 
-const POOL_RUINS: StationPool = {
+function poolRuins(): StationPool {
+  return {
   low:  _pick('Survivant des ruines', 'Scavenger opportuniste', 'Vagabond armé', 'Mendiant armé'),
   mid:  _pick('Scavenger vétéran', 'Mercenaire des ruines', 'Pirate reconverti', 'Dresseur de bêtes mutantes'),
   high: _pick('Vétéran des ruines', 'Ancien du Vide', 'Traqueur de factions', 'Sniper des abysses'),
+  }
 }
 
-const POOL_LUXE: StationPool = {
+function poolLuxe(): StationPool {
+  return {
   low:  _pick('Vigile Emporium', 'Chasseur de primes novice', 'Fuyarde paniquée', 'Garde corrompu'),
   mid:  _pick("Garde Emporium armé", 'Assassin de bas étage', 'Agent double', "Trafiquant d'organes"),
   high: _pick("Exécuteur de l'Emporium", 'Assassin du Conclave', 'Garde du corps impitoyable', 'Fantôme de la Garde Noire'),
+  }
 }
 
-const POOL_INDUSTRIEL: StationPool = {
+function poolIndustriel(): StationPool {
+  return {
   low:  _pick('Mineur agressif', 'Ouvrier en colère', 'Réparateur jaloux', 'Scavenger opportuniste'),
   mid:  _pick('Contrebandier défensif', 'Scavenger vétéran', 'Sergent des bas-fonds', 'Dresseur de bêtes mutantes'),
   high: _pick('Ingénieur de guerre', 'Berserker augmenté', 'Vétéran des ruines', 'Pilote de combat au sol'),
+  }
 }
 
-const POOL_SCIENTIFIQUE: StationPool = {
+function poolScientifique(): StationPool {
+  return {
   low:  _pick('Réparateur jaloux', 'Pilote raté', 'Rat de cargaison', 'Vigile Emporium'),
   mid:  _pick('Hacker de rue', 'Agent double', 'Contrebandier défensif', 'Officier renégat'),
   high: _pick('Ingénieur de guerre', 'Traqueur de factions', 'Fantôme de la Garde Noire', 'Sniper des abysses'),
+  }
 }
 
-const STATION_POOL_MAP: Record<string, StationPool> = {
+function stationPoolMap(): Record<string, StationPool> {
+  return {
   // Faucons Noirs
-  'Arc Ouest Apocalypse':  POOL_FAUCON,
-  'Le Nid des Faucons':    POOL_FAUCON,
-  'Le Perchoir':           POOL_FAUCON,
-  'Station Ombre':         POOL_FAUCON,
-  'Relais Noir':           POOL_FAUCON,
-  'La Tanière':            POOL_FAUCON,
-  'Fort de Cendres':       POOL_FAUCON,
-  "L'Œil du Faucon":      POOL_FAUCON,
+  'Arc Ouest Apocalypse':  poolFaucon(),
+  'Le Nid des Faucons':    poolFaucon(),
+  'Le Perchoir':           poolFaucon(),
+  'Station Ombre':         poolFaucon(),
+  'Relais Noir':           poolFaucon(),
+  'La Tanière':            poolFaucon(),
+  'Fort de Cendres':       poolFaucon(),
+  "L'Œil du Faucon":      poolFaucon(),
   // Gardiens Écarlates
-  'La Citadelle Écarlate': POOL_GARDIEN,
-  'Bastion Mineur':        POOL_GARDIEN,
-  'Poste Vigie':           POOL_GARDIEN,
-  "L'Arsenal Écarlate":   POOL_GARDIEN,
-  'La Forteresse Exilée':  POOL_GARDIEN,
+  'La Citadelle Écarlate': poolGardien(),
+  'Bastion Mineur':        poolGardien(),
+  'Poste Vigie':           poolGardien(),
+  "L'Arsenal Écarlate":   poolGardien(),
+  'La Forteresse Exilée':  poolGardien(),
   // Emporium
-  'Emporium Requiem':      POOL_EMPORIUM,
-  'Comptoir Sud':          POOL_EMPORIUM,
-  'Annexe Commerciale':    POOL_EMPORIUM,
-  'Relais de Transit':     POOL_EMPORIUM,
+  'Emporium Requiem':      poolEmporium(),
+  'Comptoir Sud':          poolEmporium(),
+  'Annexe Commerciale':    poolEmporium(),
+  'Relais de Transit':     poolEmporium(),
   // Criminel / bas-fonds
-  'Les Bas-Fonds de Vega': POOL_CRIMINEL,
-  'Repaire Vega-Sud':      POOL_CRIMINEL,
-  'Port de Nuit':          POOL_CRIMINEL,
-  'La Forge Noire':        POOL_CRIMINEL,
-  "L'Entrepôt Zéro":      POOL_CRIMINEL,
+  'Les Bas-Fonds de Vega': poolCriminel(),
+  'Repaire Vega-Sud':      poolCriminel(),
+  'Port de Nuit':          poolCriminel(),
+  'La Forge Noire':        poolCriminel(),
+  "L'Entrepôt Zéro":      poolCriminel(),
   // Militaire neutre
-  'Fort Kharos':           POOL_MILITAIRE,
-  'Fort Ossian':           POOL_MILITAIRE,
-  'Star Quest':            POOL_MILITAIRE,
+  'Fort Kharos':           poolMilitaire(),
+  'Fort Ossian':           poolMilitaire(),
+  'Star Quest':            poolMilitaire(),
   // Ruines / abandonnées
-  'Le Purgatoire':         POOL_RUINS,
-  'Les Abysses de Velkor': POOL_RUINS,
-  'Les Cendres':           POOL_RUINS,
-  'Station Quarantaine':   POOL_RUINS,
-  'Le Berceau':            POOL_RUINS,
-  "L'Épave Vivante":      POOL_RUINS,
-  'Station Fantôme':       POOL_RUINS,
+  'Le Purgatoire':         poolRuins(),
+  'Les Abysses de Velkor': poolRuins(),
+  'Les Cendres':           poolRuins(),
+  'Station Quarantaine':   poolRuins(),
+  'Le Berceau':            poolRuins(),
+  "L'Épave Vivante":      poolRuins(),
+  'Station Fantôme':       poolRuins(),
   // Luxe / haute société
-  "La Couronne d'Eos":    POOL_LUXE,
-  'Résidence Orbitale':    POOL_LUXE,
-  "Club Privé Éos":       POOL_LUXE,
-  'Scotty Golden North':   POOL_LUXE,
+  "La Couronne d'Eos":    poolLuxe(),
+  'Résidence Orbitale':    poolLuxe(),
+  "Club Privé Éos":       poolLuxe(),
+  'Scotty Golden North':   poolLuxe(),
   // Industriel / minier
-  'Station Rocaille':      POOL_INDUSTRIEL,
-  'Les Cavernes de Mira':  POOL_INDUSTRIEL,
-  'La Raffinerie':         POOL_INDUSTRIEL,
+  'Station Rocaille':      poolIndustriel(),
+  'Les Cavernes de Mira':  poolIndustriel(),
+  'La Raffinerie':         poolIndustriel(),
   // Scientifique
-  'Nexus Aldara':          POOL_SCIENTIFIQUE,
-  'Station Zéphyr':        POOL_SCIENTIFIQUE,
-  "L'Observatoire":       POOL_SCIENTIFIQUE,
-  'Station Limite':        POOL_SCIENTIFIQUE,
+  'Nexus Aldara':          poolScientifique(),
+  'Station Zéphyr':        poolScientifique(),
+  "L'Observatoire":       poolScientifique(),
+  'Station Limite':        poolScientifique(),
   // Personnages piliers — nouvelles stations
-  "L'Arc Perdu":          POOL_RUINS,
-  'La Tribosphère':        POOL_MILITAIRE,
-  'Paradoxa Eterna':       POOL_GARDIEN,
+  "L'Arc Perdu":          poolRuins(),
+  'La Tribosphère':        poolMilitaire(),
+  'Paradoxa Eterna':       poolGardien(),
   // Nouvelles stations
-  'Port des Brumes':          POOL_CRIMINEL,
-  'Forge Alpha':              POOL_INDUSTRIEL,
-  'Le Sanctuaire des Dérives': POOL_LUXE,
-  'Sanctum Machina':          POOL_SCIENTIFIQUE,
-  'La Bulle':                 POOL_SCIENTIFIQUE,
-  'La Forge des Damnés':      POOL_CRIMINEL,
+  'Port des Brumes':          poolCriminel(),
+  'Forge Alpha':              poolIndustriel(),
+  'Le Sanctuaire des Dérives': poolLuxe(),
+  'Sanctum Machina':          poolScientifique(),
+  'La Bulle':                 poolScientifique(),
+  'La Forge des Damnés':      poolCriminel(),
+  }
 }
 
 export function getEnemyForStation(stationName: string, depth: number, day: number): Enemy {
-  const pool = STATION_POOL_MAP[stationName]
+  const pool = stationPoolMap()[stationName]
   if (!pool) return getEnemyForDepth(depth, day)
   const tier: 'low' | 'mid' | 'high' = depth <= 2 ? 'low' : depth <= 5 ? 'mid' : 'high'
   const arr = pool[tier]

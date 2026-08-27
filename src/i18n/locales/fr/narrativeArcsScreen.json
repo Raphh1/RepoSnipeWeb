@@ -1,0 +1,14 @@
+{
+  "header": "ARCS NARRATIFS",
+  "arcLabel": "— ARC NARRATIF —",
+  "step": "Étape {{current}}/{{max}}",
+  "continue": "Continuer",
+  "blockedTitle": "⚠ PRÉREQUIS NON REMPLIS",
+  "completed": "★ Arc complété !",
+  "back": "← Retour",
+  "empty": "Aucun arc narratif disponible pour l'instant. Explore davantage le secteur.",
+  "available": "DISPONIBLES",
+  "currentStep": "Étape actuelle : {{title}}",
+  "seeDetails": "→ Cliquer pour voir les détails",
+  "completedSection": "COMPLÉTÉS"
+}

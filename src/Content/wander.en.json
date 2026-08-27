@@ -1,0 +1,450 @@
+{
+  "low": [
+    {
+      "setup": "A kid has been following you for three corridors. He's waiting for you to stop. He's got something to sell, or to steal.",
+      "choices": [
+        { "label": "Turn around and ask what he wants", "flavor": "He sells you a tip about a nearby cache. It's real information. He was in the network before.", "outcome": "credits_medium" },
+        { "label": "Ignore him and keep walking", "flavor": "He stops. He's waiting for someone else.", "outcome": "nothing" },
+        { "label": "Confront him directly", "flavor": "He runs off. His hands had been in your jacket for two corridors.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A traveling merchant sells things of dubious quality from a cart. 'Guaranteed authentic, certified original.'",
+      "choices": [
+        { "label": "Buy something", "flavor": "It's counterfeit. Functional. You'd have paid three times as much elsewhere.", "outcome": "item_common+lose_credits_tiny" },
+        { "label": "Haggle aggressively", "flavor": "He enjoys the game. You end up with something decent for very little.", "outcome": "item_rare+lose_credits_tiny" },
+        { "label": "Call out his counterfeits", "flavor": "He vanishes in three seconds. The cart stays. You can take what you want.", "outcome": "item_common+rep_minus_tiny" }
+      ]
+    },
+    {
+      "setup": "Someone drew a simplified map of the zone on a wall — danger zones, resource zones, obscure symbols.",
+      "choices": [
+        { "label": "Memorize the map", "flavor": "The marked resource zones turn out to be accurate. Someone who really knows this place made this.", "outcome": "credits_small+rep_tiny" },
+        { "label": "Copy the map onto paper", "flavor": "You've got it. The information will spread less if it stays in your pocket.", "outcome": "credits_medium" }
+      ]
+    },
+    {
+      "setup": "Two people make a quick exchange at a crossroads. One leaves with something. The other leaves with money.",
+      "choices": [
+        { "label": "Approach the one with the something", "flavor": "She refuses to talk. But she assesses your danger level. She decides you're acceptable. She offers you something else.", "outcome": "item_common+rep_tiny" },
+        { "label": "Approach the one with the money", "flavor": "He was looking for something else. You might have what he needs. Quick transaction.", "outcome": "credits_small+item_common" },
+        { "label": "Do nothing — observe", "flavor": "There will be other exchanges. This zone is active.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "An informal bar — a few crates, a barrel as a counter, and a woman selling something hot that resembles coffee.",
+      "choices": [
+        { "label": "Order and sit down", "flavor": "The hot stuff doesn't taste like anything known. Still comforting. She's chatty. You learn things.", "outcome": "stamina_full+rep_small+lose_credits_tiny" },
+        { "label": "Order and listen to the other patrons", "flavor": "They talk. People in bars always talk too much if you know when to shut up.", "outcome": "credits_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "An old scavenger repairs something ancient with modern parts. A strange hybrid that works anyway.",
+      "choices": [
+        { "label": "Ask him what it is", "flavor": "A pre-war navigation system. He's been restoring it for ten years. He explains what it used to map.", "outcome": "rep_small+item_rare" },
+        { "label": "Offer to buy the object", "flavor": "He refuses. But he has other things to sell. Stuff he's picked up along the way.", "outcome": "item_common+lose_credits_small" }
+      ]
+    },
+    {
+      "setup": "A crowd gathers around an argument — not violent yet, but close.",
+      "choices": [
+        { "label": "Step in to calm things down", "flavor": "Both parties accept the unexpected arbitration. One of them thanks you more concretely than the other.", "outcome": "rep_medium+credits_small" },
+        { "label": "Take advantage of the distraction", "flavor": "Everyone's watching the argument. Not you.", "outcome": "credits_small+rep_minus_tiny" },
+        { "label": "Watch the argument through to its natural end", "flavor": "It resolves itself. Crowds like this disperse fast.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A guy offers you information in exchange for an unspecified favor — payable later.",
+      "choices": [
+        { "label": "Accept without knowing what it is", "flavor": "The information is good. The favor will come due at an inconvenient time. That's the deal.", "outcome": "credits_medium+rep_minus_tiny" },
+        { "label": "Refuse — vague debts are traps", "flavor": "He shrugs. 'Maybe you're right.'", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A refugee from the latest purge hands you a photo of a station you don't recognize. 'It still existed three months ago.' He's not looking for pity. He's looking for someone who remembers it.",
+      "choices": [
+        { "label": "Listen to his story", "flavor": "He talks for a long time. What he describes matches nothing in the official databases. He gives you something in exchange for your attention.", "outcome": "credits_small+rep_small" },
+        { "label": "Give him credits without listening", "flavor": "He takes the money. He watches you leave with something between relief and disappointment.", "outcome": "lose_credits_small+rep_small" },
+        { "label": "Move on — you don't have time for other people's stories", "flavor": "He keeps the photo in his hand. He's waiting for someone else.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "An independent technician has set up his workshop in a corner of the corridor. 'Quick tune-up, fair price, decent quality.' He seems to know what he's doing. Roughly.",
+      "choices": [
+        { "label": "Let him work (full tune-up)", "flavor": "Twenty minutes later, everything runs better than before. In places you'd forgotten about.", "outcome": "stamina_full+lose_credits_small" },
+        { "label": "Haggle the price down", "flavor": "He agrees to half. The work is half-done. He's honest about that.", "outcome": "stamina_small+lose_credits_tiny" },
+        { "label": "Politely decline", "flavor": "He shrugs. 'Come back when it breaks.'", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A commercial delivery drone glitches in front of you. Its compartment opens and the cargo starts sliding toward the floor.",
+      "choices": [
+        { "label": "Pick up what's falling", "flavor": "Components, rations, an unidentified item. The drone flies off as if nothing happened.", "outcome": "item_common+rep_minus_tiny" },
+        { "label": "Report the incident to the station operator", "flavor": "He thanks you officially. This gesture circulates in circles that value reliable people.", "outcome": "rep_small" },
+        { "label": "Photograph the scene and move on", "flavor": "Proof the company's drones are faulty. Someone will pay for that.", "outcome": "credits_tiny" }
+      ]
+    },
+    {
+      "setup": "A kid about ten years old plays alone with magnetic cards, reciting probabilities out loud. He knows exactly what he's doing.",
+      "choices": [
+        { "label": "Play a round with him", "flavor": "He teaches you a calculation system you hadn't seen. You lose. Worth it.", "outcome": "rep_small+stamina_small" },
+        { "label": "Ask him where he learned that", "flavor": "His father was a trajectory mathematician. He then points you to a shortcut commercial shuttles use.", "outcome": "credits_small" },
+        { "label": "Keep walking", "flavor": "He doesn't look up. He was already counting on you passing by.", "outcome": "nothing" }
+      ]
+    }
+  ],
+  "mid": [
+    {
+      "setup": "A stranger sits across from you in a bar and puts something on the table. A file. He watches you.",
+      "choices": [
+        { "label": "Open the file", "flavor": "Your file. He knows things about you. He wants something in exchange for discretion.", "outcome": "lose_credits_medium+rep_small" },
+        { "label": "Push the file back without opening it", "flavor": "He's surprised. 'You're not scared.' 'I know what's in that file.' He leaves. You might have bluffed.", "outcome": "rep_medium" },
+        { "label": "Attack before he speaks", "flavor": "Violent. Effective. And now you have his file on you.", "outcome": "combat_easy+credits_small" }
+      ]
+    },
+    {
+      "setup": "A local gang tests newcomers — not aggressively, just an imposing presence in your path.",
+      "choices": [
+        { "label": "Pay the unspoken toll", "flavor": "You give them something. They step aside. Next time it'll be cheaper because they'll recognize you.", "outcome": "lose_credits_small+rep_tiny" },
+        { "label": "Walk past while ostentatiously ignoring them", "flavor": "They appreciate the boldness, or the ignorance. Either way they step aside.", "outcome": "rep_small" },
+        { "label": "Look them in the eye and wait", "flavor": "A long silence. Someone in the group laughs. The tension dissolves.", "outcome": "rep_medium" },
+        { "label": "Draw your weapon", "flavor": "That was a terrible idea, or a very good one. Both are possible here.", "outcome": "combat_medium" }
+      ]
+    },
+    {
+      "setup": "A coded message on a mural — an address, a time, a date. Three hours from now.",
+      "choices": [
+        { "label": "Show up at the stated time", "flavor": "An organized exchange. They were looking for someone reliable. You arrive, you look the part.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Go there now to scout ahead", "flavor": "You've got two hours' lead. What you find there tells you whether you really want to be there at the stated time.", "outcome": "item_rare+rep_small" },
+        { "label": "Ignore it — coded meetups in back alleys rarely lead anywhere simple", "flavor": "Wise. Probably wise.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "An informant someone recommended to you. He looks at you like someone sold him the wrong merchandise.",
+      "choices": [
+        { "label": "Talk to him normally and see what happens", "flavor": "He relaxes. He was expecting someone more dangerous. You get good information at a fair price.", "outcome": "credits_small+rep_small" },
+        { "label": "Play the part of someone more dangerous", "flavor": "He buys the act. He lowers his price out of fear. Effective, and a little shameful.", "outcome": "credits_medium+rep_minus_tiny" }
+      ]
+    },
+    {
+      "setup": "A local faction is recruiting — a table set up, a sign, people approaching and leaving.",
+      "choices": [
+        { "label": "Approach and listen to the pitch", "flavor": "A well-trained recruiter. The pitch is good. The reality of what they're asking is less glamorous.", "outcome": "rep_small+credits_small" },
+        { "label": "Approach and refuse openly", "flavor": "He tries to understand why. The conversation turns into a negotiation. You come out of it with something.", "outcome": "rep_medium+credits_tiny" },
+        { "label": "Walk past without looking", "flavor": "Recruiters note who pays attention and who doesn't. You didn't catch their interest.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A duel is about to happen between two people. Everyone backs away. Someone has to arbitrate.",
+      "choices": [
+        { "label": "Impose yourself as arbiter", "flavor": "Your intervention postpones the duel. Both parties now have to convince you their cause is just. That's information.", "outcome": "rep_medium+credits_small" },
+        { "label": "Stay to watch", "flavor": "The duel happens. The winner is generous in victory. He shares something with the witnesses.", "outcome": "credits_small+rep_tiny" },
+        { "label": "Leave before it starts", "flavor": "Duels sometimes involve nearby innocents. Leaving is a reasonable precaution.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A reformed ship's doctor sells augmentations in a discreet corridor. 'Nothing illegal, technically.' His hands are clean. His smile, less so.",
+      "choices": [
+        { "label": "Buy a stabilization module", "flavor": "The installation is quick, roughly clean. It holds. For now.", "outcome": "stamina_full+item_rare+lose_credits_medium" },
+        { "label": "Buy medicine from him instead", "flavor": "Less risky. Reliability unknown. Fair price for zones where pharmacies don't ask questions.", "outcome": "item_common+lose_credits_small" },
+        { "label": "Pass — back-alley doctors are traps", "flavor": "Maybe. Probably wise in this particular spot.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A man in a hurry asks you to watch a package for an hour. 'I'll be back. Don't touch anything. Here's a hundred credits.' He's gone before you can answer.",
+      "choices": [
+        { "label": "Watch the package honestly", "flavor": "He comes back exactly on time. He gives you double. 'You didn't open it.' It wasn't a question.", "outcome": "credits_medium+rep_small" },
+        { "label": "Discreetly open the package", "flavor": "Classified data. Three people are looking for a copy. You now have one. Word will get out.", "outcome": "item_rare+credits_small+rep_minus_small" },
+        { "label": "Leave — not your problem", "flavor": "The package stays there. Someone else will find it. Or not.", "outcome": "rep_minus_tiny" }
+      ]
+    },
+    {
+      "setup": "An informant being paid by two factions at once offers you his services. He's visibly very busy and slightly panicked.",
+      "choices": [
+        { "label": "Hire him normally", "flavor": "He gives you what he's got. Good information, partly true, carefully filtered.", "outcome": "credits_medium+rep_tiny" },
+        { "label": "Use him to sell false information to his clients", "flavor": "He plays along enthusiastically. Both factions now have false data. You have money.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Report him to one of the two factions", "flavor": "They appreciate it. His career as an informant ends. You're on their good list now.", "outcome": "rep_medium+credits_small" }
+      ]
+    },
+    {
+      "setup": "A known fence in the area sells at rock-bottom prices — too low. He's liquidating everything. Someone's coming for him soon, and he knows you've figured it out.",
+      "choices": [
+        { "label": "Buy quickly before it shuts down", "flavor": "Fair price for hot goods. The quality's there. The provenance is murky.", "outcome": "item_rare+lose_credits_small" },
+        { "label": "Warn him you saw the people coming", "flavor": "He looks at you differently. He disappears. He left you something as thanks.", "outcome": "credits_medium+rep_small" },
+        { "label": "Move along", "flavor": "You don't get involved. What happened next, you'll never know.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A plainclothes military officer has been watching you for a while. He's bad at it. His posture gives him away.",
+      "choices": [
+        { "label": "Approach him directly — 'You've been following me for three corridors.'", "flavor": "He drops the act. He wants to talk to you about someone you might both know.", "outcome": "rep_medium+credits_medium" },
+        { "label": "Deliberately lose him", "flavor": "He loses your trail. He'll note that you were hard to follow. Not a problem in every context.", "outcome": "rep_small" },
+        { "label": "Carry on normally and let him follow", "flavor": "He notes your routines. What he does with that depends on who he really is.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A lender approaches you with an unsolicited offer. 'I saw your situation. I can help.' He seems honest. Honest lenders are rare.",
+      "choices": [
+        { "label": "Politely decline", "flavor": "He respects the refusal. He gives you his frequency 'just in case'. The pressure will come later.", "outcome": "rep_tiny" },
+        { "label": "Take the money — debt now beats misery today", "flavor": "The money comes fast. The terms come with it. Not exactly what he'd said.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Ask him why he's approaching you specifically", "flavor": "He has his sources. What he knows about you, and why he thinks you'll pay back — both are instructive.", "outcome": "rep_small" }
+      ]
+    },
+    {
+      "setup": "A diplomat on a civilian mission is visibly out of his depth. His mission went badly. He's looking for someone to talk to.",
+      "choices": [
+        { "label": "Listen — distressed diplomats are gold mines of information", "flavor": "He talks too long. What he lets slip goes far beyond what he meant to share. Useful.", "outcome": "credits_medium+rep_small" },
+        { "label": "Offer him practical help", "flavor": "He needed someone who knows the station. What you make easier for him creates a favorable obligation.", "outcome": "rep_large+lose_credits_tiny" },
+        { "label": "Pass — diplomats in trouble create diplomatic problems", "flavor": "Wise.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A rumor is going around about a recently discovered treasure in the station — several versions circulate, all different.",
+      "choices": [
+        { "label": "Cross-reference the versions to find the truth", "flavor": "Half the people repeat what they heard. One detail comes up in every version.", "outcome": "credits_medium+rep_small" },
+        { "label": "Search directly without wasting time listening", "flavor": "You find something. Not what the rumor described. Still worth something.", "outcome": "item_rare+lose_hp_tiny" },
+        { "label": "Ignore it — station treasures are always already taken", "flavor": "Probably true. Probably.", "outcome": "nothing" }
+      ]
+    }
+  ],
+  "high": [
+    {
+      "setup": "Someone who knows your name greets you like old friends. You don't recognize him.",
+      "choices": [
+        { "label": "Play along — act like you remember", "flavor": "He talks about 'what you did together'. You have no memory of it but the details are convincing. He gives you something.", "outcome": "credits_medium+rep_small" },
+        { "label": "Admit you don't recognize him", "flavor": "He's surprised. He shuts down. He leaves. You may never know.", "outcome": "nothing" },
+        { "label": "Question him about what he knows about you", "flavor": "He assesses. If you don't recognize him, you're not the one he's looking for. Or you're a better actor than him.", "outcome": "rep_small" }
+      ]
+    },
+    {
+      "setup": "A death happened here recently — not an accident, people are talking, but the details change depending on who's telling it.",
+      "choices": [
+        { "label": "Investigate the death", "flavor": "You piece together the story. What you find is useful to someone who'll pay to keep it quiet.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Ignore it — other people's deaths are rarely simple matters", "flavor": "Wise. Extremely wise in this particular place.", "outcome": "rep_tiny" },
+        { "label": "Talk to witnesses to understand the threat", "flavor": "What happened here could happen to you. The details let you avoid it.", "outcome": "rep_small+stamina_small" }
+      ]
+    },
+    {
+      "setup": "A man is paid to guard a door. He's bored. He's also badly overpaid for what he's doing.",
+      "choices": [
+        { "label": "Talk to him to learn what's behind it", "flavor": "He talks. Bored people talk. What he describes is worth more than what he's supposed to protect.", "outcome": "credits_medium+rep_small" },
+        { "label": "Pay him to look away for two minutes", "flavor": "He weighs the risk. He takes the money. Exactly two minutes.", "outcome": "item_rare+lose_credits_small" },
+        { "label": "Look for an alternate entrance", "flavor": "There's always one in places that need it. You find it.", "outcome": "credits_small+item_common" }
+      ]
+    },
+    {
+      "setup": "A message on a private frequency from an anonymous source: 'Don't stay there. In ten minutes it's going to heat up.'",
+      "choices": [
+        { "label": "Leave immediately", "flavor": "Sure enough. Ten minutes later something happens where you were standing. You find out later.", "outcome": "rep_small+stamina_small" },
+        { "label": "Stay to see what happens", "flavor": "An operation. Armed people. You're in the wrong spot.", "outcome": "combat_hard+credits_medium" },
+        { "label": "Try to find out who warned you", "flavor": "Someone's been watching you long enough to want you alive. That's interesting.", "outcome": "rep_medium" }
+      ]
+    },
+    {
+      "setup": "A section of the station is clearly under a faction's control — markings, familiar faces, territorial body language.",
+      "choices": [
+        { "label": "Walk through normally, ignoring the markings", "flavor": "They let you pass. Your confidence, or your obliviousness, protected you this time.", "outcome": "rep_small" },
+        { "label": "Verbally negotiate access", "flavor": "They appreciate being asked. You pass with an informal obligation attached.", "outcome": "rep_medium+rep_minus_tiny" },
+        { "label": "Go around the zone", "flavor": "Longer. Safer. Sometimes that's the right call.", "outcome": "lose_hp_tiny" }
+      ]
+    },
+    {
+      "setup": "A faction commander you recognize by reputation sits alone at a table. He's seen you. He hasn't called his men.",
+      "choices": [
+        { "label": "Go talk to him directly", "flavor": "He appreciates the boldness. The conversation is short, precise, and leaves you with something to think about.", "outcome": "rep_large+credits_medium" },
+        { "label": "Ignore him and move on", "flavor": "He notes your face. Not necessarily a bad sign — people who don't look for trouble interest him too.", "outcome": "rep_small" },
+        { "label": "Watch him from a discreet spot", "flavor": "He's waiting for someone. Someone doesn't show. He leaves with an expression that doesn't bode well for someone.", "outcome": "credits_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "An assassination is being set up — you read it in the details, the angles, the positions. The target doesn't know yet.",
+      "choices": [
+        { "label": "Warn the target discreetly", "flavor": "She's surprised. She leaves without looking at you. Later you receive something from an anonymous messenger.", "outcome": "credits_large+rep_medium" },
+        { "label": "Warn the assassins that you've seen them", "flavor": "They assess whether you're a problem. They decide you're not, yet. They leave. The target isn't there anymore either.", "outcome": "credits_medium+rep_minus_small" },
+        { "label": "Do nothing — not your problem", "flavor": "You walk away. Later, someone is dead. Maybe not who you think.", "outcome": "nothing" },
+        { "label": "Foil the assassination directly", "flavor": "The clash is brief. The assassins leave. The target lives. Her gratitude is real and measurable.", "outcome": "combat_hard+rep_large+credits_medium" }
+      ]
+    },
+    {
+      "setup": "A signal on an unknown frequency broadcasts from a specific spot in the station. Short, repetitive. Artificial but not official.",
+      "choices": [
+        { "label": "Locate the source of the signal", "flavor": "A homemade transmitter in a bulkhead. What it's sending, to whom, and why — three questions each worth something.", "outcome": "credits_large+item_rare" },
+        { "label": "Transmit a reply on the same frequency", "flavor": "The signal stops. Ten minutes later, someone arrives where you're standing. They look surprised.", "outcome": "rep_medium+credits_medium" },
+        { "label": "Ignore it — stray station signals have no known author", "flavor": "Wise. Unidentified signals and their authors can be as dangerous as the curiosity they generate.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A secondary faction leader contacts you directly. 'I've got a job. Clean. Fast. A favor in return.' He doesn't explain the favor.",
+      "choices": [
+        { "label": "Accept the job without asking questions", "flavor": "He appreciates the discretion. The job is exactly what he said. The favor turns out useful later.", "outcome": "credits_large+rep_medium" },
+        { "label": "Negotiate details before accepting", "flavor": "He answers some questions. Not all. What he clarifies is reassuring. What he avoids, less so.", "outcome": "credits_medium+rep_small" },
+        { "label": "Refuse — factions and their favors are traps", "flavor": "He notes the refusal. He won't hold it against you this time. He keeps the information for later.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A local power vacuum just occurred — someone key in the area disappeared this morning. Everyone's waiting to see what fills the void.",
+      "choices": [
+        { "label": "Quickly position yourself as a neutral contact", "flavor": "Several parties come looking for you in the hours that follow. Neutrality in a power vacuum is a rare commodity.", "outcome": "rep_large+credits_medium" },
+        { "label": "Find out why the person disappeared", "flavor": "The answer has value to several factions. What you do with it will define you in this sector.", "outcome": "credits_large+rep_minus_small" },
+        { "label": "Leave the zone before it gets complicated", "flavor": "Wise. Power vacuums attract people settling scores in passing.", "outcome": "stamina_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A wanted notice about you is posted in the zone — not official, no known faction. Just your name and a reward.",
+      "choices": [
+        { "label": "Tear down the notice quickly", "flavor": "Two people already saw you. The notice is gone. Both people are still around.", "outcome": "rep_minus_small+stamina_small" },
+        { "label": "Leave the notice and find out who posted it", "flavor": "The source is a faction you don't know yet. What they want from you isn't what the notice says.", "outcome": "rep_medium+credits_small" },
+        { "label": "Leave the zone immediately", "flavor": "Cautious. The zone will get dangerous in the hours that follow.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "An encrypted message was sent on your frequency. The content is ambiguous. The context suggests it wasn't meant for you.",
+      "choices": [
+        { "label": "Reply to the message", "flavor": "Someone on the other end realizes the mistake. They assess whether you're a problem. They decide to explain what it's about.", "outcome": "rep_medium+credits_medium" },
+        { "label": "Analyze the message to understand the context", "flavor": "What it contains is a fragment of a larger operation. On its own, it's worth something.", "outcome": "credits_large" },
+        { "label": "Delete the message and ignore it", "flavor": "You received nothing. No one can prove otherwise.", "outcome": "rep_tiny" }
+      ]
+    }
+  ],
+  "generic": [
+    {
+      "setup": "A corridor you hadn't taken before leads somewhere unexpected.",
+      "choices": [
+        { "label": "Explore", "flavor": "A hidden room, a shortcut, or a spot no one's claimed. Useful in its own way.", "outcome": "credits_small+item_common" },
+        { "label": "Keep going", "flavor": "Another day, maybe.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "Someone drops something and walks on without noticing.",
+      "choices": [
+        { "label": "Pick it up and return it", "flavor": "He's grateful in a way that goes beyond the lost item.", "outcome": "rep_medium+credits_tiny" },
+        { "label": "Pick it up and keep it", "flavor": "Ownership transferred by accident.", "outcome": "item_common" },
+        { "label": "Leave it", "flavor": "It's not yours to pick up what isn't yours.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A local offers to show you something interesting they discovered.",
+      "choices": [
+        { "label": "Accept and follow him", "flavor": "It really is interesting. A hidden bit of architecture, a forgotten access point, something of value.", "outcome": "credits_medium+item_rare" },
+        { "label": "Politely decline", "flavor": "He shrugs. He'll show it to someone else.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "You come across someone who clearly needs help but isn't asking for any.",
+      "choices": [
+        { "label": "Offer help without being asked", "flavor": "He's surprised. He accepts after hesitating. What he was carrying — literally — feels lighter with two.", "outcome": "rep_medium+credits_small" },
+        { "label": "Keep going and let him manage", "flavor": "He'll manage. Or not. Not your business today.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A rumor is going around this sector — something happened, something's going to happen, someone vanished or appeared.",
+      "choices": [
+        { "label": "Look into the rumor", "flavor": "Half is true. The other half is invented to protect the true half. You untangle the two.", "outcome": "rep_small+credits_small" },
+        { "label": "Ignore the rumors", "flavor": "Most rumors change nothing for you.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A quiet spot in an otherwise noisy station — a few unexpected minutes of calm.",
+      "choices": [
+        { "label": "Sit down and rest", "flavor": "Spatial quiet is rare. You enjoy it. You feel better afterward.", "outcome": "stamina_full+hp_tiny" },
+        { "label": "Find out why it's quiet here", "flavor": "There's a reason. Not necessarily worrying. But it's there.", "outcome": "item_rare+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "You find a note — a word, a few sentences, left by someone for someone else.",
+      "choices": [
+        { "label": "Read the note", "flavor": "Intimate, private, not meant for you. It tells you something about the place you're in.", "outcome": "rep_small" },
+        { "label": "Put it back where you found it", "flavor": "Someone was expecting this note. It's still there for them.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "Something fixable — a broken thing you could do something about with what you have.",
+      "choices": [
+        { "label": "Fix it", "flavor": "It holds. Someone who would've used it tonight will be grateful without knowing it was you.", "outcome": "rep_medium" },
+        { "label": "Ignore it", "flavor": "Not your responsibility.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "An obsolete service automaton still runs in a transit corridor. It dispenses reconstituted drinks no one orders anymore.",
+      "choices": [
+        { "label": "Order something", "flavor": "It produces something hot. 90% reconstituted. But hot. It sends you a thank-you signal that might just be residual code.", "outcome": "stamina_small+lose_credits_tiny" },
+        { "label": "Examine the automaton up close", "flavor": "Its maintenance panel has been open for weeks. What's still inside is worth something.", "outcome": "item_common+credits_tiny" },
+        { "label": "Walk past without stopping", "flavor": "It logs your passage anyway. Gives it something to do.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A handwritten letter lies on the ground in a busy corridor. No one's bothered with it.",
+      "choices": [
+        { "label": "Read it", "flavor": "A request for help. An address. Someone waiting for anyone to read it.", "outcome": "rep_small+credits_tiny" },
+        { "label": "Pick it up and look for the recipient nearby", "flavor": "He's in the next corridor. His reaction to learning you read the letter depends on its content.", "outcome": "rep_medium" },
+        { "label": "Leave it", "flavor": "Someone else will find it. Maybe.", "outcome": "nothing" }
+      ]
+    },
+    {
+      "setup": "A musician sings in an alcove with a voice that doesn't match his looks at all. People walk past without stopping.",
+      "choices": [
+        { "label": "Stop and listen", "flavor": "He sings an Old Earth song whose original version you'd never heard. He lets you stay for a long while.", "outcome": "stamina_full+rep_small" },
+        { "label": "Leave him some credits", "flavor": "He looks up. He doesn't say thanks. He plays better afterward.", "outcome": "lose_credits_tiny+rep_small" },
+        { "label": "Talk to him between songs", "flavor": "He's more interesting than his situation suggests. He knows people and places. He talks about it freely.", "outcome": "credits_small+rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A couple argues loudly in a corridor. Passersby avert their eyes. The tone rises.",
+      "choices": [
+        { "label": "Step in calmly to defuse it", "flavor": "They both turn on you together, which ends up making them laugh. The argument resumes more gently after you leave.", "outcome": "rep_medium" },
+        { "label": "Keep your distance and wait it out", "flavor": "It resolves without you. Some arguments don't need an audience.", "outcome": "nothing" },
+        { "label": "Offer your unofficial mediation", "flavor": "One of them accepts. The other, less so. You learn something useful about their situation trying to help.", "outcome": "rep_small+credits_tiny" }
+      ]
+    },
+    {
+      "setup": "An informal barter market — people trading objects without credits.",
+      "choices": [
+        { "label": "Join in — offer something", "flavor": "The exchange is honest. What you get in return is different but equivalent.", "outcome": "item_common+item_rare" },
+        { "label": "Look for a good deal without giving much", "flavor": "The barter community remembers who's fair. And who isn't.", "outcome": "item_rare+rep_minus_tiny" }
+      ]
+    },
+    {
+      "setup": "A network of informal passages connecting several sections without going through the official corridors.",
+      "choices": [
+        { "label": "Take them", "flavor": "Faster. More discreet. And you cross paths with people who use these passages out of necessity — instructive.", "outcome": "rep_small+credits_tiny" },
+        { "label": "Stick to the official paths", "flavor": "Safer. You know exactly where the cameras are.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A malfunctioning holographic ad projects fragments of a pre-war broadcast. Faces that match no current era.",
+      "choices": [
+        { "label": "Watch the fragments to the end", "flavor": "A lost cultural context. A song. A recurring face you can't identify. It stays with you.", "outcome": "stamina_small+rep_tiny" },
+        { "label": "Report the technical fault", "flavor": "A technician arrives. He thanks you absent-mindedly. He'd known for two weeks.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A smell you recognize from something specific in your past drifts through the corridor with no apparent source.",
+      "choices": [
+        { "label": "Follow it", "flavor": "It leads to a makeshift kitchen. Someone's cooking something real in a station where everything is reconstituted.", "outcome": "hp_small+stamina_small" },
+        { "label": "Stop for a moment", "flavor": "The memory it summons is vivid. It gives you something the rest of the day didn't have.", "outcome": "stamina_full" }
+      ]
+    },
+    {
+      "setup": "A public terminal displays a message left by someone for 'whoever passes by here every morning'. You do.",
+      "choices": [
+        { "label": "Read the message", "flavor": "A farewell. A debt repaid from a distance. It's not for you but it matters anyway.", "outcome": "rep_small" },
+        { "label": "Delete the message after reading it", "flavor": "It's been read. That's all it asked for.", "outcome": "rep_tiny" }
+      ]
+    },
+    {
+      "setup": "A child hands you something without explanation and runs off. A small, closed, unmarked object.",
+      "choices": [
+        { "label": "Open the object immediately", "flavor": "An encrypted message, a small valuable, or both. Someone was testing you or trusting you.", "outcome": "item_rare+rep_small" },
+        { "label": "Chase after the child to return it", "flavor": "He was already far away. He was watching to see if you would. He saw you run. He nods from the far end of the corridor.", "outcome": "rep_medium" },
+        { "label": "Set it aside and keep going", "flavor": "You'll open it later. Maybe.", "outcome": "item_common" }
+      ]
+    },
+    {
+      "setup": "An old soldier turned civilian security guard asks for your help with something trivial. He has no one else to ask.",
+      "choices": [
+        { "label": "Help without making a fuss", "flavor": "He's grateful in a direct way. He shows you something in the station no one else would have shown you.", "outcome": "rep_medium+item_common" },
+        { "label": "Politely decline — you don't have time", "flavor": "He doesn't hold it against you. He finds someone else later.", "outcome": "nothing" }
+      ]
+    }
+  ]
+}

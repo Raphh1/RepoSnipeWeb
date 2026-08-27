@@ -1,0 +1,48 @@
+{
+  "subtitle": "THE VOID HAS CHOSEN FOR YOU",
+  "tier": {
+    "bad": "☠ HARD",
+    "balanced": "◆ BALANCED",
+    "good": "★ ADVANTAGEOUS"
+  },
+  "warnings": {
+    "dailyDebt": "⚠ -{{amount}} cr per day",
+    "travelCreditCost": "⚠ -{{amount}} cr per trip",
+    "cargoDegrades": "⚠ 30% chance to lose cargo while traveling",
+    "cursedEvents": "⚠ Positive events have a 50% chance to fizzle",
+    "piratesDoubled": "⚠ Pirates twice as frequent",
+    "cannotBuyWeapons": "⚠ Cannot buy weapons",
+    "peacefulBan": "⚠ Banned from peaceful stations"
+  },
+  "stats": {
+    "credits": "Credits",
+    "fuel": "Fuel",
+    "hp": "HP",
+    "stamina": "Stamina",
+    "station": "Station"
+  },
+  "runConditionsHeader": "◆ RUN CONDITIONS",
+  "rerollCount": "Reroll ({{count}})",
+  "difficulty": {
+    "easy": { "label": "Easy", "desc": "No modifiers" },
+    "normal": { "label": "Normal", "desc": "2 modifiers" },
+    "hard": { "label": "Hard", "desc": "3 debuffs only" }
+  },
+  "noModifiers": "No modifiers — a run with no extra constraints.",
+  "tag": {
+    "buff": "▲ BUFF",
+    "debuff": "▼ DEBUFF",
+    "mixed": "◆ MIXED"
+  },
+  "secretObjective": "★ SECRET OBJECTIVE",
+  "objectiveReward": "Reward: +{{pts}} legacy pts",
+  "start": "START → {{name}}",
+  "rerollClass_one": "Reroll class ({{count}} left)",
+  "rerollClass_other": "Reroll class ({{count}} left)",
+  "noRerollsLeft": "No more rerolls",
+  "legacyButton": "★ LEGACY — select the upgrades for this run",
+  "ptsToSpend": "· {{pts}} pts to spend",
+  "activeCount_one": "({{count}} active)",
+  "activeCount_other": "({{count}} active)",
+  "footer": "THE VOID AWAITS YOU"
+}

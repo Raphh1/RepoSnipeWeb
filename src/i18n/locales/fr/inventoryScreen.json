@@ -1,0 +1,22 @@
+{
+  "back": "← RETOUR",
+  "title": "INVENTAIRE",
+  "cargoHold": "SOUTE ({{count}} type{{plural}})",
+  "cargoEmpty": "Soute vide.",
+  "weapons": "ARMES ({{count}})",
+  "noWeapon": "Aucune arme.",
+  "damage": "Dégâts : {{min}}–{{max}} · Crit : {{crit}}%",
+  "selfDamage": "⚠ Self-dmg {{value}}% ({{min}}–{{max}})",
+  "unequip": "DÉSÉQUIPER",
+  "equip": "ÉQUIPER",
+  "armors": "ARMURES ({{count}})",
+  "noArmor": "Aucune armure.",
+  "defense": "Défense : {{value}}%",
+  "hpBonus": " · PV +{{value}}",
+  "armorEffect": {
+    "regen": "Régén +{{value}} PV/tour",
+    "thorns": "Épines {{value}}% renvoyés",
+    "immunity": "Absorbe 1 coup fatal",
+    "staminaBoost": "Stamina +{{value}}/tour"
+  }
+}

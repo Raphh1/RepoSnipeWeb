@@ -1,0 +1,30 @@
+{
+  "cat": {
+    "survie": "❤ SURVIE",
+    "combat": "⚔ COMBAT",
+    "commerce": "◆ COMMERCE",
+    "voyage": "⛽ VOYAGE",
+    "special": "★ SPÉCIAL"
+  },
+  "title": "HÉRITAGE",
+  "subtitlePreRun": "Achète et sélectionne les améliorations pour cette run",
+  "subtitlePermanent": "Améliorations permanentes entre les runs",
+  "pointsAvailable": "Points dispo : ",
+  "pointsEarned": "/ {{total}} gagnés",
+  "preRunHint": "Active ou désactive chaque amélioration pour cette run uniquement — elles restent acquises pour les prochaines.",
+  "firstRunHint": "Termine ta première run pour gagner des points d'héritage.",
+  "unlocked": "DÉBLOQUÉ",
+  "locked": "VERROUILLÉ",
+  "available": "DISPONIBLE",
+  "requires": "(requiert : {{name}})",
+  "active": "✓ ACTIF",
+  "inactive": "○ INACTIF",
+  "acquired": "ACQUIS",
+  "runHistory": "HISTORIQUE DES RUNS ({{count}})",
+  "victory": "★ VICTOIRE",
+  "death": "✕ MORT",
+  "runSummary": "J{{day}} · {{bosses}} boss · {{quests}} quêtes · {{stations}} stations",
+  "pointsGained": "· +{{pts}} pts",
+  "back": "← RETOUR",
+  "newRun": "NOUVELLE RUN"
+}

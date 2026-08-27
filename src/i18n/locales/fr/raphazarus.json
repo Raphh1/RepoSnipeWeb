@@ -1,0 +1,7 @@
+{
+  "drakhanos": { "name": "Drakhanos, Première Lame", "description": "La main droite de Raphazarus. On dit qu'il n'a jamais perdu un duel — parce qu'aucun adversaire n'a survécu pour en parler." },
+  "legionAcier": { "name": "La Légion d'Acier de Raphazarus", "description": "Une escouade soudée par 47 ans de guerre. Ils se battent comme un seul homme, et meurent comme personne." },
+  "vorne": { "name": "Vorne le Bourreau de l'Arc", "description": "Il exécutait les déserteurs pendant la Grande Guerre. Raphazarus l'a réveillé rien que pour toi." },
+  "soeurKaln": { "name": "Sœur Kaln, Veuve de Guerre", "description": "Elle a tout perdu dans la Fracture. Raphazarus lui a rendu un but : t'empêcher de finir ce qu'il a commencé." },
+  "spectre": { "name": "Le Spectre du Front Perdu", "description": "Un vétéran que la guerre n'a jamais laissé partir. Il frappe depuis des angles que tu ne vois pas venir." }
+}

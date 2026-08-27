@@ -1,0 +1,55 @@
+{
+  "back": "← BACK",
+  "title": "WIKI",
+  "tabs": {
+    "classes": "CLASSES",
+    "stations": "STATIONS",
+    "armes": "WEAPONS",
+    "armures": "ARMOR",
+    "factions": "FACTIONS",
+    "marchandises": "GOODS"
+  },
+  "tier": {
+    "bad": "HARD",
+    "good": "ADVANTAGEOUS",
+    "balanced": "BALANCED"
+  },
+  "classStart": "Start: {{station}} · {{credits}} cr · Fuel {{fuel}}/{{maxFuel}} · {{hp}} HP",
+  "danger": {
+    "safe": "SAFE",
+    "risky": "RISKY",
+    "dangerous": "DANGEROUS",
+    "war": "WAR"
+  },
+  "type": "Type: {{type}} · {{visited}}",
+  "visited": "✓ Visited",
+  "notVisited": "Not visited",
+  "goods": "Goods: {{list}}",
+  "weaponTier": "Tier {{tier}}",
+  "damage": "Damage: {{min}}–{{max}} · Crit: {{crit}}%",
+  "selfDamage": "⚠ Self-dmg {{value}}%",
+  "defense": "Defense: {{value}}%",
+  "hpBonus": " · +{{value}} HP",
+  "armorEffect": {
+    "regen": "Regen +{{value}} HP/turn",
+    "thorns": "Thorns {{value}}% reflected",
+    "immunity": "Absorbs 1 fatal hit",
+    "staminaBoost": "+{{value}} stamina/turn"
+  },
+  "memberTag": "MEMBER",
+  "cargoTag": "IN CARGO ×{{count}}",
+  "goods_medicaments": "Heals 30 HP. Medic class: sells for 50% more.",
+  "goods_medicamentsPremium": "Heals all HP.",
+  "goods_metauxBruts": "Industrial raw material.",
+  "goods_nourritureSynthetique": "+10 HP, +20 stamina if consumed.",
+  "goods_nourritureFraiche": "+20 HP, +20 stamina if consumed.",
+  "goods_composantsElectroniques": "Base of many tech markets.",
+  "goods_armesIllegales": "High profits, high risks.",
+  "goods_droguesDeSynthese": "Random effects if consumed. High profits.",
+  "goods_donneesVolees": "Highly sought at Nexus Aldara.",
+  "goods_metauxRares": "Needed for Tier 4+ armor.",
+  "goods_cristauxEnergetiques": "High-quality fuel.",
+  "goods_artefacts": "Can be consumed for a random effect.",
+  "goods_implants": "In demand everywhere. Do not swallow.",
+  "goods_or": "Universal value. Always profitable."
+}

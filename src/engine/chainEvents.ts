@@ -1,6 +1,8 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+const ce = (key: string) => i18n.t(key, { ns: 'chainEvents' })
 
 export type ChainEventType = 'reward' | 'threat' | 'info' | 'consequence' | 'mystery'
 export type ChainTrigger = 'boss_killed' | 'stalker_killed' | 'faction_loyal' | 'low_rep' | 'rich' | 'prison_escaped'
@@ -28,41 +30,47 @@ export function createChainEvent(trigger: ChainTrigger, gs: GameState): ChainEve
 
   switch (trigger) {
     case 'boss_killed': {
-      if (roll < 0.45) return {
-        id, trigger, triggerDay, type: 'reward', color: 'var(--gold)',
-        title: 'Prime de faction',
-        description: `Des représentants d'une faction locale t'ont retracé. Le boss que tu as éliminé avait une mise à prix non réclamée. Ils règlent la dette. +${rng(600, 1200)} cr · +5 réputation.`,
-        effect: { credits: rng(600, 1200), reputation: 5 },
+      if (roll < 0.45) {
+        const amount = rng(600, 1200)
+        return {
+          id, trigger, triggerDay, type: 'reward', color: 'var(--gold)',
+          title: ce('bossKilled.reward.title'),
+          description: i18n.t('bossKilled.reward.description', { ns: 'chainEvents', amount }),
+          effect: { credits: amount, reputation: 5 },
+        }
       }
       if (roll < 0.75) return {
         id, trigger, triggerDay, type: 'threat', color: 'var(--red)',
-        title: 'Représailles attendues',
-        description: `Les associés du boss ont retrouvé ta trace. Un message laissé au barman local : "Tu as tué quelqu'un qui avait des amis. On se souvient." Quelqu'un te surveille maintenant. -8 réputation.`,
+        title: ce('bossKilled.threat.title'),
+        description: ce('bossKilled.threat.description'),
         effect: { reputation: -8 },
       }
       return {
         id, trigger, triggerDay, type: 'mystery', color: 'var(--purple)',
-        title: 'Ce que le boss cachait',
-        description: `Dans les effets personnels du boss, un datapad crypté. Les données portent ton nom — et une date qui précède de trois semaines ton arrivée dans le secteur. Quelqu'un te suivait avant même l'affrontement.`,
+        title: ce('bossKilled.mystery.title'),
+        description: ce('bossKilled.mystery.description'),
       }
     }
 
     case 'stalker_killed': {
-      if (roll < 0.40) return {
-        id, trigger, triggerDay, type: 'reward', color: 'var(--gold)',
-        title: 'Le stalker avait des ennemis',
-        description: `Un intermédiaire sans visage t'aborde. Bref. Discret. "Il avait beaucoup d'ennemis. Tu nous as rendu service." Une bourse change de mains. +${rng(500, 900)} cr.`,
-        effect: { credits: rng(500, 900) },
+      if (roll < 0.40) {
+        const amount = rng(500, 900)
+        return {
+          id, trigger, triggerDay, type: 'reward', color: 'var(--gold)',
+          title: ce('stalkerKilled.reward.title'),
+          description: i18n.t('stalkerKilled.reward.description', { ns: 'chainEvents', amount }),
+          effect: { credits: amount },
+        }
       }
       if (roll < 0.70) return {
         id, trigger, triggerDay, type: 'mystery', color: 'var(--purple)',
-        title: 'Il ne travaillait pas seul',
-        description: `Un message anonyme, sans source traçable : "Tu as bien géré le problème. Mais tu dois savoir — il ne travaillait pas seul. Ce qu'il cherchait sur toi, d'autres continuent à chercher. Sois prudent."`,
+        title: ce('stalkerKilled.mystery.title'),
+        description: ce('stalkerKilled.mystery.description'),
       }
       return {
         id, trigger, triggerDay, type: 'info', color: 'var(--cyan)',
-        title: 'Qui l\'avait envoyé ?',
-        description: `Dans les registres de voyage du stalker, une piste. Une transaction financière depuis une station que tu connais. Quelqu'un a payé pour qu'on te retrouve. Tu ne sais pas encore pourquoi.`,
+        title: ce('stalkerKilled.info.title'),
+        description: ce('stalkerKilled.info.description'),
         effect: { reputation: -5 },
       }
     }
@@ -71,27 +79,27 @@ export function createChainEvent(trigger: ChainTrigger, gs: GameState): ChainEve
       const faction = gs.faction
       if (faction === 'faucons') return {
         id, trigger, triggerDay, type: 'reward', color: 'var(--red)',
-        title: 'Message de Cael — Les Faucons',
-        description: `"Les Faucons ne font pas dans les compliments. Mais le travail accompli mérite reconnaissance. Voilà ta part." Un paiement direct, propre. +1 200 cr.`,
+        title: ce('factionLoyal.faucons.title'),
+        description: ce('factionLoyal.faucons.description'),
         effect: { credits: 1200 },
       }
       if (faction === 'emporium') return {
         id, trigger, triggerDay, type: 'reward', color: 'var(--gold)',
-        title: 'Commission de Pistis — L\'Emporium',
-        description: `Un virement automatique. Froid, précis, sans commentaire. Puis un message de Pistis : "Efficacité notée. Continuez." +900 cr · +3 réputation.`,
+        title: ce('factionLoyal.emporium.title'),
+        description: ce('factionLoyal.emporium.description'),
         effect: { credits: 900, reputation: 3 },
       }
       if (faction === 'gardiens') return {
         id, trigger, triggerDay, type: 'reward', color: 'var(--cyan)',
-        title: 'Ravitaillement de Myrra — Les Gardiens',
-        description: `Un colis livré en ton nom. Médicaments, une unité de carburant, et un mot de Myrra : "Les Gardiens n'oublient pas les leurs. Reste en vie." +2 Médicaments · +1 carburant · +5 rép.`,
+        title: ce('factionLoyal.gardiens.title'),
+        description: ce('factionLoyal.gardiens.description'),
         effect: { cargo: { 'Médicaments': 2 }, fuel: 1, reputation: 5 },
       }
       // culte
       return {
         id, trigger, triggerDay, type: 'info', color: 'var(--purple)',
-        title: 'Paroles de Neva — Le Culte',
-        description: `Un extrait du Livre du Vide, chapitre non publié, envoyé personnellement par Neva. Les mots sont troublants. Tu ne sais pas encore si c'est une récompense ou un avertissement. +8 réputation.`,
+        title: ce('factionLoyal.culte.title'),
+        description: ce('factionLoyal.culte.description'),
         effect: { reputation: 8 },
       }
     }
@@ -99,20 +107,20 @@ export function createChainEvent(trigger: ChainTrigger, gs: GameState): ChainEve
     case 'low_rep': {
       if (roll < 0.40) return {
         id, trigger, triggerDay, type: 'consequence', color: 'var(--orange)',
-        title: 'Taxe informelle',
-        description: `L'Emporium a mis ton profil en alerte. Une commission "administrative" est prélevée automatiquement sur tes prochaines transactions. -200 cr.`,
+        title: ce('lowRep.consequence.title'),
+        description: ce('lowRep.consequence.description'),
         effect: { credits: -200 },
       }
       if (roll < 0.70) return {
         id, trigger, triggerDay, type: 'threat', color: 'var(--red)',
-        title: 'Mandat des Gardiens',
-        description: `Ton comportement a été suffisamment documenté pour justifier un mandat préventif. Les Gardiens ont officiellement enregistré ton dossier. Les stations affiliées ne t'accueilleront pas chaleureusement. -12 réputation.`,
+        title: ce('lowRep.threat.title'),
+        description: ce('lowRep.threat.description'),
         effect: { reputation: -12 },
       }
       return {
         id, trigger, triggerDay, type: 'info', color: 'var(--text-dim)',
-        title: 'Réputation qui précède',
-        description: `Un informateur a vendu ton profil de comportement sur le réseau noir. Les acheteurs sont multiples. Certains sont curieux. D'autres ont des raisons plus concrètes. -5 réputation.`,
+        title: ce('lowRep.info.title'),
+        description: ce('lowRep.info.description'),
         effect: { reputation: -5 },
       }
     }
@@ -120,20 +128,20 @@ export function createChainEvent(trigger: ChainTrigger, gs: GameState): ChainEve
     case 'rich': {
       if (roll < 0.45) return {
         id, trigger, triggerDay, type: 'consequence', color: 'var(--orange)',
-        title: 'Commission Emporium',
-        description: `L'Emporium surveille les flux financiers importants du secteur. Tes actifs ont déclenché une alerte. Une "frais de supervision" est prélevée. C'est légal selon l'Accord de Requiem. -500 cr.`,
+        title: ce('rich.consequence.title'),
+        description: ce('rich.consequence.description'),
         effect: { credits: -500 },
       }
       if (roll < 0.70) return {
         id, trigger, triggerDay, type: 'reward', color: 'var(--gold)',
-        title: 'Client fidèle',
-        description: `Un commerçant avec qui tu as régulièrement traité t'envoie une commission surprise. "Pour la fidélité. Le secteur manque de gens fiables." +350 cr.`,
+        title: ce('rich.reward.title'),
+        description: ce('rich.reward.description'),
         effect: { credits: 350 },
       }
       return {
         id, trigger, triggerDay, type: 'threat', color: 'var(--red)',
-        title: 'Profil financier compromis',
-        description: `Quelqu'un a mis ton profil financier en circulation sur le réseau noir. Montant estimé, dernières transactions, station actuelle. Des gens s'y intéressent. Des gens avec des projets. Reste vigilant. -5 réputation.`,
+        title: ce('rich.threat.title'),
+        description: ce('rich.threat.description'),
         effect: { reputation: -5 },
       }
     }
@@ -141,20 +149,20 @@ export function createChainEvent(trigger: ChainTrigger, gs: GameState): ChainEve
     case 'prison_escaped': {
       if (roll < 0.45) return {
         id, trigger, triggerDay, type: 'consequence', color: 'var(--red)',
-        title: 'Mandat d\'arrestation',
-        description: `Les Gardiens ont émis un mandat officiel suite à ton évasion. Distribué aux stations affiliées. Ta réputation dans le secteur prend un coup immédiat. -15 réputation.`,
+        title: ce('prisonEscaped.consequence.title'),
+        description: ce('prisonEscaped.consequence.description'),
         effect: { reputation: -15 },
       }
       if (roll < 0.75) return {
         id, trigger, triggerDay, type: 'reward', color: 'var(--cyan)',
-        title: 'Souvenir de cellule',
-        description: `Ton ancien codétenu t'a envoyé quelque chose. Un message : "Tu m'as appris à tenir. Voilà ce que je peux faire pour toi." Des provisions cachées à l'entrée de la station. +2 Médicaments · +1 carburant.`,
+        title: ce('prisonEscaped.reward.title'),
+        description: ce('prisonEscaped.reward.description'),
         effect: { cargo: { 'Médicaments': 2 }, fuel: 1 },
       }
       return {
         id, trigger, triggerDay, type: 'mystery', color: 'var(--purple)',
-        title: 'Ce que le gardien savait',
-        description: `Un gardien de prison te contact de façon anonyme. "J'ai vu ton dossier. Il y a des choses là-dedans que tu ignores sur toi-même. Des connexions que tu n'as pas faites. Si tu veux savoir — retrouve-moi." Pas de station. Pas de nom.`,
+        title: ce('prisonEscaped.mystery.title'),
+        description: ce('prisonEscaped.mystery.description'),
       }
     }
   }

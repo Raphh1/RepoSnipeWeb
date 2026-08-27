@@ -1,6 +1,9 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
+import { translateEnemyName } from './goodsI18n'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+const sk = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'stalker', ...params })
 
 export interface StalkerState {
   name: string
@@ -66,28 +69,10 @@ export interface StalkerEvent {
 export function rollStalkerEvent(gs: GameState, stalker: StalkerState): StalkerEvent | null {
   if (Math.random() > 0.65) return null  // pas toujours un signe
 
-  const signs1 = [
-    `Une silhouette dans la foule. Tu te retournes — personne. ${stalker.name} est dans ce secteur.`,
-    `Ton vaisseau a été touché pendant ton absence. Rien de volé. Juste la preuve qu'il pouvait.`,
-    `Un barman t'avertit à voix basse. Quelqu'un posait des questions sur toi. Le signalement correspond à ${stalker.name}.`,
-    `Une balle gravée sur ton siège de pilotage. Pas de message. Ça n'en a pas besoin.`,
-  ]
-  const signs2 = [
-    `Il était dans la station précédente. Il te suit. Tu ne lui échapperas pas comme ça.`,
-    `Quelqu'un a consulté tes registres de voyage. Heure et destination. ${stalker.name} connaît ta route.`,
-    `Tu entends son nom deux fois dans la même heure. Coincidence ou message.`,
-    `La porte de ton vaisseau a été forcée. La serrure refermée. Il voulait que tu saches.`,
-  ]
-  const signs3 = [
-    `Il est dans cette station. Tu le sais. Il sait que tu le sais.`,
-    `Tu l'as aperçu — une fraction de seconde avant qu'il disparaisse. Il ne cherche plus à se cacher.`,
-    `Trois personnes t'ont regardé partir ce matin. L'une d'elles travaillait pour lui.`,
-    `Il t'a envoyé un message. Quatre mots : "Je t'attends quelque part."`,
-  ]
-
-  const pool = stalker.threatLevel >= 3 ? signs3 : stalker.threatLevel >= 2 ? signs2 : signs1
+  const signsKey = stalker.threatLevel >= 3 ? 'signs3' : stalker.threatLevel >= 2 ? 'signs2' : 'signs1'
+  const pool = i18n.t(signsKey, { ns: 'stalker', name: stalker.name, returnObjects: true }) as string[]
   return {
-    title: `⚠ ${stalker.name}`,
+    title: `⚠ ${translateEnemyName(stalker.name)}`,
     description: pool[Math.floor(Math.random() * pool.length)],
     newStalkerState: { closingIn: true, daysSinceLastSeen: gs.day },
   }
@@ -115,26 +100,18 @@ export function getAvengingArrivalAmbushChance(stalker: StalkerState): number {
 // Texte de présence atmosphérique pour le hub
 export function getStalkerPresenceText(stalker: StalkerState): string {
   if (stalker.threatLevel >= 5) {
-    return "Il est devenu une légende noire. Des mercenaires l'accompagnent. Il ne te laissera pas partir."
+    return sk('presence.t5')
   }
   if (stalker.threatLevel >= 4) {
-    return stalker.closingIn
-      ? "Il a recruté des alliés. Ils convergent vers toi."
-      : "On parle de lui dans les stations. Il offre une prime pour savoir où tu es."
+    return stalker.closingIn ? sk('presence.t4Closing') : sk('presence.t4')
   }
   if (stalker.threatLevel >= 3) {
-    return stalker.closingIn
-      ? "Il peut surgir à tout instant. Il le sait."
-      : "Il est dans cette station. Il te regarde faire."
+    return stalker.closingIn ? sk('presence.t3Closing') : sk('presence.t3')
   }
   if (stalker.threatLevel >= 2) {
-    return stalker.closingIn
-      ? "Il connaît ta route. Il anticipe chaque mouvement."
-      : "Il est quelque part dans ce secteur. Il attend le bon moment."
+    return stalker.closingIn ? sk('presence.t2Closing') : sk('presence.t2')
   }
-  return stalker.closingIn
-    ? "Il se rapproche. Tu l'as croisé une fois. Il te cherche."
-    : "Une présence dans l'ombre. Quelqu'un te suit depuis un moment."
+  return stalker.closingIn ? sk('presence.t1Closing') : sk('presence.t1')
 }
 
 export type StalkerResolution = 'fight' | 'flee' | 'talk' | 'pay'
@@ -153,28 +130,28 @@ export function resolveStalkerEncounter(
 ): StalkerResolutionResult {
   switch (action) {
     case 'fight':
-      return { newGs: {}, message: "Combat avec le stalker.", triggerCombat: true }
+      return { newGs: {}, message: sk('resolve.fight'), triggerCombat: true }
 
     case 'flee': {
       const ok = Math.random() < 0.50
       return ok
-        ? { newGs: { fuel: Math.max(0, gs.fuel - 1) }, message: `Tu files. -1 carburant. ${stalker.name} attend la prochaine occasion.` }
-        : { newGs: {}, message: "Il est plus rapide. Combat.", triggerCombat: true }
+        ? { newGs: { fuel: Math.max(0, gs.fuel - 1) }, message: sk('resolve.fleeSuccess', { name: translateEnemyName(stalker.name) }) }
+        : { newGs: {}, message: sk('resolve.fleeFail'), triggerCombat: true }
     }
 
     case 'talk': {
       const chance = 0.25 + gs.reputation / 400
       return Math.random() < chance
-        ? { newGs: { reputation: gs.reputation + 20, stalker: undefined }, message: `Accord trouvé. ${stalker.name} lève la menace. +20 rép.`, stalkerDefeated: true }
-        : { newGs: {}, message: "Il n'est pas là pour parler. Combat.", triggerCombat: true }
+        ? { newGs: { reputation: gs.reputation + 20, stalker: undefined }, message: sk('resolve.talkSuccess', { name: translateEnemyName(stalker.name) }), stalkerDefeated: true }
+        : { newGs: {}, message: sk('resolve.talkFail'), triggerCombat: true }
     }
 
     case 'pay': {
       const amount = 1000 + stalker.threatLevel * 500
-      if (gs.credits < amount) return { newGs: {}, message: "Pas assez de crédits. Combat.", triggerCombat: true }
+      if (gs.credits < amount) return { newGs: {}, message: sk('resolve.payInsufficient'), triggerCombat: true }
       return {
         newGs: { credits: gs.credits - amount, stalker: undefined },
-        message: `-${amount} cr. ${stalker.name} encaisse et disparaît. Pour l'instant.`,
+        message: sk('resolve.paySuccess', { amount, name: translateEnemyName(stalker.name) }),
         stalkerDefeated: true,
       }
     }
@@ -186,18 +163,18 @@ export function resolveStalkerEncounter(
 export function stalkerToEnemy(stalker: StalkerState) {
   const t = stalker.threatLevel
   const allyDesc = t >= 5
-    ? ` Il a amené des renforts — deux mercenaires couvrent ses flancs.`
+    ? sk('enemy.allyDesc5')
     : t >= 4
-    ? ` Un complice est embusqué. Tu te bats sur deux fronts.`
+    ? sk('enemy.allyDesc4')
     : ''
   return {
-    name: t >= 4 ? `${stalker.name} [RENFORCÉ]` : stalker.name,
+    name: t >= 4 ? `${stalker.name}${sk('enemy.reinforcedSuffix')}` : stalker.name,
     maxHp: t >= 5 ? 750 : t >= 4 ? 560 : 150 + t * 90,
     damageMin: t >= 5 ? 90 : t >= 4 ? 65 : 18 + t * 10,
     damageMax: t >= 5 ? 160 : t >= 4 ? 120 : 40 + t * 18,
     lootMin: 500 + t * 400,
     lootMax: 1200 + t * 800,
-    description: `Il te traquait. Il sait exactement comment tu te bats. Il ne s'arrêtera pas.${allyDesc}`,
+    description: sk('enemy.description', { allyDesc }),
     captureChance: 0,
     killChance: Math.min(80, 20 + t * 12),
     isBoss: true,

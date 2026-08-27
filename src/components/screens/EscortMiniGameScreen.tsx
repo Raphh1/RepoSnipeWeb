@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 
 const GAME_DURATION = 25
@@ -31,6 +32,7 @@ interface Bullet {
 const SHOT_COOLDOWN_MS = 260
 
 export function EscortMiniGameScreen() {
+  const { t } = useTranslation('minigames')
   const gs                  = useGameStore(s => s.gs!)
   const completeEscortQuest = useGameStore(s => s.completeEscortQuest)
 
@@ -95,9 +97,9 @@ export function EscortMiniGameScreen() {
     const onTouch = (e: TouchEvent) => {
       e.preventDefault()
       const r  = canvas.getBoundingClientRect()
-      const t  = e.touches[0]
-      s.playerX = Math.max(PLAYER_W, Math.min(W - PLAYER_W, (t.clientX - r.left) * (W / r.width)))
-      s.playerY = Math.max(PLAYER_H, Math.min(H - PLAYER_H, (t.clientY - r.top)  * (H / r.height)))
+      const touch  = e.touches[0]
+      s.playerX = Math.max(PLAYER_W, Math.min(W - PLAYER_W, (touch.clientX - r.left) * (W / r.width)))
+      s.playerY = Math.max(PLAYER_H, Math.min(H - PLAYER_H, (touch.clientY - r.top)  * (H / r.height)))
     }
     const onKeyDown = (e: KeyboardEvent) => {
       s.keys.add(e.key)
@@ -296,11 +298,11 @@ export function EscortMiniGameScreen() {
 
   return (
     <div className="layout" style={{ alignItems: 'center' }}>
-      <div className="t-center t-dim t-xs" style={{ letterSpacing: '2px' }}>— TRANSIT MÉTÉORITIQUE —</div>
+      <div className="t-center t-dim t-xs" style={{ letterSpacing: '2px' }}>{t('escort.header')}</div>
 
       {quest && (
         <div className="t-xs t-dim t-center">
-          Escorte : <span className="t-cyan">{quest.title}</span>
+          {t('escort.escort')} <span className="t-cyan">{quest.title}</span>
           <span className="t-dim" style={{ marginLeft: '8px' }}>→ {quest.targetStation}</span>
         </div>
       )}
@@ -312,7 +314,7 @@ export function EscortMiniGameScreen() {
           ))}
         </div>
         <div className="t-xs" style={{ color: 'var(--cyan)' }}>
-          🚀 {shipsDestroyed} détruit{shipsDestroyed > 1 ? 's' : ''}
+          {t('escort.destroyed', { count: shipsDestroyed })}
         </div>
         <div className="t-xs" style={{ color: timeLeft <= 5 ? 'var(--red)' : 'var(--text)' }}>
           <span className={timeLeft <= 5 ? 'blink' : ''}>{timeLeft}s</span>
@@ -327,22 +329,22 @@ export function EscortMiniGameScreen() {
       />
 
       <div className="t-xs t-dim t-center">
-        Souris · ZQSD · Flèches pour naviguer — Clic ou Espace pour tirer sur les vaisseaux ennemis (les détruire libère l'espace, pas de combat déclenché) — Survie {GAME_DURATION}s pour livrer le passager
+        {t('escort.instructions', { duration: GAME_DURATION })}
       </div>
 
       {result && (
         <div className="px-box" style={{ borderColor: result === 'won' ? 'var(--gold)' : 'var(--red)', textAlign: 'center', maxWidth: '520px', width: '100%' }}>
           {result === 'won' ? (
             <>
-              <div className="t-lg t-gold mb4">★ PASSAGER LIVRÉ</div>
-              <div className="t-xs t-dim">Le transit s'est passé sans pertes majeures.</div>
-              {quest && <div className="t-xs t-cyan mt4">+{quest.creditReward.toLocaleString()} cr · +{quest.repReward} rép</div>}
+              <div className="t-lg t-gold mb4">{t('escort.passengerDelivered')}</div>
+              <div className="t-xs t-dim">{t('escort.smoothTransit')}</div>
+              {quest && <div className="t-xs t-cyan mt4">{t('escort.reward', { credits: quest.creditReward.toLocaleString(), rep: quest.repReward })}</div>}
             </>
           ) : (
             <>
-              <div className="t-lg t-red mb4">✕ PASSAGER PERDU</div>
-              <div className="t-xs t-dim">Le vaisseau a encaissé trop de météorites. Le passager n'a pas survécu.</div>
-              <div className="t-xs t-red mt4">Quête échouée · −20 PV de vaisseau</div>
+              <div className="t-lg t-red mb4">{t('escort.passengerLost')}</div>
+              <div className="t-xs t-dim">{t('escort.tookTooManyHits')}</div>
+              <div className="t-xs t-red mt4">{t('escort.questFailed')}</div>
             </>
           )}
           <button
@@ -350,7 +352,7 @@ export function EscortMiniGameScreen() {
             style={{ borderColor: result === 'won' ? 'var(--gold)' : 'var(--red)', color: result === 'won' ? 'var(--gold)' : 'var(--red)' }}
             onClick={() => completeEscortQuest(result === 'won')}
           >
-            CONTINUER →
+            {t('escort.continueArrow')}
           </button>
         </div>
       )}

@@ -1,0 +1,33 @@
+{
+  "bossKilled": {
+    "reward": { "title": "Faction bounty", "description": "Representatives of a local faction tracked you down. The boss you eliminated had an unclaimed bounty. They settle the debt. +{{amount}} cr · +5 reputation." },
+    "threat": { "title": "Retaliation expected", "description": "The boss's associates found your trail. A message left with the local barkeep: \"You killed someone who had friends. We remember.\" Someone's watching you now. -8 reputation." },
+    "mystery": { "title": "What the boss was hiding", "description": "Among the boss's personal effects, an encrypted datapad. The data bears your name — and a date three weeks before your arrival in the sector. Someone was following you before the confrontation even happened." }
+  },
+  "stalkerKilled": {
+    "reward": { "title": "The stalker had enemies", "description": "A faceless intermediary approaches you. Brief. Discreet. \"He had a lot of enemies. You did us a favor.\" A purse changes hands. +{{amount}} cr." },
+    "mystery": { "title": "He wasn't working alone", "description": "An anonymous message, untraceable source: \"You handled the problem well. But you should know — he wasn't working alone. What he was looking for on you, others are still looking for. Be careful.\"" },
+    "info": { "title": "Who sent him?", "description": "In the stalker's travel logs, a lead. A financial transaction from a station you know. Someone paid to have you found. You don't know why yet." }
+  },
+  "factionLoyal": {
+    "faucons": { "title": "Message from Cael — The Falcons", "description": "\"The Falcons don't do compliments. But good work deserves recognition. Here's your cut.\" A direct, clean payment. +1,200 cr." },
+    "emporium": { "title": "Commission from Pistis — The Emporium", "description": "An automatic transfer. Cold, precise, no comment. Then a message from Pistis: \"Efficiency noted. Continue.\" +900 cr · +3 reputation." },
+    "gardiens": { "title": "Supplies from Myrra — The Guardians", "description": "A package delivered in your name. Medicine, a unit of fuel, and a note from Myrra: \"The Guardians don't forget their own. Stay alive.\" +2 Medicine · +1 fuel · +5 rep." },
+    "culte": { "title": "Words from Neva — The Cult", "description": "An excerpt from the Book of the Void, unpublished chapter, sent personally by Neva. The words are unsettling. You don't know yet if this is a reward or a warning. +8 reputation." }
+  },
+  "lowRep": {
+    "consequence": { "title": "Informal tax", "description": "The Emporium flagged your profile. An \"administrative\" fee is automatically deducted from your next transactions. -200 cr." },
+    "threat": { "title": "Guardian warrant", "description": "Your behavior has been documented enough to justify a preventive warrant. The Guardians have officially logged your file. Affiliated stations won't welcome you warmly. -12 reputation." },
+    "info": { "title": "Reputation precedes you", "description": "An informant sold your behavior profile on the black network. There are multiple buyers. Some are curious. Others have more concrete reasons. -5 reputation." }
+  },
+  "rich": {
+    "consequence": { "title": "Emporium commission", "description": "The Emporium monitors major financial flows in the sector. Your assets triggered an alert. A \"supervision fee\" is deducted. It's legal under the Requiem Accord. -500 cr." },
+    "reward": { "title": "Loyal client", "description": "A merchant you've regularly dealt with sends a surprise commission. \"For loyalty. The sector's short on reliable people.\" +350 cr." },
+    "threat": { "title": "Financial profile compromised", "description": "Someone put your financial profile into circulation on the black network. Estimated worth, recent transactions, current station. Some people are interested. Some people have plans. Stay alert. -5 reputation." }
+  },
+  "prisonEscaped": {
+    "consequence": { "title": "Arrest warrant", "description": "The Guardians issued an official warrant following your escape. Distributed to affiliated stations. Your standing in the sector takes an immediate hit. -15 reputation." },
+    "reward": { "title": "Cell memento", "description": "Your former cellmate sent you something. A message: \"You taught me to hold on. Here's what I can do for you.\" Supplies hidden at the station entrance. +2 Medicine · +1 fuel." },
+    "mystery": { "title": "What the guard knew", "description": "A prison guard contacts you anonymously. \"I saw your file. There are things in there you don't know about yourself. Connections you haven't made. If you want to know — find me.\" No station. No name." }
+  }
+}

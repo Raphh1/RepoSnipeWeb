@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import { StopTheBar, type StopResult } from '../minigames/StopTheBar'
 import { addJournal } from '../../engine/journal'
 import { tickWorldEventsMultipleDays } from '../../engine/worldEvents'
+import i18n from '../../i18n/config'
 import type { GameState, WeaponData, ArmorData } from '../../types'
 
 type EscapePhase = 'menu' | 'playing' | 'between' | 'caught' | 'escape-final-roll' | 'success' | 'execution'
 
-const ROUND_LABELS = ["Serrure de cellule", "Couloir de garde", "Porte de sortie"]
-const ROUND_DESCS = [
-  "La serrure électronique de ta cellule. Le garde repasse dans quelques secondes. Un timing parfait l'ouvre en silence.",
-  "Tu es dans le couloir. Une grille magnétique bloque le passage. Elle s'ouvre par à-coups. Tu dois saisir la fenêtre exacte.",
-  "La porte extérieure. Le système principal. Le plus sensible. Un faux mouvement et toute la prison s'illumine.",
-]
-const BETWEEN_MSGS = [
-  "La cellule est ouverte. Tu avances dans le couloir, dos aux murs. Un garde tourne le dos.",
-  "Tu traverses la grille. La sortie est en vue. Dernier obstacle.",
-]
+const pt = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'prisonScreen', ...params })
+
 const TOTAL_ROUNDS = 3
 
 const PRISON_PILLAR_STATIONS: Record<string, keyof GameState['pillarStanding']> = {
@@ -43,27 +37,27 @@ function rollPrisonEvent(gs: GameState): PrisonEvent {
   if (r < 0.15) {
     // Vol nocturne
     const stolen = Math.min(gs.credits, 80 + Math.floor(Math.random() * 150))
-    return { text: `Quelqu'un fouille tes affaires pendant la nuit. −${stolen} cr.`, hpDelta: 0, hpMaxDelta: 0, creditsDelta: -stolen, repDelta: 0 }
+    return { text: pt('events.theft', { amount: stolen }), hpDelta: 0, hpMaxDelta: 0, creditsDelta: -stolen, repDelta: 0 }
   }
   if (r < 0.27) {
     // Maladie — HP max permanent
     const loss = 5 + Math.floor(Math.random() * 8)
-    return { text: `Tu tombes malade. L'infirmerie est une fiction ici. −${loss} HP max (permanent).`, hpDelta: -loss, hpMaxDelta: -loss, creditsDelta: 0, repDelta: 0 }
+    return { text: pt('events.illness', { loss }), hpDelta: -loss, hpMaxDelta: -loss, creditsDelta: 0, repDelta: 0 }
   }
   if (r < 0.38) {
     // Interrogatoire surprise
-    return { text: `Interrogatoire surprise. Rien de neuf — mais ça use. −5 rép.`, hpDelta: -8, hpMaxDelta: 0, creditsDelta: 0, repDelta: -5 }
+    return { text: pt('events.interrogation'), hpDelta: -8, hpMaxDelta: 0, creditsDelta: 0, repDelta: -5 }
   }
   if (r < 0.48) {
     // Solidarité
     const heal = 8 + Math.floor(Math.random() * 12)
-    return { text: `Un codétenu partage sa ration. Un geste rare. +${heal} PV.`, hpDelta: heal, hpMaxDelta: 0, creditsDelta: 0, repDelta: 0 }
+    return { text: pt('events.solidarity', { heal }), hpDelta: heal, hpMaxDelta: 0, creditsDelta: 0, repDelta: 0 }
   }
   if (r < 0.55) {
     // Information
-    return { text: `Tu entends une conversation à travers les murs. Des noms, des routes. Ça reste.`, hpDelta: 0, hpMaxDelta: 0, creditsDelta: 0, repDelta: 3 }
+    return { text: pt('events.information'), hpDelta: 0, hpMaxDelta: 0, creditsDelta: 0, repDelta: 3 }
   }
-  return { text: `Une journée de plus. Les murs ne changent pas.`, hpDelta: 0, hpMaxDelta: 0, creditsDelta: 0, repDelta: 0 }
+  return { text: pt('events.nothing'), hpDelta: 0, hpMaxDelta: 0, creditsDelta: 0, repDelta: 0 }
 }
 
 // ── RESTORATION D'ITEMS ────────────────────────────────────────────────────────
@@ -113,6 +107,7 @@ function buildItemRestore(gs: GameState, fraction: number): Partial<GameState> {
 // ── COMPOSANT ─────────────────────────────────────────────────────────────────
 
 export function PrisonScreen() {
+  const { t } = useTranslation('prisonScreen')
   const gs           = useGameStore(s => s.gs!)
   const patch        = useGameStore(s => s.patch)
   const goTo         = useGameStore(s => s.goTo)
@@ -153,16 +148,16 @@ export function PrisonScreen() {
   // ── HELPERS ──────────────────────────────────────────────────────────────
 
   function getItemFractionText(frac: number) {
-    if (frac >= 1)   return 'tous tes items'
-    if (frac >= 0.5) return '~50% de tes items'
-    if (frac > 0)    return '~25% de tes items'
-    return 'aucun item'
+    if (frac >= 1)   return t('itemFraction.all')
+    if (frac >= 0.5) return t('itemFraction.half')
+    if (frac > 0)    return t('itemFraction.quarter')
+    return t('itemFraction.none')
   }
 
   function serveTime() {
     const debtLoss = (gs.class.dailyDebt ?? 0) * days
     const events: PrisonEvent[] = Array.from({ length: days }, () => rollPrisonEvent(gs))
-    const log = events.map((e, i) => `Jour ${i + 1} : ${e.text}`)
+    const log = events.map((e, i) => t('dayLog', { day: i + 1, text: e.text }))
 
     const evtHpDelta    = events.reduce((s, e) => s + e.hpDelta, 0)
     const evtHpMaxDelta = events.reduce((s, e) => s + e.hpMaxDelta, 0)
@@ -195,7 +190,11 @@ export function PrisonScreen() {
     const factionStandingLoss = hasFactionMission ? days * 8 : days * 3
 
     const itemPatch = buildItemRestore(gs, 0.5)
-    const journalText = `J'ai purgé ${days} jour${days > 1 ? 's' : ''} à ${gs.currentStation}. ${days >= 5 ? 'Long. Trop long.' : "Chaque heure pesait son poids."}${expiredCount > 0 ? ` ${expiredCount} contrat${expiredCount > 1 ? 's' : ''} perdu${expiredCount > 1 ? 's' : ''} en prison.` : ''}`
+    const journalText = t('journalServeTime', {
+      days, plural: days > 1 ? 's' : '', station: gs.currentStation,
+      longNote: days >= 5 ? t('journalLongTrue') : t('journalLongFalse'),
+      expiredNote: expiredCount > 0 ? t('journalExpired', { count: expiredCount, plural: expiredCount > 1 ? 's' : '' }) : '',
+    })
 
     const afterEvents = tickWorldEventsMultipleDays({ ...gs, day: gs.day + days }, days)
 
@@ -217,37 +216,38 @@ export function PrisonScreen() {
       ...itemPatch,
     })
     setDailyLog(log)
+    const repDelta = (finalRep - (expiredCount * 5)) - gs.reputation
     const lines = [
-      `${days} jour${days > 1 ? 's' : ''} purgé${days > 1 ? 's' : ''}.`,
-      `Sortie : ${finalHp} PV (max ${newHpMax}), stamina ${finalSt}.`,
-      `Réputation : ${finalRep - (expiredCount * 5) > gs.reputation ? '+' : ''}${(finalRep - (expiredCount * 5)) - gs.reputation}.`,
-      finalCr < gs.credits ? `−${(gs.credits - finalCr).toLocaleString()} cr.` : null,
-      pillarKey ? `−${pillarPenalty} standing ${pillarKey}.` : null,
-      expiredCount > 0 ? `⚠ ${expiredCount} quête${expiredCount > 1 ? 's' : ''} expirée${expiredCount > 1 ? 's' : ''} (−${expiredCount * 5} rép supplémentaire).` : null,
-      hasFactionMission ? `⚠ Mission faction abandonnée — −${factionStandingLoss} standing faction.` : null,
-      `Items récupérés : ${getItemFractionText(0.5)}.`,
+      t('serveTimeSummary.daysServed', { days, plural: days > 1 ? 's' : '' }),
+      t('serveTimeSummary.exit', { hp: finalHp, maxHp: newHpMax, stamina: finalSt }),
+      t('serveTimeSummary.reputation', { sign: repDelta > 0 ? '+' : '', delta: repDelta }),
+      finalCr < gs.credits ? t('serveTimeSummary.credits', { amount: (gs.credits - finalCr).toLocaleString() }) : null,
+      pillarKey ? t('serveTimeSummary.standing', { penalty: pillarPenalty, pillar: pillarKey }) : null,
+      expiredCount > 0 ? t('serveTimeSummary.expiredQuests', { count: expiredCount, plural: expiredCount > 1 ? 's' : '', repLoss: expiredCount * 5 }) : null,
+      hasFactionMission ? t('serveTimeSummary.factionAbandoned', { loss: factionStandingLoss }) : null,
+      t('serveTimeSummary.itemsRecovered', { fraction: getItemFractionText(0.5) }),
     ].filter(Boolean) as string[]
     setMsg(lines.join(' '))
     setFreed(true)
   }
 
   function payCaution() {
-    if (gs.credits < caution) { setMsg(`Il te manque ${caution - gs.credits} cr.`); return }
+    if (gs.credits < caution) { setMsg(t('missingCredits', { amount: caution - gs.credits })); return }
     const itemPatch = buildItemRestore(gs, 0.5)
     patch({
       credits: gs.credits - caution,
       isImprisoned: false, prisonDaysLeft: 0,
       playerHp: Math.max(1, Math.floor(gs.playerMaxHp * 0.60)),
       reputation: gs.reputation - 8,
-      journal: addJournal(gs, `J'ai payé la caution à ${gs.currentStation}. ${caution.toLocaleString()} crédits. Ma liberté a un prix.`, 'prison'),
+      journal: addJournal(gs, t('cautionJournal', { station: gs.currentStation, amount: caution.toLocaleString() }), 'prison'),
       ...itemPatch,
     })
-    setMsg(`Caution payée. −${caution} cr. 60% PV. −8 rép. ${getItemFractionText(0.5)} récupérés.`)
+    setMsg(t('cautionMsg', { amount: caution, fraction: getItemFractionText(0.5) }))
     setFreed(true)
   }
 
   function bribeGuard() {
-    if (gs.credits < 400) { setMsg('Pas assez de crédits.'); return }
+    if (gs.credits < 400) { setMsg(t('notEnoughCredits')); return }
     const ok = Math.random() < 0.50 + (gs.reputation > 40 ? 0.10 : 0)
     if (ok) {
       const itemPatch = buildItemRestore(gs, 0.5)
@@ -256,25 +256,25 @@ export function PrisonScreen() {
         isImprisoned: false, prisonDaysLeft: 0,
         playerHp: Math.max(1, Math.floor(gs.playerMaxHp * 0.50)),
         prisonEscapes: gs.prisonEscapes + 1,
-        journal: addJournal(gs, `J'ai soudoyé un garde à ${gs.currentStation}. Il a regardé ailleurs. Je suis sorti.`, 'prison'),
+        journal: addJournal(gs, t('bribeJournal', { station: gs.currentStation }), 'prison'),
         ...itemPatch,
       })
-      setMsg(`Le garde empoche les 400 cr et regarde ailleurs. ${Math.floor(gs.playerMaxHp * 0.50)} PV. ${getItemFractionText(0.5)} récupérés.`)
+      setMsg(t('bribeSuccessMsg', { amount: 400, hp: Math.floor(gs.playerMaxHp * 0.50), fraction: getItemFractionText(0.5) }))
       setFreed(true)
     } else {
       patch({ credits: gs.credits - 400, prisonDaysLeft: days + 1 })
-      setMsg(`Il prend l'argent ET appelle du renfort. +1 jour. ${days + 1} jours restants.`)
+      setMsg(t('bribeFailMsg', { days: days + 1 }))
     }
   }
 
   function fightCellmate() {
     const power = 30 + Math.floor(gs.day * 1.8)
     startCombat({
-      name: 'Codétenu hostile',
+      name: t('cellmateName'),
       maxHp: power,
       damageMin: 7, damageMax: 17,
       lootMin: 60, lootMax: 180,
-      description: "Il a le regard de quelqu'un qui n'a plus rien à perdre. Dans une cellule, c'est le pire type d'adversaire.",
+      description: t('cellmateDesc'),
       captureChance: 0,
       killChance: 5,
       isBoss: false,
@@ -287,7 +287,7 @@ export function PrisonScreen() {
     // L'ignorer coûte des PV — il te frappe de dos
     const dmg = 12 + Math.floor(Math.random() * 20)
     patch({ prisonCellmatePending: false, playerHp: Math.max(1, gs.playerHp - dmg) })
-    setMsg(`Tu l'ignores. Il te frappe dans le dos. −${dmg} PV.`)
+    setMsg(t('ignoreCellmateMsg', { dmg }))
   }
 
   // ── RÉSULTAT D'ÉVASION ────────────────────────────────────────────────────
@@ -333,7 +333,7 @@ export function PrisonScreen() {
         playerHp: Math.max(1, gs.playerHp - 10),
         prisonEscapes: gs.prisonEscapes + 1,
         reputation: gs.reputation + 25,
-        journal: addJournal(gs, `Je me suis évadé de la prison de ${gs.currentStation}. Trois obstacles. Puis le vide. J'ai couru.`, 'prison'),
+        journal: addJournal(gs, t('escapeJournal', { station: gs.currentStation }), 'prison'),
         ...itemPatch,
       })
       setEscapePhase('success')
@@ -371,28 +371,28 @@ export function PrisonScreen() {
           </div>
           <div className="px-box" style={{ borderColor: 'var(--red)', borderWidth: '2px', textAlign: 'center', padding: '32px 24px' }}>
             <div style={{ fontSize: '11px', color: 'var(--red)', letterSpacing: '5px', marginBottom: '8px' }}>
-              COULOIR DE LA MORT
+              {t('execution.corridorTitle')}
             </div>
             <div style={{ fontSize: '22px', color: 'var(--red)', letterSpacing: '3px', marginBottom: '24px', fontWeight: 'bold' }}>
-              SENTENCE FINALE
+              {t('execution.finalSentence')}
             </div>
             <div className="t-xs" style={{ color: 'var(--dim)', lineHeight: '2.4', marginBottom: '20px', fontStyle: 'italic' }}>
-              Trois tentatives. Trois échecs.<br />
-              La bêtise a ses propres limites — tu les as toutes franchies,<br />
-              l'une après l'autre, avec une régularité presque admirable.
+              {t('execution.body1a')}<br />
+              {t('execution.body1b')}<br />
+              {t('execution.body1c')}
             </div>
             <div className="t-xs" style={{ color: 'var(--text)', lineHeight: '2.4', marginBottom: '20px' }}>
-              On t'a accordé plus d'une chance.<br />
-              Tu as refusé chacune d'entre elles.<br />
-              Le couloir de la mort n'est pas fait pour les gens intelligents.<br />
-              Tu t'y retrouves quand même.
+              {t('execution.body2a')}<br />
+              {t('execution.body2b')}<br />
+              {t('execution.body2c')}<br />
+              {t('execution.body2d')}
             </div>
             <div className="t-xs" style={{ color: 'var(--red)', lineHeight: '2', marginBottom: '24px', letterSpacing: '1px' }}>
-              Tes items ont été distribués entre les gardiens.<br />
-              Personne ne s'est battu pour les avoir.
+              {t('execution.body3a')}<br />
+              {t('execution.body3b')}
             </div>
             <div style={{ color: 'var(--dim)', fontSize: '8px', letterSpacing: '3px', marginBottom: '20px' }}>
-              — FIN DE PEINE —
+              {t('execution.endOfSentence')}
             </div>
           </div>
           <div className="t-center" style={{ color: 'var(--red)', fontSize: '8px', letterSpacing: '6px', margin: '16px 0' }}>
@@ -401,11 +401,11 @@ export function PrisonScreen() {
           <button className="px-btn px-btn--danger" style={{ letterSpacing: '2px' }} onClick={() => {
             patch({
               isDead: true,
-              deathCause: 'Exécuté après trois tentatives d\'évasion. La bêtise a ses limites.',
+              deathCause: t('execution.deathCause'),
               prisonConfiscatedItems: null,
             })
           }}>
-            Accepter l'inévitable
+            {t('execution.acceptButton')}
           </button>
         </div>
       </div>
@@ -417,27 +417,25 @@ export function PrisonScreen() {
     return (
       <div className="layout" style={{ justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%' }}>
-          <div className="t-xs t-dim t-center mb8">— ÉVASION — Dernière porte franchie —</div>
+          <div className="t-xs t-dim t-center mb8">{t('finalRoll.title')}</div>
           <div className="px-box" style={{ borderColor: 'var(--orange)', textAlign: 'center', padding: '24px' }}>
-            <div className="t-xs t-orange mb8">TU ES DEHORS — PRESQUE</div>
+            <div className="t-xs t-orange mb8">{t('finalRoll.outside')}</div>
             <div className="t-xs t-dim" style={{ lineHeight: '2.2' }}>
-              Tu as franchi les trois obstacles. Mais l'espace entre toi et ton vaisseau
-              est encore surveillé. 70% de chances de disparaître dans la nuit.
-              30% de chances qu'ils t'attendent déjà.
+              {t('finalRoll.body')}
             </div>
             <div className="t-xs t-dim mt8" style={{ fontStyle: 'italic' }}>
               {failures >= 3
-                ? "⚠ TENTATIVE 4/4 — C'est ta dernière chance. Un échec ici, c'est la mort."
+                ? t('finalRoll.attempt4')
                 : failures >= 2
-                  ? "⚠ Tentative 3/4 — Il te reste une seule chance après celle-ci."
+                  ? t('finalRoll.attempt3')
                   : failures >= 1
-                    ? "Tentative 2/4 — Un nouvel échec et tu ne récupères plus rien."
-                    : "Tentative 1/4 — Un nouvel échec te coûtera 25% de tes items."
+                    ? t('finalRoll.attempt2')
+                    : t('finalRoll.attempt1')
               }
             </div>
           </div>
           <button className="px-btn px-btn--primary mt8" onClick={resolveEscapeFinalRoll}>
-            Courir vers le vaisseau →
+            {t('finalRoll.runButton')}
           </button>
         </div>
       </div>
@@ -448,14 +446,14 @@ export function PrisonScreen() {
   if (escapePhase === 'playing') {
     return (
       <div className="layout">
-        <div className="t-xs t-dim t-center">— ÉVASION — Tour {round}/{TOTAL_ROUNDS} —</div>
+        <div className="t-xs t-dim t-center">{t('playing.header', { round, total: TOTAL_ROUNDS })}</div>
         <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
-          <div className="t-xs t-orange mb4">{ROUND_LABELS[round - 1]}</div>
-          <div className="t-xs t-dim" style={{ lineHeight: '2' }}>{ROUND_DESCS[round - 1]}</div>
+          <div className="t-xs t-orange mb4">{t(`roundLabels.${round - 1}`)}</div>
+          <div className="t-xs t-dim" style={{ lineHeight: '2' }}>{t(`roundDescs.${round - 1}`)}</div>
         </div>
         <StopTheBar
           difficulty={round as 1 | 2 | 3}
-          label={ROUND_LABELS[round - 1].toUpperCase()}
+          label={t(`roundLabels.${round - 1}`).toUpperCase()}
           onResult={handleRoundResult}
         />
       </div>
@@ -467,13 +465,13 @@ export function PrisonScreen() {
     return (
       <div className="layout" style={{ justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%' }}>
-          <div className="t-xs t-dim t-center mb8">— ÉVASION — Tour {round}/{TOTAL_ROUNDS} passé —</div>
+          <div className="t-xs t-dim t-center mb8">{t('between.header', { round, total: TOTAL_ROUNDS })}</div>
           <div className="px-box" style={{ borderColor: 'var(--green)', textAlign: 'center', padding: '20px' }}>
-            <div className="t-xs t-green mb8">✓ PASSAGE RÉUSSI</div>
-            <div className="t-xs t-dim" style={{ lineHeight: '2' }}>{BETWEEN_MSGS[round - 1]}</div>
+            <div className="t-xs t-green mb8">{t('between.passed')}</div>
+            <div className="t-xs t-dim" style={{ lineHeight: '2' }}>{t(`betweenMsgs.${round - 1}`)}</div>
           </div>
           <button className="px-btn px-btn--primary mt8" onClick={() => { setRound(r => r + 1); setEscapePhase('playing') }}>
-            Continuer → Tour {round + 1}/{TOTAL_ROUNDS}
+            {t('between.continueButton', { next: round + 1, total: TOTAL_ROUNDS })}
           </button>
         </div>
       </div>
@@ -483,37 +481,37 @@ export function PrisonScreen() {
   // ── RATTRAPÉ ──────────────────────────────────────────────────────────────
   if (escapePhase === 'caught') {
     const addDays = Math.max(1, TOTAL_ROUNDS - round + 1)
-    const itemLabel = failures >= 2 ? 'Aucun item récupéré' : failures >= 1 ? '25% items récupérés (reste confisqué)' : '25% items récupérés'
+    const itemLabel = failures >= 2 ? t('caught.itemNone') : failures >= 1 ? t('caught.item25partial') : t('caught.item25')
     return (
       <div className="layout" style={{ justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%' }}>
-          <div className="t-xs t-dim t-center mb8">— ÉVASION ÉCHOUÉE —</div>
+          <div className="t-xs t-dim t-center mb8">{t('caught.header')}</div>
           <div className="px-box" style={{ borderColor: 'var(--red)', textAlign: 'center', padding: '20px' }}>
-            <div className="t-red" style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '12px' }}>RATTRAPÉ</div>
+            <div className="t-red" style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '12px' }}>{t('caught.title')}</div>
             <div className="t-xs t-dim" style={{ lineHeight: '2.2', marginBottom: '8px' }}>
-              {round === 1 && "La serrure résiste. Une alarme silencieuse. Des pas dans le couloir."}
-              {round === 2 && "La grille te bloque. Un garde se retourne. Il crie."}
-              {round === 3 && "Si près. La porte ne s'ouvre pas à temps. Les lumières s'allument."}
+              {round === 1 && t('caught.round1')}
+              {round === 2 && t('caught.round2')}
+              {round === 3 && t('caught.round3')}
             </div>
-            <div className="t-xs t-red">+{addDays} jour{addDays > 1 ? 's' : ''} de peine. {itemLabel}.</div>
+            <div className="t-xs t-red">{t('caught.penalty', { days: addDays, plural: addDays > 1 ? 's' : '', itemLabel })}</div>
             {failures >= 3 && (
               <div className="t-xs mt4" style={{ color: 'var(--red)', letterSpacing: '1px', fontWeight: 'bold' }}>
-                ⚠ TENTATIVE {failures}/{failures} ÉCHOUÉE — LA PROCHAINE EST LA MORT.
+                {t('caught.attemptFatal', { n: failures })}
               </div>
             )}
             {failures === 2 && (
               <div className="t-xs t-red mt4">
-                ⚠ Tentative 2/4 ratée — Il te reste 2 chances avant la mort.
+                {t('caught.attempt2Warn')}
               </div>
             )}
             {failures === 1 && (
               <div className="t-xs" style={{ color: 'var(--orange)' }}>
-                Tentative 1/4 ratée — 3 chances restantes.
+                {t('caught.attempt1Warn')}
               </div>
             )}
           </div>
           <button className="px-btn mt8" onClick={() => { setEscapePhase('menu'); setRound(1) }}>
-            Retour en cellule
+            {t('caught.backButton')}
           </button>
         </div>
       </div>
@@ -525,30 +523,29 @@ export function PrisonScreen() {
     return (
       <div className="layout" style={{ justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ maxWidth: '480px', margin: '0 auto', width: '100%' }}>
-          <div className="t-xs t-dim t-center mb8">— ÉVASION —</div>
+          <div className="t-xs t-dim t-center mb8">{t('success.header')}</div>
           <div className="px-box" style={{ borderColor: 'var(--green)', textAlign: 'center', padding: '24px' }}>
-            <div className="t-green" style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '12px' }}>ÉVADÉ</div>
+            <div className="t-green" style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '12px' }}>{t('success.title')}</div>
             <div className="t-xs t-dim" style={{ lineHeight: '2.2', marginBottom: '12px' }}>
-              Tu franchis la dernière porte. L'air froid de l'espace t'accueille.
-              Tu cours sans te retourner jusqu'à ton vaisseau.
+              {t('success.body')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">PV</span>
+                <span className="t-xs t-dim">{t('success.hp')}</span>
                 <span className="t-xs" style={{ color: gs.playerHp < gs.playerMaxHp * 0.3 ? 'var(--red)' : 'var(--green)' }}>{gs.playerHp}/{gs.playerMaxHp}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Réputation</span>
+                <span className="t-xs t-dim">{t('success.reputation')}</span>
                 <span className="t-xs t-green">+25</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Items récupérés</span>
+                <span className="t-xs t-dim">{t('success.itemsRecovered')}</span>
                 <span className="t-xs t-orange">~75%</span>
               </div>
             </div>
           </div>
           <button className="px-btn px-btn--primary mt8" onClick={() => goTo('station-hub')}>
-            Disparaître dans la station →
+            {t('success.disappearButton')}
           </button>
         </div>
       </div>
@@ -566,35 +563,35 @@ export function PrisonScreen() {
   return (
     <div className="layout">
       <div className="t-center mb8" style={{ letterSpacing: '4px', color: 'var(--red)', fontSize: '9px' }}>
-        ▓ ▓ ▓ ▓ CELLULE ▓ ▓ ▓ ▓
+        {t('menu.cellHeader')}
       </div>
 
       <div className="px-box" style={{ borderColor: 'var(--red)' }}>
-        <div className="t-lg t-red t-center mb8">PRISON</div>
+        <div className="t-lg t-red t-center mb8">{t('menu.title')}</div>
         <div className="t-xs t-dim mb8" style={{ lineHeight: '2' }}>
-          Tes affaires ont été confisquées. Chaque tentative d'évasion ratée empire les conditions de ta libération.
+          {t('menu.intro')}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span className="t-xs t-dim">Jours restants</span>
-            <span className="t-xs t-red">{days} jour{days > 1 ? 's' : ''}</span>
+            <span className="t-xs t-dim">{t('menu.daysLeft')}</span>
+            <span className="t-xs t-red">{t('menu.daysLeftValue', { days, plural: days > 1 ? 's' : '' })}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span className="t-xs t-dim">PV actuels</span>
+            <span className="t-xs t-dim">{t('menu.hpCurrent')}</span>
             <span className="t-xs" style={{ color: gs.playerHp < gs.playerMaxHp * 0.3 ? 'var(--red)' : 'var(--green)' }}>{gs.playerHp}/{gs.playerMaxHp}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span className="t-xs t-dim">Crédits</span>
+            <span className="t-xs t-dim">{t('menu.credits')}</span>
             <span className="t-xs t-gold">{gs.credits.toLocaleString()} cr</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span className="t-xs t-dim">Items confisqués</span>
-            <span className="t-xs t-orange">{itemsCount} type{itemsCount !== 1 ? 's' : ''}</span>
+            <span className="t-xs t-dim">{t('menu.itemsConfiscated')}</span>
+            <span className="t-xs t-orange">{t('menu.itemsConfiscatedValue', { count: itemsCount, plural: itemsCount !== 1 ? 's' : '' })}</span>
           </div>
           {failures > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="t-xs t-dim">Tentatives d'évasion ratées</span>
-              <span className="t-xs t-red">{failures}/3 {failures >= 3 ? '⚠ PROCHAINE = MORT' : failures >= 2 ? '⚠ 1 chance restante' : failures >= 1 ? '2 chances restantes' : ''}</span>
+              <span className="t-xs t-dim">{t('menu.escapeFailures')}</span>
+              <span className="t-xs t-red">{failures}/3 {failures >= 3 ? t('menu.escapeFailuresNextDeath') : failures >= 2 ? t('menu.escapeFailures1chance') : failures >= 1 ? t('menu.escapeFailures2chances') : ''}</span>
             </div>
           )}
         </div>
@@ -603,16 +600,16 @@ export function PrisonScreen() {
       {/* Codétenu hostile */}
       {gs.prisonCellmatePending && (
         <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
-          <div className="t-xs t-orange mb4">CODÉTENU HOSTILE</div>
+          <div className="t-xs t-orange mb4">{t('menu.cellmateTitle')}</div>
           <div className="t-xs t-dim mb8" style={{ lineHeight: '2' }}>
-            Un type dans ta cellule te regarde comme si tu lui devais quelque chose. Il cherche les ennuis — ou une sortie. Dans les deux cas, ça finit pareil.
+            {t('menu.cellmateDesc2')}
           </div>
           <div className="row gap4">
             <button className="px-btn px-btn--danger" style={{ flex: 1 }} onClick={fightCellmate}>
-              Affronter (combat réel)
+              {t('menu.fightButton')}
             </button>
             <button className="px-btn" style={{ flex: 1, color: 'var(--dim)' }} onClick={ignoreCellmate}>
-              Ignorer (−PV garanti)
+              {t('menu.ignoreButton')}
             </button>
           </div>
         </div>
@@ -629,12 +626,12 @@ export function PrisonScreen() {
       {freed && msg && (
         <div className="col gap4">
           <div className="px-box" style={{ borderColor: 'var(--green)' }}>
-            <div className="t-xs t-green mb4">LIBÉRÉ</div>
+            <div className="t-xs t-green mb4">{t('menu.freedTitle')}</div>
             <div className="t-xs" style={{ color: 'var(--green)', lineHeight: '2' }}>{msg}</div>
           </div>
           {dailyLog.length > 0 && (
             <div className="px-box" style={{ borderColor: 'var(--border)', padding: '8px 12px' }}>
-              <div className="t-xs t-dim mb4" style={{ letterSpacing: '1px' }}>JOURNAL DE CELLULE</div>
+              <div className="t-xs t-dim mb4" style={{ letterSpacing: '1px' }}>{t('menu.journalTitle')}</div>
               {dailyLog.map((line, i) => (
                 <div key={i} className="t-xs t-dim" style={{ lineHeight: '1.8', borderLeft: '2px solid var(--border)', paddingLeft: '8px', marginBottom: '3px' }}>
                   {line}
@@ -642,7 +639,7 @@ export function PrisonScreen() {
               ))}
             </div>
           )}
-          <button className="px-btn px-btn--primary" onClick={() => goTo('station-hub')}>Retour en station →</button>
+          <button className="px-btn px-btn--primary" onClick={() => goTo('station-hub')}>{t('menu.backToStation')}</button>
         </div>
       )}
 
@@ -650,46 +647,46 @@ export function PrisonScreen() {
       {!freed && !gs.prisonCellmatePending && (
         <div className="col gap4">
           <div className="px-box" style={{ padding: '8px 12px', borderColor: 'var(--border)' }}>
-            <div className="t-xs t-dim mb4" style={{ letterSpacing: '1px' }}>COÛT DE LA PEINE</div>
+            <div className="t-xs t-dim mb4" style={{ letterSpacing: '1px' }}>{t('menu.costTitle')}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Sortie à</span>
-                <span className="t-xs t-red">~{Math.round(baseHpPct * 100)}% PV + événements aléatoires</span>
+                <span className="t-xs t-dim">{t('menu.exitAt')}</span>
+                <span className="t-xs t-red">{t('menu.exitAtValue', { pct: Math.round(baseHpPct * 100) })}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Réputation</span>
+                <span className="t-xs t-dim">{t('menu.reputation')}</span>
                 <span className="t-xs t-red">−{baseRepLoss}</span>
               </div>
               {pillarKey && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="t-xs t-dim">Standing {pillarKey}</span>
+                  <span className="t-xs t-dim">{t('menu.standing', { pillar: pillarKey })}</span>
                   <span className="t-xs t-red">−{days * 3}</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Items rendus à la sortie</span>
+                <span className="t-xs t-dim">{t('menu.itemsReturned')}</span>
                 <span className="t-xs t-orange">50%</span>
               </div>
             </div>
           </div>
 
           <button className="px-btn px-btn--danger" onClick={serveTime}>
-            Purger la peine ({days} jour{days > 1 ? 's' : ''})
+            {t('menu.serveButton', { days, plural: days > 1 ? 's' : '' })}
           </button>
           <button className="px-btn" onClick={payCaution} disabled={gs.credits < caution}>
-            Payer la caution ({caution.toLocaleString()} cr) — 60% PV · 50% items
-            {gs.credits < caution ? ` · manque ${(caution - gs.credits).toLocaleString()} cr` : ''}
+            {t('menu.payCautionButton', { amount: caution.toLocaleString() })}
+            {gs.credits < caution ? t('menu.payCautionMissing', { amount: (caution - gs.credits).toLocaleString() }) : ''}
           </button>
           <button className="px-btn" onClick={bribeGuard} disabled={gs.credits < 400}>
-            Soudoyer un garde (400 cr · {50 + (gs.reputation > 40 ? 10 : 0)}% succès)
+            {t('menu.bribeButton', { amount: 400, chance: 50 + (gs.reputation > 40 ? 10 : 0) })}
           </button>
           <button
             className="px-btn"
             style={{ color: failures >= 3 ? 'var(--red)' : 'var(--orange)', borderColor: failures >= 3 ? 'var(--red)' : 'var(--orange)' }}
             onClick={() => { setRound(1); setEscapePhase('playing') }}
           >
-            ► Tenter une évasion — tentative {failures + 1}/4
-            {failures >= 3 ? ' ⚠ DERNIÈRE CHANCE · MORT SI RATÉ' : failures >= 2 ? ' · ⚠ 1 chance restante après' : failures >= 1 ? ' · 0 item si raté' : ' · 25% items si raté · 70% succès final'}
+            {t('menu.escapeButton', { n: failures + 1 })}
+            {failures >= 3 ? t('menu.escapeLastChance') : failures >= 2 ? t('menu.escape1chanceAfter') : failures >= 1 ? t('menu.escape0item') : t('menu.escapeDefault')}
           </button>
         </div>
       )}

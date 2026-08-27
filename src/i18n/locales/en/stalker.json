@@ -1,0 +1,46 @@
+{
+  "signs1": [
+    "A silhouette in the crowd. You turn around — no one. {{name}} is in this sector.",
+    "Your ship was tampered with while you were away. Nothing stolen. Just proof he could.",
+    "A bartender warns you in a low voice. Someone was asking about you. The description matches {{name}}.",
+    "A bullet engraved on your pilot seat. No message. It doesn't need one."
+  ],
+  "signs2": [
+    "He was at the previous station. He's following you. You won't shake him off like that.",
+    "Someone accessed your travel logs. Time and destination. {{name}} knows your route.",
+    "You hear his name twice within the same hour. Coincidence or message.",
+    "Your ship's door was forced open. The lock reset. He wanted you to know."
+  ],
+  "signs3": [
+    "He's at this station. You know it. He knows you know it.",
+    "You caught a glimpse of him — a split second before he vanished. He's not hiding anymore.",
+    "Three people watched you leave this morning. One of them worked for him.",
+    "He sent you a message. Four words: \"I'm waiting somewhere.\""
+  ],
+  "presence": {
+    "t5": "He's become a dark legend. Mercenaries travel with him now. He won't let you leave.",
+    "t4Closing": "He's recruited allies. They're converging on you.",
+    "t4": "People talk about him at the stations. He's offering a bounty for your location.",
+    "t3Closing": "He could show up at any moment. He knows it.",
+    "t3": "He's at this station. Watching you.",
+    "t2Closing": "He knows your route. He anticipates every move.",
+    "t2": "He's somewhere in this sector. Waiting for the right moment.",
+    "t1Closing": "He's getting closer. You've crossed paths once. He's looking for you.",
+    "t1": "A presence in the shadows. Someone's been following you for a while."
+  },
+  "resolve": {
+    "fight": "Fight with the stalker.",
+    "fleeSuccess": "You bolt. -1 fuel. {{name}} waits for the next chance.",
+    "fleeFail": "He's faster. Fight.",
+    "talkSuccess": "Deal reached. {{name}} lifts the threat. +20 rep.",
+    "talkFail": "He's not here to talk. Fight.",
+    "payInsufficient": "Not enough credits. Fight.",
+    "paySuccess": "-{{amount}} cr. {{name}} takes it and disappears. For now."
+  },
+  "enemy": {
+    "reinforcedSuffix": " [REINFORCED]",
+    "allyDesc5": " He brought reinforcements — two mercenaries cover his flanks.",
+    "allyDesc4": " An accomplice is lying in wait. You're fighting on two fronts.",
+    "description": "He was tracking you. He knows exactly how you fight. He won't stop.{{allyDesc}}"
+  }
+}

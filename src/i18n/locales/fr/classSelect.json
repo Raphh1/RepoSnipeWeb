@@ -1,0 +1,48 @@
+{
+  "subtitle": "LE VIDE A CHOISI POUR TOI",
+  "tier": {
+    "bad": "☠ DIFFICILE",
+    "balanced": "◆ ÉQUILIBRÉ",
+    "good": "★ AVANTAGEUX"
+  },
+  "warnings": {
+    "dailyDebt": "⚠ -{{amount}} cr par jour",
+    "travelCreditCost": "⚠ -{{amount}} cr par voyage",
+    "cargoDegrades": "⚠ 30% chance de perdre un cargo en voyage",
+    "cursedEvents": "⚠ Événements positifs 50% de chance de fizzle",
+    "piratesDoubled": "⚠ Pirates deux fois plus fréquents",
+    "cannotBuyWeapons": "⚠ Ne peut pas acheter d'armes",
+    "peacefulBan": "⚠ Banné des stations paisibles"
+  },
+  "stats": {
+    "credits": "Crédits",
+    "fuel": "Carburant",
+    "hp": "PV",
+    "stamina": "Stamina",
+    "station": "Station"
+  },
+  "runConditionsHeader": "◆ CONDITIONS DE RUN",
+  "rerollCount": "Relancer ({{count}})",
+  "difficulty": {
+    "easy": { "label": "Facile", "desc": "Sans modificateurs" },
+    "normal": { "label": "Normal", "desc": "2 modificateurs" },
+    "hard": { "label": "Difficile", "desc": "3 malus uniquement" }
+  },
+  "noModifiers": "Aucun modificateur — partie sans contraintes supplémentaires.",
+  "tag": {
+    "buff": "▲ BUFF",
+    "debuff": "▼ MALUS",
+    "mixed": "◆ MIXTE"
+  },
+  "secretObjective": "★ OBJECTIF SECRET",
+  "objectiveReward": "Récompense : +{{pts}} pts héritage",
+  "start": "COMMENCER → {{name}}",
+  "rerollClass_one": "Relancer la classe ({{count}} restant)",
+  "rerollClass_other": "Relancer la classe ({{count}} restants)",
+  "noRerollsLeft": "Plus de relancements",
+  "legacyButton": "★ HÉRITAGE — sélectionner les améliorations pour cette run",
+  "ptsToSpend": "· {{pts}} pts à dépenser",
+  "activeCount_one": "({{count}} actif)",
+  "activeCount_other": "({{count}} actifs)",
+  "footer": "LE VIDE VOUS ATTEND"
+}

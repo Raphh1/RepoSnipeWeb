@@ -1,6 +1,8 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+const ct = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'consumables', ...params })
 
 export interface ConsumableEffect {
   message: string
@@ -13,19 +15,19 @@ export function useConsumable(gs: GameState, item: string): ConsumableEffect {
     case 'Médicaments':
       return {
         gs: { playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 30) },
-        message: `+30 PV. ${Math.min(gs.playerMaxHp, gs.playerHp + 30)}/${gs.playerMaxHp}`
+        message: ct('medHp', { current: Math.min(gs.playerMaxHp, gs.playerHp + 30), max: gs.playerMaxHp })
       }
 
     case 'Médicaments premium':
       return {
         gs: { playerHp: gs.playerMaxHp },
-        message: 'PV complètement restaurés.'
+        message: ct('medPremium')
       }
 
     case 'Plantes médicinales':
       return {
         gs: { playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 15), stamina: Math.min(gs.maxStamina, gs.stamina + 30) },
-        message: '+15 PV, +30 Stamina. Goût horrible, effet réel.'
+        message: ct('plants')
       }
 
     case 'Rations':
@@ -35,14 +37,14 @@ export function useConsumable(gs: GameState, item: string): ConsumableEffect {
       const hpGain = item === 'Nourriture fraîche' ? 20 : 10
       return {
         gs: { playerHp: Math.min(gs.playerMaxHp, gs.playerHp + hpGain), stamina: Math.min(gs.maxStamina, gs.stamina + 20) },
-        message: `+${hpGain} PV, +20 Stamina.`
+        message: ct('food', { hp: hpGain })
       }
     }
 
     case 'Eau purifiée':
       return {
         gs: { stamina: gs.maxStamina },
-        message: 'Stamina complètement restaurée.'
+        message: ct('water')
       }
 
     case 'Drogues de synthèse': {
@@ -50,26 +52,26 @@ export function useConsumable(gs: GameState, item: string): ConsumableEffect {
       if (roll < 0.40) {
         return {
           gs: { stamina: gs.maxStamina, playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 40) },
-          message: 'Effet puissant. +40 PV, stamina max. Ça dure pas.',
+          message: ct('drugsGood'),
           isRisky: true,
         }
       } else if (roll < 0.70) {
         const dmg = rng(10, 30)
         return {
           gs: { playerHp: Math.max(1, gs.playerHp - dmg) },
-          message: `Mauvaise dose. -${dmg} PV. Tu te remets lentement.`,
+          message: ct('drugsBadDose', { amount: dmg }),
           isRisky: true,
         }
       } else if (roll < 0.85) {
         return {
           gs: { credits: Math.max(0, gs.credits - rng(100, 400)) },
-          message: 'Hallucinations. Tu te réveilles avec moins de crédits.',
+          message: ct('drugsHallucinations'),
           isRisky: true,
         }
       } else {
         return {
           gs: { addictionLevel: (gs.addictionLevel ?? 0) + 1 },
-          message: 'Rien. Ou peut-être quelque chose. Difficile à dire.',
+          message: ct('drugsNothing'),
           isRisky: true,
         }
       }
@@ -80,26 +82,26 @@ export function useConsumable(gs: GameState, item: string): ConsumableEffect {
       if (roll < 0.25) {
         return {
           gs: { playerMaxHp: gs.playerMaxHp + 15, playerHp: gs.playerHp + 15 },
-          message: 'Implant réussi. +15 PV max permanent.',
+          message: ct('expPermanentHp'),
           isRisky: true,
         }
       } else if (roll < 0.50) {
         return {
           gs: { maxStamina: gs.maxStamina + 20 },
-          message: 'Stimulant permanent. +20 Stamina max.',
+          message: ct('expPermanentStamina'),
           isRisky: true,
         }
       } else if (roll < 0.75) {
         const dmg = rng(20, 50)
         return {
           gs: { playerHp: Math.max(1, gs.playerHp - dmg) },
-          message: `Rejet. -${dmg} PV. Ton corps n'a pas aimé.`,
+          message: ct('expRejection', { amount: dmg }),
           isRisky: true,
         }
       } else {
         return {
           gs: { reputation: gs.reputation + rng(10, 40) },
-          message: 'Étrange transformation. Ta présence inspire quelque chose. +rép.',
+          message: ct('expTransformation'),
           isRisky: true,
         }
       }
@@ -109,18 +111,18 @@ export function useConsumable(gs: GameState, item: string): ConsumableEffect {
       const cr = rng(500, 2000)
       return {
         gs: { credits: gs.credits + cr, reputation: gs.reputation + 5 },
-        message: `L'artefact révèle sa valeur. +${cr} cr, +5 rép.`
+        message: ct('artifact', { cr })
       }
     }
 
     case 'Stimulant de combat':
       return {
         gs: { maxStamina: gs.maxStamina + 20, stamina: Math.min(gs.maxStamina + 20, gs.stamina + 20) },
-        message: '+20 Stamina max (temporaire).'
+        message: ct('combatStim')
       }
 
     default:
-      return { gs: {}, message: `${item} utilisé. Aucun effet notable.` }
+      return { gs: {}, message: ct('genericUse', { item }) }
   }
 }
 

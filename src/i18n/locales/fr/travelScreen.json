@@ -1,0 +1,23 @@
+{
+  "connections": "Connexions →",
+  "sellsFuel": "Vend du carburant",
+  "cost": "(coût {{amount}})",
+  "dangerLabels": ["◆ SÛR", "◆ RISQUÉ", "◆ DANGEREUX", "◆ ZONE DE GUERRE"],
+  "back": "← RETOUR",
+  "title": "DESTINATION",
+  "fuel": "Carburant :",
+  "route": "◎ ROUTE",
+  "destinationReached": "Destination atteinte !",
+  "clearRoute": "Effacer la route",
+  "fuelSurcharge": "⚠ Surcoût carburant actif : +{{amount}} par trajet",
+  "noDestination": "Aucune destination accessible depuis ici.",
+  "priceHint": " · Prix : {{list}}...",
+  "fuelUnit": "CARBURANT",
+  "sellsFuelBadge": "⛽ VEND DU CARBURANT",
+  "banned": "BANNI",
+  "blocked": "⚠ BLOQUÉ",
+  "nextStep": "◎ PROCHAINE ÉTAPE DE LA ROUTE",
+  "finalDestination": "◎ DESTINATION FINALE",
+  "activeQuest": "★ Quête active : {{title}}",
+  "pirateInterceptor": "Pirate intercepteur"
+}

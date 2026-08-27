@@ -1,0 +1,30 @@
+{
+  "cat": {
+    "survie": "❤ SURVIVAL",
+    "combat": "⚔ COMBAT",
+    "commerce": "◆ TRADE",
+    "voyage": "⛽ TRAVEL",
+    "special": "★ SPECIAL"
+  },
+  "title": "LEGACY",
+  "subtitlePreRun": "Buy and select upgrades for this run",
+  "subtitlePermanent": "Permanent upgrades between runs",
+  "pointsAvailable": "Points available: ",
+  "pointsEarned": "/ {{total}} earned",
+  "preRunHint": "Toggle each upgrade on or off for this run only — they remain owned for future runs.",
+  "firstRunHint": "Finish your first run to earn legacy points.",
+  "unlocked": "UNLOCKED",
+  "locked": "LOCKED",
+  "available": "AVAILABLE",
+  "requires": "(requires: {{name}})",
+  "active": "✓ ACTIVE",
+  "inactive": "○ INACTIVE",
+  "acquired": "OWNED",
+  "runHistory": "RUN HISTORY ({{count}})",
+  "victory": "★ VICTORY",
+  "death": "✕ DEATH",
+  "runSummary": "D{{day}} · {{bosses}} bosses · {{quests}} quests · {{stations}} stations",
+  "pointsGained": "· +{{pts}} pts",
+  "back": "← BACK",
+  "newRun": "NEW RUN"
+}

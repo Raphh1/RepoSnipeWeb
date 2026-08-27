@@ -1,0 +1,27 @@
+{
+  "header": "— GROUP COMBAT — {{count}} opponents — Turn {{turn}} —",
+  "youHp": "YOU · HP",
+  "stamina": "STAMINA",
+  "finisherReady": "FINISHER!",
+  "enemyComposition": "ENEMY COMPOSITION",
+  "eliminated": "Eliminated",
+  "stunned": "STUNNED {{turns}}t",
+  "combatStart": "Group combat begins...",
+  "attackHeader": "ATTACK:",
+  "finisherButton": "★ FINISHER — 3× damage on the weakest enemy",
+  "healButton": "Heal +30 HP (Medicine ×{{count}})",
+  "fleeButton": "Flee ({{chance}}% success) — -1 fuel",
+  "role": {
+    "tank": "Tank",
+    "ranged": "Shooter",
+    "support": "Support",
+    "normal": "Normal"
+  },
+  "classAction": {
+    "medecin": "[MEDIC] Quick heal +30 HP · 1×/combat",
+    "contrebandier": "[SMUGGLER] Guaranteed escape · -1 fuel",
+    "seigneur": "[WARLORD] Intimidate the most dangerous enemy",
+    "hackeur": "[HACKER] Mass hack — all non-tanks stunned",
+    "vagabond": "[VAGRANT] Cheap shot on the weakest enemy"
+  }
+}

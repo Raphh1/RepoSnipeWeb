@@ -1,0 +1,42 @@
+{
+  "easy": [
+    { "q": "How many days are in a week?", "choices": ["5", "7", "10", "12"] },
+    { "q": "What color is the sky on a clear day?", "choices": ["Green", "Red", "Blue", "Yellow"] },
+    { "q": "What is 7 × 8?", "choices": ["54", "56", "64", "49"] },
+    { "q": "Which celestial body lights the Earth during the day?", "choices": ["The Moon", "The Sun", "Mars", "Venus"] },
+    { "q": "How many legs does a spider have?", "choices": ["6", "8", "10", "4"] },
+    { "q": "Which planet do we live on?", "choices": ["Mars", "Jupiter", "Earth", "Saturn"] },
+    { "q": "How many sides does a triangle have?", "choices": ["3", "4", "5", "6"] },
+    { "q": "Which animal barks?", "choices": ["The cat", "The dog", "The cow", "The duck"] },
+    { "q": "What is the capital of France?", "choices": ["Lyon", "Marseille", "Paris", "Bordeaux"] },
+    { "q": "What is 100 ÷ 4?", "choices": ["20", "25", "40", "50"] },
+    { "q": "What color is grass?", "choices": ["Blue", "Green", "Red", "Black"] },
+    { "q": "What liquid falls when it rains?", "choices": ["Milk", "Water", "Sand", "Oil"] },
+    { "q": "How many fingers does a hand have (generally)?", "choices": ["4", "5", "6", "3"] },
+    { "q": "What is the opposite of \"hot\"?", "choices": ["Cold", "Wet", "Big", "Heavy"] },
+    { "q": "Which ocean borders mainland France to the west?", "choices": ["Pacific", "Indian", "Atlantic", "Arctic"] },
+    { "q": "What is 12 + 13?", "choices": ["24", "25", "26", "23"] },
+    { "q": "Which fruit is yellow and curved?", "choices": ["Apple", "Banana", "Strawberry", "Grape"] },
+    { "q": "Which season comes after winter?", "choices": ["Summer", "Autumn", "Spring", "Monsoon"] },
+    { "q": "How many minutes are in an hour?", "choices": ["30", "45", "60", "100"] },
+    { "q": "Which metal is attracted by a magnet?", "choices": ["Gold", "Iron", "Copper", "Silver"] },
+    { "q": "What shape is a football?", "choices": ["Cube", "Sphere", "Pyramid", "Cylinder"] },
+    { "q": "How many continents are there (common model)?", "choices": ["5", "6", "7", "9"] },
+    { "q": "Which gas do we breathe to live?", "choices": ["Nitrogen", "Oxygen", "Helium", "Methane"] },
+    { "q": "What is the first prime number?", "choices": ["0", "1", "2", "3"] },
+    { "q": "What color is human blood?", "choices": ["Blue", "Red", "Green", "Yellow"] },
+    { "q": "How many wheels does a standard car have?", "choices": ["2", "3", "4", "6"] }
+  ],
+  "impossible": [
+    { "q": "How many grains of sand are there exactly on Velkor beach?", "choices": ["8,412,003,991", "8,412,003,992", "8,412,003,990", "No idea, obviously"] },
+    { "q": "What was the interrogator thinking exactly three seconds ago?", "choices": ["His retirement", "You", "His breakfast", "Nothing"] },
+    { "q": "What was the name of your jailer's neighbor's dog in 2174?", "choices": ["Brutus", "Pixel", "Sergeant", "Mochi"] },
+    { "q": "What is the 9,999,999th decimal digit of Pi?", "choices": ["1", "4", "7", "8"] },
+    { "q": "How many times have you blinked since your capture?", "choices": ["142", "317", "88", "Nobody counts that"] },
+    { "q": "What number is the interrogator thinking of, right now?", "choices": ["7", "42", "13", "666"] },
+    { "q": "What is Emperor Cesarion's grandfather's favorite color?", "choices": ["Purple", "Ochre", "Cyan", "Nobody knows"] },
+    { "q": "What day of the week would the 3rd anniversary of the ship that captured you fall on?", "choices": ["Monday", "Thursday", "Saturday", "Sunday"] },
+    { "q": "How many hairs do you have exactly on your left arm?", "choices": ["2,209", "11,040", "7,777", "Seriously?"] },
+    { "q": "What will be the interrogator's last word before dying?", "choices": ["\"Mom\"", "\"Again\"", "\"Why\"", "Undeterminable"] }
+  ]
+}

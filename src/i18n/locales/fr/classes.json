@@ -1,0 +1,62 @@
+{
+  "vagabond": {
+    "description": "Parti de rien. Tu driftes de station en station en laissant des dettes derrière toi. Aucune règle, aucun plan, aucun futur.",
+    "bonusDesc": "Coup bas en combat (ignore armure) · +15% crit · Fragile mais imprévisible"
+  },
+  "ferrailleur": {
+    "description": "Ton vaisseau se désintègre en temps réel. Tu répares avec de la ferraille et de l'espoir. Surtout de la ferraille.",
+    "bonusDesc": "⚠ 30% chance de perdre un cargo en voyage · Coriace mais lent"
+  },
+  "endette": {
+    "description": "Quelqu'un veut récupérer son argent. Chaque. Jour. Tu dois 50cr par jour à quelqu'un que tu ne veux pas rencontrer.",
+    "bonusDesc": "⚠ -50cr par jour automatiquement · Combat standard"
+  },
+  "accro": {
+    "description": "T'as des habitudes coûteuses. C'est pas négociable. Chaque voyage te coûte 100cr en plus pour tes besoins.",
+    "bonusDesc": "⚠ -100cr par voyage · Stamina max élevée · Attaques erratiques"
+  },
+  "rayane": {
+    "description": "Ses stats sont catastrophiques. Sa seule force : quand tout semble perdu, il propose toujours de tout jouer à pile ou face. À toi de juger si le risque vaut le coup.",
+    "bonusDesc": "⚠ Pires stats du jeu · 🪙 Pile ou face DISPONIBLE (jamais imposé) en combat, en fuite, en ravitaillement, sur les récompenses de quête, et une fois face à la mort par run"
+  },
+  "maudit": {
+    "description": "L'univers ne t'aime tout simplement pas. Les événements positifs ont 50% de chance de se retourner contre toi.",
+    "bonusDesc": "⚠ Événements positifs 50% chance de fizzle · Combat équilibré"
+  },
+  "marchand": {
+    "description": "Rien de spécial. Un travail honnête dans un univers malhonnête. Tu achètes, tu vends, tu survies.",
+    "bonusDesc": "Classe neutre · Bonus sur les négociations · Stats équilibrées"
+  },
+  "mecanicien": {
+    "description": "Tu connais les moteurs. Tu es fauché comme les blés. Mais ton vaisseau tient — à peu près.",
+    "bonusDesc": "Carburant max +4 · Stamina bonus · Bonne endurance en combat"
+  },
+  "explorateur": {
+    "description": "Tout vu. Tout raté. Mais tu continues d'avancer. Les endroits calmes te récompensent mieux.",
+    "bonusDesc": "Événements neutres plus fréquents · Réflexes accrus (+8% crit)"
+  },
+  "medecin": {
+    "description": "Tu répares des corps dans des cliniques clandestines. La mort, tu la connais. Tu la retardes.",
+    "bonusDesc": "Médicaments vendus +50% · Soin rapide combat · PV max élevés · -10% dégâts reçus"
+  },
+  "contrebandier": {
+    "description": "Bons prix, ennemis dangereux. Tu vis de combines. Chaque deal est une question de survie.",
+    "bonusDesc": "-20% sur les achats · Fuite garantie 1×/combat · ⚠ Pirates 2× plus fréquents"
+  },
+  "veteran": {
+    "description": "Trente ans de guerres pour des causes oubliées. Tu es encore debout. Ça suffit.",
+    "bonusDesc": "+30% attaque · -20% dégâts reçus · Commence avec 1 momentum · Guerrier accompli"
+  },
+  "heritier": {
+    "description": "Vieux argent. Éducation pacifiste. Tu ne sais pas te battre mais ton portefeuille compense.",
+    "bonusDesc": "+300cr toutes les 5 jours · ⚠ Ne peut pas acheter d'armes · Faible en combat"
+  },
+  "hackeur": {
+    "description": "Les systèmes n'ont pas de secrets pour toi. Les murs sont des suggestions. Les serrures, des invitations.",
+    "bonusDesc": "Voit les prix à destination · Pirate équipement ennemi · Fragile physiquement"
+  },
+  "seigneurDeGuerre": {
+    "description": "Craint partout. Bienvenu nulle part de paisible. Les pirates t'évitent. Les marchands aussi.",
+    "bonusDesc": "Pirates auto-éliminés · Intimidation combat · +50% attaque · ⚠ Stations paisibles refusent"
+  }
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']
 // Valeur : A=1, 2..10, J=11, Q=12, K=13
@@ -12,6 +13,7 @@ interface CardGameProps {
 function drawCard() { return Math.floor(Math.random() * 13) }
 
 export function CardGame({ onResult }: CardGameProps) {
+  const { t } = useTranslation('minigames')
   const [current, setCurrent]   = useState(drawCard)
   const [next, setNext]         = useState<number | null>(null)
   const [round, setRound]       = useState(0)        // 0-4
@@ -64,16 +66,16 @@ export function CardGame({ onResult }: CardGameProps) {
   if (phase === 'end') {
     return (
       <div className="layout">
-        <div className="t-xs t-dim t-center">— JEU DE CARTES —</div>
+        <div className="t-xs t-dim t-center">{t('cardGame.header')}</div>
         <div className="px-box t-center" style={{ borderColor: pot > 0 ? 'var(--gold)' : 'var(--red)' }}>
           <div className="t-lg" style={{ color: pot > 0 ? 'var(--gold)' : 'var(--red)', marginBottom: '12px' }}>
-            {pot > 0 ? '★ GAIN' : '✗ PERDU'}
+            {pot > 0 ? t('cardGame.win') : t('cardGame.lose')}
           </div>
           <div className="t-sm" style={{ color: 'var(--gold)' }}>+{pot.toLocaleString()} cr</div>
-          {streak >= MAX_ROUNDS && <div className="t-xs t-green mt8">SÉRIE PARFAITE !</div>}
+          {streak >= MAX_ROUNDS && <div className="t-xs t-green mt8">{t('cardGame.perfectStreak')}</div>}
         </div>
         <button className="px-btn px-btn--primary" onClick={() => onResult(pot)}>
-          Encaisser et partir
+          {t('cardGame.collectAndLeave')}
         </button>
       </div>
     )
@@ -83,12 +85,12 @@ export function CardGame({ onResult }: CardGameProps) {
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— JEU DE CARTES —</div>
+      <div className="t-xs t-dim t-center">{t('cardGame.header')}</div>
 
       {/* Infos */}
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <span className="t-xs t-dim">MANCHE {round + 1}/{MAX_ROUNDS}</span>
-        <span className="t-xs t-gold">POT : {pot.toLocaleString()} cr</span>
+        <span className="t-xs t-dim">{t('cardGame.round', { round: round + 1, max: MAX_ROUNDS })}</span>
+        <span className="t-xs t-gold">{t('cardGame.pot', { pot: pot.toLocaleString() })}</span>
       </div>
 
       {/* Cartes */}
@@ -121,14 +123,14 @@ export function CardGame({ onResult }: CardGameProps) {
 
       {/* Enjeu de la prochaine manche */}
       <div className="t-xs t-center" style={{ color: 'var(--gold)' }}>
-        Prochaine manche : +{POT_PER_ROUND[round].toLocaleString()} cr
+        {t('cardGame.nextRound', { amount: POT_PER_ROUND[round].toLocaleString() })}
       </div>
 
       {/* Choix */}
       {phase === 'choose' && (
         <div className="grid2">
-          <button className="px-btn px-btn--green" onClick={() => guess(true)}>▲ PLUS HAUT</button>
-          <button className="px-btn px-btn--danger" onClick={() => guess(false)}>▼ PLUS BAS</button>
+          <button className="px-btn px-btn--green" onClick={() => guess(true)}>{t('cardGame.higher')}</button>
+          <button className="px-btn px-btn--danger" onClick={() => guess(false)}>{t('cardGame.lower')}</button>
         </div>
       )}
       {phase === 'reveal' && (
@@ -140,7 +142,7 @@ export function CardGame({ onResult }: CardGameProps) {
       {/* Encaisser */}
       {pot > 0 && phase === 'choose' && (
         <button className="px-btn" onClick={() => setPhase('end')} style={{ color: 'var(--gold)', opacity: 0.7 }}>
-          Encaisser ({pot.toLocaleString()} cr) et partir
+          {t('cardGame.collectAmountAndLeave', { amount: pot.toLocaleString() })}
         </button>
       )}
     </div>

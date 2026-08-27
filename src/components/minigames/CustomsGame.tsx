@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Cargo } from '../../types'
+import { translateGood } from '../../engine/goodsI18n'
 
 const CONTRABAND = [
   'Armes illégales', 'Drogues de synthèse', 'Données volées', 'Pièces de contrebande',
@@ -19,6 +21,7 @@ interface Props {
 }
 
 export function CustomsGame({ cargo, maxHide, onResult }: Props) {
+  const { t } = useTranslation('minigames')
   const items = Object.entries(cargo)
   const [hidden, setHidden]     = useState<Set<string>>(new Set())
   const [timeLeft, setTimeLeft] = useState(5)
@@ -75,11 +78,11 @@ export function CustomsGame({ cargo, maxHide, onResult }: Props) {
 
   return (
     <div className="layout">
-      <div className="t-xs t-red t-center" style={{ letterSpacing: '3px' }}>⚠ CONTRÔLE DOUANIER ⚠</div>
+      <div className="t-xs t-red t-center" style={{ letterSpacing: '3px' }}>{t('customsGame.header')}</div>
 
       <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(180,0,0,0.05)' }}>
         <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div className="t-sm t-red">SCANNER EN APPROCHE</div>
+          <div className="t-sm t-red">{t('customsGame.scannerApproaching')}</div>
           <div className="t-xs" style={{ color: timeLeft <= 3 ? 'var(--red)' : 'var(--orange)', fontWeight: 'bold' }}>⏱ {timeLeft}s</div>
         </div>
         <div style={{ height: '4px', background: 'var(--border)', borderRadius: '2px', overflow: 'hidden', marginBottom: '12px' }}>
@@ -91,11 +94,11 @@ export function CustomsGame({ cargo, maxHide, onResult }: Props) {
         </div>
 
         <div className="t-xs t-dim mb8" style={{ lineHeight: '2' }}>
-          Un garde s'approche avec un scanner. Tu peux cacher{' '}
+          {t('customsGame.introPrefix')}{' '}
           <span style={{ color: canHideMore ? 'var(--cyan)' : 'var(--text-dim)' }}>
             {maxHide - hiddenCount}
           </span>{' '}
-          item(s) supplémentaire(s). Clique sur les items suspects pour les dissimuler.
+          {t('customsGame.introSuffix')}
         </div>
 
         <div className="col gap4">
@@ -114,21 +117,21 @@ export function CustomsGame({ cargo, maxHide, onResult }: Props) {
                 }}
                 onClick={() => !blocked && toggleHide(name)}>
                 <span style={{ marginRight: '8px', minWidth: '70px', display: 'inline-block' }}>
-                  {isHid ? '▼ CACHÉ' : isSuspect ? '⚠ SUSPECT' : '○ LÉGAL'}
+                  {isHid ? t('customsGame.hidden') : isSuspect ? t('customsGame.suspect') : t('customsGame.legal')}
                 </span>
-                {name} ×{qty}
+                {translateGood(name)} ×{qty}
               </button>
             )
           })}
         </div>
 
         <div className="t-xs t-dim mt8" style={{ fontStyle: 'italic' }}>
-          Items avec ⚠ seront confisqués si visibles. Items cachés passent sans contrôle.
+          {t('customsGame.footer')}
         </div>
       </div>
 
       <button className="px-btn px-btn--danger" onClick={doScan}>
-        Lancer le scan maintenant
+        {t('customsGame.scanNow')}
       </button>
     </div>
   )

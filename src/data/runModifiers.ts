@@ -1,5 +1,8 @@
 import type { GameState } from '../types'
-import { NAMED_NPCS } from '../engine/npcTracker'
+import { getNamedNpcs } from '../engine/npcTracker'
+import i18n from '../i18n/config'
+
+const rm = (key: string) => i18n.t(key, { ns: 'runModifiers' })
 
 export type ModifierTag = 'buff' | 'debuff' | 'mixed'
 
@@ -14,23 +17,24 @@ export interface RunModifier {
 
 function pickRandom<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)] }
 
-export const RUN_MODIFIERS: RunModifier[] = [
+export function getRunModifiers(): RunModifier[] {
+  return [
   // ── BUFFS ────────────────────────────────────────────────────────────────────
   {
-    id: 'fortune_initiale', name: 'Fortune Initiale', tag: 'buff', color: '#ffd700',
-    desc: 'Quelqu\'un a préparé le terrain. +800 cr · +2 carburant au départ.',
+    id: 'fortune_initiale', name: rm('fortuneInitiale.name'), tag: 'buff', color: '#ffd700',
+    desc: rm('fortuneInitiale.desc'),
     apply: gs => ({ credits: gs.credits + 800, fuel: Math.min(gs.maxFuel, gs.fuel + 2) }),
   },
   {
-    id: 'vaisseau_prepare', name: 'Vaisseau Préparé', tag: 'buff', color: '#40ffff',
-    desc: 'Révisé avant le départ. +50 PV vaisseau max.',
+    id: 'vaisseau_prepare', name: rm('vaisseauPrepare.name'), tag: 'buff', color: '#40ffff',
+    desc: rm('vaisseauPrepare.desc'),
     apply: gs => ({ shipHp: gs.shipMaxHp + 50, shipMaxHp: gs.shipMaxHp + 50 }),
   },
   {
-    id: 'contacts_etablis', name: 'Contacts Établis', tag: 'buff', color: '#40ff80',
-    desc: 'Tu as des amis là où ça compte. 3 PNJs te connaissent et te font confiance.',
+    id: 'contacts_etablis', name: rm('contactsEtablis.name'), tag: 'buff', color: '#40ff80',
+    desc: rm('contactsEtablis.desc'),
     apply: gs => {
-      const three = [...NAMED_NPCS].sort(() => Math.random() - 0.5).slice(0, 3)
+      const three = [...getNamedNpcs()].sort(() => Math.random() - 0.5).slice(0, 3)
       const knownNpcs = { ...gs.knownNpcs }
       const names = new Set(gs.npcsMet)
       for (const n of three) {
@@ -41,8 +45,8 @@ export const RUN_MODIFIERS: RunModifier[] = [
     },
   },
   {
-    id: 'medecin_de_bord', name: 'Médecin de Bord', tag: 'buff', color: '#40ff80',
-    desc: 'Infirmerie bien fournie. +5 Médicaments · +10 HP max au départ.',
+    id: 'medecin_de_bord', name: rm('medecinDeBord.name'), tag: 'buff', color: '#40ff80',
+    desc: rm('medecinDeBord.desc'),
     apply: gs => ({
       cargo: { ...gs.cargo, 'Médicaments': (gs.cargo['Médicaments'] ?? 0) + 5 },
       playerMaxHp: gs.playerMaxHp + 10,
@@ -50,41 +54,41 @@ export const RUN_MODIFIERS: RunModifier[] = [
     }),
   },
   {
-    id: 'endurance', name: 'Endurance Forgée', tag: 'buff', color: '#40ffff',
-    desc: 'Corps entraîné, esprit stable. +2 stamina max.',
+    id: 'endurance', name: rm('endurance.name'), tag: 'buff', color: '#40ffff',
+    desc: rm('endurance.desc'),
     apply: gs => ({ maxStamina: gs.maxStamina + 2, stamina: gs.stamina + 2 }),
   },
 
   // ── DEBUFFS ──────────────────────────────────────────────────────────────────
   {
-    id: 'dette_initiale', name: 'En Dette', tag: 'debuff', color: '#ff4040',
-    desc: 'Tu pars avec une ardoise. Crédits réduits de 80% · +200 cr de dette quotidienne.',
+    id: 'dette_initiale', name: rm('detteInitiale.name'), tag: 'debuff', color: '#ff4040',
+    desc: rm('detteInitiale.desc'),
     apply: gs => ({ credits: Math.max(200, Math.floor(gs.credits * 0.2)), debtDailyAmount: (gs.debtDailyAmount ?? 0) + 200 }),
   },
   {
-    id: 'traque', name: 'Traqué', tag: 'debuff', color: '#ff4040',
-    desc: 'Quelqu\'un veut ta peau. -30 réputation · stalker actif dès le départ.',
+    id: 'traque', name: rm('traque.name'), tag: 'debuff', color: '#ff4040',
+    desc: rm('traque.desc'),
     apply: gs => ({
       reputation: gs.reputation - 30,
       stalker: { name: 'L\'Agent Gris', station: gs.currentStation, closingIn: false, daysSinceLastSeen: 0, threatLevel: 1 as const, daysActive: 0 },
     }),
   },
   {
-    id: 'vide_poches', name: 'Vide-Poches', tag: 'debuff', color: '#ff4040',
-    desc: 'Tu pars sans rien. Crédits de départ ÷2.',
+    id: 'vide_poches', name: rm('videPoches.name'), tag: 'debuff', color: '#ff4040',
+    desc: rm('videPoches.desc'),
     apply: gs => ({ credits: Math.max(0, Math.floor(gs.credits / 2)) }),
   },
   {
-    id: 'vaisseau_epave', name: 'Épave Volante', tag: 'debuff', color: '#ff8040',
-    desc: 'Vaisseau décrépit. PV vaisseau → 35. Mais la soute est chargée.',
+    id: 'vaisseau_epave', name: rm('vaisseauEpave.name'), tag: 'debuff', color: '#ff8040',
+    desc: rm('vaisseauEpave.desc'),
     apply: gs => ({
       shipHp: 35,
       cargo: { ...gs.cargo, 'Ferraille': (gs.cargo['Ferraille'] ?? 0) + 3, 'Outils': (gs.cargo['Outils'] ?? 0) + 2 },
     }),
   },
   {
-    id: 'survivant_endurci', name: 'Survivant Endurci', tag: 'mixed', color: '#ff8040',
-    desc: 'HP max -25%, mais crédits de départ +1500.',
+    id: 'survivant_endurci', name: rm('survivantEndurci.name'), tag: 'mixed', color: '#ff8040',
+    desc: rm('survivantEndurci.desc'),
     apply: gs => ({
       playerMaxHp: Math.floor(gs.playerMaxHp * 0.75),
       playerHp: Math.floor(gs.playerHp * 0.75),
@@ -94,35 +98,40 @@ export const RUN_MODIFIERS: RunModifier[] = [
 
   // ── MIXTES ───────────────────────────────────────────────────────────────────
   {
-    id: 'contrat_de_sang', name: 'Contrat de Sang', tag: 'mixed', color: '#ff6060',
-    desc: '+200 cr par victoire de combat. -5 rép par victoire.',
+    id: 'contrat_de_sang', name: rm('contratDeSang.name'), tag: 'mixed', color: '#ff6060',
+    desc: rm('contratDeSang.desc'),
     apply: _ => ({}),
   },
   {
-    id: 'economie_de_guerre', name: 'Économie de Guerre', tag: 'mixed', color: '#ffd700',
-    desc: 'Achats ×1.5. Récompenses de quêtes ×2.',
+    id: 'economie_de_guerre', name: rm('economieDeGuerre.name'), tag: 'mixed', color: '#ffd700',
+    desc: rm('economieDeGuerre.desc'),
     apply: _ => ({}),
   },
   {
-    id: 'paria', name: 'Paria', tag: 'mixed', color: '#a040ff',
-    desc: 'Aucune faction ne t\'acceptera. Mais les prix à l\'achat sont -20%.',
+    id: 'paria', name: rm('paria.name'), tag: 'mixed', color: '#a040ff',
+    desc: rm('paria.desc'),
     apply: _ => ({}),
   },
   {
-    id: 'boucher', name: 'Boucher', tag: 'mixed', color: '#ff6040',
-    desc: 'Loot de combat ×1.5. Chaque victoire coûte -3 rép.',
+    id: 'boucher', name: rm('boucher.name'), tag: 'mixed', color: '#ff6040',
+    desc: rm('boucher.desc'),
     apply: _ => ({}),
   },
   {
-    id: 'karma_negatif', name: 'Karma Négatif', tag: 'debuff', color: '#a040ff',
-    desc: 'Chaque voyage coûte +1 carburant supplémentaire.',
+    id: 'karma_negatif', name: rm('karmaNegatif.name'), tag: 'debuff', color: '#a040ff',
+    desc: rm('karmaNegatif.desc'),
     apply: _ => ({}),
   },
-]
+  ]
+}
 
 export function drawRunModifiers(count = 2): RunModifier[] {
-  const shuffled = [...RUN_MODIFIERS].sort(() => Math.random() - 0.5)
+  const shuffled = [...getRunModifiers()].sort(() => Math.random() - 0.5)
   return shuffled.slice(0, count)
+}
+
+export function getRunModifierById(id: string): RunModifier | undefined {
+  return getRunModifiers().find(m => m.id === id)
 }
 
 // ── Helpers pour les effets en cours ─────────────────────────────────────────
@@ -180,5 +189,5 @@ export function canJoinFactionThisRun(gs: GameState): boolean {
 }
 
 export function pickRandomModifier(): RunModifier {
-  return pickRandom(RUN_MODIFIERS)
+  return pickRandom(getRunModifiers())
 }

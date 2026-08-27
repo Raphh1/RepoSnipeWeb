@@ -1,0 +1,218 @@
+{
+  "services": {
+    "ferrailleur": {
+      "label": "🔧 Repair the ship",
+      "costText": "500 cr",
+      "whyNotIntact": "Ship intact",
+      "whyNotCredits": "Short {{amount}} cr",
+      "message": "He glances at the hull and pulls out his tools. -500 cr · Ship repaired ({{max}}/{{max}} HP)."
+    },
+    "medecin": {
+      "label": "💊 Full treatment",
+      "costText": "300 cr",
+      "whyNotFull": "You're in perfect health",
+      "whyNotCredits": "Short {{amount}} cr",
+      "message": "-300 cr · Full treatment. HP restored to {{max}}."
+    },
+    "hackeuse": {
+      "label": "⚡ Wipe the record",
+      "costText": "800 cr",
+      "whyNotCredits": "Short {{amount}} cr",
+      "whyNotClean": "Record already clean",
+      "message": "-800 cr · She types a few lines without looking at you. \"Done.\" +40 reputation."
+    },
+    "dealer": {
+      "label": "📦 Under-the-table supplies",
+      "costText": "400 cr",
+      "whyNotCredits": "Short {{amount}} cr",
+      "message": "-400 cr · He pulls a crate out from under the counter. +2 Medicine · +1 Stimulant."
+    },
+    "forgeron": {
+      "label": "⚔ Upgrade equipped weapon",
+      "costText": "Tools ×2 + 400 cr",
+      "whyNotNoWeapon": "No weapon equipped",
+      "whyNotTools": "Need Tools ×2",
+      "whyNotCredits": "Short {{amount}} cr",
+      "noWeaponMsg": "No weapon.",
+      "message": "He reworks the blade in silence. -400 cr · -Tools ×2 · {{weapon}}: +2 min/max damage."
+    },
+    "piloteRetraite": {
+      "label": "🛸 Secret route",
+      "costText": "200 cr",
+      "whyNotCredits": "Short {{amount}} cr",
+      "whyNotFull": "Tank full",
+      "message": "-200 cr · \"Take this shortcut — nobody else knows about it yet.\" +2 fuel."
+    },
+    "veteran": {
+      "label": "🏋 Intensive training",
+      "costText": "1 action",
+      "whyNotNothing": "Nothing to improve",
+      "message": "An hour with him. No words, just sweat. Stamina maxed · +8 reputation."
+    },
+    "courtier": {
+      "label": "💼 Discreet deal",
+      "costText": "500 cr",
+      "whyNotCredits": "Short {{amount}} cr",
+      "message": "-500 cr · He slides a crate across the counter. +1 {{item}}."
+    },
+    "marchande": {
+      "label": "💼 Exclusive stock",
+      "costText": "400 cr",
+      "whyNotCredits": "Short {{amount}} cr",
+      "message": "-400 cr · \"Just came in, not even in the catalog yet.\" +1 {{item}}."
+    },
+    "chercheuse": {
+      "label": "🔬 Artifact / data appraisal",
+      "costText": "Data or Artifact required",
+      "whyNotNone": "No data or artifact in cargo (Data, Stolen data, Artifacts…)",
+      "message": "She examines the specimen at length. A long pause. \"This is rare — genuinely rare.\" She pays without haggling. -1 {{key}} · +{{reward}} cr · +{{rep}} rep."
+    },
+    "survivante": {
+      "label": "🤝 Survival trade",
+      "costText": "1 Food",
+      "whyNotNone": "No food available",
+      "message": "She trades without a word. -1 {{key}} · +2 Medicine · +15 HP."
+    }
+  },
+  "greetings": {
+    "ally": [
+      "Still alive. Good news.",
+      "I knew you'd come back.",
+      "I missed you, in a way."
+    ],
+    "friendly": [
+      "Well, look who's back.",
+      "Welcome back. Want something to drink?",
+      "You again. Not a complaint."
+    ],
+    "hostile": [
+      "We have unfinished business.",
+      "You shouldn't have come back.",
+      "I was waiting for you."
+    ],
+    "cold": [
+      "...",
+      "What do you want.",
+      "I didn't invite you."
+    ]
+  },
+  "folieCallback": [
+    "{{name}} steps back as you approach. \"You've got... dried blood. There, on your jaw.\" He avoids your gaze for the rest of the conversation.",
+    "{{name}} sniffs the air, uneasy. \"What's that smell...\" He doesn't finish the sentence.",
+    "\"People say things about you,\" {{name}} says quietly. \"The kind of things you'd rather not believe. Except now, looking at you...\"",
+    "{{name}} keeps their distance, hands visible. \"I'm not going to ask questions. Just be quick.\""
+  ],
+  "pillarCallback": {
+    "fear": [
+      "{{npc}} freezes for a second. \"They say {{name}} has sworn to end you. People like me avoid people like you.\"",
+      "\"You're the one who defied {{name}},\" {{npc}} murmurs, not meeting your eyes. \"Do what you came for and leave.\"",
+      "{{npc}} steps back. \"I don't want trouble with {{name}}. And you're trouble on legs.\""
+    ],
+    "betray": [
+      "{{npc}} stares at you coldly. \"Alanossa tells everyone you betrayed her. Her word carries weight here.\"",
+      "\"I was told not to trust you,\" {{npc}} says. \"Someone close to Alanossa. You know the type.\""
+    ],
+    "respect": [
+      "{{npc}} nods with deference. \"Word is {{name}} holds you in high regard. That opens doors around here.\"",
+      "\"You're close to {{name}}, aren't you?\" {{npc}} lowers their voice, almost respectful. \"That changes things.\""
+    ]
+  },
+  "greeting": {
+    "stalker": [
+      "{{name}} lowers their voice. \"Someone was asking about you earlier. Watch yourself.\"",
+      "{{name}} glances behind you before speaking. \"Got someone on your tail?\"",
+      "\"You look like someone people are looking for,\" {{name}} says without a smile."
+    ],
+    "hurt": [
+      "{{name}} watches you approach. \"You've taken a beating. Shows from a mile off.\"",
+      "\"You're still alive? Barely.\" {{name}} narrows their eyes.",
+      "\"Sit down,\" {{name}} says. \"You look like a dead man still walking.\""
+    ],
+    "famous": [
+      "{{name}} recognizes you instantly. \"Everyone in the sector is talking about you.\"",
+      "\"Ah. You.\" {{name}} looks impressed despite themself.",
+      "\"I'd heard you'd pass through here,\" {{name}} says. \"The sector has a memory.\""
+    ],
+    "badRep": [
+      "{{name}} looks away. \"Not sure I want to be seen with you here.\"",
+      "\"You've got a bad reputation,\" {{name}} says quietly. \"A few people would like to talk to you. The kind of people you'd rather avoid.\""
+    ],
+    "traque": "{{name}} notices something. \"You've been looking over your shoulder since you walked in. What's your problem?\"",
+    "regular": [
+      "{{name}} looks up without surprise. \"You're still here. Part of the furniture now.\"",
+      "\"You again.\" {{name}} says it without malice. Almost warm.",
+      "\"I was half expecting you,\" {{name}} says. \"You're predictable. Not a complaint.\""
+    ],
+    "day20": "\"You're still alive,\" {{name}} says. \"That's something, around here.\"",
+    "poor": "{{name}} glances at you. \"You look broke. It shows.\"",
+    "lore": "{{name}} looks at you differently. \"You look like someone searching for something specific. Or someone who's already found too much.\"",
+    "neutral": [
+      "{{name}} looks up. No enthusiasm, no hostility. They're waiting.",
+      "{{name}} sizes you up for a second, then goes back to what they were doing. They saw you.",
+      "{{name}} gives you a brief nod. The kind that says: \"you're here, I saw, we're good.\"",
+      "{{name}} pauses for a second. Looks at you. Continues. The silence is neutral.",
+      "\"Hey.\" {{name}} says nothing else. But they recognized you."
+    ]
+  },
+  "rival": {
+    "fightMsg": "{{name}} draws their weapon. Fight.",
+    "apologizeSuccess": "They listen. Their shoulders relax. 'This doesn't erase anything. But...' They leave. +20 rep.",
+    "apologizeFail": "{{name}} isn't ready to listen. Fight inevitable.",
+    "payInsufficient": "Not enough credits ({{amount}} cr required). They're done waiting.",
+    "paySuccess": "-{{amount}} cr. They take the money and leave. Grudges have a price.",
+    "fleeSuccess": "You bolt. -1 fuel. They'll be there next time.",
+    "fleeFail": "They're faster than expected. Fight."
+  },
+  "rivalEnemyDesc": "They fight with the rage of someone who's been waiting a long time.",
+  "namedNpcs": {
+    "marek": "He's been fixing ships for thirty years. He knows things.",
+    "sela": "Smiling. Efficient. Never quite honest.",
+    "torvak": "Sixty years of service. He's seen things he doesn't talk about anymore.",
+    "lira": "She knows your passwords. She doesn't use them — yet.",
+    "boro": "He sells things you don't need but will want anyway.",
+    "cael": "Alanossa's right hand. Efficient. Discreet. Deadly.",
+    "neva": "She's been here since it was still a real prison.",
+    "pistis": "He connects those who want to sell with those who'd rather not know where it came from.",
+    "ganz": "He runs the bets, the arenas, and the secrets of the wealthy.",
+    "myrra": "She commands the Scarlet Guardians at this station. She judges fast.",
+    "ysla": "She's searching for something in the ruins. She thinks she found it.",
+    "drela": "He's flown everywhere. Now he drinks and watches the stars.",
+    "rook": "He makes weapons. He doesn't ask questions. He gives good prices.",
+    "vance": "Calm. But his eyes have seen something that calm barely hides.",
+    "vosh": "He evaluates candidates for Alanossa. One look. One second. He's already decided.",
+    "orva": "She runs the fort when Ossian sleeps. Either she respects you, or you leave.",
+    "besh": "He guards things that belong to no one — and profits from it.",
+    "ulmo": "He advises those who decide. What he himself thinks, no one knows.",
+    "vael": "He counts the ships that pass. He doesn't let many through.",
+    "kross": "He knows things about everyone here. He carefully chooses what he keeps.",
+    "setta": "She manages the stock, the prices, and the undesirables. In that order.",
+    "fenn": "He knew Alanossa before she was Alanossa. He remembers it differently.",
+    "torq": "Discipline and loyalty. In that order. He doesn't smile often.",
+    "lyss": "She sees patterns in data no one else reads.",
+    "mako": "He runs the sector's riskiest bar with unsettling serenity.",
+    "harek": "He's held his post for eight years. He didn't ask to leave.",
+    "sera": "She's seen everything that passes through this space corridor for five years. Everything.",
+    "drav": "Whatever he can't fix, he hasn't met yet.",
+    "keln": "He commanded a Guardian garrison. He doesn't talk about it.",
+    "mira-c": "She smiles at everyone and remembers every price.",
+    "rexx": "Clean suit, chosen words. What he thinks, he keeps to himself.",
+    "olin": "He knows where every crate is. He also knows where some shouldn't be.",
+    "sonn": "She's lived here for thirty years. She's seen enough people to no longer be surprised by anything.",
+    "sael": "He knows everything said in this club. He'll never repeat it. Except once.",
+    "murn": "He was there when it burned. He's still here. There's a reason.",
+    "docta": "He's treated residents since the official quarantine ended. No one told him to leave.",
+    "zal": "He protects archives that predate the sector's collective memory.",
+    "oss": "His ship became a city. He adapted to it slowly.",
+    "shel": "If you see her, it's because she decided you could.",
+    "tonn": "He has an agreement with every faction. He never says how he got it.",
+    "rinn": "She maintains the signal. She listens to everything that passes. She notes a lot of things.",
+    "broxx": "He knows the prices of forty stations. He knows exactly what you're overpaying.",
+    "reine": "Her real name isn't known. Her authority over this port is.",
+    "vael-s": "He's studied gas giants for twelve years. He hasn't found what he's looking for. He continues.",
+    "elenne": "She watches the stars. She stopped watching people a long time ago.",
+    "kaed": "He's gone further than this station. Twice. He talks about it sparingly.",
+    "grelm": "He's led the miners since the old chief left. Nobody asks why.",
+    "brenn": "He manages the men, the machines, and the heat. Not necessarily in that order.",
+    "kaur": "Forty years in the mines. His hands are harder than the rock he cut."
+  }
+}

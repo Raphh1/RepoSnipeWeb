@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import type { CombatAction } from '../../engine/combat'
 import type { CombatLogEntry } from '../../types'
@@ -10,6 +11,7 @@ import { getSubBossMinigame } from '../../data/subBosses'
 import type { SubBossMinigameKind } from '../../data/subBosses'
 import { useFloatingNumbers, FloatingNumbersLayer } from '../ui/FloatingNumber'
 import { playHit, playCrit, playHeal, playFlee, playClick, playVictory, playDeath, playFinisher } from '../../engine/sfx'
+import { translateGood, translateWeaponName, translateArmorName, translateEnemyName } from '../../engine/goodsI18n'
 
 type NegotiateCondition = {
   id: string
@@ -22,19 +24,13 @@ type NegotiateCondition = {
 
 const ANIM_DELAY_MS = 850
 
-const INTENT_LABEL: Record<string, string> = {
-  normal: '→ Attaque standard',
-  heavy:  '⚠ FRAPPE LOURDE IMMINENTE',
-  charge: '⚡ SE CONCENTRE (frappe dévastatrice +1)',
-  disarm: '✋ Vise ton arme',
-  defend: '○ Se repose ce tour',
-}
 const INTENT_CLASS: Record<string, string> = {
   normal: 'intent--normal', heavy: 'intent--heavy', charge: 'intent--charge',
   disarm: 'intent--disarm', defend: 'intent--defend',
 }
 
 export function CombatScreen() {
+  const { t } = useTranslation('combatScreen')
   const gs             = useGameStore(s => s.gs!)
   const submit         = useGameStore(s => s.submitCombatAction)
   const resolveVictory = useGameStore(s => s.resolveVictory)
@@ -194,19 +190,19 @@ export function CombatScreen() {
 
     pool.push({
       id: 'credits',
-      label: `Payer ${demand.toLocaleString()} cr`,
-      desc: `"Tu veux passer ? Montre-moi ce que ça vaut pour toi. Du liquide, maintenant."`,
+      label: t('negotiate.payLabel', { amount: demand.toLocaleString() }),
+      desc: t('negotiate.payDesc'),
       available: gs.credits >= demand,
-      whyNot: gs.credits < demand ? `Il te manque ${(demand - gs.credits).toLocaleString()} cr` : undefined,
+      whyNot: gs.credits < demand ? t('negotiate.payWhyNot', { missing: (demand - gs.credits).toLocaleString() }) : undefined,
       accept: () => { patch({ credits: gs.credits - demand }); act({ type: 'negotiate-accept' }); setNegotiateConditions(null) },
     })
 
     if (Object.keys(gs.cargo).length > 0) {
-      const cargoLabel = Object.entries(gs.cargo).map(([k, v]) => `${k} ×${v}`).join(', ')
+      const cargoLabel = Object.entries(gs.cargo).map(([k, v]) => `${translateGood(k)} ×${v}`).join(', ')
       pool.push({
         id: 'cargo',
-        label: 'Vider ta soute',
-        desc: `"Laisse tout ce que t'as là-dedans — ${cargoLabel} — et tu repars avec tes os en bon état."`,
+        label: t('negotiate.cargoLabel'),
+        desc: t('negotiate.cargoDesc', { cargo: cargoLabel }),
         available: true,
         accept: () => { patch({ cargo: {} }); act({ type: 'negotiate-accept' }); setNegotiateConditions(null) },
       })
@@ -214,8 +210,8 @@ export function CombatScreen() {
 
     pool.push({
       id: 'favor',
-      label: 'Faveur personnelle',
-      desc: `Il te regarde de haut en bas, s'attarde. Un sourire en coin. "Je veux une faveur. Du genre... personnel. Tu vois ce que je veux dire."`,
+      label: t('negotiate.favorLabel'),
+      desc: t('negotiate.favorDesc'),
       available: true,
       accept: () => { patch({ reputation: gs.reputation - 5 }); act({ type: 'negotiate-accept' }); setNegotiateConditions(null) },
     })
@@ -224,8 +220,8 @@ export function CombatScreen() {
       const w = gs.equippedWeapon
       pool.push({
         id: 'weapon',
-        label: `Laisser ${w.name}`,
-        desc: `"Cette arme. Pose-la par terre et recule. Je te laisse partir."`,
+        label: t('negotiate.weaponLabel', { weapon: translateWeaponName(w.name) }),
+        desc: t('negotiate.weaponDesc'),
         available: true,
         accept: () => {
           patch({ weapons: gs.weapons.filter(x => x !== w), equippedWeapon: null })
@@ -238,8 +234,8 @@ export function CombatScreen() {
     if (gs.equippedArmor) {
       pool.push({
         id: 'armor',
-        label: `Retirer ton armure`,
-        desc: `"L'armure. Tu l'enlèves, tu la poses là. On est quittes."`,
+        label: t('negotiate.armorLabel'),
+        desc: t('negotiate.armorDesc'),
         available: true,
         accept: () => { patch({ equippedArmor: null }); act({ type: 'negotiate-accept' }); setNegotiateConditions(null) },
       })
@@ -247,8 +243,8 @@ export function CombatScreen() {
 
     pool.push({
       id: 'rep',
-      label: 'Jurer de quitter le secteur',
-      desc: `"Tu jures sur ta vie que tu remets plus les pieds ici, et tu le fais savoir. Partout."`,
+      label: t('negotiate.repLabel'),
+      desc: t('negotiate.repDesc'),
       available: true,
       accept: () => { patch({ reputation: gs.reputation - 15 }); act({ type: 'negotiate-accept' }); setNegotiateConditions(null) },
     })
@@ -294,19 +290,19 @@ export function CombatScreen() {
       {victoryPending && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
           <div style={{ textAlign: 'center', animation: 'fadeIn 0.3s ease-in' }}>
-            <div style={{ fontSize: '11px', letterSpacing: '6px', color: 'var(--gold)', textShadow: '0 0 20px var(--gold)', marginBottom: '8px' }}>★ VICTOIRE ★</div>
-            <div className="t-xs t-dim">{gs.combatEnemy?.name} est vaincu</div>
+            <div style={{ fontSize: '11px', letterSpacing: '6px', color: 'var(--gold)', textShadow: '0 0 20px var(--gold)', marginBottom: '8px' }}>{t('victoryTitle')}</div>
+            <div className="t-xs t-dim">{t('defeated', { enemy: gs.combatEnemy ? translateEnemyName(gs.combatEnemy.name) : undefined })}</div>
           </div>
         </div>
       )}
       {negotiateConditions && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, background: 'rgba(0,0,0,0.92)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ maxWidth: '600px', width: '100%' }} className="col gap4">
-            <div className="t-xs t-dim t-center">— NÉGOCIATION —</div>
+            <div className="t-xs t-dim t-center">{t('negotiate.modalTitle')}</div>
             <div className="px-box" style={{ borderColor: 'var(--cyan)' }}>
-              <div className="t-sm t-bright mb4">{enemy.name} pose ses conditions</div>
+              <div className="t-sm t-bright mb4">{t('negotiate.conditionsTitle', { enemy: translateEnemyName(enemy.name) })}</div>
               <div className="t-xs t-dim mb8" style={{ fontStyle: 'italic', lineHeight: '2' }}>
-                "Si tu veux t'en sortir vivant, voilà ce que ça va coûter."
+                {t('negotiate.quote')}
               </div>
               <div className="col gap4">
                 {negotiateConditions.map(c => (
@@ -321,7 +317,7 @@ export function CombatScreen() {
               </div>
             </div>
             <button className="px-btn t-dim" onClick={() => setNegotiateConditions(null)}>
-              ← Refuser — continuer le combat
+              {t('negotiate.refuse')}
             </button>
           </div>
         </div>
@@ -348,7 +344,7 @@ export function CombatScreen() {
             {sbGame.kind === 'stop' && (
               <StopTheBar
                 difficulty={sbGame.difficulty}
-                label={`COUP CIBLÉ — ${enemy.name}`}
+                label={t('targetedHit', { enemy: translateEnemyName(enemy.name) })}
                 onResult={(r) => resolveSubBossGame(r === 'perfect' ? 1.8 : r === 'good' ? 1.15 : 0.4)}
               />
             )}
@@ -361,14 +357,14 @@ export function CombatScreen() {
             {sbGame.kind === 'draw' && (
               <QuickDraw
                 difficulty={sbGame.difficulty}
-                label={`COUP CIBLÉ — ${enemy.name}`}
+                label={t('targetedHit', { enemy: translateEnemyName(enemy.name) })}
                 onResult={(mult) => resolveSubBossGame(mult)}
               />
             )}
             {sbGame.kind === 'react' && (
               <ReactFlash
                 difficulty={sbGame.difficulty}
-                label={`COUP CIBLÉ — ${enemy.name}`}
+                label={t('targetedHit', { enemy: translateEnemyName(enemy.name) })}
                 onResult={(mult) => resolveSubBossGame(mult)}
               />
             )}
@@ -377,15 +373,15 @@ export function CombatScreen() {
       )}
 
       {/* Header */}
-      <div className="t-center t-dim t-xs">— COMBAT —</div>
+      <div className="t-center t-dim t-xs">{t('header')}</div>
 
       {/* Enemy + Player status */}
       <div className="grid2">
         {/* Player */}
         <div className="px-box" ref={playerRef} style={{ position: 'relative', overflow: 'visible' }}>
           <FloatingNumbersLayer entries={playerFloats} />
-          <div className="t-sm t-bright mb8">TOI</div>
-          <div className="t-xs t-dim mb4">PV</div>
+          <div className="t-sm t-bright mb8">{t('you')}</div>
+          <div className="t-xs t-dim mb4">{t('hp')}</div>
           <div className={`bar bar--hp ${phPct < 30 ? 'low' : phPct < 60 ? 'medium' : ''} ${playerDamaged ? 'hp-damaged' : ''}`}>
             <div className="bar__fill" style={{ width: `${phPct}%` }} />
           </div>
@@ -393,33 +389,33 @@ export function CombatScreen() {
             {shownPlayerHp}/{gs.playerMaxHp}
           </div>
 
-          <div className="t-xs t-dim mb4 mt8">STAMINA</div>
+          <div className="t-xs t-dim mb4 mt8">{t('stamina')}</div>
           <div className="bar bar--sta">
             <div className="bar__fill" style={{ width: `${staPct}%` }} />
           </div>
           <div className="t-xs t-cyan mt4">{gs.stamina}/{gs.maxStamina}</div>
 
           <div className="mt8 t-xs t-dim">
-            {weapon ? <span className="t-orange">{weapon.name}</span> : 'Mains nues'}
-            {gs.equippedArmor && <span className="t-blue" style={{ color: 'var(--blue)' }}> · {gs.equippedArmor.name}</span>}
+            {weapon ? <span className="t-orange">{translateWeaponName(weapon.name)}</span> : t('bareHands')}
+            {gs.equippedArmor && <span className="t-blue" style={{ color: 'var(--blue)' }}> · {translateArmorName(gs.equippedArmor.name)}</span>}
           </div>
 
           <div className="momentum mt8">
-            <span className="t-xs t-dim">MOMENTUM</span>
+            <span className="t-xs t-dim">{t('momentum')}</span>
             {[0,1,2].map(i => (
               <div key={i} className={`momentum__pip ${cs.momentum > i ? `momentum__pip--${cs.momentum}` : ''}`} />
             ))}
-            {cs.momentum >= 3 && <span className="t-gold t-xs blink">FINISHER!</span>}
+            {cs.momentum >= 3 && <span className="t-gold t-xs blink">{t('finisherTag')}</span>}
           </div>
         </div>
 
         {/* Enemy */}
         <div className="px-box px-box--hi" ref={enemyRef} style={{ position: 'relative', overflow: 'visible' }}>
           <FloatingNumbersLayer entries={enemyFloats} />
-          <div className="t-sm t-red mb4">{enemy.name}</div>
+          <div className="t-sm t-red mb4">{translateEnemyName(enemy.name)}</div>
           <div className="t-xs t-dim mb8">{enemy.description}</div>
 
-          <div className="t-xs t-dim mb4">PV ENNEMI</div>
+          <div className="t-xs t-dim mb4">{t('enemyHp')}</div>
           <div className={`bar bar--hp ${hpPct < 30 ? 'low' : hpPct < 60 ? 'medium' : ''} ${enemyDamaged ? 'hp-damaged' : ''}`}>
             <div className="bar__fill" style={{ width: `${hpPct}%` }} />
           </div>
@@ -428,14 +424,14 @@ export function CombatScreen() {
           </div>
 
           <div className={`t-xs mt8 ${INTENT_CLASS[cs.currentIntent]}`}>
-            INTENTION : {INTENT_LABEL[cs.currentIntent]}
+            {t('intentLabel', { label: t(`intent.${cs.currentIntent}`) })}
           </div>
 
-          {cs.enemyStunTurns > 0    && <div className="t-xs t-yellow mt4">ÉTOURDI ({cs.enemyStunTurns} tour{cs.enemyStunTurns > 1 ? 's' : ''})</div>}
-          {cs.enemyBlinded           && <div className="t-xs t-yellow mt4">AVEUGLÉ</div>}
-          {cs.enemyBurnTurns > 0    && <div className="t-xs t-orange mt4" style={{ color: 'var(--orange)' }}>BRÛLURE ×{cs.enemyBurnTurns}</div>}
-          {cs.enemyWeaponDisabledTurns > 0 && <div className="t-xs t-cyan mt4">HACKÉ ({cs.enemyWeaponDisabledTurns}t)</div>}
-          {cs.enemyCharging          && <div className="t-xs t-red mt4 blink">SE PRÉPARE !</div>}
+          {cs.enemyStunTurns > 0    && <div className="t-xs t-yellow mt4">{t('stunned', { turns: cs.enemyStunTurns, plural: cs.enemyStunTurns > 1 ? 's' : '' })}</div>}
+          {cs.enemyBlinded           && <div className="t-xs t-yellow mt4">{t('blinded')}</div>}
+          {cs.enemyBurnTurns > 0    && <div className="t-xs t-orange mt4" style={{ color: 'var(--orange)' }}>{t('burning', { turns: cs.enemyBurnTurns })}</div>}
+          {cs.enemyWeaponDisabledTurns > 0 && <div className="t-xs t-cyan mt4">{t('hacked', { turns: cs.enemyWeaponDisabledTurns })}</div>}
+          {cs.enemyCharging          && <div className="t-xs t-red mt4 blink">{t('charging')}</div>}
         </div>
       </div>
 
@@ -443,7 +439,7 @@ export function CombatScreen() {
       <div className="combat-log-wrap">
         <div className="px-box px-box--dark combat-log" ref={logRef}>
           {visibleLog.length === 0
-            ? <div className="log-entry log-entry--info">Le combat commence...</div>
+            ? <div className="log-entry log-entry--info">{t('combatStart')}</div>
             : visibleLog.map(entry => (
                 <div key={entry.id} className={`log-entry log-entry--${entry.type}`}>
                   {entry.text}
@@ -456,58 +452,58 @@ export function CombatScreen() {
 
       {/* Actions */}
       <div className="px-box">
-        <div className="t-xs t-dim mb8">{isAnimating ? '...' : 'ACTION :'}</div>
+        <div className="t-xs t-dim mb8">{isAnimating ? '...' : t('actionLabel')}</div>
         {enemy.isSubBoss && getSubBossMinigame(enemy.name) && !isAnimating && (
           <div className="t-xs t-cyan mb8" style={{ opacity: 0.8 }}>
-            ◆ SOUS-BOSS — chaque coup porté déclenche un défi de précision. Réussis-le pour frapper fort.
+            {t('subBossHint')}
           </div>
         )}
         <div className="col gap4">
           {cs.momentum >= 3 && (
             <button className="px-btn px-btn--primary momentum-pulse" disabled={isAnimating} onClick={() => { playFinisher(); act({ type: 'finisher' }) }}>
-              ★ FINISHER · <span className="t-gold">{dmgRange(3)} dmg</span> · reset momentum
+              {t('actions.finisher')}<span className="t-gold">{dmgRange(3)}{t('actions.finisherSuffix')}</span>
             </button>
           )}
 
           <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'attack' })}>
-            {weapon ? `⚔ ${weapon.name}` : '✊ Mains nues'}
-            <span className="t-dim" style={{ marginLeft: '8px' }}><span className="t-bright">{dmgRange(1)} dmg</span> · -20 sta</span>
+            {weapon ? t('actions.attackWeapon', { weapon: translateWeaponName(weapon.name) }) : t('bareHandsAction')}
+            <span className="t-dim" style={{ marginLeft: '8px' }}><span className="t-bright">{dmgRange(1)}</span>{t('actions.dmgSuffix')}</span>
           </button>
 
           {gs.stamina >= 30 && (
             <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'offensive' })}>
-              ⚡ Offensive · <span className="t-bright">{dmgRange(1.3)} dmg</span>
-              <span className="t-dim" style={{ marginLeft: '6px' }}>· tu encaisses +20% · -30 sta</span>
+              {t('actions.offensive')}<span className="t-bright">{dmgRange(1.3)}{t('actions.offensiveDmgSuffix')}</span>
+              <span className="t-dim" style={{ marginLeft: '6px' }}>{t('actions.offensiveSuffix')}</span>
             </button>
           )}
           {gs.stamina >= 15 && (
             <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'defensive' })}>
-              🛡 Défensive · <span className="t-bright">{dmgRange(1)} dmg</span>
-              <span className="t-dim" style={{ marginLeft: '6px' }}>· reçois <span className="t-green">{enemyDmgRange(0.70)} dmg</span> · -15 sta</span>
+              {t('actions.defensive')}<span className="t-bright">{dmgRange(1)}{t('actions.defensiveDmgSuffix')}</span>
+              <span className="t-dim" style={{ marginLeft: '6px' }}>{t('actions.defensiveSuffix')}<span className="t-green">{enemyDmgRange(0.70)}</span>{t('actions.defensiveSuffix2')}</span>
             </button>
           )}
           {gs.stamina >= 10 && (
             <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'dodge' })}>
-              💨 Esquive · <span className="t-bright">{dmgRange(0.6)} dmg</span>
-              <span className="t-dim" style={{ marginLeft: '6px' }}>· 40% évitement · -10 sta</span>
+              {t('actions.dodge')}<span className="t-bright">{dmgRange(0.6)}{t('actions.dodgeDmgSuffix')}</span>
+              <span className="t-dim" style={{ marginLeft: '6px' }}>{t('actions.dodgeSuffix')}</span>
             </button>
           )}
           {gs.stamina >= 50 && (
             <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'focused' })}>
-              🎯 Concentrée · <span className="t-bright">{dmgRange(1.6)} dmg</span>
-              <span className="t-dim" style={{ marginLeft: '6px' }}>· tu es vulnérable (×1.5 reçu) · -50 sta</span>
+              {t('actions.focused')}<span className="t-bright">{dmgRange(1.6)}{t('actions.focusedDmgSuffix')}</span>
+              <span className="t-dim" style={{ marginLeft: '6px' }}>{t('actions.focusedSuffix')}</span>
             </button>
           )}
           {gs.moralTags.includes('cannibal') && gs.stamina >= 25 && (
             <button className="px-btn" disabled={isAnimating} onClick={() => act({ type: 'bite' })}
               style={{ color: 'var(--red)', borderColor: 'var(--red)' }}>
-              🩸 Morsure · faibles dégâts, te soigne · -20 folie · -25 sta
-              {(gs.folieLevel ?? 0) >= 50 ? ` · folie ${gs.folieLevel}` : ''}
+              {t('actions.bite')}
+              {(gs.folieLevel ?? 0) >= 50 ? t('actions.biteMadness', { level: gs.folieLevel }) : ''}
             </button>
           )}
           {hasSpecial && gs.stamina >= 35 && (
             <button className="px-btn" style={{ color: 'var(--purple)' }} disabled={isAnimating} onClick={() => act({ type: 'special' })}>
-              ✨ Spéciale — {weapon!.effectDesc} ({weapon!.effectChance}%) · -35 sta
+              {t('actions.special', { desc: weapon!.effectDesc, chance: weapon!.effectChance })}
             </button>
           )}
 
@@ -526,13 +522,13 @@ export function CombatScreen() {
 
           {gs.reputation > 0 && (
             <button className="px-btn t-dim" disabled={isAnimating} onClick={() => act({ type: 'intimidate' })}>
-              😤 Intimider · {Math.min(75, Math.floor(gs.reputation / 5))}% succès
+              {t('actions.intimidate', { chance: Math.min(75, Math.floor(gs.reputation / 5)) })}
             </button>
           )}
           {enemy.isBoss
             ? (
               <button className="px-btn t-dim" disabled style={{ opacity: 0.35 }}>
-                🗣 Négocier — sans effet sur ce type d'ennemi
+                {t('actions.negotiateBoss')}
               </button>
             )
             : (() => {
@@ -545,22 +541,22 @@ export function CombatScreen() {
                     act({ type: 'negotiate' })
                   }
                 }}>
-                  🗣 Négocier · {chance}% qu'il accepte de parler
+                  {t('actions.negotiate', { chance })}
                 </button>
               )
             })()
           }
           <button className="px-btn t-dim" disabled={isAnimating} onClick={() => act({ type: 'rest' })}>
-            ○ Souffler · +40 stamina · l'ennemi attaque sans riposte
+            {t('actions.rest')}
           </button>
           {(gs.cargo['Médicaments'] ?? 0) > 0 && (
             <button className="px-btn px-btn--green" disabled={isAnimating || cs.medicUses >= 3} onClick={() => act({ type: 'heal' })}>
-              ✚ Se soigner +30 PV · Médicaments : {gs.cargo['Médicaments']} {cs.medicUses >= 3 ? '· LIMITE ATTEINTE' : `· Soins ${cs.medicUses}/3`}
+              {t('actions.heal', { qty: gs.cargo['Médicaments'], limit: cs.medicUses >= 3 ? t('actions.healLimit') : t('actions.healRemaining', { used: cs.medicUses }) })}
             </button>
           )}
           {(gs.cargo['Eau purifiée'] ?? 0) > 0 && gs.stamina < gs.maxStamina && (
             <button className="px-btn px-btn--green" disabled={isAnimating} onClick={() => act({ type: 'water' })}>
-              💧 Eau purifiée · stamina max · ×{gs.cargo['Eau purifiée']}
+              {t('actions.water', { qty: gs.cargo['Eau purifiée'] })}
             </button>
           )}
           {(gs.cargo['Drogues de synthèse'] ?? 0) > 0 && (
@@ -569,18 +565,18 @@ export function CombatScreen() {
               disabled={isAnimating}
               onClick={() => act({ type: 'drug' })}
             >
-              💉 Drogues de synthèse ×{gs.cargo['Drogues de synthèse']}
-              {(gs.addictionLevel ?? 0) > 0 ? ' · ACCRO — overdose !' : ' · +20 PV, +25 Sta'}
+              {t('actions.drug', { qty: gs.cargo['Drogues de synthèse'] })}
+              {(gs.addictionLevel ?? 0) > 0 ? t('actions.drugAddicted') : t('actions.drugNormal')}
             </button>
           )}
           {(gs.cargo['Médicaments premium'] ?? 0) > 0 && gs.playerHp < gs.playerMaxHp && (
             <button className="px-btn px-btn--green" disabled={isAnimating || cs.medicUses >= 3} onClick={() => act({ type: 'premium_med' })}>
-              ✚✚ Médicaments premium +60 PV · ×{gs.cargo['Médicaments premium']} {cs.medicUses >= 3 ? '· LIMITE' : `· ${cs.medicUses}/3`}
+              {t('actions.premiumMed', { qty: gs.cargo['Médicaments premium'], limit: cs.medicUses >= 3 ? t('actions.premiumMedLimit') : t('actions.premiumMedRemaining', { used: cs.medicUses }) })}
             </button>
           )}
           {(gs.cargo['Plantes médicinales'] ?? 0) > 0 && gs.playerHp < gs.playerMaxHp && (
             <button className="px-btn px-btn--green" disabled={isAnimating || cs.medicUses >= 3} onClick={() => act({ type: 'herb' })}>
-              🌿 Plantes médicinales +25 PV · ×{gs.cargo['Plantes médicinales']} {cs.medicUses >= 3 ? '· LIMITE' : `· ${cs.medicUses}/3`}
+              {t('actions.herb', { qty: gs.cargo['Plantes médicinales'], limit: cs.medicUses >= 3 ? t('actions.premiumMedLimit') : t('actions.premiumMedRemaining', { used: cs.medicUses }) })}
             </button>
           )}
           {(() => {
@@ -589,22 +585,25 @@ export function CombatScreen() {
             if (!found || gs.playerHp >= gs.playerMaxHp) return null
             return (
               <button className="px-btn px-btn--green" disabled={isAnimating || cs.medicUses >= 3} onClick={() => act({ type: 'food' })}>
-                🍖 {found} +15 PV · ×{gs.cargo[found]} {cs.medicUses >= 3 ? '· LIMITE' : `· ${cs.medicUses}/3`}
+                {t('actions.food', { item: found ? translateGood(found) : found, qty: gs.cargo[found], limit: cs.medicUses >= 3 ? t('actions.premiumMedLimit') : t('actions.premiumMedRemaining', { used: cs.medicUses }) })}
               </button>
             )
           })()}
           {(gs.cargo['Alcools exotiques'] ?? 0) > 0 && gs.stamina < gs.maxStamina && (
             <button className="px-btn" style={{ borderColor: 'var(--orange)', color: 'var(--orange)' }} disabled={isAnimating} onClick={() => act({ type: 'alcohol' })}>
-              🥃 Alcools exotiques +60 Sta · l'ennemi attaque · ×{gs.cargo['Alcools exotiques']}
+              {t('actions.alcohol', { qty: gs.cargo['Alcools exotiques'] })}
             </button>
           )}
           {gs.fuel > 0 && cs.fleeAttempts < 2 && (
             <button className="px-btn px-btn--danger" disabled={isAnimating} onClick={flee}>
-              🏃 Fuir · {gs.class.name === 'Rayane' ? '🪙 50' : 50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0)}% succès · {gs.class.name === 'Rayane' ? 'gratuit si pile, coup gratuit encaissé si face' : '-1 carburant'}
+              {t('actions.flee', {
+                chance: gs.class.name === 'Rayane' ? '🪙 50' : 50 + (gs.fuel > 2 ? 15 : 0) + (gs.class.name === 'Contrebandier' ? 20 : 0),
+                cost: gs.class.name === 'Rayane' ? t('actions.fleeCostRayane') : t('actions.fleeCostNormal'),
+              })}
             </button>
           )}
           {cs.fleeAttempts >= 2 && (
-            <div className="t-xs t-red" style={{ padding: '4px 0' }}>Fuite impossible — trop de tentatives ratées</div>
+            <div className="t-xs t-red" style={{ padding: '4px 0' }}>{t('actions.fleeBlocked')}</div>
           )}
         </div>
       </div>
@@ -613,31 +612,32 @@ export function CombatScreen() {
 }
 
 function ClassAction({ gs, onAct, disabled }: { gs: ReturnType<typeof useGameStore.getState>['gs'] & object; onAct: (a: CombatAction) => void; disabled: boolean }) {
+  const { t } = useTranslation('combatScreen')
   if (!gs) return null
   switch (gs.class.name) {
     case 'Seigneur de guerre':
       return <button className="px-btn" style={{ color: 'var(--cyan)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
-        [SEIGNEUR] Intimidation de combat · ennemi perd son tour · 1×/combat
+        {t('class.warlord')}
       </button>
     case 'Médecin':
       return gs.stamina >= 20 ? <button className="px-btn" style={{ color: 'var(--cyan)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
-        [MÉDECIN] Soin rapide +30 PV sans perdre son tour · -20 sta · 1×/combat
+        {t('class.medic')}
       </button> : null
     case 'Hackeur':
       return gs.stamina >= 30 ? <button className="px-btn" style={{ color: 'var(--cyan)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
-        [HACKEUR] Pirater équipement ennemi · 2 tours désactivé · -30 sta · 1×/combat
+        {t('class.hacker')}
       </button> : null
     case 'Contrebandier':
       return gs.fuel > 0 ? <button className="px-btn" style={{ color: 'var(--cyan)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
-        [CONTREBANDIER] Fuite garantie · -1 carburant · 1×/combat
+        {t('class.smuggler')}
       </button> : null
     case 'Vagabond':
       return <button className="px-btn" style={{ color: 'var(--cyan)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
-        [VAGABOND] Coup bas · ignore armure, dégâts élevés · -10 rép · 1×/combat
+        {t('class.wanderer')}
       </button>
     case 'Rayane':
       return <button className="px-btn" style={{ color: 'var(--gold)' }} disabled={disabled} onClick={() => onAct({ type: 'class' })}>
-        [RAYANE] 🪙 Pile ou face · pile : ×4 dégâts (armure ignorée) · face : -30% PV max, étourdi · 1×/combat
+        {t('class.rayane')}
       </button>
     default: return null
   }

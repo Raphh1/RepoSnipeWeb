@@ -1,0 +1,27 @@
+{
+  "header": "— COMBAT MULTIPLE — {{count}} adversaires — Tour {{turn}} —",
+  "youHp": "TOI · PV",
+  "stamina": "STAMINA",
+  "finisherReady": "FINISHER!",
+  "enemyComposition": "COMPOSITION ENNEMIE",
+  "eliminated": "Éliminé",
+  "stunned": "ÉTOURDI {{turns}}t",
+  "combatStart": "Combat multiple commence...",
+  "attackHeader": "ATTAQUER :",
+  "finisherButton": "★ FINISHER — 3× dégâts sur l'ennemi le plus faible",
+  "healButton": "Se soigner +30 PV (Médicaments ×{{count}})",
+  "fleeButton": "Fuir ({{chance}}% succès) — -1 carburant",
+  "role": {
+    "tank": "Tank",
+    "ranged": "Tireur",
+    "support": "Soutien",
+    "normal": "Normal"
+  },
+  "classAction": {
+    "medecin": "[MÉDECIN] Soin rapide +30 PV · 1×/combat",
+    "contrebandier": "[CONTREBANDIER] Fuite garantie · -1 carburant",
+    "seigneur": "[SEIGNEUR] Intimider l'ennemi le plus dangereux",
+    "hackeur": "[HACKEUR] Hack de masse — tous les non-tanks étourdis",
+    "vagabond": "[VAGABOND] Coup bas sur l'ennemi le plus faible"
+  }
+}

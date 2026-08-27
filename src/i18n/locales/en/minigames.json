@@ -1,0 +1,83 @@
+{
+  "asteroidDodge": {
+    "header": "— ASTEROID FIELD —",
+    "controls": "← → dodge · SPACE fire",
+    "warning": "⚠ Firing on an enemy ship = pirate combat"
+  },
+  "cardGame": {
+    "header": "— CARD GAME —",
+    "win": "★ WIN",
+    "lose": "✗ LOST",
+    "perfectStreak": "PERFECT STREAK!",
+    "collectAndLeave": "Collect and leave",
+    "round": "ROUND {{round}}/{{max}}",
+    "pot": "POT: {{pot}} cr",
+    "nextRound": "Next round: +{{amount}} cr",
+    "higher": "▲ HIGHER",
+    "lower": "▼ LOWER",
+    "collectAmountAndLeave": "Collect ({{amount}} cr) and leave"
+  },
+  "customsGame": {
+    "header": "⚠ CUSTOMS CHECK ⚠",
+    "scannerApproaching": "SCANNER APPROACHING",
+    "introPrefix": "A guard approaches with a scanner. You can hide",
+    "introSuffix": "extra item(s). Click on suspicious items to conceal them.",
+    "hidden": "▼ HIDDEN",
+    "suspect": "⚠ SUSPECT",
+    "legal": "○ LEGAL",
+    "footer": "Items marked ⚠ will be confiscated if visible. Hidden items pass without inspection.",
+    "scanNow": "Launch scan now"
+  },
+  "hackSequence": {
+    "header": "— SYSTEM INTRUSION —",
+    "targetSequence": "TARGET SEQUENCE",
+    "time": "TIME",
+    "accessGranted": "✓ ACCESS GRANTED",
+    "connectionLost": "✗ CONNECTION LOST"
+  },
+  "reactFlash": {
+    "defaultLabel": "REFLEXES",
+    "instructions": "MEMORIZE THE COLOR — CLICK THE RIGHT ONE BEFORE TIME RUNS OUT",
+    "hits_one": "{{hits}}/3 good reaction",
+    "hits_other": "{{hits}}/3 good reactions",
+    "damageMult": "×{{mult}} damage",
+    "ready": "READY...",
+    "choose": "CHOOSE!",
+    "perfectReaction": "✓ PERFECT REACTION",
+    "missed": "✗ MISSED",
+    "difficulty": "Difficulty: {{filled}}{{empty}}",
+    "colors": {
+      "ROUGE": "RED",
+      "BLEU": "BLUE",
+      "VERT": "GREEN"
+    }
+  },
+  "escort": {
+    "header": "— METEORITE TRANSIT —",
+    "escort": "Escort:",
+    "destroyed_one": "🚀 {{count}} destroyed",
+    "destroyed_other": "🚀 {{count}} destroyed",
+    "instructions": "Mouse · WASD · Arrows to navigate — Click or Space to fire on enemy ships (destroying them clears the path, no combat triggered) — Survive {{duration}}s to deliver the passenger",
+    "passengerDelivered": "★ PASSENGER DELIVERED",
+    "smoothTransit": "The transit went by without major losses.",
+    "reward": "+{{credits}} cr · +{{rep}} rep",
+    "passengerLost": "✕ PASSENGER LOST",
+    "tookTooManyHits": "The ship took too many meteorite hits. The passenger didn't survive.",
+    "questFailed": "Quest failed · −20 ship HP",
+    "continueArrow": "CONTINUE →"
+  },
+  "quickDraw": {
+    "defaultLabel": "PRECISION SHOOTING",
+    "instructions": "CLICK THE TARGET BEFORE IT DISAPPEARS",
+    "hits_one": "{{hits}}/3 target hit",
+    "hits_other": "{{hits}}/3 targets hit"
+  },
+  "stopTheBar": {
+    "defaultLabel": "LOCKPICKING",
+    "instructions": "STOP THE BAR IN THE GREEN ZONE",
+    "perfect": "★ PERFECT",
+    "success": "◆ SUCCESS",
+    "miss": "✗ MISS",
+    "stopButton": "► STOP!"
+  }
+}

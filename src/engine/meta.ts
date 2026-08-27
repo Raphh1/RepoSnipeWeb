@@ -1,6 +1,6 @@
 import type { GameState } from '../types'
 import type { MetaProgress, RunSummary } from '../types/meta'
-import { META_UNLOCKS } from '../data/metaUnlocks'
+import { getMetaUnlocks } from '../data/metaUnlocks'
 import { rollWeaponForTier } from '../data/weapons'
 
 export function calculateRunPoints(gs: GameState, victory: boolean): number {
@@ -36,7 +36,7 @@ export function buildRunSummary(gs: GameState, victory: boolean): RunSummary {
 }
 
 export function applyMetaBonuses(gs: GameState, meta: MetaProgress): GameState {
-  const unlocked = META_UNLOCKS.filter(u => meta.unlockedIds.includes(u.id))
+  const unlocked = getMetaUnlocks().filter(u => meta.unlockedIds.includes(u.id))
   let result = { ...gs }
 
   let cls = { ...result.class }

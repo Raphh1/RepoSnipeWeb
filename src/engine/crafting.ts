@@ -1,7 +1,7 @@
 import type { GameState } from '../types'
 import type { Recipe } from '../data/recipes'
 import { rollWeaponForTier } from '../data/weapons'
-import { rollArmorForTier } from '../data/armors'
+import { rollArmorForTier, grantArmor } from '../data/armors'
 
 export function canCraft(recipe: Recipe, cargo: GameState['cargo']): boolean {
   return Object.entries(recipe.ingredients).every(
@@ -34,7 +34,7 @@ export function applyCraft(gs: GameState, recipe: Recipe): GameState {
     result = { ...result, weapons: [...result.weapons, weapon] }
   } else if (out.type === 'armor_roll') {
     const armor = rollArmorForTier(out.tier)
-    result = { ...result, armors: [...result.armors, armor] }
+    result = { ...result, ...grantArmor(result, armor) }
   } else if (out.type === 'cargo') {
     // Cas spécial : carburant de synthèse appliqué directement
     if (out.item === 'Carburant de synthèse') {

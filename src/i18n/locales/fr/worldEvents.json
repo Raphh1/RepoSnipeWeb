@@ -1,0 +1,57 @@
+{
+  "faucon_war": {
+    "title": "Guerre des Faucons",
+    "description": "Les Faucons Noirs ont lancé une offensive totale contre les Gardiens Écarlates. Les routes militaires sont coupées.",
+    "shortDesc": "Armes & armures +50% · Fort Kharos et Citadelle bloqués · +15% combat"
+  },
+  "emporium_blockade": {
+    "title": "Blocus de l'Emporium",
+    "description": "L'Emporium Requiem a fermé ses routes commerciales en représailles d'un incident non confirmé. Les vivres se raréfient.",
+    "shortDesc": "Nourriture & médicaments +70% · +1 carburant par trajet"
+  },
+  "epidemic": {
+    "title": "Épidémie en expansion",
+    "description": "Un pathogène inconnu se propage depuis Station Quarantaine. Les autorités tentent de contenir la situation.",
+    "shortDesc": "Médicaments ×4 · Station Quarantaine bloquée"
+  },
+  "cosmic_storm": {
+    "title": "Tempête cosmique",
+    "description": "Une tempête de particules ionisées balaye le secteur. Les systèmes de navigation sont perturbés, les voyages plus dangereux.",
+    "shortDesc": "+2 carburant par trajet · +10% risque combat en voyage"
+  },
+  "bounty_hunt": {
+    "title": "Chasse à la prime",
+    "description": "Une organisation inconnue a placé des primes sur des voyageurs indépendants dans ce secteur. Des chasseurs de primes opèrent partout.",
+    "shortDesc": "+25% risque combat partout · Chasseurs de primes actifs"
+  },
+  "colonial_famine": {
+    "title": "Famine coloniale",
+    "description": "Les colonies agricoles ont subi de mauvaises récoltes. Les vivres et l'eau sont devenus une denrée précieuse dans tout le secteur.",
+    "shortDesc": "Nourriture & eau ×3 en vente · Opportunité commerciale"
+  },
+  "market_crash": {
+    "title": "Effondrement du marché",
+    "description": "Une manipulation financière massive a fait s'effondrer les cours. Tout se vend et s'achète pour une bouchée de pain.",
+    "shortDesc": "Tous les prix −35% · Bonne période pour acheter"
+  },
+  "artifact_rush": {
+    "title": "Ruée vers les artefacts",
+    "description": "Des découvertes dans les zones de ruines ont déclenché une ruée. Collectionneurs et factions se battent pour les artefacts anciens.",
+    "shortDesc": "Artefacts & données classifiées ×3 · Explorations plus rentables"
+  },
+  "military_coup": {
+    "title": "Coup d'état militaire",
+    "description": "Un putsch interne secoue les forces militaires du secteur. Les bases sont en état de siège, les civils interdits d'accès.",
+    "shortDesc": "Forts militaires bloqués · Armures & munitions +60%"
+  },
+  "guild_truce": {
+    "title": "Trêve des guildes",
+    "description": "Un accord de paix temporaire entre les grandes factions a été signé. Le commerce reprend librement, les tensions s'apaisent.",
+    "shortDesc": "Tous les prix −20% · −15% risque combat · Bonne période pour voyager"
+  },
+  "grand_festival": {
+    "title": "Grand Festival Orbital",
+    "description": "La Tribosphère et Scotty Golden North organisent un festival inter-sectoriel. Les foules affluent, les crédits coulent.",
+    "shortDesc": "Luxe & divertissements ×2 · Tribosphère et Scotty en fête · -10% combat"
+  }
+}

@@ -1,7 +1,10 @@
 import type { GameState, PersistentNpc, NpcReaction } from '../types'
+import i18n from '../i18n/config'
+import { translateWeaponName } from './goodsI18n'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+const nt = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'npcTracker', ...params })
 
 // ── Services par rôle ────────────────────────────────────────────────────────
 
@@ -13,57 +16,58 @@ export interface NpcService {
   execute: (gs: GameState) => { patch: Partial<GameState>; message: string }
 }
 
-const SERVICES: Record<string, NpcService> = {
+function getServices(): Record<string, NpcService> {
+  return {
   Ferrailleur: {
-    label: '🔧 Réparer le vaisseau',
-    costText: '500 cr',
+    label: nt('services.ferrailleur.label'),
+    costText: nt('services.ferrailleur.costText'),
     canUse: gs => gs.shipHp < gs.shipMaxHp && gs.credits >= 500,
-    whyNot: gs => gs.shipHp >= gs.shipMaxHp ? 'Vaisseau intact' : `Manque ${500 - gs.credits} cr`,
+    whyNot: gs => gs.shipHp >= gs.shipMaxHp ? nt('services.ferrailleur.whyNotIntact') : nt('services.ferrailleur.whyNotCredits', { amount: 500 - gs.credits }),
     execute: gs => ({
       patch: { credits: gs.credits - 500, shipHp: gs.shipMaxHp },
-      message: `Il jette un œil à la coque et sort ses outils. -500 cr · Vaisseau réparé (${gs.shipMaxHp}/${gs.shipMaxHp} PV).`,
+      message: nt('services.ferrailleur.message', { max: gs.shipMaxHp }),
     }),
   },
   Médecin: {
-    label: '💊 Soins complets',
-    costText: '300 cr',
+    label: nt('services.medecin.label'),
+    costText: nt('services.medecin.costText'),
     canUse: gs => gs.playerHp < gs.playerMaxHp && gs.credits >= 300,
-    whyNot: gs => gs.playerHp >= gs.playerMaxHp ? 'Tu es en pleine forme' : `Manque ${300 - gs.credits} cr`,
+    whyNot: gs => gs.playerHp >= gs.playerMaxHp ? nt('services.medecin.whyNotFull') : nt('services.medecin.whyNotCredits', { amount: 300 - gs.credits }),
     execute: gs => ({
       patch: { credits: gs.credits - 300, playerHp: gs.playerMaxHp },
-      message: `-300 cr · Soins complets. PV restaurés à ${gs.playerMaxHp}.`,
+      message: nt('services.medecin.message', { max: gs.playerMaxHp }),
     }),
   },
   Hackeuse: {
-    label: '⚡ Effacer le casier',
-    costText: '800 cr',
+    label: nt('services.hackeuse.label'),
+    costText: nt('services.hackeuse.costText'),
     canUse: gs => gs.credits >= 800 && gs.reputation < 80,
-    whyNot: gs => gs.credits < 800 ? `Manque ${800 - gs.credits} cr` : 'Casier déjà propre',
+    whyNot: gs => gs.credits < 800 ? nt('services.hackeuse.whyNotCredits', { amount: 800 - gs.credits }) : nt('services.hackeuse.whyNotClean'),
     execute: gs => ({
       patch: { credits: gs.credits - 800, reputation: Math.min(100, gs.reputation + 40) },
-      message: `-800 cr · Elle tape quelques lignes sans te regarder. "C'est fait." +40 réputation.`,
+      message: nt('services.hackeuse.message'),
     }),
   },
   Dealer: {
-    label: '📦 Ravitaillement clandestin',
-    costText: '400 cr',
+    label: nt('services.dealer.label'),
+    costText: nt('services.dealer.costText'),
     canUse: gs => gs.credits >= 400,
-    whyNot: gs => `Manque ${400 - gs.credits} cr`,
+    whyNot: gs => nt('services.dealer.whyNotCredits', { amount: 400 - gs.credits }),
     execute: gs => ({
       patch: {
         credits: gs.credits - 400,
         cargo: { ...gs.cargo, 'Médicaments': (gs.cargo['Médicaments'] ?? 0) + 2, 'Stimulant': (gs.cargo['Stimulant'] ?? 0) + 1 },
       },
-      message: `-400 cr · Il sort une caisse de sous le comptoir. +2 Médicaments · +1 Stimulant.`,
+      message: nt('services.dealer.message'),
     }),
   },
   Forgeron: {
-    label: "⚔ Améliorer l'arme équipée",
-    costText: 'Outils ×2 + 400 cr',
+    label: nt('services.forgeron.label'),
+    costText: nt('services.forgeron.costText'),
     canUse: gs => !!gs.equippedWeapon && (gs.cargo['Outils'] ?? 0) >= 2 && gs.credits >= 400,
-    whyNot: gs => !gs.equippedWeapon ? 'Aucune arme équipée' : (gs.cargo['Outils'] ?? 0) < 2 ? 'Il faut Outils ×2' : `Manque ${400 - gs.credits} cr`,
+    whyNot: gs => !gs.equippedWeapon ? nt('services.forgeron.whyNotNoWeapon') : (gs.cargo['Outils'] ?? 0) < 2 ? nt('services.forgeron.whyNotTools') : nt('services.forgeron.whyNotCredits', { amount: 400 - gs.credits }),
     execute: gs => {
-      if (!gs.equippedWeapon) return { patch: {}, message: 'Aucune arme.' }
+      if (!gs.equippedWeapon) return { patch: {}, message: nt('services.forgeron.noWeaponMsg') }
       const newOutils = (gs.cargo['Outils'] ?? 0) - 2
       const nc = { ...gs.cargo, Outils: newOutils }
       if (newOutils <= 0) delete (nc as Record<string, number>).Outils
@@ -71,68 +75,68 @@ const SERVICES: Record<string, NpcService> = {
       const newWeapons = gs.weapons.map(w => w.name === gs.equippedWeapon!.name ? upgraded : w)
       return {
         patch: { credits: gs.credits - 400, cargo: nc, equippedWeapon: upgraded, weapons: newWeapons },
-        message: `Il retravaille la lame en silence. -400 cr · -Outils ×2 · ${upgraded.name} : +2 dégâts min/max.`,
+        message: nt('services.forgeron.message', { weapon: translateWeaponName(upgraded.name) }),
       }
     },
   },
   'Pilote retraité': {
-    label: '🛸 Route secrète',
-    costText: '200 cr',
+    label: nt('services.piloteRetraite.label'),
+    costText: nt('services.piloteRetraite.costText'),
     canUse: gs => gs.credits >= 200 && gs.fuel < gs.maxFuel,
-    whyNot: gs => gs.credits < 200 ? `Manque ${200 - gs.credits} cr` : 'Réservoir plein',
+    whyNot: gs => gs.credits < 200 ? nt('services.piloteRetraite.whyNotCredits', { amount: 200 - gs.credits }) : nt('services.piloteRetraite.whyNotFull'),
     execute: gs => ({
       patch: { credits: gs.credits - 200, fuel: Math.min(gs.maxFuel, gs.fuel + 2) },
-      message: `-200 cr · "Prends ce raccourci — personne d'autre le connaît encore." +2 carburant.`,
+      message: nt('services.piloteRetraite.message'),
     }),
   },
   Vétéran: {
-    label: '🏋 Entraînement intensif',
-    costText: '1 action',
+    label: nt('services.veteran.label'),
+    costText: nt('services.veteran.costText'),
     canUse: gs => gs.stamina < gs.maxStamina || gs.reputation < 100,
-    whyNot: _ => 'Rien à améliorer',
+    whyNot: _ => nt('services.veteran.whyNotNothing'),
     execute: gs => ({
       patch: { stamina: gs.maxStamina, reputation: Math.min(100, gs.reputation + 8) },
-      message: `Une heure avec lui. Pas de mots, juste de la sueur. Stamina max · +8 réputation.`,
+      message: nt('services.veteran.message'),
     }),
   },
   Courtier: {
-    label: '💼 Transaction secrète',
-    costText: '500 cr',
+    label: nt('services.courtier.label'),
+    costText: nt('services.courtier.costText'),
     canUse: gs => gs.credits >= 500,
-    whyNot: gs => `Manque ${500 - gs.credits} cr`,
+    whyNot: gs => nt('services.courtier.whyNotCredits', { amount: 500 - gs.credits }),
     execute: gs => {
       const items = ['Composants électroniques', 'Équipements blindés', 'Données classifiées', 'Métaux rares', 'Cristaux énergétiques']
       const item = pick(items)
       return {
         patch: { credits: gs.credits - 500, cargo: { ...gs.cargo, [item]: (gs.cargo[item] ?? 0) + 1 } },
-        message: `-500 cr · Il fait glisser une caisse par-dessus le comptoir. +1 ${item}.`,
+        message: nt('services.courtier.message', { item }),
       }
     },
   },
   Marchande: {
-    label: '💼 Stock exclusif',
-    costText: '400 cr',
+    label: nt('services.marchande.label'),
+    costText: nt('services.marchande.costText'),
     canUse: gs => gs.credits >= 400,
-    whyNot: gs => `Manque ${400 - gs.credits} cr`,
+    whyNot: gs => nt('services.marchande.whyNotCredits', { amount: 400 - gs.credits }),
     execute: gs => {
       const items = ['Médicaments premium', 'Munitions spéciales', 'Outils lourds', 'Composants tactiques', 'Pièces techniques']
       const item = pick(items)
       return {
         patch: { credits: gs.credits - 400, cargo: { ...gs.cargo, [item]: (gs.cargo[item] ?? 0) + 1 } },
-        message: `-400 cr · "Ça vient d'arriver, pas encore au catalogue." +1 ${item}.`,
+        message: nt('services.marchande.message', { item }),
       }
     },
   },
   Chercheuse: {
-    label: '🔬 Expertise d\'artefacts / données',
-    costText: 'Données ou Artefact requis',
+    label: nt('services.chercheuse.label'),
+    costText: nt('services.chercheuse.costText'),
     canUse: gs =>
       (gs.cargo['Données'] ?? 0) > 0 ||
       (gs.cargo['Données volées'] ?? 0) > 0 ||
       (gs.cargo['Données classifiées'] ?? 0) > 0 ||
       (gs.cargo['Artefacts'] ?? 0) > 0 ||
       (gs.cargo['Composants expérimentaux'] ?? 0) > 0,
-    whyNot: _ => 'Aucune donnée ni artefact en soute (Données, Données volées, Artefacts…)',
+    whyNot: _ => nt('services.chercheuse.whyNotNone'),
     execute: gs => {
       const priority = ['Artefacts', 'Composants expérimentaux', 'Données classifiées', 'Données volées', 'Données']
       const key = priority.find(k => (gs.cargo[k] ?? 0) > 0)!
@@ -144,15 +148,15 @@ const SERVICES: Record<string, NpcService> = {
       if ((nc[key] ?? 0) <= 0) delete (nc as Record<string, number>)[key]
       return {
         patch: { credits: gs.credits + reward, cargo: nc, reputation: gs.reputation + repGain },
-        message: `Elle examine longuement le spécimen. Longue pause. "C'est rare — vraiment rare." Elle te paie sans marchander. -1 ${key} · +${reward} cr · +${repGain} rép.`,
+        message: nt('services.chercheuse.message', { key, reward, rep: repGain }),
       }
     },
   },
   Survivante: {
-    label: '🤝 Troc de survie',
-    costText: '1 Nourriture',
+    label: nt('services.survivante.label'),
+    costText: nt('services.survivante.costText'),
     canUse: gs => (gs.cargo['Nourriture synthétique'] ?? 0) >= 1 || (gs.cargo['Nourriture fraîche'] ?? 0) >= 1,
-    whyNot: _ => 'Aucune nourriture disponible',
+    whyNot: _ => nt('services.survivante.whyNotNone'),
     execute: gs => {
       const hasFraiche = (gs.cargo['Nourriture fraîche'] ?? 0) >= 1
       const key = hasFraiche ? 'Nourriture fraîche' : 'Nourriture synthétique'
@@ -160,10 +164,11 @@ const SERVICES: Record<string, NpcService> = {
       if ((nc[key] ?? 0) <= 0) delete (nc as Record<string, number>)[key]
       return {
         patch: { cargo: { ...nc, 'Médicaments': (gs.cargo['Médicaments'] ?? 0) + 2 }, playerHp: Math.min(gs.playerMaxHp, gs.playerHp + 15) },
-        message: `Elle échange sans un mot. -1 ${key} · +2 Médicaments · +15 PV.`,
+        message: nt('services.survivante.message', { key }),
       }
     },
   },
+  }
 }
 
 const ROLE_ALIASES: Record<string, string> = {
@@ -186,7 +191,7 @@ const ROLE_ALIASES: Record<string, string> = {
 
 export function getNpcService(role: string): NpcService | null {
   const resolved = ROLE_ALIASES[role] ?? role
-  return SERVICES[resolved] ?? null
+  return getServices()[resolved] ?? null
 }
 
 export function getNpc(gs: GameState, id: string, name: string, station: string): PersistentNpc {
@@ -213,26 +218,10 @@ export function getNpcReaction(npc: PersistentNpc, gs: GameState): NpcReaction {
   return 'neutral'
 }
 
-const ALLY_GREETINGS = [
-  "Toujours en vie. Bonne nouvelle.",
-  "Je savais que tu reviendrais.",
-  "Tu m'as manqué, d'une certaine façon.",
-]
-const FRIENDLY_GREETINGS = [
-  "Tiens, te revoilà.",
-  "Bon retour. Tu veux quelque chose à boire ?",
-  "Encore toi. C'est pas une plainte.",
-]
-const HOSTILE_GREETINGS = [
-  "On a un problème non réglé.",
-  "T'aurais pas dû revenir.",
-  "Je t'attendais.",
-]
-const COLD_GREETINGS = [
-  "...",
-  "Tu veux quoi.",
-  "Je t'ai pas invité.",
-]
+function getAllyGreetings(): string[] { return i18n.t('greetings.ally', { ns: 'npcTracker', returnObjects: true }) as string[] }
+function getFriendlyGreetings(): string[] { return i18n.t('greetings.friendly', { ns: 'npcTracker', returnObjects: true }) as string[] }
+function getHostileGreetings(): string[] { return i18n.t('greetings.hostile', { ns: 'npcTracker', returnObjects: true }) as string[] }
+function getColdGreetings(): string[] { return i18n.t('greetings.cold', { ns: 'npcTracker', returnObjects: true }) as string[] }
 
 // ── CALLBACKS PILIERS (5.3) ────────────────────────────────────────────────
 // Les PNJ réagissent aux décisions piliers du joueur : un détenteur rendu
@@ -247,12 +236,7 @@ function getFolieCallback(npc: PersistentNpc, gs: GameState): string | null {
   if (!gs.moralTags.includes('cannibal')) return null
   const folie = gs.folieLevel ?? 0
   if (folie < 70) return null
-  const lines = [
-    `${npc.name} recule d'un pas en te voyant approcher. "T'as... du sang séché. Là, sur la mâchoire." Il évite ton regard le reste de la conversation.`,
-    `${npc.name} renifle l'air, mal à l'aise. "Ça sent quoi, cette odeur..." Il ne finit pas sa phrase.`,
-    `"Les gens racontent des trucs sur toi," dit ${npc.name} à voix basse. "Le genre de trucs qu'on préfère pas croire. Sauf que là, en te regardant..."`,
-    `${npc.name} garde ses distances, mains visibles. "Je vais pas te poser de questions. Fais juste vite."`,
-  ]
+  const lines = i18n.t('folieCallback', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
   return pick(lines)
 }
 
@@ -263,20 +247,13 @@ function getPillarCallback(npc: PersistentNpc, gs: GameState): string | null {
   // 1. Le joueur a fait d'un détenteur son ennemi → les PNJ le craignent
   if (angered.length > 0) {
     const name = PILLAR_DISPLAY[angered[0]] ?? angered[0]
-    const fearLines = [
-      `${npc.name} se fige une seconde. "On dit que ${name} a juré ta perte. Les gens comme moi évitent les gens comme toi."`,
-      `"Tu es celui qui a défié ${name}," souffle ${npc.name}, sans te regarder en face. "Fais vite ce que tu as à faire et pars."`,
-      `${npc.name} recule d'un pas. "Je veux pas d'ennui avec ${name}. Et toi, t'en es un ambulant."`,
-    ]
+    const fearLines = i18n.t('pillarCallback.fear', { ns: 'npcTracker', npc: npc.name, name, returnObjects: true }) as string[]
     return pick(fearLines)
   }
 
   // 2. Trahison d'Alanossa (standing très bas) → méfiance ouverte
   if ((standing.alanossa ?? 0) <= -25) {
-    const betrayLines = [
-      `${npc.name} te dévisage froidement. "Alanossa raconte partout que tu l'as trahie. Ici, sa parole pèse lourd."`,
-      `"On m'a dit de pas te faire confiance," lâche ${npc.name}. "Quelqu'un proche d'Alanossa. Tu vois le genre."`,
-    ]
+    const betrayLines = i18n.t('pillarCallback.betray', { ns: 'npcTracker', npc: npc.name, returnObjects: true }) as string[]
     return pick(betrayLines)
   }
 
@@ -284,10 +261,7 @@ function getPillarCallback(npc: PersistentNpc, gs: GameState): string | null {
   const topPillar = Object.entries(standing).sort((a, b) => b[1] - a[1])[0]
   if (topPillar && topPillar[1] >= 60) {
     const name = PILLAR_DISPLAY[topPillar[0]] ?? topPillar[0]
-    const respectLines = [
-      `${npc.name} hoche la tête avec déférence. "On murmure que ${name} te tient en haute estime. Ça ouvre des portes, par ici."`,
-      `"T'es proche de ${name}, pas vrai ?" ${npc.name} baisse d'un ton, presque respectueux. "Ça change tout."`,
-    ]
+    const respectLines = i18n.t('pillarCallback.respect', { ns: 'npcTracker', npc: npc.name, name, returnObjects: true }) as string[]
     return pick(respectLines)
   }
 
@@ -298,38 +272,23 @@ export function getNpcGreeting(npc: PersistentNpc, reaction: NpcReaction, gs?: G
   // Lignes contextuelles — priorité sur la réaction générique
   if (gs && reaction !== 'hostile') {
     if (gs.stalker) {
-      const stalkerLines = [
-        `${npc.name} baisse la voix. "Y'a quelqu'un qui posait des questions sur toi tout à l'heure. Méfie-toi."`,
-        `${npc.name} jette un coup d'œil derrière toi avant de parler. "Tu as quelqu'un aux trousses ?"`,
-        `"T'as l'air de quelqu'un qu'on cherche," dit ${npc.name} sans sourire.`,
-      ]
+      const stalkerLines = i18n.t('greeting.stalker', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
       return pick(stalkerLines)
     }
     if (gs.playerHp < gs.playerMaxHp * 0.35) {
-      const hurtLines = [
-        `${npc.name} te regarde arriver. "T'as pris des coups. Ça se voit de loin."`,
-        `"T'es encore en vie ? À peine." ${npc.name} plisse les yeux.`,
-        `"Assieds-toi," dit ${npc.name}. "T'as l'air d'un mort qui marche encore."`,
-      ]
+      const hurtLines = i18n.t('greeting.hurt', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
       return pick(hurtLines)
     }
     if (gs.reputation >= 60) {
-      const famousLines = [
-        `${npc.name} te reconnaît immédiatement. "Tout le monde parle de toi dans le secteur."`,
-        `"Ah. Toi." ${npc.name} a l'air impressionné malgré lui.`,
-        `"J'avais entendu que tu passerais par ici," dit ${npc.name}. "Le secteur a une mémoire."`,
-      ]
+      const famousLines = i18n.t('greeting.famous', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
       return pick(famousLines)
     }
     if (gs.reputation <= -40) {
-      const badRepLines = [
-        `${npc.name} regarde ailleurs. "Je suis pas sûr de vouloir être vu en ta compagnie ici."`,
-        `"T'as une sale réputation," dit ${npc.name} à voix basse. "Quelques personnes aimeraient te parler. Le genre de personnes qu'on préfère éviter."`,
-      ]
+      const badRepLines = i18n.t('greeting.badRep', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
       return pick(badRepLines)
     }
     if ((gs.runModifiers ?? []).includes('traque')) {
-      return `${npc.name} remarque quelque chose. "Tu regardes derrière toi depuis que t'es entré. C'est quoi ton problème ?"`
+      return nt('greeting.traque', { name: npc.name })
     }
     // ── CALLBACK FOLIE — priorité sur les piliers : plus immédiat, plus visible
     const folieLine = getFolieCallback(npc, gs)
@@ -338,37 +297,27 @@ export function getNpcGreeting(npc: PersistentNpc, reaction: NpcReaction, gs?: G
     const pillarLine = getPillarCallback(npc, gs)
     if (pillarLine) return pillarLine
     if (npc.timesMet >= 6) {
-      const regularLines = [
-        `${npc.name} lève les yeux sans surprise. "T'es encore là. Tu fais partie des meubles maintenant."`,
-        `"Toi encore." ${npc.name} dit ça sans malice. C'est presque chaleureux.`,
-        `"Je t'attendais presque," dit ${npc.name}. "T'es prévisible. C'est pas un reproche."`,
-      ]
+      const regularLines = i18n.t('greeting.regular', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
       return pick(regularLines)
     }
     if (gs.day >= 20) {
-      return `"T'es toujours en vie," dit ${npc.name}. "C'est pas rien, par ici."`
+      return nt('greeting.day20', { name: npc.name })
     }
     if (gs.credits < 300) {
-      return `${npc.name} te jette un coup d'œil. "T'as l'air à court. Ça se voit."`
+      return nt('greeting.poor', { name: npc.name })
     }
     if ((gs.discoveredLore ?? []).length >= 8) {
-      return `${npc.name} te regarde différemment. "T'as l'air de quelqu'un qui cherche quelque chose de précis. Ou de quelqu'un qui a déjà trop trouvé."`
+      return nt('greeting.lore', { name: npc.name })
     }
   }
 
   switch (reaction) {
-    case 'ally':     return pick(ALLY_GREETINGS)
-    case 'friendly': case 'warm': return pick(FRIENDLY_GREETINGS)
-    case 'hostile':  return pick(HOSTILE_GREETINGS)
-    case 'cold':     return pick(COLD_GREETINGS)
+    case 'ally':     return pick(getAllyGreetings())
+    case 'friendly': case 'warm': return pick(getFriendlyGreetings())
+    case 'hostile':  return pick(getHostileGreetings())
+    case 'cold':     return pick(getColdGreetings())
     default: {
-      const neutralLines = [
-        `${npc.name} lève les yeux. Pas d'enthousiasme, pas d'hostilité. Il t'attend.`,
-        `${npc.name} te jauge une seconde, puis reprend ce qu'il faisait. Il t'a vu.`,
-        `${npc.name} te fait un signe de tête bref. Le genre qui dit : "t'es là, j'ai vu, c'est bon."`,
-        `${npc.name} s'arrête une seconde. Te regarde. Continue. Le silence est neutre.`,
-        `"Tiens." ${npc.name} ne dit rien d'autre. Mais il t'a reconnu.`,
-      ]
+      const neutralLines = i18n.t('greeting.neutral', { ns: 'npcTracker', name: npc.name, returnObjects: true }) as string[]
       return neutralLines[npc.timesMet % neutralLines.length]
     }
   }
@@ -384,57 +333,61 @@ export interface NamedNpcDef {
   description: string
 }
 
-export const NAMED_NPCS: NamedNpcDef[] = [
-  { id: 'marek',    name: 'Marek',     station: 'La Carcasse',         role: 'Ferrailleur', description: "Il répare des vaisseaux depuis trente ans. Il sait des choses." },
-  { id: 'sela',     name: 'Sela',      station: 'Port Méridien',       role: 'Marchande',   description: "Souriante. Efficace. Jamais vraiment honnête." },
-  { id: 'torvak',   name: 'Torvak',    station: 'Fort Kharos',         role: 'Vétéran',     description: "Soixante ans de service. Il a vu des choses qu'il ne raconte plus." },
-  { id: 'lira',     name: 'Lira',      station: 'Nexus Aldara',        role: 'Hackeuse',    description: "Elle connaît tes mots de passe. Elle ne les utilise pas — encore." },
-  { id: 'boro',     name: 'Boro',      station: 'Les Bas-Fonds de Vega', role: 'Dealer',    description: "Il vend des choses dont tu n'as pas besoin mais que tu voudras quand même." },
-  { id: 'cael',     name: 'Cael',      station: 'Arc Ouest Apocalypse', role: 'Lieutenant', description: "Bras droit d'Alanossa. Efficace. Discret. Mortel." },
-  { id: 'neva',     name: 'Neva',      station: 'Le Purgatoire',       role: 'Survivante',  description: "Elle est là depuis l'époque où c'était encore une vraie prison." },
-  { id: 'pistis',   name: 'Pistis',    station: 'Emporium Requiem',    role: 'Courtier',    description: "Il fait le lien entre ceux qui veulent vendre et ceux qui veulent pas savoir d'où ça vient." },
-  { id: 'ganz',     name: 'Ganz',      station: 'Star Quest',          role: 'Organisateur',description: "Il gère les paris, les arènes, et les secrets des riches." },
-  { id: 'myrra',    name: 'Myrra',     station: 'La Citadelle Écarlate', role: 'Commandante', description: "Elle commande les Gardiens Écarlates sur cette station. Elle juge vite." },
-  { id: 'ysla',     name: 'Ysla',      station: 'Les Abysses de Velkor', role: 'Chercheuse', description: "Elle cherche quelque chose dans les ruines. Elle pense l'avoir trouvé." },
-  { id: 'drela',    name: 'Drela',     station: 'Scotty Golden North', role: 'Pilote retraité', description: "Il a volé partout. Maintenant il boit et regarde les étoiles." },
-  { id: 'rook',     name: 'Rook',      station: 'La Forge Noire',      role: 'Forgeron',    description: "Il fabrique des armes. Il pose pas de questions. Il fait des prix." },
-  { id: 'vance',    name: 'Vance',     station: 'Colonie Perséphone',  role: 'Fermier',     description: "Calme. Mais ses yeux ont vu quelque chose que le calme cache mal." },
-  { id: 'vosh',     name: 'Vosh',      station: 'Le Nid des Faucons',  role: 'Recruteur',   description: "Il évalue les candidats pour Alanossa. Un regard. Une seconde. Il a déjà décidé." },
-  { id: 'orva',     name: 'Orva',      station: 'Fort Ossian',         role: 'Officière',   description: "Elle tient le fort quand Ossian dort. Soit elle te respecte, soit tu pars." },
-  { id: 'besh',     name: 'Besh',      station: "L'Entrepôt Zéro",    role: 'Gardien',     description: "Il garde des choses qui n'appartiennent à personne — et il en tire profit." },
-  { id: 'ulmo',     name: 'Ulmo',      station: "La Couronne d'Eos",   role: 'Conseiller',  description: "Il conseille ceux qui décident. Ce qu'il pense lui-même, personne ne le sait." },
+export function getNamedNpcs(): NamedNpcDef[] {
+  return NAMED_NPCS_BASE.map(n => ({ ...n, description: nt(`namedNpcs.${n.id}`) }))
+}
+
+const NAMED_NPCS_BASE: Omit<NamedNpcDef, 'description'>[] = [
+  { id: 'marek',    name: 'Marek',     station: 'La Carcasse',         role: 'Ferrailleur' },
+  { id: 'sela',     name: 'Sela',      station: 'Port Méridien',       role: 'Marchande' },
+  { id: 'torvak',   name: 'Torvak',    station: 'Fort Kharos',         role: 'Vétéran' },
+  { id: 'lira',     name: 'Lira',      station: 'Nexus Aldara',        role: 'Hackeuse' },
+  { id: 'boro',     name: 'Boro',      station: 'Les Bas-Fonds de Vega', role: 'Dealer' },
+  { id: 'cael',     name: 'Cael',      station: 'Arc Ouest Apocalypse', role: 'Lieutenant' },
+  { id: 'neva',     name: 'Neva',      station: 'Le Purgatoire',       role: 'Survivante' },
+  { id: 'pistis',   name: 'Pistis',    station: 'Emporium Requiem',    role: 'Courtier' },
+  { id: 'ganz',     name: 'Ganz',      station: 'Star Quest',          role: 'Organisateur' },
+  { id: 'myrra',    name: 'Myrra',     station: 'La Citadelle Écarlate', role: 'Commandante' },
+  { id: 'ysla',     name: 'Ysla',      station: 'Les Abysses de Velkor', role: 'Chercheuse' },
+  { id: 'drela',    name: 'Drela',     station: 'Scotty Golden North', role: 'Pilote retraité' },
+  { id: 'rook',     name: 'Rook',      station: 'La Forge Noire',      role: 'Forgeron' },
+  { id: 'vance',    name: 'Vance',     station: 'Colonie Perséphone',  role: 'Fermier' },
+  { id: 'vosh',     name: 'Vosh',      station: 'Le Nid des Faucons',  role: 'Recruteur' },
+  { id: 'orva',     name: 'Orva',      station: 'Fort Ossian',         role: 'Officière' },
+  { id: 'besh',     name: 'Besh',      station: "L'Entrepôt Zéro",    role: 'Gardien' },
+  { id: 'ulmo',     name: 'Ulmo',      station: "La Couronne d'Eos",   role: 'Conseiller' },
   // Nouvelles stations
-  { id: 'vael',     name: 'Vael',      station: 'Le Perchoir',         role: 'Sentinelle',  description: "Il compte les vaisseaux qui passent. Il n'en laisse pas passer beaucoup." },
-  { id: 'kross',    name: 'Kross',     station: 'Station Ombre',       role: 'Opérateur',   description: "Il sait des choses sur tout le monde ici. Il choisit soigneusement ce qu'il garde." },
-  { id: 'setta',    name: 'Setta',     station: 'Relais Noir',         role: 'Ravitailleuse', description: "Elle gère le stock, les prix, et les personnes non désirables. Dans cet ordre." },
-  { id: 'fenn',     name: 'Fenn',      station: 'La Tanière',          role: 'Vieux pirate', description: "Il a connu Alanossa avant qu'elle soit Alanossa. Il s'en souvient différemment." },
-  { id: 'torq',     name: 'Torq',      station: 'Fort de Cendres',     role: 'Sergent Faucon', description: "Discipline et loyauté. Dans cet ordre. Il ne sourit pas souvent." },
-  { id: 'lyss',     name: 'Lyss',      station: "L'Œil du Faucon",    role: 'Analyste',    description: "Elle voit des patterns dans des données que personne d'autre ne lit." },
-  { id: 'mako',     name: 'Mako',      station: 'Repaire Vega-Sud',    role: 'Tenancier',   description: "Il tient le bar le plus risqué du secteur avec une sérénité déconcertante." },
-  { id: 'harek',    name: 'Harek',     station: 'Bastion Mineur',      role: 'Capitaine',   description: "Il tient son poste depuis huit ans. Il n'a pas demandé à en partir." },
-  { id: 'sera',     name: 'Sera',      station: 'Poste Vigie',         role: 'Guetteur',    description: "Elle a vu tout ce qui passe dans ce couloir spatial depuis cinq ans. Tout." },
-  { id: 'drav',     name: 'Drav',      station: "L'Arsenal Écarlate",  role: "Maître d'armes", description: "Ce qu'il ne peut pas réparer, il ne l'a pas encore rencontré." },
-  { id: 'keln',     name: 'Keln',      station: 'La Forteresse Exilée', role: 'Exilé',      description: "Il dirigeait une garnison des Gardiens. Il n'en parle pas." },
-  { id: 'mira-c',   name: 'Mira',      station: 'Comptoir Sud',        role: 'Commerçante', description: "Elle sourit à tout le monde et se souvient de chaque prix." },
-  { id: 'rexx',     name: 'Rexx',      station: 'Annexe Commerciale',  role: 'Représentant', description: "Costume propre, mots choisis. Ce qu'il pense, il le garde pour lui." },
-  { id: 'olin',     name: 'Olin',      station: 'Relais de Transit',   role: 'Logisticien', description: "Il sait où chaque caisse est. Il sait aussi où certaines ne devraient pas être." },
-  { id: 'sonn',     name: 'Lady Sonn', station: 'Résidence Orbitale',  role: 'Résidente',   description: "Elle vit ici depuis trente ans. Elle a vu assez de gens pour ne plus s'étonner de rien." },
-  { id: 'sael',     name: 'Sael',      station: 'Club Privé Éos',      role: "Maître d'hôtel", description: "Il sait tout ce qui se dit dans ce club. Il ne le répètera jamais. Sauf une fois." },
-  { id: 'murn',     name: 'Murn',      station: 'Les Cendres',         role: 'Survivant',   description: "Il était là quand ça a brûlé. Il est encore là. Il y a une raison." },
-  { id: 'docta',    name: 'Docta',     station: 'Station Quarantaine', role: 'Médecin',     description: "Il soigne les résidents depuis la fin de la quarantaine officielle. Personne ne lui a dit de partir." },
-  { id: 'zal',      name: 'Archiviste Zal', station: 'Le Berceau',    role: 'Archiviste',  description: "Il protège des archives qui précèdent la mémoire collective du secteur." },
-  { id: 'oss',      name: 'Capitaine Oss', station: "L'Épave Vivante", role: 'Ancien capitaine', description: "Son vaisseau est devenu une ville. Il s'y est adapté lentement." },
-  { id: 'shel',     name: 'Shel',      station: 'Station Fantôme',     role: 'Fantôme officieux', description: "Si tu la vois, c'est qu'elle a décidé que tu pouvais la voir." },
-  { id: 'tonn',     name: 'Tonn',      station: "L'Oasis de Fer",     role: 'Garant de la paix', description: "Il a un accord avec toutes les factions. Il ne dit jamais comment il l'a obtenu." },
-  { id: 'rinn',     name: 'Rinn',      station: 'La Balise',           role: 'Technicienne', description: "Elle entretient le signal. Elle écoute tout ce qui passe. Elle note beaucoup de choses." },
-  { id: 'broxx',    name: 'Broxx',     station: 'Confluent',           role: 'Marchand carrefour', description: "Il connaît les prix de quarante stations. Il sait exactement ce que tu paies en trop." },
-  { id: 'reine',    name: 'La Reine de Nuit', station: 'Port de Nuit', role: 'Patronne',   description: "Son nom réel n'est pas connu. Son autorité sur ce port, si." },
-  { id: 'vael-s',   name: 'Drs. Vael', station: 'Station Zéphyr',      role: 'Chercheur',   description: "Il étudie les gaz des géantes depuis douze ans. Il n'a pas trouvé ce qu'il cherchait. Il continue." },
-  { id: 'elenne',   name: 'Elenne',    station: "L'Observatoire",      role: 'Astronome',   description: "Elle regarde les étoiles. Elle a arrêté de regarder les gens il y a longtemps." },
-  { id: 'kaed',     name: 'Kaed',      station: 'Station Limite',      role: 'Explorateur', description: "Il est allé plus loin que cette station. Deux fois. Il n'en parle qu'avec parcimonie." },
-  { id: 'grelm',    name: 'Grelm',     station: 'Les Cavernes de Mira', role: 'Mineur chef', description: "Il dirige les mineurs depuis que l'ancien chef est parti. On ne demande pas pourquoi." },
-  { id: 'brenn',    name: 'Brenn',     station: 'La Raffinerie',       role: 'Contremaître', description: "Il gère les hommes, les machines, et la chaleur. Pas nécessairement dans cet ordre." },
-  { id: 'kaur',     name: 'Kaur',      station: 'Station Rocaille',    role: 'Ferrailleur',  description: "Quarante ans dans les mines. Ses mains sont plus dures que la roche qu'il a taillée." },
+  { id: 'vael',     name: 'Vael',      station: 'Le Perchoir',         role: 'Sentinelle' },
+  { id: 'kross',    name: 'Kross',     station: 'Station Ombre',       role: 'Opérateur' },
+  { id: 'setta',    name: 'Setta',     station: 'Relais Noir',         role: 'Ravitailleuse' },
+  { id: 'fenn',     name: 'Fenn',      station: 'La Tanière',          role: 'Vieux pirate' },
+  { id: 'torq',     name: 'Torq',      station: 'Fort de Cendres',     role: 'Sergent Faucon' },
+  { id: 'lyss',     name: 'Lyss',      station: "L'Œil du Faucon",    role: 'Analyste' },
+  { id: 'mako',     name: 'Mako',      station: 'Repaire Vega-Sud',    role: 'Tenancier' },
+  { id: 'harek',    name: 'Harek',     station: 'Bastion Mineur',      role: 'Capitaine' },
+  { id: 'sera',     name: 'Sera',      station: 'Poste Vigie',         role: 'Guetteur' },
+  { id: 'drav',     name: 'Drav',      station: "L'Arsenal Écarlate",  role: "Maître d'armes" },
+  { id: 'keln',     name: 'Keln',      station: 'La Forteresse Exilée', role: 'Exilé' },
+  { id: 'mira-c',   name: 'Mira',      station: 'Comptoir Sud',        role: 'Commerçante' },
+  { id: 'rexx',     name: 'Rexx',      station: 'Annexe Commerciale',  role: 'Représentant' },
+  { id: 'olin',     name: 'Olin',      station: 'Relais de Transit',   role: 'Logisticien' },
+  { id: 'sonn',     name: 'Lady Sonn', station: 'Résidence Orbitale',  role: 'Résidente' },
+  { id: 'sael',     name: 'Sael',      station: 'Club Privé Éos',      role: "Maître d'hôtel" },
+  { id: 'murn',     name: 'Murn',      station: 'Les Cendres',         role: 'Survivant' },
+  { id: 'docta',    name: 'Docta',     station: 'Station Quarantaine', role: 'Médecin' },
+  { id: 'zal',      name: 'Archiviste Zal', station: 'Le Berceau',    role: 'Archiviste' },
+  { id: 'oss',      name: 'Capitaine Oss', station: "L'Épave Vivante", role: 'Ancien capitaine' },
+  { id: 'shel',     name: 'Shel',      station: 'Station Fantôme',     role: 'Fantôme officieux' },
+  { id: 'tonn',     name: 'Tonn',      station: "L'Oasis de Fer",     role: 'Garant de la paix' },
+  { id: 'rinn',     name: 'Rinn',      station: 'La Balise',           role: 'Technicienne' },
+  { id: 'broxx',    name: 'Broxx',     station: 'Confluent',           role: 'Marchand carrefour' },
+  { id: 'reine',    name: 'La Reine de Nuit', station: 'Port de Nuit', role: 'Patronne' },
+  { id: 'vael-s',   name: 'Drs. Vael', station: 'Station Zéphyr',      role: 'Chercheur' },
+  { id: 'elenne',   name: 'Elenne',    station: "L'Observatoire",      role: 'Astronome' },
+  { id: 'kaed',     name: 'Kaed',      station: 'Station Limite',      role: 'Explorateur' },
+  { id: 'grelm',    name: 'Grelm',     station: 'Les Cavernes de Mira', role: 'Mineur chef' },
+  { id: 'brenn',    name: 'Brenn',     station: 'La Raffinerie',       role: 'Contremaître' },
+  { id: 'kaur',     name: 'Kaur',      station: 'Station Rocaille',    role: 'Ferrailleur' },
 ]
 
 // ── Rencontres de rivaux ─────────────────────────────────────────────────────
@@ -464,7 +417,7 @@ export function resolveRivalAction(
     case 'fight': {
       return {
         newGs: {},
-        message: `${rival.name} sort son arme. Combat.`,
+        message: nt('rival.fightMsg', { name: rival.name }),
         triggerCombat: true,
       }
     }
@@ -474,33 +427,33 @@ export function resolveRivalAction(
         const newNpcs = { ...gs.knownNpcs, [rival.id]: { ...rival, isEnemy: false, repDelta: 0 } }
         return {
           newGs: { reputation: gs.reputation + 20, knownNpcs: newNpcs },
-          message: `Il écoute. Ses épaules se relâchent. 'Ça n'efface rien. Mais...' Il repart. +20 rép.`,
+          message: nt('rival.apologizeSuccess'),
         }
       }
       return {
         newGs: {},
-        message: `${rival.name} n'est pas prêt à écouter. Combat inévitable.`,
+        message: nt('rival.apologizeFail', { name: rival.name }),
         triggerCombat: true,
       }
     }
     case 'pay': {
       if (gs.credits < debtAmount) {
-        return { newGs: {}, message: `Pas assez de crédits (${debtAmount} cr requis). Il n'attend plus.`, triggerCombat: true }
+        return { newGs: {}, message: nt('rival.payInsufficient', { amount: debtAmount }), triggerCombat: true }
       }
       const newNpcs = { ...gs.knownNpcs, [rival.id]: { ...rival, isEnemy: false, repDelta: 0 } }
       return {
         newGs: { credits: gs.credits - debtAmount, knownNpcs: newNpcs },
-        message: `-${debtAmount} cr. Il prend l'argent et repart. La rancœur a un prix.`,
+        message: nt('rival.paySuccess', { amount: debtAmount }),
       }
     }
     case 'flee': {
       if (Math.random() < 0.5) {
         return {
           newGs: { fuel: Math.max(0, gs.fuel - 1) },
-          message: `Tu te tires. -1 carburant. Il sera là la prochaine fois.`,
+          message: nt('rival.fleeSuccess'),
         }
       }
-      return { newGs: {}, message: `Il est plus rapide que prévu. Combat.`, triggerCombat: true }
+      return { newGs: {}, message: nt('rival.fleeFail'), triggerCombat: true }
     }
   }
 }
@@ -514,7 +467,7 @@ export function rivalToEnemy(rival: PersistentNpc) {
     damageMax: 22 + Math.abs(rival.repDelta) / 3,
     lootMin: 200,
     lootMax: 800,
-    description: `Il se bat avec la rage de quelqu'un qui attendait depuis longtemps.`,
+    description: nt('rivalEnemyDesc'),
     captureChance: 15,
     killChance: 20,
     isBoss: false,

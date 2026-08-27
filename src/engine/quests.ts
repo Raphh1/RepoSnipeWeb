@@ -1,9 +1,20 @@
 import type { GameState, Quest, QuestType } from '../types'
 import { getAccessibleStations, getStation } from '../data/stations'
 import { getRunQuestRewardMult } from '../data/runModifiers'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
+
+// Traduction : `descs.<type>.<index>` — un index au hasard dans le pool du type.
+const DESC_POOL_SIZES: Record<QuestType, number> = {
+  delivery: 5, kill: 5, revenge: 5, escort: 5,
+  sabotage: 4, heist: 4, extraction: 4, bounty: 4, patrol: 4,
+}
+function pickDesc(type: QuestType, params: Record<string, string>): string {
+  const idx = Math.floor(Math.random() * DESC_POOL_SIZES[type])
+  return i18n.t(`descs.${type}.${idx}`, { ns: 'quests', ...params })
+}
 
 // Économie volontairement dure : les quêtes rapportent nettement moins de crédits.
 const ECONOMY_MULT = 0.6
@@ -50,15 +61,11 @@ export function buildTutorialQuest(startStation: string): Quest {
 
   return {
     id: TUTORIAL_QUEST_ID,
-    title: `Première course : ${item}`,
+    title: i18n.t('tutorial.title', { ns: 'quests', item }),
     giver: 'Vieux Doss',
     giverStation: startStation,
     type: 'delivery',
-    description:
-      `Vieux Doss, un mécano usé qui traîne sur ${startStation}, t'arrête. "Première fois dans le secteur, hein ? `
-      + `Écoute : mon contact à ${targetName} crève sans ses ${item}. Passe au marché ici, achète-en une caisse, `
-      + `prends ton vaisseau jusqu'à ${targetName} et livre-les en main propre. Il te paiera bien — et il a un vieux `
-      + `datapad pour toi. Crois-moi, ce qu'il y a dessus vaut plus que les crédits."`,
+    description: i18n.t('tutorial.description', { ns: 'quests', station: startStation, target: targetName, item }),
     targetStation: targetName,
     targetItem: item,
     creditReward: 800,
@@ -86,128 +93,6 @@ const BOSS_NAMES: Record<string, string> = {
   'Fort Kharos':            'Le Général Ossian',
   'Fort Ossian':            'Frère Ossian le Dernier',
 }
-
-// ── POOLS DE DESCRIPTIONS ────────────────────────────────────────────────────
-
-const DELIVERY_DESCS = [
-  (item: string, giver: string, target: string) =>
-    `${giver} a besoin que ${item} arrive sur ${target} avant demain. Pas de détours, pas de questions.`,
-  (item: string, giver: string, target: string) =>
-    `Colis scellé contenant ${item}. Destination : ${target}. ${giver} insiste sur la discrétion.`,
-  (item: string, _: string, target: string) =>
-    `${item} à faire parvenir à ${target}. Légal en apparence. Ce qui est dedans, c'est une autre histoire.`,
-  (item: string, giver: string, target: string) =>
-    `Livraison urgente. ${giver} a un contact sur ${target} qui attend ${item}. Paiement à l'arrivée.`,
-  (item: string, giver: string, target: string) =>
-    `${giver} a oublié ${item} sur ${target} lors de son dernier passage. Tu t'en occupes.`,
-]
-
-const KILL_DESCS = [
-  (boss: string, giver: string, target: string) =>
-    `${boss} sur ${target}. ${giver} paie bien — et ne demande pas de preuve propre.`,
-  (boss: string, giver: string, _: string) =>
-    `${giver} a un problème avec ${boss}. La solution coûte cher. Ne pas la résoudre coûte plus.`,
-  (boss: string, _: string, target: string) =>
-    `${boss} à ${target}. Élimination discrète. Le commanditaire préfère ne pas être cité.`,
-  (boss: string, giver: string, _: string) =>
-    `Prime officieuse sur ${boss}. ${giver} a ses raisons. Toi t'as besoin de crédits. Transaction simple.`,
-  (boss: string, _: string, target: string) =>
-    `${boss} a rendu la vie impossible à trop de gens sur ${target}. Quelqu'un a décidé que ça devait s'arrêter.`,
-]
-
-const REVENGE_DESCS = [
-  (_: string, giver: string, target: string) =>
-    `Des gens de ${target} ont ruiné ${giver}. Aller là-bas et gagner un combat. Leur faire comprendre.`,
-  (_: string, giver: string, target: string) =>
-    `${giver} a une vieille dette à régler avec ${target}. Il/elle ne peut pas y aller. Toi oui.`,
-  (_: string, _2: string, target: string) =>
-    `Un affront est resté impuni. Une démonstration de force à ${target} suffira à rétablir l'équilibre.`,
-  (_: string, giver: string, target: string) =>
-    `La réputation de ${giver} est en jeu. Il faut que quelqu'un aille montrer qui commande sur ${target}.`,
-  (_: string, giver: string, target: string) =>
-    `${giver} a perdu quelque chose d'important à cause des gens de ${target}. Ça ne restera pas sans réponse.`,
-]
-
-const INFO_DESCS = [
-  (_: string, giver: string, target: string) =>
-    `${giver} a besoin d'informations fraîches sur ${target}. Ta présence là-bas suffit. Paiement au retour.`,
-  (_: string, _2: string, target: string) =>
-    `Surveillance discrète de ${target}. Pas d'armes nécessaires. Juste des yeux ouverts et une mémoire fiable.`,
-  (_: string, giver: string, target: string) =>
-    `${giver} prépare quelque chose et veut savoir ce qui se passe à ${target}. Rapport à la livraison.`,
-  (_: string, _2: string, target: string) =>
-    `Évaluation de situation à ${target}. Qui est là, quel est le niveau de tension, quels mouvements inhabituels.`,
-  (_: string, giver: string, target: string) =>
-    `Reconnaissance de ${target}. ${giver} paye pour des informations concrètes, pas des rumeurs.`,
-]
-
-const ESCORT_DESCS = [
-  (giver: string, target: string) =>
-    `${giver} a besoin que tu escortes quelqu'un jusqu'à ${target}. La personne est coopérative. L'espace, moins.`,
-  (_: string, target: string) =>
-    `Transport VIP. Destination ${target}. Le passager monte à bord maintenant. Pas de détours.`,
-  (giver: string, target: string) =>
-    `Un passager délicat à conduire jusqu'à ${target}. ${giver} insiste : tu ne poses pas de questions sur qui c'est.`,
-  (giver: string, target: string) =>
-    `${giver} a quelqu'un qui doit absolument arriver vivant à ${target}. Toi, tu t'assures que ça se passe.`,
-  (_: string, target: string) =>
-    `Extraction sécurisée vers ${target}. Le passager a des ennemis. Quelques-uns pourraient être en route.`,
-]
-
-const SABOTAGE_DESCS = [
-  (giver: string, target: string) =>
-    `${giver} veut déstabiliser ${target}. Un combat gagné là-bas envoie le bon message. Pas besoin d'en faire plus.`,
-  (_: string, target: string) =>
-    `Opération de pression sur ${target}. Neutraliser un adversaire sur place. Le reste, la station s'en souviendra.`,
-  (giver: string, target: string) =>
-    `${giver} veut que ${target} sache qu'ils ne sont pas intouchables. Résultat attendu : un ennemi vaincu sur place.`,
-  (_: string, target: string) =>
-    `Sabotage indirect. Gagner un combat à ${target} suffira à perturber leurs opérations pendant quelques jours.`,
-]
-
-const HEIST_DESCS = [
-  (item: string, giver: string, target: string) =>
-    `${item} se trouve à ${target}. ${giver} en a besoin. La méthode d'acquisition n'est pas son problème.`,
-  (item: string, _: string, target: string) =>
-    `Récupérer ${item} à ${target}. Achat, vol, échange — peu importe. Ce qui compte c'est le résultat.`,
-  (item: string, giver: string, target: string) =>
-    `${giver} veut ${item} provenant spécifiquement de ${target}. Le prix sera remboursé. Plus une prime.`,
-  (item: string, _: string, target: string) =>
-    `${item} sur ${target}. Tu trouves comment te le procurer là-bas. Retour avec la marchandise, paiement direct.`,
-]
-
-const EXTRACTION_DESCS = [
-  (item: string, giver: string, target: string) =>
-    `${item} laissé sur ${target} dans des circonstances précipitées. ${giver} te paye pour le récupérer et le ramener.`,
-  (item: string, _: string, target: string) =>
-    `Extraction de ${item} depuis ${target}. Ramène-le intact. Quelqu'un d'autre avait besoin de partir vite.`,
-  (item: string, giver: string, target: string) =>
-    `${giver} a du matériel bloqué sur ${target}. Récupérer ${item} et le rapatrier ici. Paiement à la livraison.`,
-  (item: string, _: string, target: string) =>
-    `${item} sur ${target} appartient à quelqu'un d'autre que ceux qui le détiennent. Va le chercher.`,
-]
-
-const BOUNTY_DESCS = [
-  (boss: string, giver: string, target: string) =>
-    `Prime sur ${boss} à ${target}. ${giver} vérifiera par ses propres sources. Mort ou hors de combat.`,
-  (boss: string, _: string, target: string) =>
-    `${boss} a des ennemis influents. L'un d'eux paye pour une résolution définitive sur ${target}.`,
-  (boss: string, _: string, target: string) =>
-    `Contrat de chasse. Cible : ${boss}. Lieu : ${target}. Pas de délai. Pas de pitié. Paiement à résultats.`,
-  (boss: string, giver: string, target: string) =>
-    `${giver} traque ${boss} depuis longtemps. Il/elle ne peut pas finir ça lui/elle-même. Toi si. ${target}.`,
-]
-
-const PATROL_DESCS = [
-  (_: string, giver: string, target: string) =>
-    `${giver} tient à ce que ${target} reste sous contrôle. Trois passages actifs — explorer, se montrer, décourager les problèmes. Paiement à la sécurisation.`,
-  (_: string, _2: string, target: string) =>
-    `Zone instable sur ${target}. Il faut une présence physique : circuler, explorer les accès, traîner dans les points chauds. Trois actions sur place.`,
-  (_: string, giver: string, target: string) =>
-    `${giver} a des actifs sur ${target} qui doivent rester intacts. Sécuriser la zone en trois passages — pas de rapport, juste de la présence.`,
-  (_: string, _2: string, target: string) =>
-    `Maintien de l'ordre sur ${target}. Pas de bureau, pas de formulaire — juste se montrer partout où ça craint, trois fois. Ça suffit généralement.`,
-]
 
 // ── GÉNÉRATEUR PRINCIPAL ─────────────────────────────────────────────────────
 
@@ -270,61 +155,61 @@ export function generateQuest(gs: GameState): Quest | null {
       const item   = isCrafted ? pick(CRAFTED_DELIVERY_ITEMS) : pick(DELIVERY_ITEMS)
       const reward = isCrafted ? scale(rng(1400, 3200)) : scale(rng(600, 2200))
       const desc   = isCrafted
-        ? `${giver} a besoin de ${item} — une pièce qui ne s'achète nulle part. Il faut la fabriquer à l'Atelier avant de pouvoir la livrer à ${target.name}.`
-        : pick(DELIVERY_DESCS)(item, giver, target.name)
-      return { id, title: `Livraison : ${item}`, giver, giverStation: gs.currentStation, type,
+        ? i18n.t('craftedDeliveryDesc', { ns: 'quests', giver, item, target: target.name })
+        : pickDesc('delivery', { item, giver, target: target.name })
+      return { id, title: i18n.t('titles.delivery', { ns: 'quests', item }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: isCrafted ? 15 : 10, dayMult }
     }
     case 'kill': {
-      const boss   = BOSS_NAMES[target.name] ?? `le chef de ${target.name}`
+      const boss   = BOSS_NAMES[target.name] ?? i18n.t('bossFallbackKill', { ns: 'quests', target: target.name })
       const reward = scale(rng(1500, 5000))
-      const desc   = pick(KILL_DESCS)(boss, giver, target.name)
-      return { id, title: `Contrat : ${boss}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('kill', { boss, giver, target: target.name })
+      return { id, title: i18n.t('titles.kill', { ns: 'quests', boss }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 25, dayMult }
     }
     case 'revenge': {
       const reward = scale(rng(900, 2800))
-      const desc   = pick(REVENGE_DESCS)('', giver, target.name)
-      return { id, title: `Règlement de comptes — ${target.name}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('revenge', { giver, target: target.name })
+      return { id, title: i18n.t('titles.revenge', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 18, dayMult }
     }
     case 'escort': {
       const reward = scale(rng(1400, 3500))
-      const desc   = pick(ESCORT_DESCS)(giver, target.name)
-      return { id, title: `Escorte vers ${target.name}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('escort', { giver, target: target.name })
+      return { id, title: i18n.t('titles.escort', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: 'Passager', creditReward: reward, repReward: 15, dayMult }
     }
     case 'sabotage': {
       const reward = scale(rng(1800, 4500))
-      const desc   = pick(SABOTAGE_DESCS)(giver, target.name)
-      return { id, title: `Sabotage — ${target.name}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('sabotage', { giver, target: target.name })
+      return { id, title: i18n.t('titles.sabotage', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: -5, dayMult }
     }
     case 'heist': {
       const item   = pick(HEIST_ITEMS)
       const reward = scale(rng(2200, 5500))
-      const desc   = pick(HEIST_DESCS)(item, giver, target.name)
-      return { id, title: `Acquisition : ${item}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('heist', { item, giver, target: target.name })
+      return { id, title: i18n.t('titles.heist', { ns: 'quests', item }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 5, dayMult }
     }
     case 'extraction': {
       const item   = pick(EXTRACTION_ITEMS)
       const reward = scale(rng(1100, 3200))
-      const desc   = pick(EXTRACTION_DESCS)(item, giver, target.name)
-      return { id, title: `Extraction depuis ${target.name}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('extraction', { item, giver, target: target.name })
+      return { id, title: i18n.t('titles.extraction', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 12, dayMult }
     }
     case 'bounty': {
-      const boss   = BOSS_NAMES[target.name] ?? `un chef de guerre à ${target.name}`
+      const boss   = BOSS_NAMES[target.name] ?? i18n.t('bossFallbackBounty', { ns: 'quests', target: target.name })
       const reward = scale(rng(3000, 7000))
-      const desc   = pick(BOUNTY_DESCS)(boss, giver, target.name)
-      return { id, title: `Prime — ${boss}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('bounty', { boss, giver, target: target.name })
+      return { id, title: i18n.t('titles.bounty', { ns: 'quests', boss }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 35, dayMult }
     }
     case 'patrol': {
       const reward = scale(rng(500, 1800))
-      const desc   = pick(PATROL_DESCS)('', giver, target.name)
-      return { id, title: `Patrouille : ${target.name}`, giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('patrol', { giver, target: target.name })
+      return { id, title: i18n.t('titles.patrol', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 6, dayMult }
     }
   }
@@ -349,16 +234,8 @@ const CHAIN_FOLLOW: Partial<Record<QuestType, QuestType[]>> = {
   heist:      ['delivery', 'heist'],
 }
 
-const CHAIN_DESCS: Record<QuestType, (prev: Quest) => string> = {
-  delivery:   q => `Suite directe du contrat avec ${q.giver}. 'Il y a plus à transporter que prévu — même route, même tarif, plus de marchandise.' Fiable.`,
-  escort:     q => `${q.giver} a un second passager délicat à escorter. 'Même discrétion que la première fois. Tu sais comment ça marche.' Paiement majoré.`,
-  extraction: q => `${q.giver} a laissé autre chose là-bas. 'Je savais que j'aurais besoin de toi une deuxième fois. C'est prêt.' Bonus sur la précédente mission.`,
-  patrol:     q => `Zone toujours instable selon ${q.giver}. 'Repasse là-bas — la situation a bougé. Trois passages, comme avant.' Récompense augmentée.`,
-  kill:       q => `La cible avait des associés. ${q.giver} les a tracés. 'Le travail n'était qu'à moitié fait. Tu veux finir ce qu'on a commencé ?' Prime élevée.`,
-  revenge:    q => `${q.giver} a identifié d'autres responsables. 'Il en reste. Même station, même méthode. Tu veux la suite ?' Plus difficile. Plus payant.`,
-  bounty:     q => `Contrat en cascade. La cible précédente avait un commanditaire. ${q.giver} a remonté la piste. 'La vraie tête est là-bas.' Prime plus haute.`,
-  sabotage:   q => `${q.giver} veut aller plus loin. 'Ce qu'on a fait a déstabilisé les choses. Maintenant c'est le moment d'enfoncer le clou.' Même cible, autre mission.`,
-  heist:      q => `${q.giver} a repéré autre chose sur place. 'En y allant, t'as vu ce que j'avais pas vu. Y'a plus à prendre là-bas.' Acquisition supplémentaire.`,
+function chainDesc(type: QuestType, prev: Quest): string {
+  return i18n.t(`chain.${type}`, { ns: 'quests', giver: prev.giver })
 }
 
 export function generateChainQuest(completed: Quest, gs: GameState): Quest | null {
@@ -392,10 +269,10 @@ export function generateChainQuest(completed: Quest, gs: GameState): Quest | nul
   const repReward = Math.round((completed.repReward ?? 10) * 1.3)
 
   return {
-    id, title: `[SUITE] ${completed.title}`,
+    id, title: i18n.t('chain.titlePrefix', { ns: 'quests', title: completed.title }),
     giver: completed.giver, giverStation: completed.giverStation,
     type: newType, targetStation: target.name, targetItem,
-    description: CHAIN_DESCS[newType](completed),
+    description: chainDesc(newType, completed),
     creditReward, repReward, dayMult,
   }
 }
@@ -427,12 +304,21 @@ export function checkDeliveryComplication(quest: Quest): QuestComplication {
 export function checkQuestsOnArrival(gs: GameState): { completed: Quest[]; complications: QuestComplication[] } {
   const completed: Quest[] = []
   const complications: QuestComplication[] = []
+  // Copie locale du cargo décrémentée au fil de la boucle, pour éviter que
+  // plusieurs quêtes réclamant le même item ne soient toutes validées avec un seul exemplaire.
+  const remainingCargo = { ...gs.cargo }
+  const consume = (item: string) => {
+    const cur = remainingCargo[item] ?? 0
+    if (cur <= 1) delete remainingCargo[item]
+    else remainingCargo[item] = cur - 1
+  }
 
   for (const q of gs.activeQuests) {
     // Quêtes qui se complètent à la station CIBLE
     if (q.targetStation === gs.currentStation) {
-      if (q.type === 'escort' && (gs.cargo['Passager'] ?? 0) > 0) {
+      if (q.type === 'escort' && (remainingCargo['Passager'] ?? 0) > 0) {
         completed.push(q)
+        consume('Passager')
         // delivery et heist nécessitent une livraison manuelle depuis le hub (voir StationHub)
       } else if ((q.type === 'revenge' || q.type === 'sabotage') && gs.stationBossesBeaten.includes(q.targetStation)) {
         completed.push(q)
@@ -443,8 +329,9 @@ export function checkQuestsOnArrival(gs: GameState): { completed: Quest[]; compl
 
     // Extraction : se complète en retournant à la station du DONNEUR avec l'item
     if (q.type === 'extraction' && q.giverStation === gs.currentStation
-        && q.targetItem && (gs.cargo[q.targetItem] ?? 0) > 0) {
+        && q.targetItem && (remainingCargo[q.targetItem] ?? 0) > 0) {
       completed.push(q)
+      consume(q.targetItem)
     }
   }
 
@@ -548,132 +435,63 @@ export function generateFactionMission(gs: GameState, factionId: string): Quest 
 
   switch (type) {
     case 'kill': {
-      const boss   = BOSS_NAMES[target] ?? `le chef de ${target}`
+      const boss   = BOSS_NAMES[target] ?? i18n.t('bossFallbackKill', { ns: 'quests', target })
       const reward = scale(rng(2500, 6000))
-      return { id, factionId, title: `[FACTION] Éliminer ${boss}`, giver, giverStation: gs.currentStation, type,
-        description: `Mission officielle. ${boss} sur ${target} représente une menace directe. L'élimination doit avoir lieu sur place — gagne un combat contre le boss là-bas pour compléter.`,
+      return { id, factionId, title: i18n.t('faction.titles.kill', { ns: 'quests', boss }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.kill', { ns: 'quests', boss, target }),
         targetStation: target, creditReward: reward, repReward: 15, dayMult }
     }
     case 'sabotage': {
       const reward = scale(rng(2000, 5000))
-      return { id, factionId, title: `[FACTION] Opération sur ${target}`, giver, giverStation: gs.currentStation, type,
-        description: `Rends-toi sur ${target} et gagne un combat là-bas. Ça envoie le message — l'ennemi doit comprendre que vos territoires ont des limites.`,
+      return { id, factionId, title: i18n.t('faction.titles.sabotage', { ns: 'quests', target }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.sabotage', { ns: 'quests', target }),
         targetStation: target, creditReward: reward, repReward: 10, dayMult }
     }
     case 'delivery': {
       const item   = pick(DELIVERY_ITEMS)
       const reward = scale(rng(1500, 4000))
-      return { id, factionId, title: `[FACTION] Livraison : ${item} vers ${target}`, giver, giverStation: gs.currentStation, type,
-        description: `L'Emporium a besoin que ${item} arrive sur ${target}. Prends la marchandise et livre-la en main propre — paiement à l'arrivée avec le bonus faction.`,
+      return { id, factionId, title: i18n.t('faction.titles.delivery', { ns: 'quests', item, target }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.delivery', { ns: 'quests', item, target }),
         targetStation: target, targetItem: item, creditReward: reward, repReward: 10, dayMult }
     }
     case 'heist': {
       const item   = pick(HEIST_ITEMS)
       const reward = scale(rng(3000, 7000))
-      return { id, factionId, title: `[FACTION] Acquisition : ${item} depuis ${target}`, giver, giverStation: gs.currentStation, type,
-        description: `L'Emporium veut ${item} provenant de ${target}. Vas-y, procure-le comme tu l'entends, reviens avec — paiement garanti plus bonus faction.`,
+      return { id, factionId, title: i18n.t('faction.titles.heist', { ns: 'quests', item, target }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.heist', { ns: 'quests', item, target }),
         targetStation: target, targetItem: item, creditReward: reward, repReward: 10, dayMult }
     }
     case 'escort': {
       const reward = scale(rng(2000, 5000))
-      return { id, factionId, title: `[FACTION] Escorte vers ${target}`, giver, giverStation: gs.currentStation, type,
-        description: `Un émissaire du Culte doit rejoindre ${target}. Embarque le passager et escorte-le à destination.`,
+      return { id, factionId, title: i18n.t('faction.titles.escort', { ns: 'quests', target }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.escort', { ns: 'quests', target }),
         targetStation: target, targetItem: 'Passager', creditReward: reward, repReward: 12, dayMult }
     }
     default: return null
   }
 }
 
-export const GOSSIP: Record<string, string[]> = {
-  'La Carcasse': [
-    "Une cache de crédits du vieux régime serait quelque part dans les soutes nord.",
-    "Un vaisseau Faucon Noir rôdait autour de la station la nuit dernière. Personne ne sait pourquoi.",
-    "Le prix du carburant monte encore. Quelqu'un contrôle les flux — et c'est pas nous.",
-    "Un mécano a disparu hier. Il travaillait sur quelque chose qu'il n'aurait pas dû toucher.",
-    "On parle d'une nouvelle route commerciale qui court-circuite Port Méridien. Les marchands sont nerveux.",
-  ],
-  'Arc Ouest Apocalypse': [
-    "Alanossa cherche quelqu'un pour une mission. Pas de détails. Rémunération extrême.",
-    "Trois vaisseaux ne sont pas rentrés la semaine dernière. Zone d'Alanossa.",
-    "On murmure qu'Alanossa a une prime sur quelqu'un de nouveau. Peut-être toi.",
-    "Les Faucons Noirs recrutent. Critères flous. Survie à l'entretien non garantie.",
-    "Un transfuge de l'Emporium s'est réfugié ici. Il a des informations. Et des ennemis.",
-  ],
-  'Port Méridien': [
-    "Les prix vont monter la semaine prochaine. Source sûre. Achète maintenant.",
-    "Une livraison mystérieuse est arrivée hier soir sans destinataire. Elle attend toujours.",
-    "La sécurité est renforcée. Quelqu'un d'important est attendu — ou quelqu'un de dangereux.",
-    "Un pilote a proposé une route directe vers les zones profondes. Personne n'a accepté.",
-    "L'Emporium ouvre un bureau ici. Les marchands indépendants commencent à s'inquiéter.",
-  ],
-  'Les Bas-Fonds de Vega': [
-    "Boro a reçu un colis scellé hier. Il n'a pas dormi depuis.",
-    "Une faction cherche un transporteur discret. Très discret. Paiement en liquide non traçable.",
-    "La douane a été corrompue. Pour combien de temps, personne ne sait.",
-    "Quelqu'un vend des plans militaires volés. Le vendeur change d'adresse toutes les heures.",
-    "Un chasseur de primes est arrivé ce matin. Il cherche quelqu'un. Peut-être toi.",
-  ],
-  'Fort Kharos': [
-    "L'armée prépare une opération dans les zones profondes. Recrutement en cours.",
-    "Un officier a disparu avec l'équipement de sa section. Enquête interne.",
-    "Des munitions expérimentales ont été testées la semaine dernière. Résultats classifiés.",
-    "Un convoi militaire a été attaqué sur la route de La Carcasse. Aucun survivant.",
-    "Les Gardiens cherchent un informateur dans leurs rangs. L'ambiance est tendue.",
-  ],
-  'La Citadelle Écarlate': [
-    "Myrra a convoqué tous ses lieutenants ce matin. Réunion à huis clos.",
-    "Une délégation de l'Emporium est arrivée hier. On ne sait pas de quoi ils ont parlé.",
-    "Un tournoi clandestin est organisé dans les niveaux inférieurs. Mise d'entrée : 500cr.",
-    "Les Gardiens ont perdu un poste avancé dans les ruines. Ils n'ont pas communiqué sur les pertes.",
-    "Quelqu'un a graffité 'LE VIDE ARRIVE' dans sept couloirs différents. L'ambiance est étrange.",
-  ],
-  'Le Purgatoire': [
-    "Neva dit qu'elle a vu quelque chose dans les couloirs du niveau 7. Elle refuse de préciser.",
-    "Un ancien prisonnier est revenu. Il cherche quelque chose qu'il a laissé ici.",
-    "Le Culte du Vide tient des réunions dans les sous-niveaux. Participants inconnus.",
-    "Une vieille dette de jeu refait surface. Ça va finir en sang, comme d'habitude.",
-    "Un puits d'extraction abandonné a été rouvert. On ne sait pas par qui ni pourquoi.",
-  ],
-  'Nexus Aldara': [
-    "Lira a cracké un système qui ne devait pas être crackable. Elle est introuvable depuis.",
-    "Un prototype d'IA militaire a été volé. L'armée cherche — discrètement.",
-    "Des anomalies dans le réseau local depuis trois jours. Origine non identifiée.",
-    "Un ingénieur propose de vendre les plans d'un système de propulsion interdit. Preneurs nombreux.",
-    "Une équipe de recherche n'est pas rentrée de sa dernière expédition. Leur matériel, si.",
-  ],
-  default: [
-    "Les routes commerciales changent. Certaines deviennent dangereuses du jour au lendemain.",
-    "Une guerre de factions couve quelque part dans le secteur. Ça va déborder.",
-    "On parle d'un trésor oublié dans une zone que personne ne visite plus. Pour une bonne raison.",
-    "Le marché noir est actif. Quelqu'un vend quelque chose qui ne devrait pas exister.",
-    "Un pilote a disparu sur la route de la semaine dernière. Son vaisseau a été retrouvé vide.",
-    "Les prix du carburant fluctuent bizarrement. Quelqu'un manipule les marchés.",
-    "Une rumeur court sur un fragment Nexus caché dans une station abandonnée.",
-    "Des survivants d'une bataille évoquent une arme inconnue. Personne ne les croit vraiment.",
-  ]
-}
-
 // ── QUÊTES PNJ ───────────────────────────────────────────────────────────────
 
-const NPC_QUEST_PROFILES: Record<string, { types: QuestType[]; items?: string[]; creditMult?: number; repMult?: number; flavor: string }> = {
-  'Ferrailleur': { types: ['delivery','extraction'], items: ['Pièces techniques','Composants électroniques','Métaux bruts'], creditMult: 1.0, flavor: "a des pièces à récupérer ou livrer" },
-  'Marchande':   { types: ['delivery','escort'], items: ['Médicaments','Vivres','Composants électroniques'], creditMult: 1.0, flavor: "a une route commerciale à couvrir" },
-  'Vétéran':     { types: ['revenge','bounty'], creditMult: 1.3, repMult: 1.5, flavor: "a des comptes à régler" },
-  'Hackeuse':    { types: ['heist','sabotage'], items: ['Données classifiées','Logiciels'], creditMult: 1.4, flavor: "a besoin d'accès à des systèmes" },
-  'Dealer':      { types: ['delivery','escort'], items: ['Pièces de contrebande','Drogues de synthèse'], creditMult: 1.2, flavor: "a des livraisons délicates" },
-  'Lieutenant':  { types: ['sabotage','bounty'], creditMult: 1.5, repMult: 0.8, flavor: "a une mission pour les Faucons" },
-  'Survivante':  { types: ['patrol','extraction'], items: ['Artefacts','Données'], creditMult: 0.9, repMult: 1.4, flavor: "a besoin de savoir ce qui se passe ailleurs" },
-  'Courtier':    { types: ['delivery','heist'], items: ['Renseignements','Artefacts','Or'], creditMult: 1.3, flavor: "a des affaires à faire circuler" },
-  'Organisateur':{ types: ['delivery','patrol'], creditMult: 1.1, flavor: "a des intérêts à surveiller" },
-  'Commandante': { types: ['bounty','sabotage'], creditMult: 1.4, repMult: 1.3, flavor: "a une cible à neutraliser" },
-  'Chercheuse':  { types: ['heist','extraction'], items: ['Artefacts','Composants expérimentaux','Données classifiées'], creditMult: 1.2, repMult: 1.2, flavor: "cherche des artefacts" },
-  'Pilote retraité': { types: ['patrol','escort'], creditMult: 0.9, repMult: 1.1, flavor: "connaît des routes que personne d'autre ne connaît" },
-  'Forgeron':    { types: ['extraction','delivery'], items: ['Métaux rares','Cristaux énergétiques',"Composants d'armure"], creditMult: 1.0, flavor: "a besoin de matériaux pour forger" },
-  'Fermier':     { types: ['delivery','patrol'], items: ['Nourriture fraîche','Eau purifiée','Équipement agricole'], creditMult: 0.8, repMult: 1.3, flavor: "a une livraison à faire" },
-  'Recruteur':   { types: ['sabotage','bounty'], creditMult: 1.4, repMult: 0.7, flavor: "recrute pour les Faucons Noirs" },
-  'Officière':   { types: ['revenge','bounty'], creditMult: 1.2, repMult: 1.1, flavor: "a un dossier non résolu" },
-  'Gardien':     { types: ['extraction','heist'], items: ['Marchandises volées','Données','Artefacts'], creditMult: 1.3, flavor: "gère des choses qui appartiennent à personne" },
-  'Conseiller':  { types: ['bounty','kill'], creditMult: 1.6, repMult: 1.0, flavor: "a besoin d'informations sur des cibles importantes" },
+const NPC_QUEST_PROFILES: Record<string, { types: QuestType[]; items?: string[]; creditMult?: number; repMult?: number }> = {
+  'Ferrailleur': { types: ['delivery','extraction'], items: ['Pièces techniques','Composants électroniques','Métaux bruts'], creditMult: 1.0 },
+  'Marchande':   { types: ['delivery','escort'], items: ['Médicaments','Vivres','Composants électroniques'], creditMult: 1.0 },
+  'Vétéran':     { types: ['revenge','bounty'], creditMult: 1.3, repMult: 1.5 },
+  'Hackeuse':    { types: ['heist','sabotage'], items: ['Données classifiées','Logiciels'], creditMult: 1.4 },
+  'Dealer':      { types: ['delivery','escort'], items: ['Pièces de contrebande','Drogues de synthèse'], creditMult: 1.2 },
+  'Lieutenant':  { types: ['sabotage','bounty'], creditMult: 1.5, repMult: 0.8 },
+  'Survivante':  { types: ['patrol','extraction'], items: ['Artefacts','Données'], creditMult: 0.9, repMult: 1.4 },
+  'Courtier':    { types: ['delivery','heist'], items: ['Renseignements','Artefacts','Or'], creditMult: 1.3 },
+  'Organisateur':{ types: ['delivery','patrol'], creditMult: 1.1 },
+  'Commandante': { types: ['bounty','sabotage'], creditMult: 1.4, repMult: 1.3 },
+  'Chercheuse':  { types: ['heist','extraction'], items: ['Artefacts','Composants expérimentaux','Données classifiées'], creditMult: 1.2, repMult: 1.2 },
+  'Pilote retraité': { types: ['patrol','escort'], creditMult: 0.9, repMult: 1.1 },
+  'Forgeron':    { types: ['extraction','delivery'], items: ['Métaux rares','Cristaux énergétiques',"Composants d'armure"], creditMult: 1.0 },
+  'Fermier':     { types: ['delivery','patrol'], items: ['Nourriture fraîche','Eau purifiée','Équipement agricole'], creditMult: 0.8, repMult: 1.3 },
+  'Recruteur':   { types: ['sabotage','bounty'], creditMult: 1.4, repMult: 0.7 },
+  'Officière':   { types: ['revenge','bounty'], creditMult: 1.2, repMult: 1.1 },
+  'Gardien':     { types: ['extraction','heist'], items: ['Marchandises volées','Données','Artefacts'], creditMult: 1.3 },
+  'Conseiller':  { types: ['bounty','kill'], creditMult: 1.6, repMult: 1.0 },
 }
 
 export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string, npcStation: string): Quest | null {
@@ -690,22 +508,22 @@ export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string
   const repReward = Math.floor(rng(8, 20) * (profile.repMult ?? 1.0))
   const id = Math.random().toString(36).slice(2, 8)
 
-  const descriptions: Record<QuestType, string> = {
-    delivery:   `${npcName} ${profile.flavor}. Porter ${item ?? 'un colis'} jusqu'à ${target.name}. Paiement à l'arrivée.`,
-    revenge:    `${npcName} ${profile.flavor}. Des gens sur ${target.name} ont fait quelque chose qu'ils n'auraient pas dû. Y aller et le faire comprendre.`,
-    kill:       `${npcName} ${profile.flavor}. Neutraliser une cible sur ${target.name}. Pas de questions sur les méthodes.`,
-    patrol:     `${npcName} ${profile.flavor}. Passer sur ${target.name} et s'assurer que tout est en ordre. Rapport au retour.`,
-    escort:     `${npcName} ${profile.flavor}. Conduire un passager jusqu'à ${target.name}. Sécurité garantie, paiement à l'arrivée.`,
-    sabotage:   `${npcName} ${profile.flavor}. Opération sur ${target.name} — gagner un combat là-bas. Le message passera.`,
-    extraction: `${npcName} ${profile.flavor}. ${item ?? 'Quelque chose'} est bloqué sur ${target.name}. Aller le récupérer et le ramener.`,
-    heist:      `${npcName} ${profile.flavor}. Acquérir ${item ?? 'un objet spécifique'} sur ${target.name}. La méthode est laissée à ton appréciation.`,
-    bounty:     `${npcName} ${profile.flavor}. Prime sur une cible sur ${target.name}. Mort ou hors de combat — peu importe.`,
+  const flavor = i18n.t(`npcQuest.flavors.${npcRole}`, { ns: 'quests' })
+  const itemOrPackage = item ?? i18n.t('npcQuest.itemFallbackPackage', { ns: 'quests' })
+  const itemOrThing    = item ?? i18n.t('npcQuest.itemFallbackThing', { ns: 'quests' })
+  const itemOrObject   = item ?? i18n.t('npcQuest.itemFallbackObject', { ns: 'quests' })
+  const itemByType: Partial<Record<QuestType, string>> = {
+    delivery: itemOrPackage, extraction: itemOrThing, heist: itemOrObject,
   }
+
+  const description = i18n.t(`npcQuest.descs.${type}`, {
+    ns: 'quests', npcName, flavor, target: target.name, item: itemByType[type] ?? item ?? '',
+  })
 
   return {
     id, giver: npcName, giverStation: npcStation, type,
-    title: `${npcName} — ${type.toUpperCase()}`,
-    description: descriptions[type],
+    title: i18n.t('npcQuest.titleTemplate', { ns: 'quests', npcName, type: type.toUpperCase() }),
+    description,
     targetStation: target.name,
     targetItem: (type === 'delivery' || type === 'extraction' || type === 'heist') ? item : undefined,
     creditReward, repReward,
@@ -713,6 +531,7 @@ export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string
 }
 
 export function getGossip(station: string): string {
-  const lines = GOSSIP[station] ?? GOSSIP['default']
+  const key = i18n.exists(`gossip.${station}`, { ns: 'quests' }) ? station : 'default'
+  const lines = i18n.t(`gossip.${key}`, { ns: 'quests', returnObjects: true }) as string[]
   return lines[Math.floor(Math.random() * lines.length)]
 }

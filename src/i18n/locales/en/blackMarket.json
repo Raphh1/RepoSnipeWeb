@@ -1,0 +1,19 @@
+{
+  "weaponDesc": "Tier {{tier}} weapon — {{effect}}",
+  "noSpecialEffect": "No special effect.",
+  "armorDesc": "Tier {{tier}} armor — {{desc}}",
+  "contraband": {
+    "stolenData":   { "name": "Stolen data batch", "desc": "Unknown origin." },
+    "illegalArms":  { "name": "Contraband weapons", "desc": "No serial number." },
+    "milStims":     { "name": "Military stimulants", "desc": "Guaranteed effect. Side effects too." },
+    "classifiedComponents": { "name": "Classified components", "desc": "Stolen from a military convoy." },
+    "preFractureData": { "name": "Pre-Fracture data", "desc": "Archives some would kill to have." },
+    "premiumFakeId": { "name": "Premium fake papers", "desc": "Full identity. Zero traceability." },
+    "smuggledImplants": { "name": "Smuggled implants", "desc": "Installation not guaranteed." },
+    "rawCrystals":  { "name": "Raw crystals", "desc": "Unrefined. Explosive if stored improperly." }
+  },
+  "intel": {
+    "name": "Faction intel",
+    "desc": "Information on faction movements. +15 reputation."
+  }
+}

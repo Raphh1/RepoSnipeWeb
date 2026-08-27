@@ -1,6 +1,8 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+const se = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'stationEvents', ...params })
 
 export interface StationEvent {
   id: string
@@ -16,58 +18,69 @@ export interface StationEventChoice {
   result: (gs: GameState) => { gs: Partial<GameState>; message: string }
 }
 
-export const STATION_EVENTS: Record<string, StationEvent[]> = {
+function getStationEventsMap(): Record<string, StationEvent[]> {
+  return {
   'Star Quest': [
     {
       id: 'salon_vip',
-      label: 'Salon VIP — Réseau d\'affaires',
+      label: se('starQuest.salonVip.label'),
       available: gs => gs.credits >= 400,
-      description: 'Une salle privée, lumière tamisée, flûtes de champagne synthétique. Des marchands, des courtiers, des gens qui se font des faveurs. Ici, les contacts valent plus que l\'or.',
+      description: se('starQuest.salonVip.description'),
       choices: [
         {
-          label: 'Payer l\'entrée et réseauter (400 cr)',
+          label: se('starQuest.salonVip.c0.label'),
           available: gs => gs.credits >= 400,
-          result: gs => ({
-            gs: { credits: gs.credits - 400 + rng(500, 1500), reputation: gs.reputation + 30 },
-            message: `-400 cr. Tu repars avec des contacts et des engagements. +${rng(500, 1500)} cr, +30 rép.`,
-          }),
+          result: gs => {
+            const amount = rng(500, 1500)
+            return {
+              gs: { credits: gs.credits - 400 + amount, reputation: gs.reputation + 30 },
+              message: se('starQuest.salonVip.c0.msg', { amount }),
+            }
+          },
         },
         {
-          label: 'Extraire des données discrètement (Hackeur)',
+          label: se('starQuest.salonVip.c1.label'),
           available: gs => gs.class.name === 'Hackeur',
-          result: gs => Math.random() < 0.70
-            ? { gs: { credits: gs.credits + rng(1200, 2800), reputation: gs.reputation + 15 }, message: `[HACK] Données privées extraites. +${rng(1200, 2800)} cr, +15 rép.` }
-            : { gs: { reputation: gs.reputation - 25 }, message: 'Détecté. Expulsion discrète. -25 rép.' },
+          result: gs => {
+            if (Math.random() < 0.70) {
+              const amount = rng(1200, 2800)
+              return { gs: { credits: gs.credits + amount, reputation: gs.reputation + 15 }, message: se('starQuest.salonVip.c1.win', { amount }) }
+            }
+            return { gs: { reputation: gs.reputation - 25 }, message: se('starQuest.salonVip.c1.lose') }
+          },
         },
         {
-          label: 'Entrée gratuite (Rép ≥ 80)',
+          label: se('starQuest.salonVip.c2.label'),
           available: gs => gs.reputation >= 80,
-          result: gs => ({
-            gs: { credits: gs.credits + rng(800, 2000), reputation: gs.reputation + 40 },
-            message: `On te reconnaît. Tu entres sans payer. +${rng(800, 2000)} cr, +40 rép.`,
-          }),
+          result: gs => {
+            const amount = rng(800, 2000)
+            return {
+              gs: { credits: gs.credits + amount, reputation: gs.reputation + 40 },
+              message: se('starQuest.salonVip.c2.msg', { amount }),
+            }
+          },
         },
-        { label: 'Ignorer', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('starQuest.salonVip.c3'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
     {
       id: 'arena',
-      label: 'Arène de combat',
+      label: se('starQuest.arena.label'),
       available: gs => true,
-      description: 'Des combats légaux (à peu près). La foule réclame du sang.',
+      description: se('starQuest.arena.description'),
       choices: [
         {
-          label: 'Participer (combat)',
+          label: se('starQuest.arena.c0'),
           result: gs => ({ gs: {}, message: 'ARENA_COMBAT' }),
         },
         {
-          label: 'Parier sur un combattant (300 cr)',
+          label: se('starQuest.arena.c1.label'),
           available: gs => gs.credits >= 300,
           result: gs => Math.random() < 0.5
-            ? { gs: { credits: gs.credits + 600 }, message: 'Ton poulain gagne. +600 cr.' }
-            : { gs: { credits: gs.credits - 300 }, message: 'Il s\'effondre au troisième round. -300 cr.' },
+            ? { gs: { credits: gs.credits + 600 }, message: se('starQuest.arena.c1.win') }
+            : { gs: { credits: gs.credits - 300 }, message: se('starQuest.arena.c1.lose') },
         },
-        { label: 'Partir', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('starQuest.arena.c2'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
   ],
@@ -75,82 +88,82 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Scotty Golden North': [
     {
       id: 'grand_casino',
-      label: 'Le Grand Casino Samy Scotty',
+      label: se('scottyGoldenNorth.grandCasino.label'),
       available: gs => gs.credits >= 150,
-      description: 'L\'entrée est un mur de lumière. Bruit de jetons, musique synthétique, odeur de carburant de luxe. Samy Scotty a transformé cette station en temple du hasard. Tout le monde peut jouer. Tout le monde peut perdre.',
+      description: se('scottyGoldenNorth.grandCasino.description'),
       choices: [
         {
-          label: 'Table basse — miser 150 cr (55% chance → +200)',
+          label: se('scottyGoldenNorth.grandCasino.c0.label'),
           available: gs => gs.credits >= 150,
           result: gs => Math.random() < 0.55
-            ? { gs: { credits: gs.credits + 200 }, message: 'La bille tombe sur ton numéro. +200 cr.' }
-            : { gs: { credits: gs.credits - 150 }, message: 'Raté. La maison garde les 150 cr.' },
+            ? { gs: { credits: gs.credits + 200 }, message: se('scottyGoldenNorth.grandCasino.c0.win') }
+            : { gs: { credits: gs.credits - 150 }, message: se('scottyGoldenNorth.grandCasino.c0.lose') },
         },
         {
-          label: 'Table standard — miser 500 cr (50% → +650)',
+          label: se('scottyGoldenNorth.grandCasino.c1.label'),
           available: gs => gs.credits >= 500,
           result: gs => Math.random() < 0.50
-            ? { gs: { credits: gs.credits + 650 }, message: 'Double ou rien — double. +650 cr.' }
-            : { gs: { credits: gs.credits - 500 }, message: 'La maison ramasse. -500 cr.' },
+            ? { gs: { credits: gs.credits + 650 }, message: se('scottyGoldenNorth.grandCasino.c1.win') }
+            : { gs: { credits: gs.credits - 500 }, message: se('scottyGoldenNorth.grandCasino.c1.lose') },
         },
         {
-          label: 'Haute mise — miser 1500 cr (45% → +2400)',
+          label: se('scottyGoldenNorth.grandCasino.c2.label'),
           available: gs => gs.credits >= 1500,
           result: gs => Math.random() < 0.45
-            ? { gs: { credits: gs.credits + 2400 }, message: 'Le croupier blêmit. Tu empoches 2400 cr.' }
-            : { gs: { credits: gs.credits - 1500 }, message: 'Perdu. -1500 cr. Le croupier ne sourit même pas.' },
+            ? { gs: { credits: gs.credits + 2400 }, message: se('scottyGoldenNorth.grandCasino.c2.win') }
+            : { gs: { credits: gs.credits - 1500 }, message: se('scottyGoldenNorth.grandCasino.c2.lose') },
         },
         {
-          label: 'Table VIP — miser 3000 cr (40% → +6000) [Rép ≥ 60]',
+          label: se('scottyGoldenNorth.grandCasino.c3.label'),
           available: gs => gs.credits >= 3000 && gs.reputation >= 60,
           result: gs => Math.random() < 0.40
-            ? { gs: { credits: gs.credits + 6000, reputation: gs.reputation + 10 }, message: 'La table VIP applaudit. +6000 cr, +10 rép.' }
-            : { gs: { credits: gs.credits - 3000 }, message: 'Personne ne dit un mot. -3000 cr.' },
+            ? { gs: { credits: gs.credits + 6000, reputation: gs.reputation + 10 }, message: se('scottyGoldenNorth.grandCasino.c3.win') }
+            : { gs: { credits: gs.credits - 3000 }, message: se('scottyGoldenNorth.grandCasino.c3.lose') },
         },
         {
-          label: 'Pirater les algorithmes (Hackeur — 75% → +1800 cr)',
+          label: se('scottyGoldenNorth.grandCasino.c4.label'),
           available: gs => gs.class.name === 'Hackeur' && gs.credits >= 500,
           result: gs => Math.random() < 0.75
-            ? { gs: { credits: gs.credits + 1800 }, message: '[HACK] Odds biaisés. Tu gagnes systématiquement. +1800 cr.' }
-            : { gs: { credits: gs.credits - 500, reputation: gs.reputation - 20 }, message: 'Samy a des bons techniciens. Détecté. -500 cr, -20 rép.' },
+            ? { gs: { credits: gs.credits + 1800 }, message: se('scottyGoldenNorth.grandCasino.c4.win') }
+            : { gs: { credits: gs.credits - 500, reputation: gs.reputation - 20 }, message: se('scottyGoldenNorth.grandCasino.c4.lose') },
         },
-        { label: 'Observer la folie ambiante', result: gs => ({ gs: {}, message: 'Quelqu\'un perd sa fortune. Quelqu\'un d\'autre gagne la sienne. Rien de nouveau.' }) },
+        { label: se('scottyGoldenNorth.grandCasino.c5.label'), result: gs => ({ gs: {}, message: se('scottyGoldenNorth.grandCasino.c5.msg') }) },
       ],
     },
     {
       id: 'machines_samy',
-      label: 'Les Machines de Samy — Paris clandestins',
+      label: se('scottyGoldenNorth.machinesSamy.label'),
       available: gs => gs.credits >= 200,
-      description: 'Dans l\'arrière-salle, des paris sur des combats illégaux diffusés en direct. Des machines à sous trafiquées mais pas trop. L\'odeur de transgression à prix abordable.',
+      description: se('scottyGoldenNorth.machinesSamy.description'),
       choices: [
         {
-          label: 'Machine à sous — 200 cr (3 roues, jackpot ×6, deux identiques ×1.5)',
+          label: se('scottyGoldenNorth.machinesSamy.c0.label'),
           available: gs => gs.credits >= 200,
           result: gs => {
             const w = [rng(1, 6), rng(1, 6), rng(1, 6)]
-            if (w[0] === w[1] && w[1] === w[2]) return { gs: { credits: gs.credits + 200 * 6 - 200 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] JACKPOT ! +${200 * 6 - 200} cr.` }
-            if (w[0] === w[1] || w[1] === w[2] || w[0] === w[2]) return { gs: { credits: gs.credits + Math.floor(200 * 1.5) - 200 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Deux identiques. +${Math.floor(200 * 1.5) - 200} cr.` }
-            return { gs: { credits: gs.credits - 200 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Rien. -200 cr.` }
+            if (w[0] === w[1] && w[1] === w[2]) return { gs: { credits: gs.credits + 200 * 6 - 200 }, message: se('scottyGoldenNorth.machinesSamy.c0.jackpot', { a: w[0], b: w[1], c: w[2], amount: 200 * 6 - 200 }) }
+            if (w[0] === w[1] || w[1] === w[2] || w[0] === w[2]) return { gs: { credits: gs.credits + Math.floor(200 * 1.5) - 200 }, message: se('scottyGoldenNorth.machinesSamy.c0.pair', { a: w[0], b: w[1], c: w[2], amount: Math.floor(200 * 1.5) - 200 }) }
+            return { gs: { credits: gs.credits - 200 }, message: se('scottyGoldenNorth.machinesSamy.c0.lose', { a: w[0], b: w[1], c: w[2], amount: 200 }) }
           },
         },
         {
-          label: 'Machine à sous premium — 1000 cr (jackpot ×6)',
+          label: se('scottyGoldenNorth.machinesSamy.c1.label'),
           available: gs => gs.credits >= 1000,
           result: gs => {
             const w = [rng(1, 6), rng(1, 6), rng(1, 6)]
-            if (w[0] === w[1] && w[1] === w[2]) return { gs: { credits: gs.credits + 1000 * 6 - 1000 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] JACKPOT PREMIUM ! +${1000 * 6 - 1000} cr.` }
-            if (w[0] === w[1] || w[1] === w[2] || w[0] === w[2]) return { gs: { credits: gs.credits + Math.floor(1000 * 1.5) - 1000 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Deux identiques. +${Math.floor(1000 * 1.5) - 1000} cr.` }
-            return { gs: { credits: gs.credits - 1000 }, message: `🎰 [${w[0]}][${w[1]}][${w[2]}] Rien. -1000 cr.` }
+            if (w[0] === w[1] && w[1] === w[2]) return { gs: { credits: gs.credits + 1000 * 6 - 1000 }, message: se('scottyGoldenNorth.machinesSamy.c1.jackpot', { a: w[0], b: w[1], c: w[2], amount: 1000 * 6 - 1000 }) }
+            if (w[0] === w[1] || w[1] === w[2] || w[0] === w[2]) return { gs: { credits: gs.credits + Math.floor(1000 * 1.5) - 1000 }, message: se('scottyGoldenNorth.machinesSamy.c1.pair', { a: w[0], b: w[1], c: w[2], amount: Math.floor(1000 * 1.5) - 1000 }) }
+            return { gs: { credits: gs.credits - 1000 }, message: se('scottyGoldenNorth.machinesSamy.c1.lose', { a: w[0], b: w[1], c: w[2], amount: 1000 }) }
           },
         },
         {
-          label: 'Parier sur un combat illégal — 600 cr (35% → ×3)',
+          label: se('scottyGoldenNorth.machinesSamy.c2.label'),
           available: gs => gs.credits >= 600,
           result: gs => Math.random() < 0.35
-            ? { gs: { credits: gs.credits + 600 * 3 - 600 }, message: `Ton combattant démolit l'adversaire. +${600 * 3 - 600} cr.` }
-            : { gs: { credits: gs.credits - 600 }, message: 'Il tombe en trente secondes. -600 cr.' },
+            ? { gs: { credits: gs.credits + 600 * 3 - 600 }, message: se('scottyGoldenNorth.machinesSamy.c2.win', { amount: 600 * 3 - 600 }) }
+            : { gs: { credits: gs.credits - 600 }, message: se('scottyGoldenNorth.machinesSamy.c2.lose') },
         },
-        { label: 'Partir', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('scottyGoldenNorth.machinesSamy.c3'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
   ],
@@ -158,51 +171,54 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Les Bas-Fonds de Vega': [
     {
       id: 'dealer',
-      label: 'Chercher un dealer',
+      label: se('lesBasFondsDeVega.dealer.label'),
       available: gs => gs.credits >= 200,
-      description: 'Dans les ruelles basses, quelqu\'un vend des choses qui n\'existent pas officiellement.',
+      description: se('lesBasFondsDeVega.dealer.description'),
       choices: [
         {
-          label: 'Acheter un stimulant de combat (300 cr)',
+          label: se('lesBasFondsDeVega.dealer.c0.label'),
           available: gs => gs.credits >= 300,
           result: gs => ({
             gs: { credits: gs.credits - 300, maxStamina: gs.maxStamina + 20, stamina: Math.min(gs.stamina + 20, gs.maxStamina + 20) },
-            message: '-300 cr. Stamina max +20 temporairement.',
+            message: se('lesBasFondsDeVega.dealer.c0.msg'),
           }),
         },
         {
-          label: 'Acheter une info sur un convoi (400 cr)',
+          label: se('lesBasFondsDeVega.dealer.c1.label'),
           available: gs => gs.credits >= 400,
-          result: gs => ({
-            gs: { credits: gs.credits - 400 + rng(600, 1200) },
-            message: `-400 cr. L'info mène à un convoi. +${rng(600, 1200)} cr.`,
-          }),
+          result: gs => {
+            const amount = rng(600, 1200)
+            return {
+              gs: { credits: gs.credits - 400 + amount },
+              message: se('lesBasFondsDeVega.dealer.c1.msg', { amount }),
+            }
+          },
         },
         {
-          label: 'Acheter des médicaments non tracés (150 cr)',
+          label: se('lesBasFondsDeVega.dealer.c2.label'),
           available: gs => gs.credits >= 150,
           result: gs => ({
             gs: { credits: gs.credits - 150, cargo: { ...gs.cargo, 'Médicaments': (gs.cargo['Médicaments'] ?? 0) + 3 } },
-            message: '-150 cr. +3 Médicaments.',
+            message: se('lesBasFondsDeVega.dealer.c2.msg'),
           }),
         },
-        { label: 'Rien, trop risqué', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('lesBasFondsDeVega.dealer.c3'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
     {
       id: 'fence',
-      label: 'Receleur local',
+      label: se('lesBasFondsDeVega.fence.label'),
       available: gs => Object.keys(gs.cargo).length > 0,
-      description: 'Il reprend n\'importe quoi sans poser de questions. Prix en dessous du marché.',
+      description: se('lesBasFondsDeVega.fence.description'),
       choices: [
         {
-          label: 'Vendre tout le cargo (+25% prix noir)',
+          label: se('lesBasFondsDeVega.fence.c0.label'),
           result: gs => {
             const total = Object.entries(gs.cargo).reduce((sum, [, qty]) => sum + qty * 120, 0)
-            return { gs: { credits: gs.credits + total, cargo: {} }, message: `+${total} cr. Cargo vendu au noir.` }
+            return { gs: { credits: gs.credits + total, cargo: {} }, message: se('lesBasFondsDeVega.fence.c0.msg', { amount: total }) }
           },
         },
-        { label: 'Partir', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('lesBasFondsDeVega.fence.c1'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
   ],
@@ -210,29 +226,29 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Fort Kharos': [
     {
       id: 'armoury_access',
-      label: 'Accès à l\'armurerie militaire',
+      label: se('fortKharos.armouryAccess.label'),
       available: gs => gs.credits >= 400,
-      description: 'Un sergent te fait signe depuis le couloir. "T\'as l\'air de quelqu\'un qui sait utiliser du matériel. L\'armurerie vend quelques surplus — pas au catalogue officiel."',
+      description: se('fortKharos.armouryAccess.description'),
       choices: [
         {
-          label: 'Acheter des munitions spéciales (400 cr)',
+          label: se('fortKharos.armouryAccess.c0.label'),
           available: gs => gs.credits >= 400,
           result: gs => ({
             gs: { credits: gs.credits - 400, cargo: { ...gs.cargo, 'Munitions spéciales': (gs.cargo['Munitions spéciales'] ?? 0) + 2 } },
-            message: '-400 cr. Il glisse deux caisses sans regarder. +2 Munitions spéciales.',
+            message: se('fortKharos.armouryAccess.c0.msg'),
           }),
         },
         {
-          label: 'Acheter des rations militaires (200 cr)',
+          label: se('fortKharos.armouryAccess.c1.label'),
           available: gs => gs.credits >= 200,
           result: gs => ({
             gs: { credits: gs.credits - 200, cargo: { ...gs.cargo, 'Rations militaires': (gs.cargo['Rations militaires'] ?? 0) + 3 } },
-            message: '-200 cr. +3 Rations militaires. "Discrétion attendue."',
+            message: se('fortKharos.armouryAccess.c1.msg'),
           }),
         },
         {
-          label: 'Refuser',
-          result: _ => ({ gs: {}, message: 'Il hoche la tête. Pas de problème.' }),
+          label: se('fortKharos.armouryAccess.c2.label'),
+          result: _ => ({ gs: {}, message: se('fortKharos.armouryAccess.c2.msg') }),
         },
       ],
     },
@@ -241,34 +257,40 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Nexus Aldara': [
     {
       id: 'data_market',
-      label: 'Marché de données',
+      label: se('nexusAldara.dataMarket.label'),
       available: gs => true,
-      description: 'Des brokers vendent des informations classifiées. Certaines valent une fortune.',
+      description: se('nexusAldara.dataMarket.description'),
       choices: [
         {
-          label: 'Acheter des données commerciales (300 cr)',
+          label: se('nexusAldara.dataMarket.c0.label'),
           available: gs => gs.credits >= 300,
-          result: gs => ({
-            gs: { credits: gs.credits - 300 + rng(400, 900) },
-            message: `-300 cr. Données revendues. +${rng(400, 900)} cr.`,
-          }),
+          result: gs => {
+            const amount = rng(400, 900)
+            return {
+              gs: { credits: gs.credits - 300 + amount },
+              message: se('nexusAldara.dataMarket.c0.msg', { amount }),
+            }
+          },
         },
         {
-          label: 'Vendre tes propres infos',
+          label: se('nexusAldara.dataMarket.c1.label'),
           available: gs => gs.completedQuestIds.length >= 2,
-          result: gs => ({
-            gs: { credits: gs.credits + rng(200, 600) },
-            message: `Tes infos ont de la valeur ici. +${rng(200, 600)} cr.`,
-          }),
+          result: gs => {
+            const amount = rng(200, 600)
+            return {
+              gs: { credits: gs.credits + amount },
+              message: se('nexusAldara.dataMarket.c1.msg', { amount }),
+            }
+          },
         },
         {
-          label: 'Pirater le système (Hackeur)',
+          label: se('nexusAldara.dataMarket.c2.label'),
           available: gs => gs.class.name === 'Hackeur',
           result: gs => Math.random() < 0.75
-            ? { gs: { credits: gs.credits + rng(800, 2000), reputation: gs.reputation + 20 }, message: '[HACK] Accès obtenu. +crédits, +20 rép.' }
-            : { gs: { reputation: gs.reputation - 20 }, message: 'Détecté. -20 rép.' },
+            ? { gs: { credits: gs.credits + rng(800, 2000), reputation: gs.reputation + 20 }, message: se('nexusAldara.dataMarket.c2.win') }
+            : { gs: { reputation: gs.reputation - 20 }, message: se('nexusAldara.dataMarket.c2.lose') },
         },
-        { label: 'Passer', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('nexusAldara.dataMarket.c3'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
   ],
@@ -276,26 +298,32 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Le Purgatoire': [
     {
       id: 'rumor_network',
-      label: 'Réseau des anciens prisonniers',
+      label: se('lePurgatoire.rumorNetwork.label'),
       available: gs => true,
-      description: 'Les anciens détenus ont des contacts partout. Leur réseau vaut de l\'or.',
+      description: se('lePurgatoire.rumorNetwork.description'),
       choices: [
         {
-          label: 'Acheter une info sur un convoi (200 cr)',
+          label: se('lePurgatoire.rumorNetwork.c0.label'),
           available: gs => gs.credits >= 200,
-          result: gs => ({
-            gs: { credits: gs.credits - 200 + rng(300, 700) },
-            message: `-200 cr. Info profitable. +${rng(300, 700)} cr.`,
-          }),
+          result: gs => {
+            const amount = rng(300, 700)
+            return {
+              gs: { credits: gs.credits - 200 + amount },
+              message: se('lePurgatoire.rumorNetwork.c0.msg', { amount }),
+            }
+          },
         },
         {
-          label: 'Proposer tes services comme passeur',
-          result: gs => ({
-            gs: { credits: gs.credits + rng(400, 1000), reputation: gs.reputation - 5 },
-            message: `Contrat de passage accepté. +${rng(400, 1000)} cr. -5 rép (morale).`,
-          }),
+          label: se('lePurgatoire.rumorNetwork.c1.label'),
+          result: gs => {
+            const amount = rng(400, 1000)
+            return {
+              gs: { credits: gs.credits + amount, reputation: gs.reputation - 5 },
+              message: se('lePurgatoire.rumorNetwork.c1.msg', { amount }),
+            }
+          },
         },
-        { label: 'Ignorer', result: gs => ({ gs: {}, message: '' }) },
+        { label: se('lePurgatoire.rumorNetwork.c2'), result: gs => ({ gs: {}, message: '' }) },
       ],
     },
   ],
@@ -303,67 +331,74 @@ export const STATION_EVENTS: Record<string, StationEvent[]> = {
   'Arc Ouest Apocalypse': [
     {
       id: 'alanossa_contact',
-      label: 'Contact avec les lieutenants d\'Alanossa',
+      label: se('arcOuestApocalypse.alanossaContact.label'),
       available: gs => gs.reputation >= 20 || gs.bossesDefeated >= 1,
-      description: 'Des lieutenants t\'observent depuis ton arrivée. Un signe de tête — une invitation.',
+      description: se('arcOuestApocalypse.alanossaContact.description'),
       choices: [
         {
-          label: 'Rencontrer le lieutenant',
-          result: gs => ({
-            gs: { credits: gs.credits + rng(500, 1500), reputation: gs.reputation + 20 },
-            message: `Accord tacite. +${rng(500, 1500)} cr, +20 rép.`,
-          }),
+          label: se('arcOuestApocalypse.alanossaContact.c0.label'),
+          result: gs => {
+            const amount = rng(500, 1500)
+            return {
+              gs: { credits: gs.credits + amount, reputation: gs.reputation + 20 },
+              message: se('arcOuestApocalypse.alanossaContact.c0.msg', { amount }),
+            }
+          },
         },
         {
-          label: 'Décliner',
-          result: gs => ({ gs: {}, message: 'Il note ton refus. Ça compte.' }),
+          label: se('arcOuestApocalypse.alanossaContact.c1.label'),
+          result: gs => ({ gs: {}, message: se('arcOuestApocalypse.alanossaContact.c1.msg') }),
         },
       ],
     },
   ],
+  }
 }
 
-// ── ARÈNE DE KORSUN ──────────────────────────────────────────────────────────
-;(STATION_EVENTS as Record<string, StationEvent[]>)["L'Arène de Korsun"] = [
+function getKorsunEvents(): StationEvent[] {
+  return [
   {
     id: 'tournament_register',
-    label: 'Consulter l\'affiche du Tournoi',
+    label: se('areneDeKorsun.tournamentRegister.label'),
     available: gs => gs.tournamentRound === 0,
-    description: 'Une affiche massive barre le couloir d\'entrée. DIX COMBATS. DIX ADVERSAIRES. Le dernier debout repart avec la gloire et l\'or. Un portier te dévisage depuis l\'entrée de l\'arène.',
+    description: se('areneDeKorsun.tournamentRegister.description'),
     choices: [
       {
-        label: 'S\'inscrire — entrer dans l\'arène',
+        label: se('areneDeKorsun.tournamentRegister.c0'),
         result: () => ({ gs: {}, message: 'TOURNAMENT_START' }),
       },
       {
-        label: 'Regarder le tableau des anciens champions',
-        result: () => ({ gs: {}, message: 'Des noms. Des étoiles à côté de certains. Des croix rouges à côté de la plupart. Tu comptes les survivants sur une main.' }),
+        label: se('areneDeKorsun.tournamentRegister.c1.label'),
+        result: () => ({ gs: {}, message: se('areneDeKorsun.tournamentRegister.c1.msg') }),
       },
       {
-        label: 'Partir',
+        label: se('areneDeKorsun.tournamentRegister.c2'),
         result: () => ({ gs: {}, message: '' }),
       },
     ],
   },
   {
     id: 'tournament_ongoing',
-    label: 'Tournoi en cours — Round suivant',
+    label: se('areneDeKorsun.tournamentOngoing.label'),
     available: gs => gs.tournamentRound > 0,
-    description: 'Tu es inscrit. La foule attend. Le prochain adversaire se prépare derrière la porte.',
+    description: se('areneDeKorsun.tournamentOngoing.description'),
     choices: [
       {
-        label: 'Continuer le tournoi',
+        label: se('areneDeKorsun.tournamentOngoing.c0'),
         result: () => ({ gs: {}, message: 'TOURNAMENT_CONTINUE' }),
       },
       {
-        label: 'Abandonner (disqualification)',
-        result: gs => ({ gs: { tournamentRound: 0 }, message: 'Tu jettes l\'éponge. La foule hue. Pas de honte à survivre.' }),
+        label: se('areneDeKorsun.tournamentOngoing.c1.label'),
+        result: gs => ({ gs: { tournamentRound: 0 }, message: se('areneDeKorsun.tournamentOngoing.c1.msg') }),
       },
     ],
   },
-]
+  ]
+}
 
 export function getStationEvents(gs: GameState): StationEvent[] {
-  const events = STATION_EVENTS[gs.currentStation] ?? []
+  const map = getStationEventsMap()
+  map["L'Arène de Korsun"] = getKorsunEvents()
+  const events = map[gs.currentStation] ?? []
   return events.filter(e => e.available(gs))
 }

@@ -1,5 +1,8 @@
 import type { SubBossData, Enemy, GameState } from '../types'
 import { getStation } from './stations'
+import i18n from '../i18n/config'
+
+const sb = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'subBosses', ...params })
 
 function makeEnemy(name: string, hp: number, dMin: number, dMax: number, lootMin: number, lootMax: number, desc: string, role: Enemy['role'] = 'normal'): Enemy {
   return { name, maxHp: hp, damageMin: dMin, damageMax: dMax, lootMin, lootMax, description: desc, captureChance: 5, killChance: 15, isBoss: true, role, isSubBoss: true }
@@ -17,21 +20,22 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 // ── ALANOSSA — Faucons Noirs ────────────────────────────────────────────────
-const ALANOSSA_SUBS: SubBossData[] = [
+function getAlanossaSubs(): SubBossData[] {
+  return [
   {
     id: 'ala-1',
     name: 'Le Vigie Immortel',
     pillar: 'alanossa',
     station: 'Le Perchoir',
     order: 1,
-    personality: 'Paranoïaque, obsessionnel, méthodique. Il voit des menaces partout — parce qu\'il en a vu de vraies.',
-    motivation: 'Protéger le réseau de surveillance des Faucons. Quiconque approche est un espion potentiel.',
-    backstory: 'Ancien tireur d\'élite recruté par Alanossa après qu\'il a abattu trois infiltrateurs en une nuit. Il n\'a jamais quitté son poste depuis — littéralement. Il dort sur sa chaise de vigie. Les recrues disent qu\'il ne cligne jamais des yeux.',
-    combatMechanic: 'Prévoit tes attaques : esquive automatique tous les 3 tours. Doit être frappé quand il recharge.',
-    specialAbility: 'Tir préventif — attaque en premier chaque tour, ignore la défensive.',
+    personality: sb('ala1.personality'),
+    motivation: sb('ala1.motivation'),
+    backstory: sb('ala1.backstory'),
+    combatMechanic: sb('ala1.combatMechanic'),
+    specialAbility: sb('ala1.specialAbility'),
     reward: { type: 'weapon', value: 'Lunette du Vigie' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'sabotage'],
-    enemy: makeEnemy('Le Vigie Immortel', 160, 18, 35, 2000, 4500, 'Il surveille depuis si longtemps qu\'il ne sait plus rien faire d\'autre.', 'ranged'),
+    resolutions: ['kill', 'manipulate', 'sabotage'],
+    enemy: makeEnemy('Le Vigie Immortel', 160, 18, 35, 2000, 4500, sb('ala1.enemyDesc'), 'ranged'),
   },
   {
     id: 'ala-2',
@@ -39,14 +43,14 @@ const ALANOSSA_SUBS: SubBossData[] = [
     pillar: 'alanossa',
     station: 'Relais Noir',
     order: 2,
-    personality: 'Calculateur, froid, indispensable. Il sait que sans lui, les Faucons s\'effondrent.',
-    motivation: 'Contrôler les chaînes d\'approvisionnement. Le pouvoir, ce n\'est pas les armes — c\'est la logistique.',
-    backstory: 'Ancien contrebandier recruté par Alanossa pour organiser sa logistique. Il a rendu les Faucons autosuffisants en un an. Il connaît chaque route, chaque cache, chaque dette. Le tuer serait facile. Le remplacer, impossible.',
-    combatMechanic: 'Utilise des drones de soutien qui réparent son armure. Il faut détruire les drones d\'abord (3 drones, 40 PV chacun).',
-    specialAbility: 'Appel de renforts — invoque un drone qui absorbe le prochain coup.',
+    personality: sb('ala2.personality'),
+    motivation: sb('ala2.motivation'),
+    backstory: sb('ala2.backstory'),
+    combatMechanic: sb('ala2.combatMechanic'),
+    specialAbility: sb('ala2.specialAbility'),
     reward: { type: 'item', value: 'Carte des routes Faucon' },
-    resolutions: ['kill', 'negotiate', 'ally', 'betray'],
-    enemy: makeEnemy("Le Ravitailleur de l'Ombre", 200, 20, 38, 2500, 5500, 'Sans lui la faction s\'effondre. Il le sait.', 'normal'),
+    resolutions: ['kill', 'ally', 'betray'],
+    enemy: makeEnemy("Le Ravitailleur de l'Ombre", 200, 20, 38, 2500, 5500, sb('ala2.enemyDesc'), 'normal'),
   },
   {
     id: 'ala-3',
@@ -54,14 +58,14 @@ const ALANOSSA_SUBS: SubBossData[] = [
     pillar: 'alanossa',
     station: 'Station Ombre',
     order: 3,
-    personality: 'Silencieux, létal, loyal jusqu\'à la mort. Il est le bras armé qu\'Alanossa utilise quand les mots ne suffisent plus.',
-    motivation: 'Exécuter les ordres d\'Alanossa sans question. Son dévouement est absolu.',
-    backstory: 'Personne ne connaît son vrai nom. Alanossa l\'a trouvé dans les ruines de Station Quarantaine — seul survivant d\'une épidémie qui a tué trois cents personnes. Elle l\'a recueilli, entraîné, forgé. Il est devenu son ombre.',
-    combatMechanic: 'Invisible les tours impairs — ne peut pas être touché. Contre-attaque automatiquement quand tu rates.',
-    specialAbility: 'Frappe fantôme — coup critique garanti depuis l\'invisibilité.',
+    personality: sb('ala3.personality'),
+    motivation: sb('ala3.motivation'),
+    backstory: sb('ala3.backstory'),
+    combatMechanic: sb('ala3.combatMechanic'),
+    specialAbility: sb('ala3.specialAbility'),
     reward: { type: 'armor', value: 'Cape des Ombres' },
     resolutions: ['kill', 'manipulate', 'sabotage'],
-    enemy: makeEnemy('Le Fantôme des Ombres', 180, 28, 52, 3000, 6500, 'Tu ne le vois qu\'une fois. En général c\'est trop tard.', 'ranged'),
+    enemy: makeEnemy('Le Fantôme des Ombres', 180, 28, 52, 3000, 6500, sb('ala3.enemyDesc'), 'ranged'),
   },
   {
     id: 'ala-4',
@@ -69,33 +73,35 @@ const ALANOSSA_SUBS: SubBossData[] = [
     pillar: 'alanossa',
     station: 'Le Nid des Faucons',
     order: 4,
-    personality: 'Charismatique, impitoyable, pragmatique. Elle inspire la loyauté par la peur ET le respect.',
-    motivation: 'Devenir le bras droit d\'Alanossa. Elle est la seule à pouvoir la remplacer — et elles le savent toutes les deux.',
-    backstory: 'Ancienne officière militaire qui a déserté après avoir vu son commandant sacrifier un régiment entier pour sauver sa carrière. Alanossa lui a offert quelque chose que l\'armée n\'avait jamais offert : la justice. Maintenant elle dirige le Nid avec une discipline de fer.',
-    combatMechanic: 'Change de stance tous les 2 tours : offensive (×1.5 dégâts) ou défensive (÷2 dégâts reçus). Il faut s\'adapter.',
-    specialAbility: 'Commandement — chaque tour elle gagne +5% de dégâts cumulatifs.',
+    personality: sb('ala4.personality'),
+    motivation: sb('ala4.motivation'),
+    backstory: sb('ala4.backstory'),
+    combatMechanic: sb('ala4.combatMechanic'),
+    specialAbility: sb('ala4.specialAbility'),
     reward: { type: 'weapon', value: 'Lame de la Faucon' },
-    resolutions: ['kill', 'negotiate', 'ally', 'betray'],
-    enemy: makeEnemy('La Faucon', 250, 28, 52, 3500, 7000, 'Cheffe des Faucons Noirs. Calculée. Implacable.', 'normal'),
+    resolutions: ['kill', 'ally', 'betray'],
+    enemy: makeEnemy('La Faucon', 250, 28, 52, 3500, 7000, sb('ala4.enemyDesc'), 'normal'),
   },
-]
+  ]
+}
 
 // ── CESARION — Emporium ────────────────────────────────────────────────────
-const CESARION_SUBS: SubBossData[] = [
+function getCesarionSubs(): SubBossData[] {
+  return [
   {
     id: 'ces-1',
     name: 'La Marchande de Mort',
     pillar: 'cesarion',
     station: 'Comptoir Sud',
     order: 1,
-    personality: 'Souriante, empoisonnée, dangereuse. Elle vend avec un sourire. Ce qu\'elle vend tue toujours.',
-    motivation: 'Le profit. Pur et simple. Cesarion lui laisse le Comptoir Sud en échange d\'un pourcentage. Et d\'informations.',
-    backstory: 'Fille de marchands assassinés par des pirates. Elle a reconstruit l\'empire familial en vendant les mêmes armes qui avaient tué ses parents — aux mêmes personnes. "Le business n\'a pas de morale", dit-elle. Elle y croit vraiment.',
-    combatMechanic: 'Empoisonne ses armes — chaque coup inflige du poison cumulatif. Plus le combat dure, plus c\'est dangereux.',
-    specialAbility: 'Poison commercial — chaque tour, le joueur perd 5 PV supplémentaires (cumulatif).',
+    personality: sb('ces1.personality'),
+    motivation: sb('ces1.motivation'),
+    backstory: sb('ces1.backstory'),
+    combatMechanic: sb('ces1.combatMechanic'),
+    specialAbility: sb('ces1.specialAbility'),
     reward: { type: 'weapon', value: 'Dague empoisonnée de Morte' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'ally'],
-    enemy: makeEnemy('La Marchande de Mort', 155, 18, 36, 2200, 5000, 'Ce qu\'elle vend tue toujours, même les contrats d\'assurance.', 'ranged'),
+    resolutions: ['kill', 'manipulate', 'ally'],
+    enemy: makeEnemy('La Marchande de Mort', 155, 18, 36, 2200, 5000, sb('ces1.enemyDesc'), 'ranged'),
   },
   {
     id: 'ces-2',
@@ -103,14 +109,14 @@ const CESARION_SUBS: SubBossData[] = [
     pillar: 'cesarion',
     station: 'Relais de Transit',
     order: 2,
-    personality: 'Brutal, territorial, possessif. Tout ce qui passe par son relais lui appartient.',
-    motivation: 'Contrôler les flux de marchandises pour Cesarion. Il prend une taxe sur tout — officielle ou non.',
-    backstory: 'Ancien officier de douane devenu seigneur de guerre logistique. Cesarion l\'a recruté parce qu\'il était le seul à comprendre comment taxer sans tuer le commerce. Son efficacité a un prix : des disparitions régulières de marchands "non conformes".',
-    combatMechanic: 'Vole tes crédits à chaque coup réussi (5% de tes crédits par frappe). Combat contre la montre.',
-    specialAbility: 'Taxe de sang — chaque attaque réussie te coûte des crédits.',
+    personality: sb('ces2.personality'),
+    motivation: sb('ces2.motivation'),
+    backstory: sb('ces2.backstory'),
+    combatMechanic: sb('ces2.combatMechanic'),
+    specialAbility: sb('ces2.specialAbility'),
     reward: { type: 'credits', value: 5000 },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'betray'],
-    enemy: makeEnemy('Le Passeur Sanguinaire', 190, 22, 42, 3000, 6000, 'Il contrôle le Relais de Transit. Tout ce qui passe, il le taxe.', 'normal'),
+    resolutions: ['kill', 'manipulate', 'betray'],
+    enemy: makeEnemy('Le Passeur Sanguinaire', 190, 22, 42, 3000, 6000, sb('ces2.enemyDesc'), 'normal'),
   },
   {
     id: 'ces-3',
@@ -118,14 +124,14 @@ const CESARION_SUBS: SubBossData[] = [
     pillar: 'cesarion',
     station: "L'Entrepôt Zéro",
     order: 3,
-    personality: 'Méthodique, invisible, omniscient dans son domaine. Il sait tout ce qui entre et sort.',
-    motivation: 'Détenir l\'information. Pour Cesarion, il est plus précieux que cent soldats.',
-    backstory: 'Personne ne connaît son visage — il porte un masque depuis qu\'il est arrivé à l\'Entrepôt. Certains disent qu\'il est un ancien espion, d\'autres un ex-prisonnier. Ce qui est sûr : il connaît tous les secrets de l\'Emporium. Cesarion le garde en vie parce qu\'il ne peut pas le remplacer.',
-    combatMechanic: 'Connaît ton équipement — réduit l\'efficacité de ton arme de 30%. Changer d\'arme en combat le déstabilise.',
-    specialAbility: 'Analyse tactique — esquive le premier coup de chaque séquence et contre-attaque.',
+    personality: sb('ces3.personality'),
+    motivation: sb('ces3.motivation'),
+    backstory: sb('ces3.backstory'),
+    combatMechanic: sb('ces3.combatMechanic'),
+    specialAbility: sb('ces3.specialAbility'),
     reward: { type: 'item', value: 'Dossier Cesarion' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'sabotage'],
-    enemy: makeEnemy("L'Archiviste sans Visage", 175, 26, 48, 3500, 7000, 'Il connaît tous les secrets. Il enterre le reste.', 'ranged'),
+    resolutions: ['kill', 'manipulate', 'sabotage'],
+    enemy: makeEnemy("L'Archiviste sans Visage", 175, 26, 48, 3500, 7000, sb('ces3.enemyDesc'), 'ranged'),
   },
   {
     id: 'ces-4',
@@ -133,33 +139,35 @@ const CESARION_SUBS: SubBossData[] = [
     pillar: 'cesarion',
     station: 'Annexe Commerciale',
     order: 4,
-    personality: 'Insaisissable, diplomatique en façade, impitoyable dans l\'ombre. L\'homme derrière l\'homme.',
-    motivation: 'Être le conseiller le plus proche de Cesarion. Il manipule les fils depuis l\'Annexe, loin des regards.',
-    backstory: 'Ancien diplomate d\'une nation disparue. Il a vu son monde s\'effondrer et a juré de ne plus jamais être du côté des perdants. Cesarion l\'utilise comme interface avec le monde extérieur — un visage amical pour des décisions brutales.',
-    combatMechanic: 'A des gardes personnels (2 gardes, 60 PV chacun) qui doivent être éliminés en premier. Lui-même se soigne tant que les gardes sont en vie.',
-    specialAbility: 'Directive fantôme — se soigne de 15 PV/tour tant qu\'un garde est en vie.',
+    personality: sb('ces4.personality'),
+    motivation: sb('ces4.motivation'),
+    backstory: sb('ces4.backstory'),
+    combatMechanic: sb('ces4.combatMechanic'),
+    specialAbility: sb('ces4.specialAbility'),
     reward: { type: 'armor', value: 'Uniforme Diplomatique' },
-    resolutions: ['kill', 'negotiate', 'ally', 'betray', 'manipulate'],
-    enemy: makeEnemy('Le Directeur Fantôme', 220, 24, 46, 4000, 8000, 'Officiellement un bureaucrate. Officieusement, un fantôme.', 'support'),
+    resolutions: ['kill', 'ally', 'betray', 'manipulate'],
+    enemy: makeEnemy('Le Directeur Fantôme', 220, 24, 46, 4000, 8000, sb('ces4.enemyDesc'), 'support'),
   },
-]
+  ]
+}
 
 // ── RAPHAZARUS — Vétérans de la Grande Guerre / L'Arc Perdu ─────────────────
-const RAPHAZARUS_SUBS: SubBossData[] = [
+function getRaphazarusSubs(): SubBossData[] {
+  return [
   {
     id: 'raph-1',
     name: 'Le Sergent Cendré',
     pillar: 'raphazarus',
     station: 'Les Cendres',
     order: 1,
-    personality: 'Brisé, méthodique, hanté. Il obéit encore à des ordres donnés il y a quarante ans.',
-    motivation: 'Exécuter la dernière directive de Raphazarus : surveiller les Cendres et éliminer quiconque pose des questions sur l\'Arc Perdu.',
-    backstory: 'Dernier survivant du 3e Bataillon de Raphazarus. Il a vu ses camarades mourir un par un pendant le Siège des Cendres — 47 jours sans ravitaillement. Quand les secours sont arrivés, il était le seul debout. Raphazarus lui a serré la main et lui a dit : "Tu restes ici. Tu attends." Il attend encore.',
-    combatMechanic: 'Se bat avec une discipline militaire implacable : attaque toujours deux fois de suite, mais pause un tour tous les 4 tours pour "recharger".',
-    specialAbility: 'Cadence de tir — double attaque chaque tour, pause tous les 4 tours.',
+    personality: sb('raph1.personality'),
+    motivation: sb('raph1.motivation'),
+    backstory: sb('raph1.backstory'),
+    combatMechanic: sb('raph1.combatMechanic'),
+    specialAbility: sb('raph1.specialAbility'),
     reward: { type: 'item', value: 'Plaque d\'identification 3e Bataillon' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'sabotage'],
-    enemy: makeEnemy('Le Sergent Cendré', 170, 20, 38, 2200, 5000, 'Il attend depuis quarante ans. Il a tout son temps.', 'normal'),
+    resolutions: ['kill', 'manipulate', 'sabotage'],
+    enemy: makeEnemy('Le Sergent Cendré', 170, 20, 38, 2200, 5000, sb('raph1.enemyDesc'), 'normal'),
   },
   {
     id: 'raph-2',
@@ -167,14 +175,14 @@ const RAPHAZARUS_SUBS: SubBossData[] = [
     pillar: 'raphazarus',
     station: 'La Forteresse Exilée',
     order: 2,
-    personality: 'Froide, chirurgicale, dévouée au-delà de la raison. Son mari est mort sous les ordres de Raphazarus — et elle lui en est reconnaissante.',
-    motivation: 'Protéger la Forteresse Exilée, dernier avant-poste connu de Raphazarus avant sa disparition. Elle détient des informations sur la localisation de l\'Arc Perdu.',
-    backstory: 'Son mari commandait la flotte d\'élite de Raphazarus. Il est mort en couvrant la retraite du Général vers l\'Arc Perdu. Au lieu de le haïr, elle a juré allégeance éternelle. "Mon mari a choisi de mourir pour lui. Ce choix mérite d\'être honoré." Elle est devenue la gardienne la plus implacable de tous les vétérans — la seule que Raphazarus contacte encore parfois.',
-    combatMechanic: 'Porte une armure de deuil qui absorbe 40% des dégâts physiques. Les armes à énergie (burn, shock) ignorent cette réduction.',
-    specialAbility: 'Armure de deuil — réduit 40% des dégâts physiques, vulnérable aux armes énergétiques.',
+    personality: sb('raph2.personality'),
+    motivation: sb('raph2.motivation'),
+    backstory: sb('raph2.backstory'),
+    combatMechanic: sb('raph2.combatMechanic'),
+    specialAbility: sb('raph2.specialAbility'),
     reward: { type: 'armor', value: 'Armure de la Veuve' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'betray'],
-    enemy: makeEnemy('La Veuve de Fer', 210, 24, 45, 3000, 6500, 'Son mari est mort pour Raphazarus. Elle vivra pour lui.', 'tank'),
+    resolutions: ['kill', 'manipulate', 'betray'],
+    enemy: makeEnemy('La Veuve de Fer', 210, 24, 45, 3000, 6500, sb('raph2.enemyDesc'), 'tank'),
   },
   {
     id: 'raph-3',
@@ -182,14 +190,14 @@ const RAPHAZARUS_SUBS: SubBossData[] = [
     pillar: 'raphazarus',
     station: 'Station Fantôme',
     order: 3,
-    personality: 'Invisible, silencieux, terrifiant. Il n\'est peut-être même pas humain — plus personne n\'est sûr.',
-    motivation: 'Éliminer quiconque approche de la vérité sur l\'Arc Perdu. Raphazarus lui a confié une mission : que personne ne puisse le retrouver. Jamais.',
-    backstory: 'Ancien chef du renseignement militaire du 7e Corps de Raphazarus. Après la Grande Guerre, il a fait disparaître toute trace de l\'Arc Perdu des archives officielles — coordonnées, manifestes, logs de navigation. Puis il s\'est fait disparaître lui-même. Station Fantôme porte son nom : personne ne sait s\'il y habite vraiment ou s\'il est partout à la fois.',
-    combatMechanic: 'Alterne entre deux phases : visible (attaque normalement) et spectral (immunisé aux attaques physiques, ne peut être touché que par effets/armes spéciales). Change de phase tous les 2 tours.',
-    specialAbility: 'Phase spectrale — immunisé aux attaques directes tous les 2 tours.',
+    personality: sb('raph3.personality'),
+    motivation: sb('raph3.motivation'),
+    backstory: sb('raph3.backstory'),
+    combatMechanic: sb('raph3.combatMechanic'),
+    specialAbility: sb('raph3.specialAbility'),
     reward: { type: 'weapon', value: 'Lame Fantôme du 7e' },
     resolutions: ['kill', 'manipulate', 'sabotage'],
-    enemy: makeEnemy('Le Spectre du 7e', 230, 30, 55, 4000, 8000, 'Chef du renseignement. Il a effacé l\'Arc Perdu des cartes.', 'ranged'),
+    enemy: makeEnemy('Le Spectre du 7e', 230, 30, 55, 4000, 8000, sb('raph3.enemyDesc'), 'ranged'),
   },
   {
     id: 'raph-4',
@@ -197,33 +205,35 @@ const RAPHAZARUS_SUBS: SubBossData[] = [
     pillar: 'raphazarus',
     station: 'La Forge des Damnés',
     order: 4,
-    personality: 'Stoïque, impitoyable, respecté même par les ennemis de Raphazarus. Le dernier officier encore en activité.',
-    motivation: 'Garder la Forge des Damnés opérationnelle — c\'est ici que Raphazarus forge ses armes et entraîne ses derniers soldats fidèles. Le Maréchal est le dernier rempart avant le Général.',
-    backstory: 'Bras droit de Raphazarus depuis avant la Grande Guerre. Il a survécu à trois tentatives d\'assassinat, deux trahisons et un bombardement orbital. Son surnom vient de ses blessures : il a tellement de fractures recollées que ses os forment une armure naturelle. Raphazarus l\'a nommé gardien de la Forge parce qu\'il est le seul homme en qui il a une confiance absolue.',
-    combatMechanic: 'Ses os renforcés réduisent les dégâts critiques de 60%. Plus tu le frappes, plus sa rage augmente — +15% dégâts par tranche de 25% PV perdus.',
-    specialAbility: 'Ossature blindée — réduit les critiques de 60%, rage croissante (+15% dégâts/25% PV perdus).',
+    personality: sb('raph4.personality'),
+    motivation: sb('raph4.motivation'),
+    backstory: sb('raph4.backstory'),
+    combatMechanic: sb('raph4.combatMechanic'),
+    specialAbility: sb('raph4.specialAbility'),
     reward: { type: 'weapon', value: 'Le Poing du Maréchal' },
-    resolutions: ['kill', 'negotiate', 'ally'],
-    enemy: makeEnemy('Le Maréchal Osseux', 280, 30, 58, 5000, 10000, 'Dernier officier de Raphazarus. Trois assassinats ratés. Deux trahisons survécues. Un bombardement orbital.', 'tank'),
+    resolutions: ['kill', 'ally'],
+    enemy: makeEnemy('Le Maréchal Osseux', 280, 30, 58, 5000, 10000, sb('raph4.enemyDesc'), 'tank'),
   },
-]
+  ]
+}
 
 // ── SAMY SCOTTY — Luxe / Criminel / Casino ─────────────────────────────────
-const SCOTTY_SUBS: SubBossData[] = [
+function getScottySubs(): SubBossData[] {
+  return [
   {
     id: 'sco-1',
     name: 'Le Roi de Nuit',
     pillar: 'scotty',
     station: 'Port de Nuit',
     order: 1,
-    personality: 'Discret, patient, mortel. Il dirige Port de Nuit depuis les ombres — personne ne le voit jamais.',
-    motivation: 'Contrôler le marché noir pour Scotty. Port de Nuit est son royaume.',
-    backstory: 'Ancien orphelin des Bas-Fonds. Scotty l\'a repéré quand il avait douze ans — il avait déjà son propre réseau de voleurs. Scotty lui a donné Port de Nuit comme terrain de jeu. Il en a fait un empire.',
-    combatMechanic: 'Combat dans l\'obscurité — tes attaques font 30% moins de dégâts sauf si tu utilises une arme avec effet "burn" ou "blind".',
-    specialAbility: 'Ombre de nuit — tes attaques sont réduites de 30% sauf armes incendiaires.',
+    personality: sb('sco1.personality'),
+    motivation: sb('sco1.motivation'),
+    backstory: sb('sco1.backstory'),
+    combatMechanic: sb('sco1.combatMechanic'),
+    specialAbility: sb('sco1.specialAbility'),
     reward: { type: 'weapon', value: 'Dague de la Nuit' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'betray'],
-    enemy: makeEnemy('Le Roi de Nuit', 175, 20, 40, 2500, 5500, 'Il dirige Port de Nuit depuis l\'ombre.', 'normal'),
+    resolutions: ['kill', 'manipulate', 'betray'],
+    enemy: makeEnemy('Le Roi de Nuit', 175, 20, 40, 2500, 5500, sb('sco1.enemyDesc'), 'normal'),
   },
   {
     id: 'sco-2',
@@ -231,14 +241,14 @@ const SCOTTY_SUBS: SubBossData[] = [
     pillar: 'scotty',
     station: "Club Privé Éos",
     order: 2,
-    personality: 'Séducteur, manipulateur, mortellement charmant. Il connaît les secrets de tout le monde.',
-    motivation: 'L\'information est son pouvoir. Scotty l\'utilise comme réseau d\'espionnage haute société.',
-    backstory: 'Ancien gigolo des stations luxueuses devenu maître-espion. Scotty a vu son potentiel quand il a appris que le Maître des Ombres avait fait tomber trois mariages politiques en une semaine — juste pour le sport. Maintenant il écoute, il enregistre, et il vend. À Scotty en priorité.',
-    combatMechanic: 'Retourne tes armes contre toi : 25% de chance que ton attaque te frappe à la place. Immunité aux effets de confusion.',
-    specialAbility: 'Miroir — 25% de chance que tes attaques soient retournées.',
+    personality: sb('sco2.personality'),
+    motivation: sb('sco2.motivation'),
+    backstory: sb('sco2.backstory'),
+    combatMechanic: sb('sco2.combatMechanic'),
+    specialAbility: sb('sco2.specialAbility'),
     reward: { type: 'item', value: 'Carnet de Chantage' },
-    resolutions: ['kill', 'negotiate', 'manipulate', 'ally', 'betray'],
-    enemy: makeEnemy('Le Maître des Ombres', 195, 24, 45, 3000, 6500, 'Les secrets qu\'il détient valent des armées.', 'ranged'),
+    resolutions: ['kill', 'manipulate', 'ally', 'betray'],
+    enemy: makeEnemy('Le Maître des Ombres', 195, 24, 45, 3000, 6500, sb('sco2.enemyDesc'), 'ranged'),
   },
   {
     id: 'sco-3',
@@ -246,14 +256,14 @@ const SCOTTY_SUBS: SubBossData[] = [
     pillar: 'scotty',
     station: "La Couronne d'Eos",
     order: 3,
-    personality: 'Prophétique, condescendant, terrifiant. Il prétend voir l\'avenir — et il a souvent raison.',
-    motivation: 'Maintenir son influence sur les élites. Scotty le protège parce que ses prédictions rapportent au casino.',
-    backstory: 'Ancien chercheur en intelligence artificielle devenu oracle auto-proclamé. Sa capacité prédictive n\'est pas mystique — c\'est un réseau de capteurs et d\'algorithmes qu\'il a dissimulé dans toute La Couronne. Il sait ce que tu vas faire avant toi.',
-    combatMechanic: 'Prédit tes attaques : esquive automatiquement le même type d\'attaque utilisé au tour précédent. Oblige à varier.',
-    specialAbility: 'Prédiction — immunisé au même type d\'attaque deux tours de suite.',
+    personality: sb('sco3.personality'),
+    motivation: sb('sco3.motivation'),
+    backstory: sb('sco3.backstory'),
+    combatMechanic: sb('sco3.combatMechanic'),
+    specialAbility: sb('sco3.specialAbility'),
     reward: { type: 'armor', value: 'Armure Prédictive' },
     resolutions: ['kill', 'manipulate', 'sabotage'],
-    enemy: makeEnemy('Oracle de la Singularité', 210, 30, 55, 4000, 8000, 'Il prédit tes mouvements. Il les a déjà vus.', 'ranged'),
+    enemy: makeEnemy('Oracle de la Singularité', 210, 30, 55, 4000, 8000, sb('sco3.enemyDesc'), 'ranged'),
   },
   {
     id: 'sco-4',
@@ -261,23 +271,26 @@ const SCOTTY_SUBS: SubBossData[] = [
     pillar: 'scotty',
     station: 'Les Abysses de Velkor',
     order: 4,
-    personality: 'Calme. Terrifiant justement parce qu\'il est calme. Rien ne le surprend, rien ne le fait réagir.',
-    motivation: 'Exécuter la dernière volonté d\'un mort. Les Abysses contiennent quelque chose que Scotty veut — et Pale le garde.',
-    backstory: 'Ancien directeur d\'une station de recherche qui a mal tourné. La station est tombée dans les Abysses, mais Pale est resté. Ce qu\'il a vu en bas l\'a changé. Il ne cligne plus des yeux. Il ne dort plus. Il ne mange plus. Et pourtant il est toujours là.',
-    combatMechanic: 'Plus tu le frappes, plus il devient dangereux : +10% dégâts par tranche de 20% PV perdus.',
-    specialAbility: 'Rage silencieuse — ses dégâts augmentent à mesure qu\'il perd des PV.',
+    personality: sb('sco4.personality'),
+    motivation: sb('sco4.motivation'),
+    backstory: sb('sco4.backstory'),
+    combatMechanic: sb('sco4.combatMechanic'),
+    specialAbility: sb('sco4.specialAbility'),
     reward: { type: 'weapon', value: 'Scalpel de Velkor' },
-    resolutions: ['kill', 'negotiate', 'manipulate'],
-    enemy: makeEnemy('Directeur Pale', 260, 25, 50, 5000, 10000, 'Il est calme. C\'est pire.', 'normal'),
+    resolutions: ['kill', 'manipulate'],
+    enemy: makeEnemy('Directeur Pale', 260, 25, 50, 5000, 10000, sb('sco4.enemyDesc'), 'normal'),
   },
-]
+  ]
+}
 
-export const SUB_BOSSES: SubBossData[] = [
-  ...ALANOSSA_SUBS,
-  ...CESARION_SUBS,
-  ...RAPHAZARUS_SUBS,
-  ...SCOTTY_SUBS,
-]
+function getSubBosses(): SubBossData[] {
+  return [
+    ...getAlanossaSubs(),
+    ...getCesarionSubs(),
+    ...getRaphazarusSubs(),
+    ...getScottySubs(),
+  ]
+}
 
 // ── MINI-JEU DE COUP CIBLÉ (obligatoire à chaque coup contre un sous-boss) ───
 // 4 types selon le profil du lieutenant :
@@ -312,7 +325,7 @@ const ORDER_DIFFICULTY: Record<number, 1 | 2 | 3> = { 1: 1, 2: 2, 3: 2, 4: 3 }
 export type SubBossMinigameKind = 'stop' | 'hack' | 'draw' | 'react'
 
 export function getSubBossMinigame(enemyName: string): { kind: SubBossMinigameKind; difficulty: 1 | 2 | 3 } | null {
-  const sb = SUB_BOSSES.find(s => s.name === enemyName)
+  const sb = getSubBosses().find(s => s.name === enemyName)
   if (!sb) return null
   const kind: SubBossMinigameKind =
     HACK_SUBBOSSES.has(enemyName)  ? 'hack'  :
@@ -330,7 +343,7 @@ export function getSubBossMinigame(enemyName: string): { kind: SubBossMinigameKi
 // à chaque station (contrôle de faction, quêtes d'équipement, etc.).
 export function generateLieutenantStationAssignment(): Record<string, string> {
   const assignment: Record<string, string> = {}
-  const pillars = [...new Set(SUB_BOSSES.map(sb => sb.pillar))]
+  const pillars = [...new Set(getSubBosses().map(sb => sb.pillar))]
   for (const pillar of pillars) {
     const subs = getSubBossesForPillar(pillar)
     const shuffledStations = shuffle(subs.map(sb => sb.station))
@@ -344,13 +357,13 @@ export function getSubBossStation(gs: GameState, sb: SubBossData): string {
 }
 
 export function getSubBossesForPillar(pillar: string, gs?: GameState): SubBossData[] {
-  const subs = SUB_BOSSES.filter(sb => sb.pillar === pillar).sort((a, b) => a.order - b.order)
+  const subs = getSubBosses().filter(sb => sb.pillar === pillar).sort((a, b) => a.order - b.order)
   if (!gs) return subs
   return subs.map(sb => ({ ...sb, station: getSubBossStation(gs, sb) }))
 }
 
 export function getSubBossAtStation(gs: GameState, station: string): SubBossData | undefined {
-  const sb = SUB_BOSSES.find(s => getSubBossStation(gs, s) === station)
+  const sb = getSubBosses().find(s => getSubBossStation(gs, s) === station)
   return sb ? { ...sb, station: getSubBossStation(gs, sb) } : undefined
 }
 
@@ -375,12 +388,9 @@ const CLUE_PILLARS = ['alanossa', 'cesarion', 'raphazarus', 'scotty']
 export const LIEUTENANT_CLUE_QUEST_INTERVAL = 5
 export const LIEUTENANT_CLUE_REVEAL_LEVEL = 2
 
-const INFORMANT_LINES = [
-  "Un inconnu t'aborde entre deux couloirs. \"J'ai entendu parler de ce que tu cherches,\" dit-il à voix basse, avant de disparaître dans la foule.",
-  "Une silhouette encapuchonnée te glisse un mot rapide, presque un murmure, puis s'évapore avant que tu puisses réagir.",
-  "Quelqu'un reconnaît ton insigne et t'attire dans un coin. \"Tu traques un lieutenant, pas vrai ? J'ai peut-être quelque chose pour toi.\"",
-  "Un ancien contact refait surface, comme sorti de nulle part. \"Toujours après ce lieutenant ? Écoute bien, je ne le répéterai pas.\"",
-]
+function getInformantLines(): string[] {
+  return i18n.t('informantLines', { ns: 'subBosses', returnObjects: true }) as string[]
+}
 
 // Le prochain lieutenant "actif" d'un pilier : le premier non vaincu, dans l'ordre.
 export function getNextLieutenant(defeated: Record<string, string[]>, pillar: string): SubBossData | undefined {
@@ -402,7 +412,7 @@ export function getLieutenantClueText(gs: GameState, sb: SubBossData, level: num
   if (level < LIEUTENANT_CLUE_REVEAL_LEVEL) {
     return getStation(resolvedStation).description
   }
-  return `${sb.name} se trouve à ${resolvedStation}.`
+  return i18n.t('clueLocationText', { ns: 'subBosses', name: sb.name, station: resolvedStation })
 }
 
 export interface LieutenantClueEvent {
@@ -429,7 +439,7 @@ export function rollLieutenantClueEvent(gs: GameState): { event: LieutenantClueE
   const currentLevel = (gs.lieutenantClueLevels ?? {})[sb.id] ?? 0
   const nextLevel = currentLevel + 1
   return {
-    event: { subBoss: sb, level: nextLevel, npcLine: pick(INFORMANT_LINES), clueText: getLieutenantClueText(gs, sb, nextLevel) },
+    event: { subBoss: sb, level: nextLevel, npcLine: pick(getInformantLines()), clueText: getLieutenantClueText(gs, sb, nextLevel) },
     newMilestone,
   }
 }

@@ -1,6 +1,9 @@
 import type { GameState, WeaponData, ArmorData } from '../types'
 import { rollWeaponForTier } from '../data/weapons'
-import { rollArmorForTier } from '../data/armors'
+import { rollArmorForTier, grantArmor } from '../data/armors'
+import i18n from '../i18n/config'
+
+const bm = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'blackMarket', ...params })
 
 export interface BlackMarketOffer {
   id: string
@@ -38,7 +41,7 @@ export function getBlackMarketOffers(gs: GameState): BlackMarketOffer[] {
     id: `bm-w-${gs.day}`,
     type: 'weapon',
     name: w.name,
-    description: `Arme Tier ${weaponTier} — ${w.effectDesc || 'Pas d\'effet spécial.'}`,
+    description: bm('weaponDesc', { tier: weaponTier, effect: w.effectDesc || bm('noSpecialEffect') }),
     price: wPrice,
     weapon: w,
   })
@@ -50,20 +53,20 @@ export function getBlackMarketOffers(gs: GameState): BlackMarketOffer[] {
     id: `bm-a-${gs.day}`,
     type: 'armor',
     name: a.name,
-    description: `Armure Tier ${armorTier} — ${a.description}`,
+    description: bm('armorDesc', { tier: armorTier, desc: a.description }),
     price: aPrice,
     armor: a,
   })
 
   const contraband: { name: string; desc: string; item: string; qty: number; price: number }[] = [
-    { name: 'Lot de données volées', desc: 'Provenance inconnue.', item: 'Données volées', qty: 3, price: 1500 },
-    { name: 'Armes de contrebande', desc: 'Sans numéro de série.', item: 'Armes illégales', qty: 2, price: 1200 },
-    { name: 'Stimulants militaires', desc: 'Effet garanti. Effets secondaires aussi.', item: 'Stimulants de combat', qty: 3, price: 1000 },
-    { name: 'Composants classifiés', desc: 'Volés à un convoi militaire.', item: 'Composants expérimentaux', qty: 2, price: 2200 },
-    { name: 'Données pré-Fracture', desc: 'Des archives que certains tueraient pour avoir.', item: 'Données pré-Fracture', qty: 1, price: 2800 },
-    { name: 'Faux papiers premium', desc: 'Identité complète. Aucune traçabilité.', item: 'Fausses identités', qty: 1, price: 1800 },
-    { name: 'Implants de contrebande', desc: 'Installation non garantie.', item: 'Implants cybernétiques', qty: 1, price: 1600 },
-    { name: 'Cristaux bruts', desc: 'Non raffinés. Explosifs si mal stockés.', item: 'Cristaux énergétiques', qty: 3, price: 1900 },
+    { name: bm('contraband.stolenData.name'), desc: bm('contraband.stolenData.desc'), item: 'Données volées', qty: 3, price: 1500 },
+    { name: bm('contraband.illegalArms.name'), desc: bm('contraband.illegalArms.desc'), item: 'Armes illégales', qty: 2, price: 1200 },
+    { name: bm('contraband.milStims.name'), desc: bm('contraband.milStims.desc'), item: 'Stimulants de combat', qty: 3, price: 1000 },
+    { name: bm('contraband.classifiedComponents.name'), desc: bm('contraband.classifiedComponents.desc'), item: 'Composants expérimentaux', qty: 2, price: 2200 },
+    { name: bm('contraband.preFractureData.name'), desc: bm('contraband.preFractureData.desc'), item: 'Données pré-Fracture', qty: 1, price: 2800 },
+    { name: bm('contraband.premiumFakeId.name'), desc: bm('contraband.premiumFakeId.desc'), item: 'Fausses identités', qty: 1, price: 1800 },
+    { name: bm('contraband.smuggledImplants.name'), desc: bm('contraband.smuggledImplants.desc'), item: 'Implants cybernétiques', qty: 1, price: 1600 },
+    { name: bm('contraband.rawCrystals.name'), desc: bm('contraband.rawCrystals.desc'), item: 'Cristaux énergétiques', qty: 3, price: 1900 },
   ]
   const idx1 = Math.floor(rng() * contraband.length)
   const idx2 = (idx1 + 1 + Math.floor(rng() * (contraband.length - 1))) % contraband.length
@@ -84,8 +87,8 @@ export function getBlackMarketOffers(gs: GameState): BlackMarketOffer[] {
     offers.push({
       id: `bm-intel-${gs.day}`,
       type: 'intel',
-      name: 'Renseignement faction',
-      description: 'Informations sur les mouvements des factions. +15 réputation.',
+      name: bm('intel.name'),
+      description: bm('intel.desc'),
       price: 2500,
       repCost: 0,
       effect: { reputation: gs.reputation + 15 },
@@ -107,7 +110,7 @@ export function buyBlackMarketOffer(gs: GameState, offer: BlackMarketOffer): Par
     patch.weapons = [...gs.weapons, offer.weapon]
   }
   if (offer.armor) {
-    patch.armors = [...gs.armors, offer.armor]
+    Object.assign(patch, grantArmor({ ...gs, credits: patch.credits! }, offer.armor))
   }
   if (offer.itemName && offer.itemQty) {
     const newCargo = { ...gs.cargo }

@@ -1,0 +1,81 @@
+{
+  "profiles": {
+    "raphazarus": {
+      "title": "INTERROGATION — RAPHAZARUS'S SOLDIERS",
+      "description": "The room is bare concrete. A man of impossible age watches you without blinking. His soldiers stand behind him, motionless. There's no form, no procedure. Just his eyes and your silence.",
+      "demandLabel": "Raphazarus wants to know what you were doing in the Lost Arc."
+    },
+    "emporium": {
+      "title": "INTERROGATION — EMPORIUM SERVICES",
+      "description": "A clean room, clinically lit. The agent across from you smiles. That's the worst sign. The Emporium has resources. And time. And a very broad definition of the word 'confession.'",
+      "demandLabel": "The services want to know about your activities in the imperial zone."
+    },
+    "gardiens": {
+      "title": "INTERROGATION — GUARDIANS OF THE EMPIRE",
+      "description": "The colonel watches you from across a metal table. No paperwork. No visible recording. The Guardians have their own methods — and their own definitions of justice.",
+      "demandLabel": "The Guardians want you to justify your presence in the military zone."
+    },
+    "local": {
+      "title": "INTERROGATION — LOCAL AUTHORITIES",
+      "description": "A nondescript room. Men in generic uniforms. They have a warrant and no patience. The question isn't whether you'll talk — it's when.",
+      "demandLabel": "They want to know who you are and what you were doing there."
+    }
+  },
+  "detained": "DETAINED",
+  "capturedAt": "Captured at",
+  "faction": "Faction",
+  "currentHp": "Current HP",
+  "introText": "Before the cell, they insist on 'verifying you're a normal citizen.' A series of {{total}} questions. Answer at least {{pass}} correctly and you walk out free. Most are trivial… but some have no possible answer. Good luck.",
+  "startQuiz": "Undergo the cultural interrogation ({{pass}}/{{total}}) →",
+  "otherApproach": "Try another approach (bribe, deny, escape…)",
+  "quiz": {
+    "header": "— CULTURAL INTERROGATION —",
+    "questionOf": "Question {{current}}/{{total}}",
+    "score": "Score: {{score}} · threshold {{pass}}",
+    "correct": "✓ Correct answer.",
+    "wrong": "✗ Wrong answer.",
+    "impossibleNote": " (Nobody could reasonably answer that one. It was the trap.)",
+    "seeVerdict": "See the verdict →",
+    "nextQuestion": "Next question →",
+    "passMessage": "You answered {{score}}/{{total}} questions correctly. The interrogator sighs, disappointed they can't keep you. \"Model citizen, apparently.\" They let you go.",
+    "passJournal": "I survived {{faction}}'s cultural interrogation ({{score}}/{{total}}). They couldn't keep me.",
+    "failMessage": "Only {{score}}/{{total}} correct answers. \"Either you're a spy or you're uneducated. Either way, cell.\" They take you away.",
+    "failJournal": "I failed {{faction}}'s cultural interrogation ({{score}}/{{total}}). Cell."
+  },
+  "result": {
+    "header": "— END OF INTERROGATION —",
+    "released": "RELEASED",
+    "incarcerated": "INCARCERATED",
+    "backToStation": "Return to station →",
+    "joinCell": "Join the cell →"
+  },
+  "choices": {
+    "header": "— INTERROGATION IN PROGRESS —",
+    "waiting": "They're waiting. The silence has lasted too long to be comfortable. You have options — none of them good.",
+    "talkWarning": "⚠ Talk: freed, but -rep and -credits confiscated",
+    "talkFreely": "Talk freely — cooperate fully",
+    "talkResult": "You talk. Not everything — but enough. They seem satisfied in a way that doesn't reassure you. They release you after two hours. Your credits were 'checked.' -{{amount}} cr confiscated. -10 rep.",
+    "talkJournal": "I cooperated with {{faction}}'s interrogation. They took my credits. I walked out free — which is already something.",
+    "denyAll": "Deny everything — hold your silence",
+    "denySuccess": "You deny everything consistently. They have nothing solid. After an interminable time, they release you with a warning. You walk out shaking but free. -5 rep.",
+    "denySuccessJournal": "I denied everything at the interrogation. They had nothing solid. I walked out free but shaking.",
+    "denyMidFail": "Your denial irritates them. They decide you look guilty of something else. You spend a few days in a cell while they 'verify.' -15 rep.",
+    "denyMidFailJournal": "I denied everything at the interrogation. They put me in a cell while they 'verified.' They'll verify for a long time.",
+    "denyBadFail": "They have more information than you thought. Your denial convinces them you're hiding something serious. Long detention. -20 rep.",
+    "denyBadFailJournal": "They had more information on me than I thought. My denial did nothing. Long cell.",
+    "bribe": "Bribe ({{amount}} cr · 65% success){{missing}}",
+    "bribeMissing": " · short {{amount}} cr",
+    "bribeSuccess": "The money changes hands discreetly. Nobody says a word. You're out in ten minutes. -{{amount}} cr.",
+    "bribeSuccessJournal": "I bought my freedom at {{station}}. {{amount}} credits. The agent didn't even look up.",
+    "bribeFail": "The agent pockets it. And calls for backup. 'For aggravated corruption.' You paid for nothing. -{{amount}} cr. Cell.",
+    "bribeFailJournal": "I tried to bribe the agent. He pocketed it and called for backup. I paid for a cell.",
+    "resist": "Resist physically — attempt an immediate escape (15%)",
+    "resistSuccess": "A violent move, an opening, a corridor. You run like you've never run. You're out. You don't understand how yet. +20 rep (people are talking about you).",
+    "resistSuccessJournal": "I escaped from an interrogation. A move, an opening, a corridor. I still don't understand how.",
+    "resistFail": "The attempt goes wrong immediately. There were four of them. You'll never know more. -HP, reinforced security cell.",
+    "resistFailJournal": "I physically resisted the interrogation. There were four of them. I woke up in a reinforced security cell.",
+    "betray": "Rat someone else out (+500 cr, -25 rep, 'informant' tag)",
+    "betrayResult": "You give a name. Not yours — someone else's. Someone you crossed paths with. Someone who asked for nothing. They take note. You walk out. -25 rep. 'Informant' tag.",
+    "betrayJournal": "I gave a name that wasn't mine at the interrogation. I don't know what they did with that name. I don't want to know."
+  }
+}

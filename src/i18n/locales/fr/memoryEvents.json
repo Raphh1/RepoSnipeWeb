@@ -1,0 +1,133 @@
+{
+  "cadorReturns": {
+    "title": "Cador — dette tenue",
+    "description": "Tu le reconnais avant qu'il te voie. Cador. Plus en forme qu'à la dernière fois. Il te fait un signe discret depuis une alcôve. 'Je pensais pas te recroiser aussi vite. J'ai pas oublié.'",
+    "c0": "Voir ce qu'il peut t'offrir",
+    "c0Msg": "Il te donne une piste sérieuse. +10 rép, nouvelle quête{{targetSuffix}}.",
+    "c0TargetSuffix": " sur {{station}}",
+    "c1": "Lui demander des informations sur la zone",
+    "c1Msg": "Il te brief sur la situation locale. Des infos qui valent de l'or. +crédits.",
+    "c2": "Juste le saluer et continuer",
+    "c2Msg": "Il hoche la tête. 'T'as sauvé ma peau une fois. C'est suffisant pour un respect mutuel.' Il repart.",
+    "questTitle": "Faveur de Cador — {{station}}",
+    "questGiver": "Cador",
+    "questDesc": "Cador a une cible sur {{station}}. 'Avec mon aide tactique, tu as 30% de chances en plus. Je t'en dois une.' Il te donne toutes les infos nécessaires."
+  },
+  "transfugeVengeance": {
+    "title": "Quelqu'un cherche le délateur",
+    "description": "Une affiche. Ton signalement approximatif. 'Recherché pour trahison — récompense'. Elle a survécu. Et elle sait que c'est toi. Ces gens ont des réseaux.",
+    "c0": "Ignorer et espérer qu'elle ne te trouve pas",
+    "c0Msg": "Tu passes. Pour l'instant, elle ne te voit pas. Mais l'affiche est neuve.",
+    "c1": "Chercher à lui parler — tenter une explication",
+    "c1Success": "Elle écoute. Elle n'oublie pas — mais elle comprend le contexte. Tension baissée. +8 rép.",
+    "c1Fail": "La discussion tourne mal. Elle n'était pas seule. -PV, -10 rép.",
+    "c2": "La payer pour qu'elle efface l'affiche (500 cr)",
+    "c2Insufficient": "Pas assez de crédits. L'affiche reste.",
+    "c2Msg": "-500 cr. Elle prend l'argent. L'affiche disparaît. La rancœur, moins sûr."
+  },
+  "scientistGift": {
+    "title": "Un colis sans expéditeur",
+    "description": "Un gamin te tend un paquet. Pas de nom. Pas d'adresse. Juste une note griffonnée : 'Pour celui qui m'a laissé une chance. Je n'oublie pas.' À l'intérieur, quelque chose d'utile.",
+    "c0": "Ouvrir",
+    "c0Implant": "Un implant de qualité. Travail de laboratoire. Valeur réelle. +1 Implant.",
+    "c0Credits": "{{amount}} crédits en numéraire. Il a bien réussi, depuis.",
+    "c0Data": "Des données de recherche confidentielles. +15 rép et quelque chose d'exploitable."
+  },
+  "delateurReputation": {
+    "title": "Le bruit court",
+    "description": "Un contact que tu connaissais de vue te regarde différemment. Il détourne les yeux quand tu t'approches. La réputation d'un délateur voyage vite dans ce milieu.",
+    "c0": "L'aborder directement",
+    "c0Success": "Il t'écoute. Il est pas convaincu, mais il te laisse parler. +5 rép (effort reconnu).",
+    "c0Fail": "Il n'a pas envie d'entendre. Il repart. -12 rép. Ces gens se parlent entre eux.",
+    "c1": "Assumer et en jouer",
+    "c1Msg": "Une faction te contacte — ils cherchent précisément quelqu'un sans scrupules. Moralement bancal, financièrement intéressant. -8 rép, +crédits.",
+    "c2": "Ignorer — ce n'est pas ton problème",
+    "c2Msg": "Tu passes. Les réputations mettent du temps à se bâtir et du temps à s'effacer."
+  },
+  "escapeLegend": {
+    "title": "La rumeur de l'évasion",
+    "description": "Quelqu'un dans un bar raconte une histoire — une évasion d'un poste d'interrogatoire. Les détails correspondent à ce que tu as vécu. Ta légende te précède.",
+    "c0": "Laisser courir la rumeur",
+    "c0Msg": "+12 rép. La réputation d'évasion est un actif dans certains milieux.",
+    "c1": "Démentir — trop dangereux d'être connu",
+    "c1Msg": "Tu contestes la rumeur. Certains te croient. D'autres moins. -5 rép (tu sembles nerveux).",
+    "c2": "Capitaliser — te présenter comme consultant en évasion",
+    "c2NoTarget": "Quelqu'un paie pour tes conseils. +crédits.",
+    "c2Msg": "Un client sérieux. Extraction sur {{station}}. +crédits d'avance.",
+    "questTitle": "Extraction — {{station}}",
+    "questGiver": "Client discret",
+    "questDesc": "Ta réputation d'évasion t'a valu un contrat. Quelqu'un veut sortir de {{station}} discrètement. Paiement élevé, risque réel."
+  },
+  "pistisRecommends": {
+    "title": "Recommandation de Pistis",
+    "description": "Un homme en costume sobre s'approche. 'Pistis m'a donné ton nom. Il dit que tu es quelqu'un sur qui on peut compter.' Il a quelque chose à proposer.",
+    "c0": "Écouter",
+    "c0Msg": "Une mission via les canaux de Pistis. +10 standing Cesarion, +8 rép Emporium.",
+    "c1": "Décliner poliment",
+    "c1Msg": "Il hoche la tête. 'Une autre fois, peut-être.'",
+    "questTitle": "Mission Emporium — {{station}}",
+    "questGiver": "Contact de Pistis",
+    "questDesc": "Via Pistis, un contact de l'Emporium te confie une livraison sur {{station}}. Discrétion absolue. Paiement au-dessus du marché."
+  },
+  "caelMessage": {
+    "title": "Message de Cael",
+    "description": "Un message chiffré sur ton terminal de bord. Signature des Faucons Noirs. Cael. Court : 'J'ai besoin d'un extérieur. Intéressé ?'",
+    "c0": "Répondre oui",
+    "c0Msg": "Mission reçue depuis les Faucons. +12 rép Faucons.",
+    "c1": "Ignorer le message",
+    "c1Msg": "Tu n'y réponds pas. Il enverra peut-être une autre fois.",
+    "questTitle": "Opération Faucon — {{station}}",
+    "questGiver": "Cael",
+    "questDesc": "Cael a besoin d'un indépendant pour une opération que les Faucons ne peuvent pas officiellement conduire sur {{station}}. Risque réel. Paiement exceptionnel."
+  },
+  "opportunistRep": {
+    "title": "La réputation d'opportuniste",
+    "description": "On t'aborde avec un sourire calculateur. 'J'ai entendu parler de toi. Quelqu'un qui sait profiter d'une situation. Exactement le profil qu'il me faut.'",
+    "c0": "Écouter la proposition",
+    "c0Msg": "Une mission qui correspond à ta réputation. Paiement élevé.",
+    "c1": "Rejeter — tu veux changer d'image",
+    "c1Msg": "Il hausse les épaules. Toi tu te sens légèrement mieux. +5 rép (effort).",
+    "questTitle": "Opération grise — {{station}}",
+    "questGiver": "Recruteur anonyme",
+    "questDesc": "Un travail qui ne porte pas de nom sur {{station}}. Légal dans les détails. Moralement flou dans l'ensemble. Paiement bien au-dessus du marché."
+  },
+  "defectorGratitude": {
+    "title": "Un message de l'autre côté",
+    "description": "La désertrice que tu avais embarquée t'a retrouvé. Un message vocal court : 'Je suis arrivée. Je suis en sécurité. Si tu passes par là-bas un jour, tu as une amie.'",
+    "c0": "Répondre",
+    "c0Msg": "+15 rép. Tu as maintenant un contact dans un réseau de déserteurs. Ça peut servir.",
+    "c1": "Ne pas répondre — garder ses distances",
+    "c1Msg": "Tu lis le message. Tu ne réponds pas. Elle comprendra."
+  },
+  "cesarionBountyHunter": {
+    "title": "Chasseur mandaté par l'Emporium",
+    "description": "Il porte une plaque d'accréditation impériale. Ton nom est sur sa liste. L'Emporium de Cesarion n'oublie pas ceux qui leur ont causé du tort.",
+    "c0": "Fuir avant qu'il te voie (40%)",
+    "c0Success": "Tu disparais dans la foule. Il continue de chercher.",
+    "c0Fail": "Il t'a vu. Des renforts arrivent vite. Cellule.",
+    "c1": "L'affronter",
+    "c1Msg": "Il dégaine. Combat.",
+    "c2": "Payer pour faire effacer ton nom (800 cr)",
+    "c2Insufficient": "Pas assez de crédits. Il te regarde. Il attend.",
+    "c2Msg": "-800 cr. Il fait passer le message. Le standing Emporium remonte légèrement."
+  },
+  "raphazarusFavor": {
+    "title": "Courrier de L'Arc Perdu",
+    "description": "Un messager en armure discrète. Il ne dit pas son nom. Il te tend un cylindre scellé. 'De la part de celui qui tient L'Arc Perdu. Tu t'es comporté correctement là-bas.'",
+    "c0": "Ouvrir le cylindre",
+    "c0Relics": "Des artefacts de la Grande Guerre. Authentiques. Inestimables. +Reliques, +Artefacts.",
+    "c0Credits": "{{amount}} crédits et une lettre de recommandation. +20 rép. Raphazarus a de la mémoire.",
+    "c1": "Refuser — pas d'obligations envers qui que ce soit",
+    "c1Msg": "Le messager repart sans un mot. Refuser un geste de Raphazarus se paie autrement. -10 standing."
+  },
+  "scottyNetwork": {
+    "title": "Le réseau de Scotty",
+    "description": "Un visage que tu reconnais vaguement. Employé de Scotty Golden North. Il te glisse quelque chose discrètement. 'M. Scotty dit que les amis de la maison sont bien traités.'",
+    "c0": "Accepter",
+    "c0Credits": "Une enveloppe de crédits. Le réseau de Scotty fonctionne bien. +crédits.",
+    "c0Goods": "Des spécialités de Scotty Golden North. +2 Spécialités festives.",
+    "c0Medical": "Du matériel médical de qualité casino. +PV, +stamina.",
+    "c1": "Décliner",
+    "c1Msg": "Il repart. Scotty ne force jamais."
+  }
+}

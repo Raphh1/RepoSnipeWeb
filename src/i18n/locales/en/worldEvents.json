@@ -1,0 +1,57 @@
+{
+  "faucon_war": {
+    "title": "War of the Falcons",
+    "description": "The Black Falcons have launched a full offensive against the Scarlet Guardians. Military routes are cut off.",
+    "shortDesc": "Weapons & armor +50% · Fort Kharos and Citadel blocked · +15% combat"
+  },
+  "emporium_blockade": {
+    "title": "Emporium Blockade",
+    "description": "Emporium Requiem has shut down its trade routes in retaliation for an unconfirmed incident. Supplies are running low.",
+    "shortDesc": "Food & medicine +70% · +1 fuel per trip"
+  },
+  "epidemic": {
+    "title": "Spreading Epidemic",
+    "description": "An unknown pathogen is spreading from Quarantine Station. Authorities are trying to contain the situation.",
+    "shortDesc": "Medicine ×4 · Quarantine Station blocked"
+  },
+  "cosmic_storm": {
+    "title": "Cosmic Storm",
+    "description": "An ionized particle storm sweeps through the sector. Navigation systems are disrupted, travel is more dangerous.",
+    "shortDesc": "+2 fuel per trip · +10% combat risk while traveling"
+  },
+  "bounty_hunt": {
+    "title": "Bounty Hunt",
+    "description": "An unknown organization has placed bounties on independent travelers in this sector. Bounty hunters operate everywhere.",
+    "shortDesc": "+25% combat risk everywhere · Bounty hunters active"
+  },
+  "colonial_famine": {
+    "title": "Colonial Famine",
+    "description": "Agricultural colonies suffered poor harvests. Food and water have become precious commodities across the sector.",
+    "shortDesc": "Food & water ×3 sale price · Trading opportunity"
+  },
+  "market_crash": {
+    "title": "Market Crash",
+    "description": "A massive financial manipulation crashed the markets. Everything sells and buys for next to nothing.",
+    "shortDesc": "All prices −35% · Good time to buy"
+  },
+  "artifact_rush": {
+    "title": "Artifact Rush",
+    "description": "Discoveries in the ruin zones have triggered a rush. Collectors and factions fight over ancient artifacts.",
+    "shortDesc": "Artifacts & classified data ×3 · Exploration more profitable"
+  },
+  "military_coup": {
+    "title": "Military Coup",
+    "description": "An internal putsch shakes the sector's military forces. Bases are under siege, civilians barred from entry.",
+    "shortDesc": "Military forts blocked · Armor & ammo +60%"
+  },
+  "guild_truce": {
+    "title": "Guild Truce",
+    "description": "A temporary peace agreement between the major factions has been signed. Trade resumes freely, tensions ease.",
+    "shortDesc": "All prices −20% · −15% combat risk · Good time to travel"
+  },
+  "grand_festival": {
+    "title": "Grand Orbital Festival",
+    "description": "La Tribosphère and Scotty Golden North are hosting an inter-sector festival. Crowds flock in, credits flow.",
+    "shortDesc": "Luxury & entertainment ×2 · Tribosphère and Scotty celebrating · -10% combat"
+  }
+}

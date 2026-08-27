@@ -1,0 +1,111 @@
+{
+  "reactionLabels": {
+    "ally": "★ Ally",
+    "friendly": "◆ Friendly",
+    "warm": "◆ Warm",
+    "neutral": "◆ Neutral",
+    "cold": "◆ Cold",
+    "hostile": "⚠ Hostile"
+  },
+  "defaultGreeting": "{{name}} watches you arrive.",
+  "meetingsCount": "{{count}} meeting{{plural}} · Day {{day}}",
+  "talk": "Talk",
+  "alreadyTalkedToday": "(already talked today)",
+  "alreadyUsed": "(already used)",
+  "serviceCost": "— {{cost}} · 1 action",
+  "majorMission": "★★ Important mission — {{title}}",
+  "majorMissionResult": "[MAJOR MISSION] {{title}}\n\n{{lore}}\n\nFirst step: {{objective}}",
+  "playCards": "★ Play cards",
+  "askAllyHelp": "Ask for help (ally)",
+  "allyHelpResult": "{{name}} helps you without hesitation. +20 HP · +5 rep.",
+  "fightHostile": "⚔ Fight — they hold a grudge",
+  "provoke": "Provoke (combat, -5 rep)",
+  "back": "← Back",
+  "provokeEnemyDescription": "{{role}}. You asked for this.",
+  "conversationOver": "{{name}} turns away. The conversation is over.",
+  "repGoodSuffix": " · (+50 cr, +3 rep)",
+  "repNeutralSuffix": " · (+2 rep)",
+  "genericTalkLine": "They nodded. Not much else.",
+  "npcLore": {
+    "marek": [
+      "He turns a coin between his fingers without looking at you. 'This station has burned twice. They rebuilt it without ever asking why it burned.' He puts the coin away.",
+      "'The Guardians have been searching the sub-levels for three weeks.' He shakes his head. 'When the army digs quietly, it's because they lost something they shouldn't have lost.'",
+      "'The Cult of the Void.' He lowers his voice. 'Used to be lunatics in basements. Now I've seen respectable people join quietly. That's what worries me.'"
+    ],
+    "sela": [
+      "She's sorting invoices. 'The Emporium now controls two out of three routes in this sector. Five years ago it was one in five.' She smiles without humor. 'The market gets conquered quietly.'",
+      "'The routes to the deep zones are closed, officially for radiation.' She lowers her voice. 'Unofficially, someone doesn't want us finding what's down there. And that someone has enough influence that nobody asks questions.'",
+      "She slides over a document. 'The Falcons and the Emporium are negotiating right now. If it goes through, independents like you and me...' She draws a finger across her throat."
+    ],
+    "torvak": [
+      "He stares at a point behind you. 'I served under three commanders. The first believed in order. The second in justice. The third believes in nothing — he's the one who survived.' He falls silent.",
+      "'The faction war, twenty years ago.' He speaks slowly. 'Everyone blames the Falcons. But the Emporium supplied weapons to both sides. The Guardians watched. We all played our part.'",
+      "He shows you a scar on his forearm. 'Velkor. Something in the deep ruins that Director Pale watches personally. I've seen soldiers go in to explore and never come back. Nobody asks questions.'"
+    ],
+    "lira": [
+      "She doesn't look up from her screen. 'Nexus Aldara's network was hacked three days ago. Not by me. Someone was after military archives — coordinates for deep zones.' A silence. 'They found them.'",
+      "'You know what a Nexus Fragment is?' She finally looks at you. 'A key. But to what — the archives I cracked suggest even the ones who built them aren't sure anymore.'",
+      "'There's a signal emerging from the deep zones for six months now. Regular, coded, not natural.' She shrugs. 'Nobody wants to admit it officially. I just log it.'"
+    ],
+    "boro": [
+      "He looks left, then right. 'A pilot came through yesterday, from the deep zones. Different eyes. Paid me with credits that don't officially exist.' He shrugs. 'I took them anyway.'",
+      "'The Cult of the Void pays well. Very well.' He stares at you. 'I don't ask questions. But the stuff they buy, that's not for an ordinary religious cult.'",
+      "'Something's brewing.' He says it simply. 'The big buyers are stockpiling. The small ones are fleeing. I'm just waiting to see who wins.'"
+    ],
+    "neva": [
+      "She looks at the wall. 'This prison was officially closed twelve years ago. Officially.' She points at the walls. 'The level seven inscriptions — the most recent date to six months ago. Someone was there. Someone we didn't want seen elsewhere.'",
+      "'Some people are trying to leave here. Some are trying to stay.' She looks at you. 'The second kind know something the first kind don't yet. I decided curiosity was too dangerous.'",
+      "'The Cult holds meetings in the sub-levels.' She shrugs. 'Here, we stopped chasing secrets. Takes too much energy and attracts too much trouble.'"
+    ],
+    "pistis": [
+      "He slides something across the table. 'Emporium Requiem has a blacklist. People whose movements they want to control without them knowing.' He smiles. 'Some people in this sector pay dearly to find out if their name's on it.'",
+      "'The artifact market is exploding.' He looks at you. 'Ever since the deep zones started... producing things. Things nobody understands yet. Some buyers are very patient.'"
+    ],
+    "ganz": [
+      "He talks without looking at you. 'The betting on factions has changed. People used to bet on the Falcons or the Guardians. Now the top-earning new category is The Void wins. Makes you wonder what people know.'",
+      "'The rich crowd at Star Quest started buying property in the remote zones. The really remote ones.' He smiles. 'They know something. They're not leaving yet. But they're preparing.'"
+    ],
+    "myrra": [
+      "She sizes you up before speaking. 'The Guardians lost three outposts this month. Officially, technical failures.' She pauses. 'None of the three outposts had any reported technical issues the day before.'",
+      "'Someone's recruiting deserter soldiers in this sector. Not the Falcons — I'd have known.' She looks at you. 'This level of organization, this discretion... it looks like the Cult. But the Cult doesn't usually recruit soldiers.'"
+    ],
+    "ysla": [
+      "She explains without pausing. 'The ruins in the Velkor Abyss aren't ordinary ruins. The layout of the structures suggests a civilization well predating what the official archives document.' She looks at you. 'Someone erased that from the records. Deliberately.'",
+      "'I found something here.' She lowers her voice. 'A fragment with an inscription I can't date. Neither can the materials. It shouldn't have existed at this time.' She hesitates. 'I hid it. Director Pale searches for exactly this kind of thing.'"
+    ],
+    "vance": [
+      "He looks at his hands. 'The colony was founded thirty years ago. We were told it was virgin territory.' He looks up. 'Except I found foundations under mine. Old. Very old. Nobody from the company wants to talk about it.'",
+      "'The children hear things at night, in certain parts of the colony. We tell them it's the wind.' He shakes his head slowly. 'This sector has a history we weren't told.'"
+    ],
+    "cael": [
+      "He says nothing for a moment. 'Alanossa is preparing something bigger than the usual raids.' He looks at you. 'I won't say what. But if you have debts to settle in this sector, settle them before the end of the month.'"
+    ],
+    "vosh": [
+      "He sizes you up. 'The Black Falcons aren't recruiting for raids. We're building something.' He pauses. 'Alanossa has a vision. Those who understand it before the others will be well placed.'"
+    ]
+  },
+  "talkLines": {
+    "Ferrailleur": ["He grunts, shows off a rare part.", "He points you to a cache of gear."],
+    "Marchande": ["She slips you some trade info.", "She tells you about a discreet supplier."],
+    "Vétéran": ["He tells a battle story. You listen.", "He shows you a survival technique."],
+    "Hackeuse": ["She talks little. Her eyes scan the room.", "She mentions an ongoing contract."],
+    "Dealer": ["He offers you something. You decline politely.", "He looks away. Wary."],
+    "Survivante": ["She tells you how she held on here.", "She's seen worse. She says it calmly."],
+    "Courtier": ["He slips you a market tip.", "He mentions a discreet buyer somewhere."],
+    "Organisateur": ["He tells you about an interesting bet.", "He recognizes you. That counts."],
+    "Commandante": ["She sizes you up. Short. Precise.", "She might have a job for you."],
+    "Chercheuse": ["She explains her discovery. It's fascinating.", "She needs help with something."],
+    "Pilote retraité": ["He remembers forgotten routes.", "He laughs about your recent exploits."],
+    "Forgeron": ["He shows you a weapon in progress. Clean.", "He gives deals to regulars."],
+    "Fermier": ["He shares his harvest, no fuss.", "Calm and honest. A rarity."],
+    "Lieutenant": ["He says nothing. But he listens.", "He lets you pass. For now."]
+  },
+  "decisionCallbacks": {
+    "escapedInterrogation": "He lowers his voice. 'Heard about someone who broke an interrogation. Clean. Story's spreading.' He looks at you differently.",
+    "betrayedAtInterrogation": "He gives you a sideways glance. 'People give up names under pressure. It happens.' He says it without apparent judgment. It's worse.",
+    "cooperatedInterrogation": "'You're still here.' He just states the fact. 'Some cooperate and survive. That says something — I don't know what yet.'",
+    "aidedScientist": "'There was a rumor about someone who helped a researcher escape.' He crosses his arms. 'That kind of move attracts good people. And others.'",
+    "savedMercenary": "'Patching up a mercenary in a war zone.' He nods slowly. 'Risky. Costly. People like that remember for a long time.'",
+    "defectorNetwork": "'The deserter network.' He says it fast and lowers his voice again. 'If you're mixed up in that, be careful. Some want to understand that network from the inside.'"
+  }
+}

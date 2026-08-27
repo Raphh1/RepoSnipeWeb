@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TypewriterText } from '../../ui/TypewriterText'
 import type { GameState } from '../../../types'
 import type { ExploreResult, ExploreChoice } from '../../../engine/exploration'
-import { getFragment, FRAGMENT_TYPE_LABELS, FRAGMENT_TYPE_COLORS, LORE_TOTAL } from '../../../data/loreFragments'
+import { getFragment, getFragmentTypeLabels, FRAGMENT_TYPE_COLORS, LORE_TOTAL } from '../../../data/loreFragments'
 import { playCollectClue } from '../../../engine/sfx'
+import { translateGood } from '../../../engine/goodsI18n'
 
 interface Props {
   gs: GameState
@@ -16,25 +18,26 @@ interface Props {
 }
 
 export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onContinue, onReturn, onStartLockpick, patch }: Props) {
+  const { t } = useTranslation('exploreResultPanel')
   const [resultMsg, setResultMsg] = useState<string | null>(initialResultMsg ?? null)
 
   function computeDeltas(update: Partial<GameState>): string {
     const parts: string[] = []
     if (update.credits !== undefined) {
       const d = update.credits - gs.credits
-      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} cr`)
+      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('creditsUnit')}`)
     }
     if (update.reputation !== undefined) {
       const d = update.reputation - gs.reputation
-      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} rép`)
+      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('repUnit')}`)
     }
     if (update.playerHp !== undefined) {
       const d = update.playerHp - gs.playerHp
-      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} PV`)
+      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('hpUnit')}`)
     }
     if (update.fuel !== undefined) {
       const d = update.fuel - gs.fuel
-      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} carburant`)
+      if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('fuelUnit')}`)
     }
     return parts.length > 0 ? ` · [${parts.join(', ')}]` : ''
   }
@@ -50,12 +53,12 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
       if (called) return null
       const parts: string[] = []
       const u = result.gs
-      if (u.credits !== undefined) { const d = u.credits - gs.credits; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} cr`) }
-      if (u.reputation !== undefined) { const d = u.reputation - gs.reputation; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} rép`) }
-      if (u.playerHp !== undefined) { const d = u.playerHp - gs.playerHp; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} PV`) }
-      if (u.fuel !== undefined) { const d = u.fuel - gs.fuel; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} fuel`) }
-      if (u.isImprisoned) parts.push('prison')
-      if ((u as Record<string, unknown>).screen === 'interrogation') parts.push('interrogation')
+      if (u.credits !== undefined) { const d = u.credits - gs.credits; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('creditsUnit')}`) }
+      if (u.reputation !== undefined) { const d = u.reputation - gs.reputation; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('repUnit')}`) }
+      if (u.playerHp !== undefined) { const d = u.playerHp - gs.playerHp; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('hpUnit')}`) }
+      if (u.fuel !== undefined) { const d = u.fuel - gs.fuel; if (d !== 0) parts.push(`${d > 0 ? '+' : ''}${d} ${t('fuelUnitShort')}`) }
+      if (u.isImprisoned) parts.push(t('prison'))
+      if ((u as Record<string, unknown>).screen === 'interrogation') parts.push(t('interrogation'))
       return parts.length > 0 ? parts.join(', ') : null
     } catch {
       return null
@@ -74,12 +77,12 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— EXPLORATION — Profondeur {gs.zoneDepth} —</div>
+      <div className="t-xs t-dim t-center">{t('header', { depth: gs.zoneDepth })}</div>
 
       {'description' in exploreResult && (
         <div className={`px-box ${'rare' in exploreResult && exploreResult.rare ? 'rare-event' : ''}`}>
           {'rare' in exploreResult && exploreResult.rare && (
-            <div className="t-xs mb4" style={{ color: 'var(--gold)', letterSpacing: '2px' }}>★ ÉVÉNEMENT RARE</div>
+            <div className="t-xs mb4" style={{ color: 'var(--gold)', letterSpacing: '2px' }}>{t('rareEvent')}</div>
           )}
           <div className="t-sm t-gold mb8">
             <TypewriterText text={exploreResult.description} speed={14} />
@@ -91,9 +94,9 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
               const mult = gs.pillageBonusActive ? 1.5 : 1
               const gained = Math.floor(e.credits * mult)
               patch({ credits: gs.credits + gained, pillageBonusActive: false })
-              setResultMsg(`+${gained} cr récupérés.${gs.pillageBonusActive ? ' (×1.5 pillage)' : ''}`)
+              setResultMsg(t('lootGained', { amount: gained, pillage: gs.pillageBonusActive ? t('pillageBonus') : '' }))
             }}>
-              Ramasser (+{(exploreResult as Extract<ExploreResult, { type: 'loot' }>).credits} cr{gs.pillageBonusActive ? ' ×1.5' : ''})
+              {t('pickUp', { amount: (exploreResult as Extract<ExploreResult, { type: 'loot' }>).credits, mult: gs.pillageBonusActive ? t('pickUpMult') : '' })}
             </button>
           )}
 
@@ -101,9 +104,9 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
             <button className="px-btn px-btn--primary" onClick={() => {
               const e = exploreResult as Extract<ExploreResult, { type: 'item' }>
               patch({ cargo: { ...gs.cargo, [e.item]: (gs.cargo[e.item] ?? 0) + e.qty } })
-              setResultMsg(`+${e.qty}x ${e.item}`)
+              setResultMsg(t('itemGained', { qty: e.qty, item: translateGood(e.item) }))
             }}>
-              Prendre ({(exploreResult as Extract<ExploreResult, { type: 'item' }>).item})
+              {t('take', { item: translateGood((exploreResult as Extract<ExploreResult, { type: 'item' }>).item) })}
             </button>
           )}
 
@@ -111,9 +114,9 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
             <button className="px-btn px-btn--primary" onClick={() => {
               const e = exploreResult as Extract<ExploreResult, { type: 'fuel' }>
               patch({ fuel: Math.min(gs.maxFuel, gs.fuel + e.amount) })
-              setResultMsg(`+${e.amount} carburant.`)
+              setResultMsg(t('fuelGained', { amount: e.amount }))
             }}>
-              Prendre le carburant
+              {t('takeFuel')}
             </button>
           )}
 
@@ -144,9 +147,9 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
               <div className="px-box mt8" style={{ borderColor: FRAGMENT_TYPE_COLORS[frag.type], background: 'rgba(0,0,0,0.4)' }}>
                 <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <div className="tag t-xs" style={{ borderColor: FRAGMENT_TYPE_COLORS[frag.type], color: FRAGMENT_TYPE_COLORS[frag.type] }}>
-                    {FRAGMENT_TYPE_LABELS[frag.type]}
+                    {getFragmentTypeLabels()[frag.type]}
                   </div>
-                  {alreadyKnown && <span className="t-xs t-dim">déjà archivé</span>}
+                  {alreadyKnown && <span className="t-xs t-dim">{t('alreadyArchived')}</span>}
                 </div>
                 <div className="t-xs t-bright mb4">{frag.title}</div>
                 <div className="t-xs t-dim mb6" style={{ fontStyle: 'italic', fontSize: '9px' }}>{frag.source}</div>
@@ -173,7 +176,7 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
                       })
                     }}
                   >
-                    ★ Archiver ce fragment
+                    {t('archiveFragment')}
                   </button>
                 )}
               </div>
@@ -184,10 +187,10 @@ export function ExploreResultPanel({ gs, exploreResult, initialResultMsg, onCont
 
       <div className="row gap4 mt8">
         <button className="px-btn" style={{ flex: 1 }} onClick={onContinue}>
-          Continuer (profondeur {gs.zoneDepth + 1})
+          {t('continueDepth', { depth: gs.zoneDepth + 1 })}
         </button>
         <button className="px-btn px-btn--danger" style={{ flex: 1 }} onClick={onReturn}>
-          Retourner à la station
+          {t('returnToStation')}
         </button>
       </div>
     </div>

@@ -140,7 +140,7 @@ export interface Enemy {
   isSubBoss?: boolean
 }
 
-export type SubBossResolution = 'kill' | 'negotiate' | 'manipulate' | 'betray' | 'ally' | 'sabotage'
+export type SubBossResolution = 'kill' | 'manipulate' | 'betray' | 'ally' | 'sabotage'
 
 export interface SubBossData {
   id: string

@@ -1,0 +1,17 @@
+{
+  "fortuneInitiale": { "name": "Head Start", "desc": "Someone prepared the ground. +800 cr · +2 fuel at start." },
+  "vaisseauPrepare": { "name": "Prepped Ship", "desc": "Serviced before departure. +50 max ship HP." },
+  "contactsEtablis": { "name": "Established Contacts", "desc": "You have friends where it counts. 3 NPCs already know and trust you." },
+  "medecinDeBord": { "name": "Ship's Medic", "desc": "Well-stocked infirmary. +5 Medicine · +10 max HP at start." },
+  "endurance": { "name": "Forged Endurance", "desc": "Trained body, steady mind. +2 max stamina." },
+  "detteInitiale": { "name": "In Debt", "desc": "You start with a tab. Credits reduced by 80% · +200 cr daily debt." },
+  "traque": { "name": "Hunted", "desc": "Someone wants you dead. -30 reputation · active stalker from the start." },
+  "videPoches": { "name": "Empty Pockets", "desc": "You start with nothing. Starting credits ÷2." },
+  "vaisseauEpave": { "name": "Flying Wreck", "desc": "Decrepit ship. Ship HP → 35. But the hold is loaded." },
+  "survivantEndurci": { "name": "Hardened Survivor", "desc": "Max HP -25%, but starting credits +1500." },
+  "contratDeSang": { "name": "Blood Contract", "desc": "+200 cr per combat victory. -5 rep per victory." },
+  "economieDeGuerre": { "name": "War Economy", "desc": "Purchases ×1.5. Quest rewards ×2." },
+  "paria": { "name": "Pariah", "desc": "No faction will accept you. But purchase prices are -20%." },
+  "boucher": { "name": "Butcher", "desc": "Combat loot ×1.5. Every victory costs -3 rep." },
+  "karmaNegatif": { "name": "Negative Karma", "desc": "Every trip costs +1 extra fuel." }
+}

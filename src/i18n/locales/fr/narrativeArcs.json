@@ -1,0 +1,149 @@
+{
+  "alanossa": {
+    "title": "Dette de Sang",
+    "intro": "Une rumeur circule : Alanossa cherche quelqu'un. Pas pour une offre d'emploi.",
+    "completionMessage": "Alanossa est vaincu. Une ère s'achève. Le vide retient ce nom.",
+    "steps": {
+      "0": {
+        "title": "La Rumeur",
+        "desc": "Dans un bar de La Carcasse, quelqu'un te glisse un message. 'Alanossa a entendu ton nom. Il veut te parler. Pas de façon amicale.'",
+        "c0": "Ignorer et continuer",
+        "c0msg": "Tu ranges le message. Ignorer Alanossa, c'est un choix.",
+        "c1": "Enquêter sur les intentions d'Alanossa",
+        "c1msg": "Tu poses des questions. Les réponses confirment : Alanossa veut régler quelque chose. +10 rép (audace)."
+      },
+      "1": {
+        "title": "Le Messager",
+        "desc": "Un lieutenant d'Alanossa te trouve à quai. 'Le patron t'invite à Arc Ouest Apocalypse. Seul. Sans armes. Ces conditions ne sont pas négociables.'",
+        "c0": "Accepter les conditions",
+        "c0msg": "Tu acceptes. Le messager repart. Tu pars pour Arc Ouest Apocalypse.",
+        "c1": "Refuser et proposer un terrain neutre",
+        "c1msg": "Alanossa accepte à contrecœur. Il respecte ça. +15 rép.",
+        "c2": "Disparaître — changer de secteur",
+        "c2msg": "Tu files. Alanossa ne l'oublie pas. L'arc est en pause."
+      },
+      "2": {
+        "title": "La Confrontation",
+        "conditionHint": "Alanossa ne reçoit personne qui n'a pas fait ses preuves — vaincs d'abord ses quatre lieutenants à travers le secteur avant de pouvoir l'affronter, le convaincre ou négocier avec lui.",
+        "desc": "Tu es face à Alanossa. Ses yeux t'évaluent différemment maintenant — tu as brisé quatre de ses lieutenants pour arriver jusqu'ici. 'Tu as quelque chose qui m'appartient. Ou quelqu'un qui te protège. Ou alors tu es juste doué. On va voir laquelle de ces raisons explique pourquoi tu es encore en vie.'",
+        "c0": "Négocier — proposer un arrangement",
+        "c0msg": "-3000 cr. Alanossa accepte. Accord tacite. +30 rép.",
+        "c1": "Défier Alanossa en combat",
+        "c1msg": "Combat avec Alanossa.",
+        "c2": "Révéler une information précieuse",
+        "c2msg": "L'info l'intéresse. Il te laisse partir avec quelque chose en plus. +50 rép."
+      }
+    }
+  },
+  "raphazarus": {
+    "title": "Le Prophète du Vide",
+    "intro": "Les indices convergent enfin. L'Arc Perdu n'est pas une légende — il dérive vraiment quelque part dans la Nébuleuse Noire. Ce que tu vas y trouver ne ressemble à rien de ce qu'on t'a raconté.",
+    "completionMessage": "Tu as rencontré Raphazarus à L'Arc Perdu. Le Culte du Vide t'attend — ou te craint. Raphazarus peut être affronté là-bas si tu veux régler ça définitivement.",
+    "steps": {
+      "0": {
+        "title": "L'Approche",
+        "desc": "Tu captes enfin le signal — le vrai, pas une rumeur de bar. Une station qui ne devrait pas exister, immobile dans le noir. Plus tu t'en approches, plus tu comprends pourquoi personne n'en revient jamais vraiment convaincu de ce qu'il a vu.",
+        "c0": "Scanner la station avant d'approcher",
+        "c0msg": "Les scans ne disent presque rien. La station absorbe plus qu'elle ne réfléchit. Ce que tu vois ne colle pas avec ce que les instruments mesurent. +8 rép (prudence).",
+        "c1": "Foncer — les questions attendront",
+        "c1msg": "Tu n'attends pas. L'Arc Perdu grossit dans le viseur, silencieux, comme s'il t'attendait aussi."
+      },
+      "1": {
+        "title": "Le Premier Disciple",
+        "desc": "Une femme t'accueille au sas. Robe sombre, regard absent. 'On m'a dit que tu viendrais. Peu y arrivent — la plupart abandonnent la piste avant, ou n'y croient jamais vraiment. Raphazarus t'attend. C'est une invitation — pas une convocation.'",
+        "c0": "Entrer — voir enfin la vérité par toi-même",
+        "c0msg": "Tu suis la disciple dans les entrailles de la station.",
+        "c1": "Interroger la disciple — qui est vraiment Raphazarus ?",
+        "c1msg": "Elle sourit à peine. 'Vous voulez tous savoir qui il est. Vous verrez. Les mots ne suffisent pas.' Elle ne dit rien de plus. +5 rép.",
+        "c2": "Hésiter — tout ça est encore difficile à croire",
+        "c2msg": "'C'est normal,' dit-elle. 'Presque personne n'y croit avant de le voir en face. Il t'attend quand même.'"
+      },
+      "2": {
+        "title": "Face à Raphazarus",
+        "conditionHint": "Rends-toi à L'Arc Perdu pour rencontrer Raphazarus.",
+        "desc": "Il est plus vieux que tu ne pensais. Ses yeux fixent quelque chose derrière toi. 'Le vide te connaît. Je t'ai observé depuis longtemps. Je ne t'offre pas un emploi — je t'offre un sens.' Il attend ta réponse.",
+        "c0": "Rejoindre le Culte du Vide",
+        "c0msg": "Tu rejoins le Culte. Il pose une main sur ton épaule. 'Le vide t'a choisi.' +60 rép. Tu es maintenant membre du Culte du Vide.",
+        "c1": "Rejoindre le Culte (déjà engagé ailleurs — allégeance double)",
+        "c1msg": "Tu joues un jeu dangereux. Raphazarus accepte — il sait que tu as d'autres allégeances. Double agent. +30 rép.",
+        "c2": "Refuser — ce n'est pas ta voie",
+        "c2msg": "Tu déclines. Il n'insiste pas. 'Le vide n'oublie pas les refus. Mais il pardonne les honnêtes.' Il te laisse partir.",
+        "c3": "Négocier — protection contre informations",
+        "c3msg": "Arrangement trouvé. +40 rép, +2000 cr. Il te doit quelque chose. Et toi à lui."
+      }
+    }
+  },
+  "vael": {
+    "title": "L'Enquête des Abysses",
+    "intro": "Une station a été détruite. Les Abysses de Velkor. Mais les survivants parlent d'autre chose — une disparition avant la catastrophe.",
+    "completionMessage": "La vérité sur Velkor est connue. Ce qui en sortira, c'est ton choix.",
+    "steps": {
+      "0": {
+        "title": "Les Survivants",
+        "desc": "Aux Abysses de Velkor, une vieille chercheuse t'aborde. 'Avant l'incident, quelqu'un a volé nos recherches. Quelqu'un du dedans. J'ai un nom. J'ai besoin d'un messager.'",
+        "c0": "Accepter l'enquête",
+        "c0msg": "Tu acceptes. Elle te donne un nom et une adresse.",
+        "c1": "Demander une avance (500 cr)",
+        "c1msg": "+500 cr avance. L'enquête commence."
+      },
+      "1": {
+        "title": "La Piste",
+        "desc": "Le nom mène à Nexus Aldara. Là-bas, les traces s'arrêtent net. Quelqu'un a effacé les données. Mais pas assez bien.",
+        "c0": "Pirater le terminal pour récupérer les données",
+        "c0msg": "[HACKEUR] Données récupérées. +20 rép. Tu sais qui.",
+        "c1": "Payer un informateur (400 cr)",
+        "c1msgWin": "-400 cr. L'info est bonne. La piste continue.",
+        "c1msgFail": "Pas assez de crédits.",
+        "c2": "Chercher des témoins dans la station",
+        "c2msg": "Plusieurs témoignages. La vérité émerge. +10 rép."
+      },
+      "2": {
+        "title": "La Vérité",
+        "desc": "Le responsable : un directeur de recherche. Il est vivant, caché dans les confins. Il t'attend — il savait que tu viendrais. 'J'ai fait ce que j'avais à faire. Les recherches auraient été détruites autrement. Je les ai sauvées.'",
+        "c0": "Le livrer aux autorités",
+        "c0msg": "Justice rendue. +50 rép. La chercheuse te paie.",
+        "c1": "Le laisser partir — il dit peut-être la vérité",
+        "c1msg": "Il disparaît avec ses recherches. +20 rép, +1500 cr (sa reconnaissance).",
+        "c2": "Récupérer les recherches et les vendre",
+        "c2msg": "+4000 cr. -20 rép. Les données sont vendues au plus offrant."
+      }
+    }
+  },
+  "factionwar": {
+    "title": "La Guerre des Factions",
+    "intro": "Les Faucons Noirs et les Gardiens Écarlates se sont déclaré la guerre. Tout le secteur va en subir les conséquences.",
+    "completionMessage": "La guerre de factions est terminée. Ton rôle dedans restera dans les archives.",
+    "steps": {
+      "0": {
+        "title": "L'Étincelle",
+        "desc": "Un incident à Fort Kharos : un Gardien Écarlate a été assassiné. Les Faucons Noirs sont accusés. Les deux factions se mobilisent. Les routes commerciales sont coupées.",
+        "c0": "S'aligner avec les Faucons Noirs",
+        "c0msg": "Tu rejoins les Faucons. L'arc progresse de leur côté.",
+        "c1": "S'aligner avec les Gardiens Écarlates",
+        "c1msg": "Tu rejoins les Gardiens. L'arc progresse de leur côté.",
+        "c2": "Rester neutre et en profiter",
+        "c2msg": "Tu vends des informations aux deux camps. +crédits. Dangereux à long terme."
+      },
+      "1": {
+        "title": "La Bataille",
+        "desc": "Les deux factions s'affrontent dans le secteur. Des vaisseaux brûlent. Des stations sont sous blocus. On te demande de choisir un camp pour une mission décisive.",
+        "c0": "Mener la mission (combattre l'ennemi de ta faction)",
+        "c0msg": "Mission accomplie. +60 rép. La bataille tourne.",
+        "c1": "Trahir et vendre le plan à l'adversaire",
+        "c1msg": "+3000 cr. -40 rép. Tu es agent double maintenant.",
+        "c2": "Proposer une médiation entre les deux factions",
+        "c2msg": "Les deux factions t'écoutent. +100 rép. La guerre ralentit."
+      },
+      "2": {
+        "title": "La Résolution",
+        "desc": "La guerre touche à sa fin. Un accord est possible — ou une victoire totale d'un camp. Tu as le pouvoir de décider.",
+        "c0": "Écraser la faction ennemie (victoire totale)",
+        "c0msg": "Victoire totale. +100 rép, +2000 cr. Un camp domine maintenant.",
+        "c1": "Forcer un traité de paix",
+        "c1msg": "Traité signé. +150 rép. Tu es reconnu comme artisan de la paix. Chef de faction.",
+        "c2": "Prendre le contrôle d'une faction dans la confusion",
+        "c2msg": "Tu prends les rênes. +80 rép, +3000 cr. Tu diriges maintenant."
+      }
+    }
+  }
+}

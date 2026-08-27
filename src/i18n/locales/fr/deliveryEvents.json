@@ -1,0 +1,15 @@
+{
+  "delivery": {
+    "smooth1": "Le contact de {{giver}} t'attend dans une arrière-salle. Il vérifie la marchandise en silence, puis hoche la tête. Transaction propre.",
+    "smooth2": "Tu trouves le destinataire après vingt minutes à chercher dans les couloirs. Il regarde l'item, puis toi. \"T'es en retard.\" Il paie quand même.",
+    "tense1": "Le destinataire est là, mais il n'est pas seul. Deux types dans l'ombre. Il te demande si tu es suivi.",
+    "detour1": "Tu arrives à l'adresse indiquée — le local est fermé. Un message épinglé sur la porte dit de te rendre au niveau inférieur.",
+    "ambush1": "En chemin pour la livraison, quelqu'un te double dans le couloir et renverse délibérément ta caisse. Les regards se tournent vers toi.",
+    "negotiation1": "Le destinataire est là mais refuse d'abord la marchandise. \"Les termes ont changé.\" Il cherche à renégocier à la baisse."
+  },
+  "heist": {
+    "smooth1": "Tu remets l'objet à {{giver}}. Il ne le regarde même pas — il savait déjà ce que c'était. Le paiement arrive sans un mot.",
+    "ambush1": "Quelqu'un d'autre cherchait cet item. Il est là, dans le couloir, et il t'a vu.",
+    "smooth2": "La remise se passe. {{giver}} examine l'objet longuement. \"C'est le bon.\" Il paie. Mais tu te demandes depuis combien de temps il attendait exactement ça."
+  }
+}

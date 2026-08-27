@@ -1,4 +1,8 @@
 import type { WeaponData, ArmorData, GameState } from '../types'
+import { grantArmor } from './armors'
+import i18n from '../i18n/config'
+
+const eq = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'equipmentQuests', ...params })
 
 export type EquipmentQuestDifficulty = 'common' | 'rare' | 'epic' | 'legendary'
 
@@ -33,38 +37,39 @@ function a(name: string, tier: number, def: number, hp: number,
   return { name, tier, defense: def, hpBonus: hp, effect, effectValue: eVal, description: desc, sellValue: sell }
 }
 
-export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
+export function getEquipmentQuests(): EquipmentQuest[] {
+  return [
   // ── COMMON (Tier 2) ──────────────────────────────────────────────────────
   {
     id: 'eq-lame-recup',
-    title: 'La Lame Récupérée',
-    description: 'Un forgeron de la Carcasse parle d\'une lame ancienne enfouie dans la ferraille. Il a besoin de matériaux pour la restaurer.',
+    title: eq('quests.eqLameRecup.title'),
+    description: eq('quests.eqLameRecup.description'),
     difficulty: 'common',
     station: 'La Carcasse',
     requirements: [
       { type: 'item', name: 'Métaux bruts', qty: 3 },
       { type: 'credits', amount: 500 },
     ],
-    reward: { weapon: w('Lame de la Carcasse', 2, 14, 28, 15, 'armorPierce', 0, '+30% dégâts (perce l\'armure)') },
+    reward: { weapon: w('Lame de la Carcasse', 2, 14, 28, 15, 'armorPierce', 0, eq('quests.eqLameRecup.weaponEffect')) },
   },
   {
     id: 'eq-gilet-garde',
-    title: 'Le Gilet du Garde Déchu',
-    description: 'Un ancien garde de Fort Kharos vend son équipement. Il veut quitter le secteur. Il a besoin de carburant et de crédits.',
+    title: eq('quests.eqGiletGarde.title'),
+    description: eq('quests.eqGiletGarde.description'),
     difficulty: 'common',
     station: 'Fort Kharos',
     requirements: [
       { type: 'credits', amount: 800 },
       { type: 'reputation', min: 15 },
     ],
-    reward: { armor: a('Gilet du Garde Déchu', 2, 22, 10, 'none', 0, 'L\'ancien propriétaire est parti. Le gilet est resté.', 300) },
+    reward: { armor: a('Gilet du Garde Déchu', 2, 22, 10, 'none', 0, eq('quests.eqGiletGarde.armorDesc'), 300) },
   },
 
   // ── RARE (Tier 3) ────────────────────────────────────────────────────────
   {
     id: 'eq-fusil-fantome',
-    title: 'Le Fusil du Fantôme',
-    description: 'Une rumeur circule sur Station Fantôme : une arme légendaire est cachée dans les conduits d\'aération. Pour la trouver, il faut y avoir survécu.',
+    title: eq('quests.eqFusilFantome.title'),
+    description: eq('quests.eqFusilFantome.description'),
     difficulty: 'rare',
     station: 'Station Fantôme',
     requirements: [
@@ -72,12 +77,12 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'credits', amount: 2000 },
       { type: 'item', name: 'Données volées', qty: 2 },
     ],
-    reward: { weapon: w('Fusil du Fantôme', 3, 22, 44, 22, 'blind', 40, 'Aveugle l\'ennemi 1 tour. Trouvé dans les conduits d\'une station qui n\'existe pas.') },
+    reward: { weapon: w('Fusil du Fantôme', 3, 22, 44, 22, 'blind', 40, eq('quests.eqFusilFantome.weaponEffect')) },
   },
   {
     id: 'eq-armure-mira',
-    title: 'L\'Armure des Profondeurs',
-    description: 'Les mineurs de Mira parlent d\'une armure cristalline trouvée dans les galeries les plus profondes. Elle a des propriétés étranges.',
+    title: eq('quests.eqArmureMira.title'),
+    description: eq('quests.eqArmureMira.description'),
     difficulty: 'rare',
     station: 'Les Cavernes de Mira',
     requirements: [
@@ -85,12 +90,12 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'credits', amount: 2500 },
       { type: 'day', min: 8 },
     ],
-    reward: { armor: a('Armure Cristalline de Mira', 3, 28, 20, 'thorns', 30, 'Les cristaux de Mira renvoient l\'énergie.', 800) },
+    reward: { armor: a('Armure Cristalline de Mira', 3, 28, 20, 'thorns', 30, eq('quests.eqArmureMira.armorDesc'), 800) },
   },
   {
     id: 'eq-lame-noctis',
-    title: 'La Commande de Noctis',
-    description: 'Un artisan de la Forge Noire peut forger une lame de qualité Noctis — mais il a besoin de composants spécifiques et d\'une preuve de valeur.',
+    title: eq('quests.eqLameNoctis.title'),
+    description: eq('quests.eqLameNoctis.description'),
     difficulty: 'rare',
     station: 'La Forge Noire',
     requirements: [
@@ -99,14 +104,14 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'credits', amount: 3000 },
       { type: 'combatsWon', min: 15 },
     ],
-    reward: { weapon: w('Lame Noctis Forgée', 3, 24, 48, 20, 'double_strike', 0, 'Frappe deux fois (×0.85 chacune). Forgée dans les profondeurs de la Forge Noire.') },
+    reward: { weapon: w('Lame Noctis Forgée', 3, 24, 48, 20, 'double_strike', 0, eq('quests.eqLameNoctis.weaponEffect')) },
   },
 
   // ── EPIC (Tier 4) ────────────────────────────────────────────────────────
   {
     id: 'eq-canon-velkor',
-    title: 'Le Canon des Abysses',
-    description: 'Dans les Abysses de Velkor, un prototype d\'arme pré-Fracture attend d\'être restauré. Il faut des données classifiées pour débloquer sa chambre forte.',
+    title: eq('quests.eqCanonVelkor.title'),
+    description: eq('quests.eqCanonVelkor.description'),
     difficulty: 'epic',
     station: 'Les Abysses de Velkor',
     requirements: [
@@ -115,12 +120,12 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'credits', amount: 6000 },
       { type: 'reputation', min: 40 },
     ],
-    reward: { weapon: w('Canon Abyssal', 4, 32, 62, 26, 'shock', 45, 'Étourdit + brûle 15-25/tour ×3. Prototype pré-Fracture.', 8, 20) },
+    reward: { weapon: w('Canon Abyssal', 4, 32, 62, 26, 'shock', 45, eq('quests.eqCanonVelkor.weaponEffect'), 8, 20) },
   },
   {
     id: 'eq-armure-ecarlate',
-    title: 'L\'Armure de l\'Écarlate',
-    description: 'Les Gardiens Écarlates conservent une armure légendaire dans leur Arsenal. La mériter exige loyauté et sang.',
+    title: eq('quests.eqArmureEcarlate.title'),
+    description: eq('quests.eqArmureEcarlate.description'),
     difficulty: 'epic',
     station: "L'Arsenal Écarlate",
     requirements: [
@@ -129,12 +134,12 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'credits', amount: 5000 },
       { type: 'visitStation', station: 'Bastion Mineur' },
     ],
-    reward: { armor: a('Armure Légendaire Écarlate', 4, 38, 25, 'regen', 10, 'Portée par les champions des Gardiens. +10 PV/tour.', 2200) },
+    reward: { armor: a('Armure Légendaire Écarlate', 4, 38, 25, 'regen', 10, eq('quests.eqArmureEcarlate.armorDesc'), 2200) },
   },
   {
     id: 'eq-vampirelle-mk2',
-    title: 'Vampirelle Mk.II',
-    description: 'Le Docteur Flinch à la Bulle a perfectionné la technologie vampirique. Il a besoin de composants biologiques et de cobayes... ou juste de crédits.',
+    title: eq('quests.eqVampirelleMk2.title'),
+    description: eq('quests.eqVampirelleMk2.description'),
     difficulty: 'epic',
     station: 'La Bulle',
     requirements: [
@@ -142,14 +147,14 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'credits', amount: 7000 },
       { type: 'day', min: 15 },
     ],
-    reward: { weapon: w('Vampirelle Mk.II', 4, 26, 52, 22, 'lifesteal', 0, 'Vole 35% des dégâts en PV. Version améliorée par Flinch.') },
+    reward: { weapon: w('Vampirelle Mk.II', 4, 26, 52, 22, 'lifesteal', 0, eq('quests.eqVampirelleMk2.weaponEffect')) },
   },
 
   // ── LEGENDARY (Tier 5) ───────────────────────────────────────────────────
   {
     id: 'eq-lame-nexus',
-    title: 'La Lame du Nexus',
-    description: 'Les ruines du Berceau cachent l\'arme la plus ancienne du secteur. Forgée avant la Fracture, elle nécessite des artefacts de chaque coin du secteur pour être réactivée.',
+    title: eq('quests.eqLameNexus.title'),
+    description: eq('quests.eqLameNexus.description'),
     difficulty: 'legendary',
     station: 'Le Berceau',
     requirements: [
@@ -159,12 +164,12 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'combatsWon', min: 40 },
       { type: 'reputation', min: 60 },
     ],
-    reward: { weapon: w('Lame du Nexus Originel', 5, 45, 88, 32, 'momentum_surge', 0, 'Frappe + momentum max instantané. L\'arme qui existait avant tout.') },
+    reward: { weapon: w('Lame du Nexus Originel', 5, 45, 88, 32, 'momentum_surge', 0, eq('quests.eqLameNexus.weaponEffect')) },
   },
   {
     id: 'eq-armure-singularite',
-    title: 'Le Projet Singularité',
-    description: 'ARIA-9 à Sanctum Machina possède les plans d\'une armure qui n\'est pas censée exister. La construire nécessite la coopération d\'un esprit humain et d\'une IA.',
+    title: eq('quests.eqArmureSingularite.title'),
+    description: eq('quests.eqArmureSingularite.description'),
     difficulty: 'legendary',
     station: 'Sanctum Machina',
     requirements: [
@@ -174,12 +179,12 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'day', min: 25 },
       { type: 'combatsWon', min: 35 },
     ],
-    reward: { armor: a('Armure de la Singularité Mk.II', 5, 50, 35, 'immunity', 1, 'Absorbe un coup fatal. Projet interdit. Parfait.', 5000) },
+    reward: { armor: a('Armure de la Singularité Mk.II', 5, 50, 35, 'immunity', 1, eq('quests.eqArmureSingularite.armorDesc'), 5000) },
   },
   {
     id: 'eq-sceptre-roi',
-    title: 'Le Sceptre du Roi Perdu',
-    description: 'L\'Arc Perdu contient l\'arme d\'un roi oublié. Raphazarus sait où elle se trouve — mais il ne la donnera qu\'à quelqu\'un qui a prouvé sa valeur sur les champs de bataille.',
+    title: eq('quests.eqSceptreRoi.title'),
+    description: eq('quests.eqSceptreRoi.description'),
     difficulty: 'legendary',
     station: "L'Arc Perdu",
     requirements: [
@@ -189,46 +194,47 @@ export const EQUIPMENT_QUESTS: EquipmentQuest[] = [
       { type: 'reputation', min: 70 },
       { type: 'subBoss', subBossId: 'ala-4' },
     ],
-    reward: { weapon: w('Sceptre du Roi Perdu', 5, 48, 92, 30, 'berserker', 0, 'Dégâts × (1 + 1.5×%PV manquants), max ×2.5. L\'arme d\'un roi qui a tout perdu — sauf sa fureur.') },
+    reward: { weapon: w('Sceptre du Roi Perdu', 5, 48, 92, 30, 'berserker', 0, eq('quests.eqSceptreRoi.weaponEffect')) },
   },
-]
+  ]
+}
 
 export function getQuestsAtStation(station: string): EquipmentQuest[] {
-  return EQUIPMENT_QUESTS.filter(q => q.station === station)
+  return getEquipmentQuests().filter(q => q.station === station)
 }
 
 export function canStartQuest(gs: GameState, quest: EquipmentQuest): { ok: boolean; missing: string[] } {
-  if ((gs.completedEquipmentQuests ?? []).includes(quest.id)) return { ok: false, missing: ['Déjà complétée'] }
+  if ((gs.completedEquipmentQuests ?? []).includes(quest.id)) return { ok: false, missing: [eq('missing.alreadyCompleted')] }
   const missing: string[] = []
   for (const req of quest.requirements) {
     switch (req.type) {
       case 'credits':
-        if (gs.credits < req.amount) missing.push(`${req.amount - gs.credits} crédits manquants`)
+        if (gs.credits < req.amount) missing.push(eq('missing.creditsMissing', { amount: req.amount - gs.credits }))
         break
       case 'reputation':
-        if (gs.reputation < req.min) missing.push(`Réputation ${gs.reputation}/${req.min}`)
+        if (gs.reputation < req.min) missing.push(eq('missing.reputation', { value: gs.reputation, needed: req.min }))
         break
       case 'item': {
         const qty = gs.cargo[req.name] ?? 0
-        if (qty < req.qty) missing.push(`${req.name} ${qty}/${req.qty}`)
+        if (qty < req.qty) missing.push(eq('missing.item', { name: req.name, have: qty, needed: req.qty }))
         break
       }
       case 'combatsWon':
-        if ((gs.combatsWon ?? 0) < req.min) missing.push(`Combats gagnés ${gs.combatsWon ?? 0}/${req.min}`)
+        if ((gs.combatsWon ?? 0) < req.min) missing.push(eq('missing.combatsWon', { value: gs.combatsWon ?? 0, needed: req.min }))
         break
       case 'visitStation':
-        if (!gs.visitedStations.includes(req.station)) missing.push(`Visite ${req.station} d'abord`)
+        if (!gs.visitedStations.includes(req.station)) missing.push(eq('missing.visitStation', { station: req.station }))
         break
       case 'bossKill':
-        if (!gs.stationBossesBeaten.includes(req.bossName)) missing.push(`Vaincre ${req.bossName}`)
+        if (!gs.stationBossesBeaten.includes(req.bossName)) missing.push(eq('missing.bossKill', { boss: req.bossName }))
         break
       case 'day':
-        if (gs.day < req.min) missing.push(`Jour ${gs.day}/${req.min}`)
+        if (gs.day < req.min) missing.push(eq('missing.day', { value: gs.day, needed: req.min }))
         break
       case 'subBoss': {
         const defeated = gs.subBossesDefeated ?? {}
         const allDefeated = Object.values(defeated).flat()
-        if (!allDefeated.includes(req.subBossId)) missing.push(`Sous-boss requis non vaincu`)
+        if (!allDefeated.includes(req.subBossId)) missing.push(eq('missing.subBoss'))
         break
       }
     }
@@ -255,7 +261,7 @@ export function completeQuest(gs: GameState, quest: EquipmentQuest): Partial<Gam
     patch.weapons = [...gs.weapons, quest.reward.weapon]
   }
   if (quest.reward.armor) {
-    patch.armors = [...gs.armors, quest.reward.armor]
+    Object.assign(patch, grantArmor({ ...gs, credits: newCredits }, quest.reward.armor))
   }
   return patch
 }

@@ -1,7 +1,11 @@
 import type { Enemy, GameState, CombatLogEntry, CombatOutcome } from '../types'
 import { rollWeaponForTier } from '../data/weapons'
-import { rollArmorForTier } from '../data/armors'
-import { TIER_LOW, TIER_MID, TIER_HIGH } from '../data/enemies'
+import { rollArmorForTier, grantArmor } from '../data/armors'
+import { getTierLow, getTierMid, getTierHigh } from '../data/enemies'
+import i18n from '../i18n/config'
+import { translateEnemyName } from './goodsI18n'
+
+const mt = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'multiCombat', ...params })
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const roll = (chance: number) => Math.random() * 100 < chance
@@ -85,14 +89,14 @@ export function processMultiAction(
     if (!weapon) {
       let d = rng(5, 18)
       if (gs.class.name === 'Seigneur de guerre') d += rng(8, 20)
-      if (Math.random() < 0.10) { d = Math.floor(d * 2); addLog('CRITIQUE !', 'crit') }
+      if (Math.random() < 0.10) { d = Math.floor(d * 2); addLog(mt('crit'), 'crit') }
       return Math.max(1, d)
     }
     let d = rng(weapon.damageMin, weapon.damageMax)
     const aff = weapon.affinities[gs.class.name] ?? 1
     d = Math.floor(d * aff)
     if (weapon.effect === 'armorPierce') d = Math.floor(d * 1.3)
-    if (Math.random() * 100 < weapon.critChance) { d = Math.floor(d * 2); addLog('CRITIQUE !', 'crit') }
+    if (Math.random() * 100 < weapon.critChance) { d = Math.floor(d * 2); addLog(mt('crit'), 'crit') }
     return Math.max(1, d)
   }
 
@@ -112,15 +116,15 @@ export function processMultiAction(
         const absorbed = Math.floor(dmg * 0.3)
         dmg -= absorbed
         tank.hp = Math.max(0, tank.hp - absorbed)
-        if (tank.hp <= 0) { tank.defeated = true; addLog(`${tank.base.name} s'effondre en protégeant son allié !`, 'victory') }
-        else addLog(`${tank.base.name} (Tank) absorbe ${absorbed} dégâts.`, 'info')
+        if (tank.hp <= 0) { tank.defeated = true; addLog(mt('tankProtectDefeated', { name: translateEnemyName(tank.base.name) }), 'victory') }
+        else addLog(mt('tankAbsorb', { name: translateEnemyName(tank.base.name), amount: absorbed }), 'info')
       }
 
       target.hp = Math.max(0, target.hp - dmg)
       newMcs.momentum = Math.min(3, newMcs.momentum + 1)
-      if (target.hp <= 0) { target.defeated = true; addLog(`${target.base.name} est éliminé !`, 'victory') }
-      else addLog(`${dmg} dégâts sur ${target.base.name}. (${target.hp}/${target.base.maxHp})`, 'player')
-      if (newMcs.momentum >= 3) addLog('⚡ MOMENTUM MAX — Finisher disponible !', 'crit')
+      if (target.hp <= 0) { target.defeated = true; addLog(mt('targetDefeated', { name: translateEnemyName(target.base.name) }), 'victory') }
+      else addLog(mt('hitTarget', { dmg, name: translateEnemyName(target.base.name), hp: target.hp, max: target.base.maxHp }), 'player')
+      if (newMcs.momentum >= 3) addLog(mt('momentumMax'), 'crit')
       break
     }
     case 'finisher': {
@@ -129,8 +133,8 @@ export function processMultiAction(
       if (!weakest) break
       const dmg = calcDmg() * 3
       weakest.hp = Math.max(0, weakest.hp - dmg)
-      if (weakest.hp <= 0) { weakest.defeated = true; addLog(`FINISHER — ${weakest.base.name} éliminé !`, 'victory') }
-      else addLog(`FINISHER — ${dmg} dégâts sur ${weakest.base.name}.`, 'crit')
+      if (weakest.hp <= 0) { weakest.defeated = true; addLog(mt('finisherDefeated', { name: translateEnemyName(weakest.base.name) }), 'victory') }
+      else addLog(mt('finisherHit', { dmg, name: translateEnemyName(weakest.base.name) }), 'crit')
       newMcs.momentum = 0
       break
     }
@@ -139,7 +143,7 @@ export function processMultiAction(
       cargo['Médicaments']--
       if (cargo['Médicaments'] === 0) delete cargo['Médicaments']
       playerHp = Math.min(gs.playerMaxHp, playerHp + 30)
-      addLog(`+30 PV. ${playerHp}/${gs.playerMaxHp}`, 'player')
+      addLog(mt('healed', { hp: playerHp, max: gs.playerMaxHp }), 'player')
       break
     }
     case 'class': {
@@ -148,32 +152,32 @@ export function processMultiAction(
         case 'Médecin': {
           stamina = Math.max(0, stamina - 20)
           playerHp = Math.min(gs.playerMaxHp, playerHp + 30)
-          addLog(`[MÉDECIN] Soin rapide. +30 PV. ${playerHp}/${gs.playerMaxHp}`, 'player'); break
+          addLog(mt('medicClassHeal', { hp: playerHp, max: gs.playerMaxHp }), 'player'); break
         }
         case 'Contrebandier': {
           fuel = Math.max(0, fuel - 1)
           newMcs.fled = true
-          addLog('[CONTREBANDIER] Fuite garantie. -1 carburant.', 'info'); break
+          addLog(mt('smugglerClassFlee'), 'info'); break
         }
         case 'Seigneur de guerre': {
           const stunTarget = alive[0]
           if (stunTarget) {
             stunTarget.stunTurns = 1
-            addLog(`[SEIGNEUR] Intimidation — ${stunTarget.base.name} étourdi.`, 'player')
+            addLog(mt('warlordStun', { name: translateEnemyName(stunTarget.base.name) }), 'player')
           }; break
         }
         case 'Hackeur': {
           stamina = Math.max(0, stamina - 30)
           alive.forEach(m => { if (m.base.role !== 'tank') m.stunTurns = 1 })
-          addLog('[HACKEUR] Hack de masse — tous les non-tanks étourdis 1 tour.', 'player'); break
+          addLog(mt('hackerMassHack'), 'player'); break
         }
         case 'Vagabond': {
           const target = alive.sort((a, b) => a.hp - b.hp)[0]
           if (target) {
             const dmg = rng(15, 35) + rng(5, 15)
             target.hp = Math.max(0, target.hp - dmg)
-            if (target.hp <= 0) { target.defeated = true; addLog(`[VAGABOND] Coup bas — ${target.base.name} éliminé !`, 'victory') }
-            else addLog(`[VAGABOND] Coup bas — ${dmg} dégâts (armure ignorée).`, 'player')
+            if (target.hp <= 0) { target.defeated = true; addLog(mt('vagabondCheapShotDefeated', { name: translateEnemyName(target.base.name) }), 'victory') }
+            else addLog(mt('vagabondCheapShot', { dmg }), 'player')
           }; break
         }
       }; break
@@ -183,9 +187,9 @@ export function processMultiAction(
       if (roll(chance)) {
         fuel = Math.max(0, fuel - 1)
         newMcs.fled = true
-        addLog('Tu te frais une ouverture. -1 carburant.', 'info')
+        addLog(mt('fleeOpening'), 'info')
       } else {
-        addLog('Impossible de fuir — ils encerclent la sortie.', 'enemy')
+        addLog(mt('fleeBlocked'), 'enemy')
       }; break
     }
   }
@@ -210,7 +214,7 @@ export function processMultiAction(
 
     if (m.stunTurns > 0) {
       m.stunTurns--
-      addLog(`${m.base.name} est étourdi — perd son tour.`, 'info')
+      addLog(mt('enemyStunnedSkip', { name: translateEnemyName(m.base.name) }), 'info')
       continue
     }
 
@@ -221,40 +225,40 @@ export function processMultiAction(
         if (weakest) {
           const heal = rng(15, 30)
           weakest.hp = Math.min(weakest.base.maxHp, weakest.hp + heal)
-          addLog(`${m.base.name} (Soutien) soigne ${weakest.base.name} de ${heal} PV.`, 'info')
+          addLog(mt('supportHeal', { name: translateEnemyName(m.base.name), target: translateEnemyName(weakest.base.name), amount: heal }), 'info')
         }
         dmg = rng(Math.floor(m.base.damageMin / 3), Math.max(1, Math.floor(m.base.damageMax / 3)))
         break
       }
       case 'tank':
         dmg = Math.floor(rng(m.base.damageMin, m.base.damageMax) * 1.2)
-        if (roll(20)) { newMcs.momentum = 0; addLog(`${m.base.name} (Tank) déstabilise — momentum reset !`, 'warning') }
+        if (roll(20)) { newMcs.momentum = 0; addLog(mt('tankDestabilize', { name: translateEnemyName(m.base.name) }), 'warning') }
         break
       case 'ranged':
         dmg = rng(m.base.damageMin, m.base.damageMax)
-        if (roll(15)) { dmg = Math.floor(dmg * 1.5); addLog(`${m.base.name} vise parfaitement !`, 'warning') }
+        if (roll(15)) { dmg = Math.floor(dmg * 1.5); addLog(mt('rangedPerfectAim', { name: translateEnemyName(m.base.name) }), 'warning') }
         break
       default:
         dmg = rng(m.base.damageMin, m.base.damageMax)
-        if (roll(10)) { dmg = Math.floor(dmg * 1.8); addLog(`CRITIQUE ennemi !`, 'crit') }
+        if (roll(10)) { dmg = Math.floor(dmg * 1.8); addLog(mt('enemyCrit'), 'crit') }
     }
 
     // Armure joueur
     if (gs.equippedArmor && dmg > 0) {
       const red = Math.floor(dmg * gs.equippedArmor.defense / 100)
       dmg -= red
-      if (red > 0) addLog(`Armure absorbe ${red} dégâts.`, 'info')
+      if (red > 0) addLog(mt('armorAbsorb', { amount: red }), 'info')
 
       if (gs.equippedArmor.effect === 'thorns' && dmg > 0) {
         const thorns = Math.floor(dmg * gs.equippedArmor.effectValue / 100)
         m.hp = Math.max(0, m.hp - thorns)
-        if (m.hp <= 0) { m.defeated = true; addLog(`${m.base.name} se blesse sur tes épines !`, 'victory') }
+        if (m.hp <= 0) { m.defeated = true; addLog(mt('thornsDefeated', { name: translateEnemyName(m.base.name) }), 'victory') }
       }
     }
 
     if (dmg > 0) {
       playerHp = Math.max(0, playerHp - dmg)
-      addLog(`${m.base.name} attaque — ${dmg} dégâts. PV : ${playerHp}/${gs.playerMaxHp}`, 'enemy')
+      addLog(mt('enemyAttack', { name: translateEnemyName(m.base.name), dmg, hp: playerHp, max: gs.playerMaxHp }), 'enemy')
     }
   }
 
@@ -265,7 +269,7 @@ export function processMultiAction(
   stamina = Math.min(gs.maxStamina, stamina + 15)
 
   if (playerHp <= 0) {
-    addLog('Trop nombreux. Tu tombes.', 'enemy')
+    addLog(mt('overwhelmed'), 'enemy')
     const dominant = stillAlive.sort((a, b) => b.base.killChance - a.base.killChance)[0]
     const r = Math.random() * 100
     let outcome: CombatOutcome = 'stunned'
@@ -278,21 +282,23 @@ export function processMultiAction(
 }
 
 function resolveMultiVictory(gs: GameState, squad: SquadMember[]) {
-  const loot = squad.reduce((sum, m) => sum + rng(m.base.lootMin, m.base.lootMax), 0)
+  let loot = squad.reduce((sum, m) => sum + rng(m.base.lootMin, m.base.lootMax), 0)
   const extra: Partial<GameState> = { combatsWon: (gs.combatsWon ?? 0) + 1 }
   if (Math.random() < 0.25) {
     const w = rollWeaponForTier(Math.min(3, Math.floor(Math.random() * 3) + 1))
     extra.weapons = [...gs.weapons, w]
   } else if (Math.random() < 0.15) {
     const a = rollArmorForTier(Math.min(3, Math.floor(Math.random() * 3) + 1))
-    extra.armors = [...gs.armors, a]
+    const armorPatch = grantArmor(gs, a)
+    if (armorPatch.armors) extra.armors = armorPatch.armors
+    else loot += a.sellValue
   }
   return { loot, extra }
 }
 
 // Préparer des groupes d'ennemis typiques
 export function buildSquad(danger: number, day: number): Enemy[] {
-  const pool = danger >= 3 ? TIER_HIGH : danger >= 2 ? TIER_MID : TIER_LOW
+  const pool = danger >= 3 ? getTierHigh() : danger >= 2 ? getTierMid() : getTierLow()
   const size = danger >= 2 ? rng(2, 4) : rng(2, 3)
   const squad: Enemy[] = []
   for (let i = 0; i < size; i++) {

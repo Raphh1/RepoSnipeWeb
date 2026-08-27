@@ -1,6 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
+import { translateWeaponName } from '../../engine/goodsI18n'
+import { translateEnemyName } from '../../engine/goodsI18n'
 
 export function CombatOutcomeScreen() {
+  const { t } = useTranslation('combatOutcomeScreen')
   const gs   = useGameStore(s => s.gs!)
   const goTo = useGameStore(s => s.goTo)
   const patch = useGameStore(s => s.patch)
@@ -20,35 +24,35 @@ export function CombatOutcomeScreen() {
 
           <div className="px-box" style={{ borderColor: 'var(--red)', textAlign: 'center', padding: '24px' }}>
             <div style={{ fontSize: '20px', color: 'var(--red)', letterSpacing: '4px', marginBottom: '16px' }}>
-              ASSOMMÉ
+              {t('stunned.title')}
             </div>
             <div className="t-xs t-dim" style={{ lineHeight: '2.2', marginBottom: '16px' }}>
               {enemy
-                ? `${enemy.name} t'a mis hors combat.`
-                : "Tu t'effondres."}
+                ? t('stunned.byEnemy', { name: translateEnemyName(enemy.name) })
+                : t('stunned.genericFall')}
               <br />
-              Quand tu reprends conscience, le couloir est vide.
+              {t('stunned.wakeUp')}
               <br />
-              Tes poches aussi.
+              {t('stunned.pocketsEmpty')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               {creditsLost > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="t-xs t-dim">Crédits volés</span>
+                  <span className="t-xs t-dim">{t('stunned.creditsStolen')}</span>
                   <span className="t-xs t-red">−{creditsLost.toLocaleString()} cr</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">PV restants</span>
+                <span className="t-xs t-dim">{t('stunned.hpRemaining')}</span>
                 <span className="t-xs t-red">{gs.playerHp}/{gs.playerMaxHp}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Crédits restants</span>
+                <span className="t-xs t-dim">{t('stunned.creditsRemaining')}</span>
                 <span className="t-xs t-gold">{gs.credits.toLocaleString()} cr</span>
               </div>
             </div>
             <div className="t-xs t-dim" style={{ fontStyle: 'italic', marginBottom: '20px' }}>
-              Tu te relèves. Lentement. Le vide t'a épargné — cette fois.
+              {t('stunned.flavor')}
             </div>
           </div>
 
@@ -60,7 +64,7 @@ export function CombatOutcomeScreen() {
             patch({ pendingCombatOutcome: null, pendingMessage: null })
             goTo(gs.isImprisoned ? 'prison' : 'station-hub')
           }}>
-            {gs.isImprisoned ? 'Retour en cellule →' : 'Se relever et continuer →'}
+            {gs.isImprisoned ? t('stunned.backToCell') : t('stunned.riseAndContinue')}
           </button>
         </div>
       </div>
@@ -81,46 +85,46 @@ export function CombatOutcomeScreen() {
 
           <div className="px-box" style={{ borderColor: 'var(--orange)', textAlign: 'center', padding: '24px' }}>
             <div style={{ fontSize: '20px', color: 'var(--orange)', letterSpacing: '4px', marginBottom: '16px' }}>
-              CAPTURÉ
+              {t('captured.title')}
             </div>
             <div className="t-xs t-dim" style={{ lineHeight: '2.2', marginBottom: '16px' }}>
-              {enemy ? `${enemy.name} ne te laisse pas le choix.` : "Ils ne te laissent pas le choix."}
+              {enemy ? t('captured.byEnemy', { name: translateEnemyName(enemy.name) }) : t('captured.genericNoChoice')}
               <br />
-              Menottes. Sol froid. Fouille complète.
+              {t('captured.cuffs')}
               <br />
-              Tout ce qu'ils trouvent leur appartient maintenant.
+              {t('captured.theirsNow')}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               {(captureInfo.creditsFine ?? 0) > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="t-xs t-dim">Crédits saisis (25%)</span>
+                  <span className="t-xs t-dim">{t('captured.creditsSeized')}</span>
                   <span className="t-xs t-red">−{(captureInfo.creditsFine ?? 0).toLocaleString()} cr</span>
                 </div>
               )}
               {(captureInfo.cargoLost ?? 0) > 0 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="t-xs t-dim">Cargaison confisquée</span>
-                  <span className="t-xs t-red">{captureInfo.cargoLost} type{(captureInfo.cargoLost ?? 0) > 1 ? 's' : ''} de cargo</span>
+                  <span className="t-xs t-dim">{t('captured.cargoConfiscated')}</span>
+                  <span className="t-xs t-red">{t('captured.cargoType', { count: captureInfo.cargoLost, plural: (captureInfo.cargoLost ?? 0) > 1 ? 's' : '' })}</span>
                 </div>
               )}
               {captureInfo.weaponName && (
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span className="t-xs t-dim">Arme saisie</span>
-                  <span className="t-xs t-orange">{captureInfo.weaponName}</span>
+                  <span className="t-xs t-dim">{t('captured.weaponSeized')}</span>
+                  <span className="t-xs t-orange">{translateWeaponName(captureInfo.weaponName)}</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Peine initiale</span>
-                <span className="t-xs t-orange">3 jours</span>
+                <span className="t-xs t-dim">{t('captured.initialSentence')}</span>
+                <span className="t-xs t-orange">{t('captured.threeDays')}</span>
               </div>
             </div>
 
             <div className="t-xs t-dim" style={{ fontStyle: 'italic', marginBottom: '8px' }}>
-              Tu peux purger ta peine, payer la caution, soudoyer un garde, ou tenter une évasion.
+              {t('captured.options')}
             </div>
             <div className="t-xs t-red" style={{ fontStyle: 'italic', marginBottom: '20px' }}>
-              Purger sa peine a un coût. La liberté aussi.
+              {t('captured.costWarning')}
             </div>
           </div>
 
@@ -132,7 +136,7 @@ export function CombatOutcomeScreen() {
             patch({ pendingCombatOutcome: null, pendingMessage: null })
             goTo('prison')
           }}>
-            Vers la cellule →
+            {t('captured.toCell')}
           </button>
         </div>
       </div>
@@ -150,27 +154,27 @@ export function CombatOutcomeScreen() {
 
           <div className="px-box" style={{ borderColor: 'var(--cyan)', textAlign: 'center', padding: '24px' }}>
             <div style={{ fontSize: '20px', color: 'var(--cyan)', letterSpacing: '4px', marginBottom: '16px' }}>
-              FUITE
+              {t('fled.title')}
             </div>
             <div className="t-xs t-dim" style={{ lineHeight: '2.2', marginBottom: '16px' }}>
-              Tu cours. Tu ne te retournes pas.
+              {t('fled.running')}
               <br />
-              {enemy ? `${enemy.name} crie derrière toi. Tu n'entends plus rien.` : "L'adrénaline fait le reste."}
+              {enemy ? t('fled.byEnemy', { name: translateEnemyName(enemy.name) }) : t('fled.genericAdrenaline')}
               <br />
-              Ton vaisseau démarre avant que les portes soient fermées.
+              {t('fled.shipStarts')}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Carburant</span>
-                <span className="t-xs t-cyan">{gs.fuel} restant</span>
+                <span className="t-xs t-dim">{t('fled.fuel')}</span>
+                <span className="t-xs t-cyan">{t('fled.fuelRemaining', { value: gs.fuel })}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span className="t-xs t-dim">Fuites au compteur</span>
+                <span className="t-xs t-dim">{t('fled.fleeCount')}</span>
                 <span className="t-xs t-dim">{gs.combatsFled}</span>
               </div>
             </div>
             <div className="t-xs t-dim" style={{ fontStyle: 'italic', marginBottom: '20px' }}>
-              Survivre, c'est aussi une forme de victoire.
+              {t('fled.flavor')}
             </div>
           </div>
 
@@ -182,7 +186,7 @@ export function CombatOutcomeScreen() {
             patch({ pendingCombatOutcome: null })
             goTo(gs.isImprisoned ? 'prison' : 'station-hub')
           }}>
-            {gs.isImprisoned ? 'Retour en cellule →' : 'Continuer →'}
+            {gs.isImprisoned ? t('fled.backToCell') : t('fled.continue')}
           </button>
         </div>
       </div>
@@ -192,7 +196,7 @@ export function CombatOutcomeScreen() {
   // Fallback
   return (
     <div className="layout" style={{ justifyContent: 'center', minHeight: '100vh' }}>
-      <button className="px-btn" onClick={() => goTo('station-hub')}>← Retour</button>
+      <button className="px-btn" onClick={() => goTo('station-hub')}>{t('back')}</button>
     </div>
   )
 }

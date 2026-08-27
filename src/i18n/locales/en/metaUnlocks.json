@@ -1,0 +1,21 @@
+{
+  "nanites": { "name": "Repair Nanites", "description": "Dormant nanobots in your body. +10 max HP each run." },
+  "armorBoost": { "name": "Makeshift Armor", "description": "A layer of ceramic plates welded under the skin. −10% damage taken in combat." },
+  "staminaBoost": { "name": "Second Wind", "description": "Accelerated cardio training between runs. +1 max stamina each run." },
+  "sharpBlade": { "name": "Honed Blade", "description": "You now know how to properly sharpen your weapons. +2 minimum damage with all weapons." },
+  "reflexes": { "name": "Enhanced Reflexes", "description": "Neural implant for reaction speed. +8% critical hit chance." },
+  "starterWeapon": { "name": "Starting Arsenal", "description": "A contact slips you a Tier 2 weapon at the start of the run. No questions asked." },
+  "startingFunds": { "name": "Working Capital", "description": "An old forgotten bank account. +300 credits at the start of each run." },
+  "merchantContacts": { "name": "Merchant Contacts", "description": "Your network of dealers gives you a break. −8% on all market purchases." },
+  "starterCargo": { "name": "Prepped Cargo", "description": "Someone loads your hold before departure. Start with 2 random goods." },
+  "spareTank": { "name": "Spare Tank", "description": "A jerrycan welded under the hull. +2 fuel at the start of each run." },
+  "engineTuning": { "name": "Optimized Engine", "description": "Illegal modifications to the propulsion engine. +2 max fuel capacity." },
+  "travelScanner": { "name": "Warning Scanner", "description": "Detects travel events before they hit. You see risks in advance." },
+  "reputation": { "name": "Established Reputation", "description": "Your legend precedes your ship. +20 starting reputation." },
+  "nexusFragment": { "name": "Fractal Memory", "description": "A Nexus fragment follows you between runs. Start with one fragment already collected." },
+  "medkit": { "name": "Care Inheritance", "description": "A family medical kit always ready in your cargo hold. +2 starting medicine." },
+  "lastStand": { "name": "Last Breath", "description": "Once per run, a blow that should kill you leaves you at 1 HP. You live to regret it." },
+  "coupDeGrace": { "name": "Cold Execution", "description": "When an enemy is below 25% HP, your hits deal +40% damage. The kill is efficient." },
+  "factionTies": { "name": "Old Ties", "description": "Contacts from before keep you in mind. +30 reputation with your starting faction." },
+  "scoutTraining": { "name": "Scout Training", "description": "You arrive in each run with a zone already mapped. Start at depth 2." }
+}

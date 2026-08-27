@@ -1,0 +1,213 @@
+{
+  "tutorial": {
+    "title": "First run: {{item}}",
+    "description": "Old Doss, a weathered mechanic hanging around {{station}}, stops you. \"First time in the sector, huh? Listen: my contact on {{target}} is dying without their {{item}}. Hit the market here, buy a crate, take your ship to {{target}} and hand it over in person. He'll pay well — and he's got an old datapad for you. Trust me, what's on it is worth more than the credits.\""
+  },
+  "titles": {
+    "delivery": "Delivery: {{item}}",
+    "kill": "Contract: {{boss}}",
+    "revenge": "Settling scores — {{target}}",
+    "escort": "Escort to {{target}}",
+    "sabotage": "Sabotage — {{target}}",
+    "heist": "Acquisition: {{item}}",
+    "extraction": "Extraction from {{target}}",
+    "bounty": "Bounty — {{boss}}",
+    "patrol": "Patrol: {{target}}"
+  },
+  "craftedDeliveryDesc": "{{giver}} needs {{item}} — a part you can't buy anywhere. It has to be crafted at the Workshop before it can be delivered to {{target}}.",
+  "bossFallbackKill": "the boss of {{target}}",
+  "bossFallbackBounty": "a warlord on {{target}}",
+  "descs": {
+    "delivery": [
+      "{{giver}} needs {{item}} to reach {{target}} by tomorrow. No detours, no questions.",
+      "Sealed package containing {{item}}. Destination: {{target}}. {{giver}} insists on discretion.",
+      "{{item}} to be delivered to {{target}}. Looks legal on the surface. What's inside is another story.",
+      "Urgent delivery. {{giver}} has a contact on {{target}} waiting for {{item}}. Payment on arrival.",
+      "{{giver}} left {{item}} behind on {{target}} during their last visit. You're handling it."
+    ],
+    "kill": [
+      "{{boss}} on {{target}}. {{giver}} pays well — and doesn't ask for clean proof.",
+      "{{giver}} has a problem with {{boss}}. The solution is expensive. Not solving it costs more.",
+      "{{boss}} on {{target}}. Discreet elimination. The client prefers not to be named.",
+      "Unofficial bounty on {{boss}}. {{giver}} has their reasons. You need credits. Simple transaction.",
+      "{{boss}} has made life impossible for too many people on {{target}}. Someone decided it had to stop."
+    ],
+    "revenge": [
+      "People from {{target}} ruined {{giver}}. Go there and win a fight. Make them understand.",
+      "{{giver}} has an old debt to settle with {{target}}. They can't go themselves. You can.",
+      "An affront went unpunished. A show of force on {{target}} will restore the balance.",
+      "{{giver}}'s reputation is on the line. Someone needs to go show who's in charge on {{target}}.",
+      "{{giver}} lost something important because of the people on {{target}}. It won't go unanswered."
+    ],
+    "escort": [
+      "{{giver}} needs you to escort someone to {{target}}. The person is cooperative. Space, less so.",
+      "VIP transport. Destination {{target}}. The passenger boards now. No detours.",
+      "A delicate passenger to bring to {{target}}. {{giver}} insists: no questions about who it is.",
+      "{{giver}} has someone who absolutely must arrive alive at {{target}}. You make sure it happens.",
+      "Secure extraction to {{target}}. The passenger has enemies. Some might be on the way."
+    ],
+    "sabotage": [
+      "{{giver}} wants to destabilize {{target}}. A won fight there sends the right message. No need for more.",
+      "Pressure operation on {{target}}. Neutralize an opponent on site. The station will remember the rest.",
+      "{{giver}} wants {{target}} to know they're not untouchable. Expected result: one enemy defeated on site.",
+      "Indirect sabotage. Winning a fight on {{target}} will be enough to disrupt their operations for a few days."
+    ],
+    "heist": [
+      "{{item}} is on {{target}}. {{giver}} needs it. How you get it isn't their problem.",
+      "Retrieve {{item}} on {{target}}. Buy it, steal it, trade for it — doesn't matter. What counts is the result.",
+      "{{giver}} wants {{item}} specifically from {{target}}. The cost will be reimbursed. Plus a bonus.",
+      "{{item}} on {{target}}. Figure out how to get your hands on it there. Return with the goods, direct payment."
+    ],
+    "extraction": [
+      "{{item}} left on {{target}} in a hurry. {{giver}} pays you to retrieve it and bring it back.",
+      "Extraction of {{item}} from {{target}}. Bring it back intact. Someone else needed to leave fast.",
+      "{{giver}} has equipment stranded on {{target}}. Retrieve {{item}} and bring it back here. Payment on delivery.",
+      "{{item}} on {{target}} belongs to someone other than whoever's holding it. Go get it."
+    ],
+    "bounty": [
+      "Bounty on {{boss}} on {{target}}. {{giver}} will verify through their own sources. Dead or incapacitated.",
+      "{{boss}} has influential enemies. One of them is paying for a definitive resolution on {{target}}.",
+      "Hunting contract. Target: {{boss}}. Location: {{target}}. No deadline. No mercy. Payment on results.",
+      "{{giver}} has been tracking {{boss}} for a long time. They can't finish it themselves. You can. {{target}}."
+    ],
+    "patrol": [
+      "{{giver}} wants {{target}} to stay under control. Three active passes — explore, show your face, discourage trouble. Payment once secured.",
+      "Unstable zone on {{target}}. Needs a physical presence: move around, check access points, hang around hotspots. Three actions on site.",
+      "{{giver}} has assets on {{target}} that need to stay intact. Secure the zone over three passes — no report, just presence.",
+      "Keeping order on {{target}}. No paperwork, no forms — just show up wherever it's rough, three times. Usually enough."
+    ]
+  },
+  "chain": {
+    "titlePrefix": "[FOLLOW-UP] {{title}}",
+    "delivery": "Direct follow-up to the contract with {{giver}}. 'There's more to haul than expected — same route, same rate, more cargo.' Reliable.",
+    "escort": "{{giver}} has a second delicate passenger to escort. 'Same discretion as last time. You know how it works.' Higher pay.",
+    "extraction": "{{giver}} left something else out there. 'I knew I'd need you a second time. It's ready.' Bonus on top of the last job.",
+    "patrol": "Still an unstable zone according to {{giver}}. 'Go back there — the situation's shifted. Three passes, like before.' Increased reward.",
+    "kill": "The target had associates. {{giver}} tracked them down. 'The job was only half done. Want to finish what we started?' High bounty.",
+    "revenge": "{{giver}} identified others responsible. 'There's more left. Same station, same method. Want the sequel?' Harder. Pays more.",
+    "bounty": "Cascading contract. The previous target had a backer. {{giver}} traced it. 'The real head is out there.' Higher bounty.",
+    "sabotage": "{{giver}} wants to push further. 'What we did shook things up. Now's the time to drive it home.' Same target, different mission.",
+    "heist": "{{giver}} spotted something else on site. 'Going there, you saw what I hadn't. There's more to take there.' Additional acquisition."
+  },
+  "faction": {
+    "titles": {
+      "kill": "[FACTION] Eliminate {{boss}}",
+      "sabotage": "[FACTION] Operation on {{target}}",
+      "delivery": "[FACTION] Delivery: {{item}} to {{target}}",
+      "heist": "[FACTION] Acquisition: {{item}} from {{target}}",
+      "escort": "[FACTION] Escort to {{target}}"
+    },
+    "descs": {
+      "kill": "Official mission. {{boss}} on {{target}} is a direct threat. The elimination must take place on site — win a fight against the boss there to complete it.",
+      "sabotage": "Go to {{target}} and win a fight there. It sends the message — the enemy needs to understand your territories have limits.",
+      "delivery": "The Emporium needs {{item}} to reach {{target}}. Take the goods and deliver them in person — payment on arrival plus faction bonus.",
+      "heist": "The Emporium wants {{item}} from {{target}}. Go, get it however you see fit, come back with it — guaranteed payment plus faction bonus.",
+      "escort": "A Cult emissary needs to reach {{target}}. Board the passenger and escort them to the destination."
+    }
+  },
+  "npcQuest": {
+    "titleTemplate": "{{npcName}} — {{type}}",
+    "descs": {
+      "delivery": "{{npcName}} {{flavor}}. Carry {{item}} to {{target}}. Payment on arrival.",
+      "revenge": "{{npcName}} {{flavor}}. People on {{target}} did something they shouldn't have. Go make them understand.",
+      "kill": "{{npcName}} {{flavor}}. Neutralize a target on {{target}}. No questions about the methods.",
+      "patrol": "{{npcName}} {{flavor}}. Pass through {{target}} and make sure everything's in order. Report back.",
+      "escort": "{{npcName}} {{flavor}}. Take a passenger to {{target}}. Safety guaranteed, payment on arrival.",
+      "sabotage": "{{npcName}} {{flavor}}. Operation on {{target}} — win a fight there. The message will land.",
+      "extraction": "{{npcName}} {{flavor}}. {{item}} is stranded on {{target}}. Go retrieve it and bring it back.",
+      "heist": "{{npcName}} {{flavor}}. Acquire {{item}} on {{target}}. The method is up to you.",
+      "bounty": "{{npcName}} {{flavor}}. Bounty on a target on {{target}}. Dead or incapacitated — doesn't matter."
+    },
+    "itemFallbackPackage": "a package",
+    "itemFallbackThing": "Something",
+    "itemFallbackObject": "a specific object",
+    "flavors": {
+      "Ferrailleur": "has parts to pick up or deliver",
+      "Marchande": "has a trade route to cover",
+      "Vétéran": "has scores to settle",
+      "Hackeuse": "needs access to systems",
+      "Dealer": "has delicate deliveries",
+      "Lieutenant": "has a mission for the Black Hawks",
+      "Survivante": "needs to know what's happening elsewhere",
+      "Courtier": "has business to circulate",
+      "Organisateur": "has interests to keep an eye on",
+      "Commandante": "has a target to neutralize",
+      "Chercheuse": "is looking for artifacts",
+      "Pilote retraité": "knows routes nobody else knows",
+      "Forgeron": "needs materials to forge",
+      "Fermier": "has a delivery to make",
+      "Recruteur": "recruits for the Black Hawks",
+      "Officière": "has an unresolved case",
+      "Gardien": "handles things that belong to no one",
+      "Conseiller": "needs information on important targets"
+    }
+  },
+  "gossip": {
+    "La Carcasse": [
+      "A stash of credits from the old regime is supposedly hidden somewhere in the north holds.",
+      "A Black Hawk ship was prowling around the station last night. No one knows why.",
+      "Fuel prices are climbing again. Someone's controlling the supply — and it's not us.",
+      "A mechanic disappeared yesterday. He was working on something he shouldn't have touched.",
+      "There's talk of a new trade route bypassing Port Meridian. The merchants are on edge."
+    ],
+    "Arc Ouest Apocalypse": [
+      "Alanossa is looking for someone for a job. No details. Extreme pay.",
+      "Three ships didn't come back last week. Alanossa's territory.",
+      "Word is Alanossa has a bounty on someone new. Maybe you.",
+      "The Black Hawks are recruiting. Vague criteria. Surviving the interview isn't guaranteed.",
+      "A defector from the Emporium took refuge here. He has information. And enemies."
+    ],
+    "Port Méridien": [
+      "Prices are going up next week. Reliable source. Buy now.",
+      "A mysterious delivery arrived last night with no recipient. It's still waiting.",
+      "Security's been tightened. Someone important is expected — or someone dangerous.",
+      "A pilot proposed a direct route to the deep zones. No one took him up on it.",
+      "The Emporium is opening an office here. Independent traders are getting nervous."
+    ],
+    "Les Bas-Fonds de Vega": [
+      "Boro received a sealed package yesterday. He hasn't slept since.",
+      "A faction is looking for a discreet transporter. Very discreet. Untraceable cash payment.",
+      "Customs has been bribed. For how long, no one knows.",
+      "Someone's selling stolen military plans. The seller changes address every hour.",
+      "A bounty hunter arrived this morning. Looking for someone. Maybe you."
+    ],
+    "Fort Kharos": [
+      "The army is preparing an operation in the deep zones. Recruitment underway.",
+      "An officer disappeared with his unit's equipment. Internal investigation.",
+      "Experimental munitions were tested last week. Results classified.",
+      "A military convoy was attacked on the route to La Carcasse. No survivors.",
+      "The Guardians are looking for an informant in their ranks. The mood is tense."
+    ],
+    "La Citadelle Écarlate": [
+      "Myrra summoned all her lieutenants this morning. Closed-door meeting.",
+      "An Emporium delegation arrived yesterday. No one knows what they discussed.",
+      "An underground tournament is being held in the lower levels. Entry stake: 500cr.",
+      "The Guardians lost a forward post in the ruins. They haven't reported on casualties.",
+      "Someone graffitied 'THE VOID IS COMING' in seven different corridors. The mood is strange."
+    ],
+    "Le Purgatoire": [
+      "Neva says she saw something in the level 7 corridors. She refuses to elaborate.",
+      "A former prisoner came back. Looking for something he left here.",
+      "The Cult of the Void holds meetings in the sub-levels. Participants unknown.",
+      "An old gambling debt resurfaces. It'll end in blood, as usual.",
+      "An abandoned extraction shaft has been reopened. No one knows by whom or why."
+    ],
+    "Nexus Aldara": [
+      "Lira cracked a system that wasn't supposed to be crackable. She's been unreachable since.",
+      "A military AI prototype was stolen. The army is searching — quietly.",
+      "Anomalies in the local network for three days. Origin unidentified.",
+      "An engineer is offering to sell plans for a banned propulsion system. Plenty of buyers.",
+      "A research team never returned from their last expedition. Their equipment did."
+    ],
+    "default": [
+      "Trade routes are changing. Some turn dangerous overnight.",
+      "A faction war is brewing somewhere in the sector. It's going to spill over.",
+      "There's talk of a forgotten treasure in a zone no one visits anymore. For good reason.",
+      "The black market is active. Someone's selling something that shouldn't exist.",
+      "A pilot vanished on last week's route. His ship was found empty.",
+      "Fuel prices are fluctuating strangely. Someone's manipulating the markets.",
+      "There's a rumor about a Nexus fragment hidden in an abandoned station.",
+      "Survivors of a battle describe an unknown weapon. No one quite believes them."
+    ]
+  }
+}

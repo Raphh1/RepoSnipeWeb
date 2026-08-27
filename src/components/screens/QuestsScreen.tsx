@@ -1,30 +1,22 @@
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useGameStore } from '../../store/gameStore'
-import { NAMED_NPCS } from '../../engine/npcTracker'
+import { getNamedNpcs } from '../../engine/npcTracker'
 import { getStationsSellingItem, getStation } from '../../data/stations'
 import { BOSS_TRIGGER_TYPES, CRAFTED_DELIVERY_ITEMS } from '../../engine/quests'
+import { getRecipeForItem } from '../../data/recipes'
 import type { MajorQuestCondition, QuestType, GameState } from '../../types'
+import { translateGood, translateEnemyName } from '../../engine/goodsI18n'
 
-function stageDestination(cond: MajorQuestCondition): string | null {
+function stageDestination(cond: MajorQuestCondition, t: TFunction): string | null {
   switch (cond.type) {
     case 'visitStation': return cond.station
     case 'winCombatAt':  return cond.station
-    case 'meetNpc':      return NAMED_NPCS.find(n => n.name === cond.npcName)?.station ?? null
-    case 'hasFaction':   return `Rejoindre faction : ${cond.faction}`
-    case 'bossKill':     return `Vaincre ${cond.bossName}`
+    case 'meetNpc':      return getNamedNpcs().find(n => n.name === cond.npcName)?.station ?? null
+    case 'hasFaction':   return t('joinFaction', { faction: cond.faction })
+    case 'bossKill':     return t('defeatBoss', { boss: translateEnemyName(cond.bossName) })
     default:             return null
   }
-}
-
-const TYPE_LABEL: Record<string, string> = {
-  delivery:   'LIVRAISON',
-  kill:       'CONTRAT',
-  revenge:    'VENGEANCE',
-  escort:     'ESCORTE',
-  sabotage:   'SABOTAGE',
-  heist:      'BRAQUAGE',
-  extraction: 'EXTRACTION',
-  bounty:     'PRIME',
-  patrol:     'PATROUILLE',
 }
 
 const TYPE_CLASS: Record<string, string> = {
@@ -39,19 +31,7 @@ const TYPE_CLASS: Record<string, string> = {
   patrol:     'tag--dim',
 }
 
-const TYPE_COMPLETE_HINT: Record<string, string> = {
-  delivery:   'Arriver à destination avec l\'item en cargo',
-  kill:       'Vaincre le chef de la station cible (voir le guide ci-dessous)',
-  revenge:    'Vaincre le chef de la station cible (voir le guide ci-dessous)',
-  escort:     'Arriver à destination avec le passager',
-  sabotage:   'Vaincre le chef de la station cible (voir le guide ci-dessous)',
-  heist:      'Arriver à destination avec l\'item acquis sur place',
-  extraction: 'Ramener l\'item ici depuis la destination',
-  bounty:     'Vaincre le chef de la station cible (voir le guide ci-dessous)',
-  patrol:     'Arriver à destination',
-}
-
-function bossGuidance(q: { type: QuestType; targetStation: string }, gs: GameState, isAtTarget: boolean) {
+function bossGuidance(q: { type: QuestType; targetStation: string }, gs: GameState, isAtTarget: boolean, t: TFunction) {
   if (!BOSS_TRIGGER_TYPES.includes(q.type)) return null
   const station = getStation(q.targetStation)
   const tooSafe = station.danger < 2
@@ -59,7 +39,9 @@ function bossGuidance(q: { type: QuestType; targetStation: string }, gs: GameSta
   if (!isAtTarget) {
     return (
       <div className="t-xs" style={{ color: 'var(--cyan)', lineHeight: 1.8 }}>
-        ◆ Guide : une fois sur place, reste sur cette station et clique plusieurs fois sur <span className="t-bright">EXPLORER</span> (pas "Errer") sans voyager ailleurs. Le combat contre le chef se déclenche seul après un certain nombre d'explorations.
+        {t('guideNotAtTarget').split(t('explore')).map((part, i, arr) => (
+          <span key={i}>{part}{i < arr.length - 1 && <span className="t-bright">{t('explore')}</span>}</span>
+        ))}
       </div>
     )
   }
@@ -67,7 +49,7 @@ function bossGuidance(q: { type: QuestType; targetStation: string }, gs: GameSta
   if (tooSafe) {
     return (
       <div className="t-xs t-red" style={{ lineHeight: 1.8 }}>
-        ⚠ Cette station est trop calme (danger {station.danger}/3) — aucun combat de chef ne peut s'y déclencher. Cette quête est impossible à compléter ici ; abandonne-la ou laisse-la expirer.
+        {t('tooSafe', { danger: station.danger })}
       </div>
     )
   }
@@ -79,46 +61,51 @@ function bossGuidance(q: { type: QuestType; targetStation: string }, gs: GameSta
   return (
     <div className="t-xs" style={{ lineHeight: 1.8 }}>
       <div style={{ color: 'var(--cyan)' }}>
-        ◆ Guide : clique sur <span className="t-bright">EXPLORER</span> (pas "Errer") plusieurs fois d'affilée, sans voyager ailleurs — le chef finit par apparaître.
+        {t('guideAtTarget').split(t('explore')).map((part, i, arr) => (
+          <span key={i}>{part}{i < arr.length - 1 && <span className="t-bright">{t('explore')}</span>}</span>
+        ))}
       </div>
       <div style={{ color: depthReady ? 'var(--green)' : 'var(--orange)' }}>
-        Profondeur d'exploration : {depth}/7{depthReady ? ' ✓' : ' — continue d\'explorer'}
+        {t('depthProgress', { depth, status: depthReady ? t('depthReady') : t('depthNotReady') })}
       </div>
       <div style={{ color: fightsReady ? 'var(--green)' : 'var(--orange)' }}>
-        Combats déclenchés ici : {fights}/3{fightsReady ? ' ✓' : ' — il en faut plus'}
+        {t('fightsProgress', { fights, status: fightsReady ? t('fightsReady') : t('fightsNotReady') })}
       </div>
       {depthReady && fightsReady && (
-        <div className="t-green">Conditions réunies — chaque exploration a maintenant une chance de faire apparaître le chef.</div>
+        <div className="t-green">{t('conditionsMet')}</div>
       )}
     </div>
   )
 }
 
 export function QuestsScreen() {
+  const { t } = useTranslation('questsScreen')
+  const TYPE_LABEL = t('typeLabels', { returnObjects: true }) as unknown as Record<string, string>
+  const TYPE_COMPLETE_HINT = t('completeHint', { returnObjects: true }) as unknown as Record<string, string>
   const gs   = useGameStore(s => s.gs!)
   const goTo = useGameStore(s => s.goTo)
 
   return (
     <div className="layout">
       <div className="row" style={{ alignItems: 'center', gap: '16px' }}>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
-        <div className="t-sm t-bright">QUÊTES ACTIVES ({gs.activeQuests.length}/5)</div>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{t('back')}</button>
+        <div className="t-sm t-bright">{t('activeQuests', { count: gs.activeQuests.length })}</div>
         {gs.majorQuests.filter(q => !q.completed && !q.failed).length > 0 && (
-          <div className="tag tag--purple t-xs">{gs.majorQuests.filter(q => !q.completed && !q.failed).length} mission{gs.majorQuests.filter(q => !q.completed && !q.failed).length > 1 ? 's' : ''} majeure{gs.majorQuests.filter(q => !q.completed && !q.failed).length > 1 ? 's' : ''}</div>
+          <div className="tag tag--purple t-xs">{t('majorMissionsTag', { count: gs.majorQuests.filter(q => !q.completed && !q.failed).length, plural: gs.majorQuests.filter(q => !q.completed && !q.failed).length > 1 ? 's' : '' })}</div>
         )}
-        <div className="t-xs t-dim">{gs.completedQuestIds.length} complétées</div>
+        <div className="t-xs t-dim">{t('completedCount', { count: gs.completedQuestIds.length })}</div>
       </div>
 
       {gs.activeQuests.length === 0 && (
         <div className="px-box t-dim t-xs">
-          Aucune quête active. Cherche du travail dans la station.
+          {t('noActiveQuest')}
         </div>
       )}
 
       {/* ── QUÊTES MAJEURES ─────────────────────────────────────── */}
       {gs.majorQuests.length > 0 && (
         <div className="col gap4">
-          <div className="t-xs t-dim" style={{ letterSpacing: '0.1em' }}>◆◆ MISSIONS MAJEURES ({gs.majorQuests.filter(q => !q.completed && !q.failed).length} actives)</div>
+          <div className="t-xs t-dim" style={{ letterSpacing: '0.1em' }}>{t('majorMissionsHeader', { count: gs.majorQuests.filter(q => !q.completed && !q.failed).length })}</div>
           {gs.majorQuests.map(mq => {
             const stage = mq.stages[mq.currentStage]
             const pct = Math.round((mq.currentStage / mq.stages.length) * 100)
@@ -132,7 +119,7 @@ export function QuestsScreen() {
                     {mq.completed ? '★★ ' : mq.failed ? '✗ ' : '◆◆ '}{mq.title}
                   </div>
                   <div className="tag t-xs" style={{ borderColor: 'var(--purple)', color: 'var(--purple)' }}>
-                    {mq.completed ? 'ACCOMPLIE' : mq.failed ? 'ÉCHOUÉE' : `${mq.currentStage}/${mq.stages.length}`}
+                    {mq.completed ? t('accomplished') : mq.failed ? t('failed') : t('stageOf', { current: mq.currentStage, total: mq.stages.length })}
                   </div>
                 </div>
 
@@ -143,19 +130,19 @@ export function QuestsScreen() {
                 {!mq.completed && !mq.failed && stage && (
                   <>
                     <div className="t-xs t-bright mb4" style={{ borderLeft: '2px solid var(--purple)', paddingLeft: '8px' }}>
-                      Étape {mq.currentStage + 1} — {stage.title}
+                      {t('stageLabel', { num: mq.currentStage + 1, title: stage.title })}
                     </div>
                     <div className="t-xs mb4" style={{ lineHeight: '1.8' }}>{stage.description}</div>
                     <div className="t-xs t-cyan mb4">
                       ▶ {stage.objective}
                     </div>
                     {(() => {
-                      const dest = stageDestination(stage.condition)
+                      const dest = stageDestination(stage.condition, t)
                       if (!dest) return null
                       const isHere = gs.currentStation === dest
                       return (
                         <div className="t-xs mb8" style={{ color: isHere ? 'var(--green)' : 'var(--gold)', fontWeight: 'bold' }}>
-                          {isHere ? '★ TU ES SUR PLACE' : `→ Destination : ${dest}`}
+                          {isHere ? t('youAreHere') : t('destination', { station: dest })}
                         </div>
                       )
                     })()}
@@ -186,7 +173,7 @@ export function QuestsScreen() {
                 </div>
 
                 <div className="t-xs t-dim mt8">
-                  Donné par <span className="t-bright">{mq.giver}</span> à <span style={{ color: 'var(--cyan)' }}>{mq.giverStation}</span>
+                  {t('givenByPrefix')} <span className="t-bright">{mq.giver}</span> {t('givenByMiddle')} <span style={{ color: 'var(--cyan)' }}>{mq.giverStation}</span>
                 </div>
               </div>
             )
@@ -195,7 +182,7 @@ export function QuestsScreen() {
       )}
 
       {/* ── QUÊTES SIMPLES ──────────────────────────────────────── */}
-      {gs.activeQuests.length > 0 && <div className="t-xs t-dim" style={{ letterSpacing: '0.1em' }}>◆ CONTRATS ({gs.activeQuests.length}/5)</div>}
+      {gs.activeQuests.length > 0 && <div className="t-xs t-dim" style={{ letterSpacing: '0.1em' }}>{t('contracts', { count: gs.activeQuests.length })}</div>}
       <div className="col gap4">
         {gs.activeQuests.map(q => {
           const isAtTarget = gs.currentStation === q.targetStation
@@ -206,11 +193,11 @@ export function QuestsScreen() {
           let statusColor = 'var(--text-dim)'
           let statusText  = `→ ${q.targetStation}`
           if (q.type === 'extraction') {
-            if (!isAtTarget && !hasItem) statusText = `→ Aller chercher à ${q.targetStation}`
-            else if (hasItem && !isAtGiver) statusText = `→ Ramener à ${q.giverStation}`
-            else if (hasItem && isAtGiver) { statusText = 'PRÊTE À COMPLÉTER ici'; statusColor = 'var(--green)' }
+            if (!hasItem) statusText = t('toAcquire', { item: q.targetItem ? translateGood(q.targetItem) : q.targetItem })
+            else if (hasItem && !isAtGiver) statusText = t('bringBackTo', { station: q.giverStation })
+            else if (hasItem && isAtGiver) { statusText = t('readyHere'); statusColor = 'var(--green)' }
           } else if (isAtTarget) {
-            statusText = 'À COMPLÉTER — tu es sur place'
+            statusText = t('completeHere')
             statusColor = 'var(--gold)'
           }
 
@@ -225,35 +212,46 @@ export function QuestsScreen() {
 
               <div className="t-xs t-dim" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div>
-                  Donné par <span className="t-bright">{q.giver}</span> à <span className="t-cyan">{q.giverStation}</span>
+                  {t('givenByPrefix')} <span className="t-bright">{q.giver}</span> {t('givenByMiddle')} <span className="t-cyan">{q.giverStation}</span>
                 </div>
                 <div style={{ color: statusColor }}>{statusText}</div>
                 <div className="t-dim" style={{ fontStyle: 'italic', fontSize: '7px' }}>
                   {TYPE_COMPLETE_HINT[q.type]}
                 </div>
-                {bossGuidance(q, gs, isAtTarget)}
+                {bossGuidance(q, gs, isAtTarget, t)}
                 {q.targetItem && q.type !== 'extraction' && (() => {
                   const sellers = !hasItem && q.type !== 'escort' ? getStationsSellingItem(q.targetItem!) : []
                   return (
                     <div>
-                      Item requis : <span className="t-orange">{q.targetItem}</span>
+                      {t('requiredItem')} <span className="t-orange">{q.targetItem ? translateGood(q.targetItem) : q.targetItem}</span>
                       {' '}
                       {hasItem
-                        ? <span className="t-green">(en cargo)</span>
+                        ? <span className="t-green">{t('inCargo')}</span>
                         : q.type === 'escort'
-                          ? hasPassenger ? <span className="t-green">(passager à bord)</span> : <span className="t-red">(passager non embarqué)</span>
-                          : <span className="t-red">(à acquérir)</span>
+                          ? hasPassenger ? <span className="t-green">{t('passengerAboard')}</span> : <span className="t-red">{t('passengerNotAboard')}</span>
+                          : <span className="t-red">{t('toBeAcquired')}</span>
                       }
                       {sellers.length > 0 && (
                         <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
-                          ◆ Achetable à : {sellers.slice(0, 4).join(', ')}{sellers.length > 4 ? '…' : ''}
+                          {t('buyableAt', { list: sellers.slice(0, 4).join(', ') + (sellers.length > 4 ? '…' : '') })}
                         </div>
                       )}
-                      {!hasItem && sellers.length === 0 && CRAFTED_DELIVERY_ITEMS.includes(q.targetItem!) && (
-                        <div style={{ marginTop: '3px', color: 'var(--purple)', fontSize: '8px' }}>
-                          🔧 Introuvable en achat — doit être fabriqué à l'Atelier.
-                        </div>
-                      )}
+                      {!hasItem && sellers.length === 0 && CRAFTED_DELIVERY_ITEMS.includes(q.targetItem!) && (() => {
+                        const recipe = getRecipeForItem(q.targetItem!)
+                        return (
+                          <div style={{ marginTop: '3px', color: 'var(--purple)', fontSize: '8px' }}>
+                            {t('craftOnly')}
+                            {recipe && (
+                              <div style={{ marginTop: '2px' }}>
+                                {t('ingredients', { list: Object.entries(recipe.ingredients).map(([item, qty]) => {
+                                  const have = gs.cargo[item] ?? 0
+                                  return `${translateGood(item)} ${have}/${qty}`
+                                }).join(', ') })}
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
                     </div>
                   )
                 })()}
@@ -261,12 +259,12 @@ export function QuestsScreen() {
                   const sellers = !hasItem ? getStationsSellingItem(q.targetItem!) : []
                   return (
                     <div>
-                      À récupérer : <span className="t-orange">{q.targetItem}</span>
+                      {t('toRetrieve')} <span className="t-orange">{q.targetItem ? translateGood(q.targetItem) : q.targetItem}</span>
                       {' '}
-                      {hasItem ? <span className="t-green">(en cargo)</span> : <span className="t-dim">(pas encore récupéré)</span>}
+                      {hasItem ? <span className="t-green">{t('inCargo')}</span> : <span className="t-dim">{t('notRetrievedYet')}</span>}
                       {sellers.length > 0 && !hasItem && (
                         <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
-                          ◆ Achetable à : {sellers.slice(0, 4).join(', ')}{sellers.length > 4 ? '…' : ''}
+                          {t('buyableAt', { list: sellers.slice(0, 4).join(', ') + (sellers.length > 4 ? '…' : '') })}
                         </div>
                       )}
                     </div>
@@ -275,8 +273,8 @@ export function QuestsScreen() {
               </div>
 
               <div className="t-xs t-gold mt8">
-                Récompense : {q.creditReward.toLocaleString()} cr
-                {q.repReward > 0 ? ` · +${q.repReward} rép` : q.repReward < 0 ? ` · ${q.repReward} rép` : ''}
+                {t('reward', { credits: q.creditReward.toLocaleString() })}
+                {q.repReward > 0 ? t('repSuffix', { value: q.repReward }) : q.repReward < 0 ? t('repSuffix', { value: q.repReward }) : ''}
                 {(q.dayMult ?? 1) >= 1.1 && (
                   <span style={{ color: 'var(--orange)', marginLeft: '8px', fontStyle: 'normal' }}>
                     ×{(q.dayMult ?? 1).toFixed(1)}

@@ -1,15 +1,9 @@
+import { useTranslation } from 'react-i18next'
 import { useMetaStore } from '../../store/metaStore'
 import { useGameStore } from '../../store/gameStore'
-import { META_UNLOCKS } from '../../data/metaUnlocks'
+import { getMetaUnlocks } from '../../data/metaUnlocks'
 import type { MetaCategory } from '../../types/meta'
 
-const CAT_LABELS: Record<MetaCategory, string> = {
-  survie:   '❤ SURVIE',
-  combat:   '⚔ COMBAT',
-  commerce: '◆ COMMERCE',
-  voyage:   '⛽ VOYAGE',
-  special:  '★ SPÉCIAL',
-}
 const CAT_COLORS: Record<MetaCategory, string> = {
   survie:   'var(--red)',
   combat:   'var(--orange)',
@@ -26,6 +20,14 @@ interface Props {
 }
 
 export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
+  const { t } = useTranslation('metaScreen')
+  const CAT_LABELS: Record<MetaCategory, string> = {
+    survie:   t('cat.survie'),
+    combat:   t('cat.combat'),
+    commerce: t('cat.commerce'),
+    voyage:   t('cat.voyage'),
+    special:  t('cat.special'),
+  }
   const meta        = useMetaStore(s => s.meta)
   const unlockMeta  = useMetaStore(s => s.unlockMeta)
   const available   = useMetaStore(s => s.availablePoints())
@@ -38,31 +40,31 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
       {/* Header */}
       <div className="px-box px-box--hi" style={{ borderColor: 'var(--purple)' }}>
         <div className="row" style={{ alignItems: 'center', gap: '12px' }}>
-          <div className="t-lg t-bright" style={{ color: 'var(--purple)' }}>HÉRITAGE</div>
+          <div className="t-lg t-bright" style={{ color: 'var(--purple)' }}>{t('title')}</div>
           <div className="t-xs t-dim" style={{ flex: 1 }}>
-            {isPreRun ? 'Achète et sélectionne les améliorations pour cette run' : 'Améliorations permanentes entre les runs'}
+            {isPreRun ? t('subtitlePreRun') : t('subtitlePermanent')}
           </div>
           <div className="px-box" style={{ padding: '4px 10px', borderColor: 'var(--gold)' }}>
-            <span className="t-xs t-dim">Points dispo : </span>
+            <span className="t-xs t-dim">{t('pointsAvailable')}</span>
             <span className="t-sm t-gold">{available}</span>
-            <span className="t-xs t-dim"> / {meta.totalPointsEarned} gagnés</span>
+            <span className="t-xs t-dim"> {t('pointsEarned', { total: meta.totalPointsEarned })}</span>
           </div>
         </div>
         {isPreRun && meta.unlockedIds.length > 0 && (
           <div className="t-xs t-dim mt8" style={{ fontStyle: 'italic' }}>
-            Active ou désactive chaque amélioration pour cette run uniquement — elles restent acquises pour les prochaines.
+            {t('preRunHint')}
           </div>
         )}
         {available === 0 && meta.totalPointsEarned === 0 && (
           <div className="t-xs t-dim mt8" style={{ fontStyle: 'italic' }}>
-            Termine ta première run pour gagner des points d'héritage.
+            {t('firstRunHint')}
           </div>
         )}
       </div>
 
       {/* Unlocks par catégorie */}
       {CATEGORIES.map(cat => {
-        const catUnlocks = META_UNLOCKS.filter(u => u.category === cat)
+        const catUnlocks = getMetaUnlocks().filter(u => u.category === cat)
         const color = CAT_COLORS[cat]
         return (
           <div key={cat}>
@@ -73,7 +75,7 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
                 const reqMet   = !unlock.requires || meta.unlockedIds.includes(unlock.requires)
                 const canBuy   = !owned && reqMet && available >= unlock.cost
                 const reqName  = unlock.requires
-                  ? META_UNLOCKS.find(u => u.id === unlock.requires)?.name
+                  ? getMetaUnlocks().find(u => u.id === unlock.requires)?.name
                   : null
                 const activeThisRun = isPreRun && (selectedForRun?.includes(unlock.id) ?? false)
 
@@ -90,11 +92,11 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
                             {owned ? '✓ ' : !reqMet ? '🔒 ' : canBuy ? '○ ' : ''}{unlock.name}
                           </span>
                           <span className="tag t-xs" style={{ borderColor: owned ? color : !reqMet ? 'var(--border-dim)' : 'var(--border)', color: owned ? color : 'var(--dim)' }}>
-                            {owned ? 'DÉBLOQUÉ' : !reqMet ? 'VERROUILLÉ' : canBuy ? 'DISPONIBLE' : `${unlock.cost} pts`}
+                            {owned ? t('unlocked') : !reqMet ? t('locked') : canBuy ? t('available') : `${unlock.cost} pts`}
                           </span>
                           {reqName && !owned && (
                             <span className="t-xs t-dim">
-                              (requiert : {reqName})
+                              {t('requires', { name: reqName })}
                             </span>
                           )}
                         </div>
@@ -111,10 +113,10 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
                               }}
                               onClick={() => onToggleRun(unlock.id)}
                             >
-                              {activeThisRun ? '✓ ACTIF' : '○ INACTIF'}
+                              {activeThisRun ? t('active') : t('inactive')}
                             </button>
                           ) : (
-                            <span className="tag t-xs" style={{ color, borderColor: color }}>ACQUIS</span>
+                            <span className="tag t-xs" style={{ color, borderColor: color }}>{t('acquired')}</span>
                           )
                         ) : (
                           <button
@@ -142,19 +144,19 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
       {/* Historique des runs */}
       {meta.runHistory.length > 0 && (
         <div>
-          <div className="section-header">HISTORIQUE DES RUNS ({meta.runHistory.length})</div>
+          <div className="section-header">{t('runHistory', { count: meta.runHistory.length })}</div>
           <div className="col gap4">
             {meta.runHistory.map((run, i) => (
               <div key={i} className="px-box" style={{ borderColor: run.victory ? 'var(--gold)' : 'var(--border)', padding: '6px 12px' }}>
                 <div className="row" style={{ justifyContent: 'space-between' }}>
                   <span className="t-xs" style={{ color: run.victory ? 'var(--gold)' : 'var(--text)' }}>
-                    {run.victory ? '★ VICTOIRE' : '✕ MORT'} — {run.className}
+                    {run.victory ? t('victory') : t('death')} — {run.className}
                   </span>
                   <span className="t-xs t-dim">{run.date}</span>
                 </div>
                 <div className="t-xs t-dim mt4">
-                  J{run.day} · {run.bossesKilled} boss · {run.questsDone} quêtes · {run.stationsVisited} stations
-                  <span className="t-gold"> · +{run.pointsEarned} pts</span>
+                  {t('runSummary', { day: run.day, bosses: run.bossesKilled, quests: run.questsDone, stations: run.stationsVisited })}
+                  <span className="t-gold"> {t('pointsGained', { pts: run.pointsEarned })}</span>
                 </div>
               </div>
             ))}
@@ -165,11 +167,11 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
       {/* Actions */}
       <div className="row gap4">
         <button className="px-btn" style={{ flex: 1 }} onClick={onBack}>
-          ← RETOUR
+          {t('back')}
         </button>
         {!isPreRun && (
           <button className="px-btn px-btn--primary" style={{ flex: 2 }} onClick={newGame}>
-            NOUVELLE RUN
+            {t('newRun')}
           </button>
         )}
       </div>

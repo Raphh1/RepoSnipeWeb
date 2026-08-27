@@ -1,0 +1,15 @@
+{
+  "creditsGain": "+{{amount}} cr",
+  "creditsLoss": "-{{amount}} cr",
+  "repGain": "+{{amount}} rep",
+  "repLoss": "-{{amount}} rep",
+  "hpGain": "+{{amount}} HP",
+  "hpLoss": "-{{amount}} HP",
+  "staminaSmall": "+20 stamina",
+  "staminaFull": "Stamina restored",
+  "itemGained": "+1 {{item}}",
+  "weaponRecovered": "Weapon recovered: {{name}}",
+  "weapon": "Weapon: {{name}}",
+  "shipRepair": "Ship +{{amount}} HP",
+  "addictionIncreased": "Addiction increased"
+}

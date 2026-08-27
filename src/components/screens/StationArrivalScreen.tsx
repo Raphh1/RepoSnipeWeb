@@ -1,13 +1,15 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import { getStation } from '../../data/stations'
 import { getAmbiance } from '../../engine/jsonEventLoader'
 import { TypewriterText } from '../ui/TypewriterText'
 
-const DANGER_LABEL = ['◆ SÉCURISÉE', '◆ RISQUÉE', '◆ DANGEREUSE', '◆ ZONE DE GUERRE']
 const DANGER_COLOR = ['var(--green)', 'var(--yellow)', 'var(--orange)', 'var(--red)']
 
 export function StationArrivalScreen() {
+  const { t } = useTranslation('stationArrivalScreen')
+  const DANGER_LABEL = t('dangerLabels', { returnObjects: true }) as unknown as string[]
   const gs   = useGameStore(s => s.gs!)
   const goTo = useGameStore(s => s.goTo)
 
@@ -38,7 +40,7 @@ export function StationArrivalScreen() {
         {/* En-tête station */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div className="t-xs t-dim" style={{ letterSpacing: '4px', marginBottom: '12px' }}>
-            — ARRIVÉE —
+            {t('arrivalHeader')}
           </div>
           <div style={{ fontSize: '18px', color: 'var(--text-bright)', letterSpacing: '3px', marginBottom: '10px' }}>
             {station.name}
@@ -72,8 +74,8 @@ export function StationArrivalScreen() {
 
         {/* Jour + classe */}
         <div className="t-xs t-dim" style={{ textAlign: 'center', marginBottom: '24px' }}>
-          Jour {gs.day} · <span style={{ color: gs.class.color }}>{gs.class.name}</span>
-          {gs.fuel <= 1 && <span className="t-red"> · ⚠ Carburant critique</span>}
+          {t('dayLabel', { day: gs.day })} <span style={{ color: gs.class.color }}>{gs.class.name}</span>
+          {gs.fuel <= 1 && <span className="t-red"> {t('fuelCritical')}</span>}
         </div>
 
         {/* Boutons */}
@@ -81,13 +83,13 @@ export function StationArrivalScreen() {
           {!showFull && (
             <button className="px-btn" style={{ flex: 1, color: 'var(--text-dim)', textAlign: 'center' }}
               onClick={() => setSkipped(true)}>
-              Passer →
+              {t('skip')}
             </button>
           )}
           {showFull && (
             <button className="px-btn px-btn--primary" style={{ flex: 1, textAlign: 'center' }}
               onClick={() => goTo('station-hub')}>
-              Entrer dans {station.name} →
+              {t('enterStation', { name: station.name })}
             </button>
           )}
         </div>

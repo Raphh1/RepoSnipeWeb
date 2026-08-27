@@ -1,0 +1,62 @@
+{
+  "vagabond": {
+    "description": "Started with nothing. You drift from station to station leaving debts behind. No rules, no plan, no future.",
+    "bonusDesc": "Cheap shot in combat (ignores armor) · +15% crit · Fragile but unpredictable"
+  },
+  "ferrailleur": {
+    "description": "Your ship is falling apart in real time. You repair it with scrap and hope. Mostly scrap.",
+    "bonusDesc": "⚠ 30% chance to lose cargo while traveling · Tough but slow"
+  },
+  "endette": {
+    "description": "Someone wants their money back. Every. Day. You owe 50cr a day to someone you don't want to meet.",
+    "bonusDesc": "⚠ -50cr per day automatically · Standard combat"
+  },
+  "accro": {
+    "description": "You have expensive habits. Non-negotiable. Every trip costs you an extra 100cr for your needs.",
+    "bonusDesc": "⚠ -100cr per trip · High max stamina · Erratic attacks"
+  },
+  "rayane": {
+    "description": "His stats are catastrophic. His only strength: when all seems lost, he always offers to bet it all on a coin flip. It's up to you to judge if the risk is worth it.",
+    "bonusDesc": "⚠ Worst stats in the game · 🪙 Coin flip AVAILABLE (never forced) in combat, while fleeing, refueling, on quest rewards, and once when facing death per run"
+  },
+  "maudit": {
+    "description": "The universe simply doesn't like you. Positive events have a 50% chance of turning against you.",
+    "bonusDesc": "⚠ Positive events 50% chance to fizzle · Balanced combat"
+  },
+  "marchand": {
+    "description": "Nothing special. Honest work in a dishonest universe. You buy, you sell, you survive.",
+    "bonusDesc": "Neutral class · Bonus on negotiations · Balanced stats"
+  },
+  "mecanicien": {
+    "description": "You know engines. You're broke as hell. But your ship holds together — roughly.",
+    "bonusDesc": "Max fuel +4 · Stamina bonus · Good combat endurance"
+  },
+  "explorateur": {
+    "description": "Seen it all. Failed at it all. But you keep moving forward. Calm places reward you better.",
+    "bonusDesc": "Neutral events more frequent · Sharpened reflexes (+8% crit)"
+  },
+  "medecin": {
+    "description": "You patch bodies in clandestine clinics. You know death. You delay it.",
+    "bonusDesc": "Medicine sells +50% · Quick heal in combat · High max HP · -10% damage taken"
+  },
+  "contrebandier": {
+    "description": "Good prices, dangerous enemies. You live off schemes. Every deal is a matter of survival.",
+    "bonusDesc": "-20% on purchases · Guaranteed escape 1×/fight · ⚠ Pirates 2× more frequent"
+  },
+  "veteran": {
+    "description": "Thirty years of wars for forgotten causes. You're still standing. That's enough.",
+    "bonusDesc": "+30% attack · -20% damage taken · Starts with 1 momentum · Accomplished warrior"
+  },
+  "heritier": {
+    "description": "Old money. Pacifist upbringing. You don't know how to fight but your wallet makes up for it.",
+    "bonusDesc": "+300cr every 5 days · ⚠ Can't buy weapons · Weak in combat"
+  },
+  "hackeur": {
+    "description": "Systems have no secrets from you. Walls are suggestions. Locks, invitations.",
+    "bonusDesc": "Sees destination prices · Hacks enemy equipment · Physically fragile"
+  },
+  "seigneurDeGuerre": {
+    "description": "Feared everywhere. Welcome nowhere peaceful. Pirates avoid you. So do merchants.",
+    "bonusDesc": "Pirates auto-eliminated · Combat intimidation · +50% attack · ⚠ Peaceful stations refuse you"
+  }
+}

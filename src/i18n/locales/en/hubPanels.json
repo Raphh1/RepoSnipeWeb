@@ -1,0 +1,13 @@
+{
+  "back": "← Back",
+  "questOffer": {
+    "header": "— LOOK FOR WORK —",
+    "gossip": "LOCAL RUMOR",
+    "reward": "Reward: {{credits}} cr · +{{rep}} rep",
+    "forced": "You've refused too many times. Take this contract or leave.",
+    "accept": "Accept",
+    "change_one": "Change ({{count}} left)",
+    "change_other": "Change ({{count}} left)",
+    "noWork": "No work available here right now."
+  }
+}

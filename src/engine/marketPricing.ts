@@ -1,4 +1,7 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
+
+const mt = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'marketScreen', ...params })
 
 // ── PROFILS DE PRIX PAR TYPE DE STATION ──────────────────────────────────────
 // Multiplicateur > 1 = item plus cher ici (offre basse ou demande haute)
@@ -136,15 +139,15 @@ export function getMarketContext(gs: GameState, stationType: string): string[] {
   const standing  = pillarKey ? (gs.pillarStanding ?? {})[pillarKey] ?? 0 : 0
   const disc      = getPillarDiscount(gs)
 
-  if (pillarKey && disc > 0) lines.push(`Alliance ${pillarKey} : -${Math.round(disc * 100)}% sur tous les achats`)
-  if (pillarKey && disc < 0) lines.push(`⚠ Hostile ${pillarKey} : +${Math.round(Math.abs(disc) * 100)}% sur tous les achats`)
+  if (pillarKey && disc > 0) lines.push(mt('allianceDiscount', { pillar: pillarKey, pct: Math.round(disc * 100) }))
+  if (pillarKey && disc < 0) lines.push(mt('hostileSurcharge', { pillar: pillarKey, pct: Math.round(Math.abs(disc) * 100) }))
 
   const profile = STATION_TYPE_PROFILES[stationType as StationType]
   if (profile) {
     const cheap  = Object.entries(profile).filter(([, m]) => m < 0.80).map(([k]) => k).slice(0, 3)
     const pricey = Object.entries(profile).filter(([, m]) => m > 1.30).map(([k]) => k).slice(0, 2)
-    if (cheap.length)  lines.push(`Abondant ici : ${cheap.join(', ')}`)
-    if (pricey.length) lines.push(`Rare ici : ${pricey.join(', ')}`)
+    if (cheap.length)  lines.push(mt('abundantHere', { list: cheap.join(', ') }))
+    if (pricey.length) lines.push(mt('rareHere', { list: pricey.join(', ') }))
   }
 
   return lines

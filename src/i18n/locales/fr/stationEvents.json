@@ -1,0 +1,106 @@
+{
+  "starQuest": {
+    "salonVip": {
+      "label": "Salon VIP — Réseau d'affaires",
+      "description": "Une salle privée, lumière tamisée, flûtes de champagne synthétique. Des marchands, des courtiers, des gens qui se font des faveurs. Ici, les contacts valent plus que l'or.",
+      "c0": { "label": "Payer l'entrée et réseauter (400 cr)", "msg": "-400 cr. Tu repars avec des contacts et des engagements. +{{amount}} cr, +30 rép." },
+      "c1": { "label": "Extraire des données discrètement (Hackeur)", "win": "[HACK] Données privées extraites. +{{amount}} cr, +15 rép.", "lose": "Détecté. Expulsion discrète. -25 rép." },
+      "c2": { "label": "Entrée gratuite (Rép ≥ 80)", "msg": "On te reconnaît. Tu entres sans payer. +{{amount}} cr, +40 rép." },
+      "c3": "Ignorer"
+    },
+    "arena": {
+      "label": "Arène de combat",
+      "description": "Des combats légaux (à peu près). La foule réclame du sang.",
+      "c0": "Participer (combat)",
+      "c1": { "label": "Parier sur un combattant (300 cr)", "win": "Ton poulain gagne. +600 cr.", "lose": "Il s'effondre au troisième round. -300 cr." },
+      "c2": "Partir"
+    }
+  },
+  "scottyGoldenNorth": {
+    "grandCasino": {
+      "label": "Le Grand Casino Samy Scotty",
+      "description": "L'entrée est un mur de lumière. Bruit de jetons, musique synthétique, odeur de carburant de luxe. Samy Scotty a transformé cette station en temple du hasard. Tout le monde peut jouer. Tout le monde peut perdre.",
+      "c0": { "label": "Table basse — miser 150 cr (55% chance → +200)", "win": "La bille tombe sur ton numéro. +200 cr.", "lose": "Raté. La maison garde les 150 cr." },
+      "c1": { "label": "Table standard — miser 500 cr (50% → +650)", "win": "Double ou rien — double. +650 cr.", "lose": "La maison ramasse. -500 cr." },
+      "c2": { "label": "Haute mise — miser 1500 cr (45% → +2400)", "win": "Le croupier blêmit. Tu empoches 2400 cr.", "lose": "Perdu. -1500 cr. Le croupier ne sourit même pas." },
+      "c3": { "label": "Table VIP — miser 3000 cr (40% → +6000) [Rép ≥ 60]", "win": "La table VIP applaudit. +6000 cr, +10 rép.", "lose": "Personne ne dit un mot. -3000 cr." },
+      "c4": { "label": "Pirater les algorithmes (Hackeur — 75% → +1800 cr)", "win": "[HACK] Odds biaisés. Tu gagnes systématiquement. +1800 cr.", "lose": "Samy a des bons techniciens. Détecté. -500 cr, -20 rép." },
+      "c5": { "label": "Observer la folie ambiante", "msg": "Quelqu'un perd sa fortune. Quelqu'un d'autre gagne la sienne. Rien de nouveau." }
+    },
+    "machinesSamy": {
+      "label": "Les Machines de Samy — Paris clandestins",
+      "description": "Dans l'arrière-salle, des paris sur des combats illégaux diffusés en direct. Des machines à sous trafiquées mais pas trop. L'odeur de transgression à prix abordable.",
+      "c0": { "label": "Machine à sous — 200 cr (3 roues, jackpot ×6, deux identiques ×1.5)", "jackpot": "🎰 [{{a}}][{{b}}][{{c}}] JACKPOT ! +{{amount}} cr.", "pair": "🎰 [{{a}}][{{b}}][{{c}}] Deux identiques. +{{amount}} cr.", "lose": "🎰 [{{a}}][{{b}}][{{c}}] Rien. -{{amount}} cr." },
+      "c1": { "label": "Machine à sous premium — 1000 cr (jackpot ×6)", "jackpot": "🎰 [{{a}}][{{b}}][{{c}}] JACKPOT PREMIUM ! +{{amount}} cr.", "pair": "🎰 [{{a}}][{{b}}][{{c}}] Deux identiques. +{{amount}} cr.", "lose": "🎰 [{{a}}][{{b}}][{{c}}] Rien. -{{amount}} cr." },
+      "c2": { "label": "Parier sur un combat illégal — 600 cr (35% → ×3)", "win": "Ton combattant démolit l'adversaire. +{{amount}} cr.", "lose": "Il tombe en trente secondes. -600 cr." },
+      "c3": "Partir"
+    }
+  },
+  "lesBasFondsDeVega": {
+    "dealer": {
+      "label": "Chercher un dealer",
+      "description": "Dans les ruelles basses, quelqu'un vend des choses qui n'existent pas officiellement.",
+      "c0": { "label": "Acheter un stimulant de combat (300 cr)", "msg": "-300 cr. Stamina max +20 temporairement." },
+      "c1": { "label": "Acheter une info sur un convoi (400 cr)", "msg": "-400 cr. L'info mène à un convoi. +{{amount}} cr." },
+      "c2": { "label": "Acheter des médicaments non tracés (150 cr)", "msg": "-150 cr. +3 Médicaments." },
+      "c3": "Rien, trop risqué"
+    },
+    "fence": {
+      "label": "Receleur local",
+      "description": "Il reprend n'importe quoi sans poser de questions. Prix en dessous du marché.",
+      "c0": { "label": "Vendre tout le cargo (+25% prix noir)", "msg": "+{{amount}} cr. Cargo vendu au noir." },
+      "c1": "Partir"
+    }
+  },
+  "fortKharos": {
+    "armouryAccess": {
+      "label": "Accès à l'armurerie militaire",
+      "description": "Un sergent te fait signe depuis le couloir. \"T'as l'air de quelqu'un qui sait utiliser du matériel. L'armurerie vend quelques surplus — pas au catalogue officiel.\"",
+      "c0": { "label": "Acheter des munitions spéciales (400 cr)", "msg": "-400 cr. Il glisse deux caisses sans regarder. +2 Munitions spéciales." },
+      "c1": { "label": "Acheter des rations militaires (200 cr)", "msg": "-200 cr. +3 Rations militaires. \"Discrétion attendue.\"" },
+      "c2": { "label": "Refuser", "msg": "Il hoche la tête. Pas de problème." }
+    }
+  },
+  "nexusAldara": {
+    "dataMarket": {
+      "label": "Marché de données",
+      "description": "Des brokers vendent des informations classifiées. Certaines valent une fortune.",
+      "c0": { "label": "Acheter des données commerciales (300 cr)", "msg": "-300 cr. Données revendues. +{{amount}} cr." },
+      "c1": { "label": "Vendre tes propres infos", "msg": "Tes infos ont de la valeur ici. +{{amount}} cr." },
+      "c2": { "label": "Pirater le système (Hackeur)", "win": "[HACK] Accès obtenu. +crédits, +20 rép.", "lose": "Détecté. -20 rép." },
+      "c3": "Passer"
+    }
+  },
+  "lePurgatoire": {
+    "rumorNetwork": {
+      "label": "Réseau des anciens prisonniers",
+      "description": "Les anciens détenus ont des contacts partout. Leur réseau vaut de l'or.",
+      "c0": { "label": "Acheter une info sur un convoi (200 cr)", "msg": "-200 cr. Info profitable. +{{amount}} cr." },
+      "c1": { "label": "Proposer tes services comme passeur", "msg": "Contrat de passage accepté. +{{amount}} cr. -5 rép (morale)." },
+      "c2": "Ignorer"
+    }
+  },
+  "arcOuestApocalypse": {
+    "alanossaContact": {
+      "label": "Contact avec les lieutenants d'Alanossa",
+      "description": "Des lieutenants t'observent depuis ton arrivée. Un signe de tête — une invitation.",
+      "c0": { "label": "Rencontrer le lieutenant", "msg": "Accord tacite. +{{amount}} cr, +20 rép." },
+      "c1": { "label": "Décliner", "msg": "Il note ton refus. Ça compte." }
+    }
+  },
+  "areneDeKorsun": {
+    "tournamentRegister": {
+      "label": "Consulter l'affiche du Tournoi",
+      "description": "Une affiche massive barre le couloir d'entrée. DIX COMBATS. DIX ADVERSAIRES. Le dernier debout repart avec la gloire et l'or. Un portier te dévisage depuis l'entrée de l'arène.",
+      "c0": "S'inscrire — entrer dans l'arène",
+      "c1": { "label": "Regarder le tableau des anciens champions", "msg": "Des noms. Des étoiles à côté de certains. Des croix rouges à côté de la plupart. Tu comptes les survivants sur une main." },
+      "c2": "Partir"
+    },
+    "tournamentOngoing": {
+      "label": "Tournoi en cours — Round suivant",
+      "description": "Tu es inscrit. La foule attend. Le prochain adversaire se prépare derrière la porte.",
+      "c0": "Continuer le tournoi",
+      "c1": { "label": "Abandonner (disqualification)", "msg": "Tu jettes l'éponge. La foule hue. Pas de honte à survivre." }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "back": "← BACK",
+  "title": "INVENTORY",
+  "cargoHold": "HOLD ({{count}} type{{plural}})",
+  "cargoEmpty": "Hold is empty.",
+  "weapons": "WEAPONS ({{count}})",
+  "noWeapon": "No weapon.",
+  "damage": "Damage: {{min}}–{{max}} · Crit: {{crit}}%",
+  "selfDamage": "⚠ Self-dmg {{value}}% ({{min}}–{{max}})",
+  "unequip": "UNEQUIP",
+  "equip": "EQUIP",
+  "armors": "ARMOR ({{count}})",
+  "noArmor": "No armor.",
+  "defense": "Defense: {{value}}%",
+  "hpBonus": " · HP +{{value}}",
+  "armorEffect": {
+    "regen": "Regen +{{value}} HP/turn",
+    "thorns": "Thorns {{value}}% reflected",
+    "immunity": "Absorbs 1 fatal hit",
+    "staminaBoost": "Stamina +{{value}}/turn"
+  }
+}

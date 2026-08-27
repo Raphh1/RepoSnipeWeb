@@ -1,3 +1,7 @@
+import i18n from '../i18n/config'
+
+const re = (key: string) => i18n.t(key, { ns: 'recipes' })
+
 export type RecipeOutput =
   | { type: 'weapon_roll'; tier: 1 | 2 | 3 | 4 }
   | { type: 'armor_roll';  tier: 1 | 2 | 3 | 4 }
@@ -12,12 +16,13 @@ export interface Recipe {
   output: RecipeOutput
 }
 
-export const RECIPES: Recipe[] = [
+export function getRecipes(): Recipe[] {
+  return [
   // ── ARMES ────────────────────────────────────────────────────────────────
   {
     id: 'blade_scrap',
     name: 'Lame de récupération',
-    description: 'Ferraille soudée et taillée en pointe. Rudimentaire mais efficace.',
+    description: re('bladeScrap'),
     category: 'arme',
     ingredients: { 'Ferraille': 3, 'Outils': 1 },
     output: { type: 'weapon_roll', tier: 1 },
@@ -25,7 +30,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'pistol_crude',
     name: 'Pistolet artisanal',
-    description: 'Assemblage de pièces techniques et de métal. Ça tire, la plupart du temps.',
+    description: re('pistolCrude'),
     category: 'arme',
     ingredients: { 'Métaux bruts': 2, 'Pièces techniques': 2 },
     output: { type: 'weapon_roll', tier: 1 },
@@ -33,7 +38,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'rifle_makeshift',
     name: 'Fusil de fortune',
-    description: 'Portée améliorée, précision approximative. Mieux que rien en zone hostile.',
+    description: re('rifleMakeshift'),
     category: 'arme',
     ingredients: { 'Métaux rares': 1, 'Munitions': 2, 'Composants divers': 2 },
     output: { type: 'weapon_roll', tier: 2 },
@@ -41,7 +46,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'plasma_lance',
     name: 'Lance plasma',
-    description: 'Un cristal énergétique focalisé dans un tube de conducteurs. Brûle tout ce qu\'il touche.',
+    description: re('plasmaLance'),
     category: 'arme',
     ingredients: { 'Cristaux énergétiques': 1, 'Composants électroniques': 2 },
     output: { type: 'weapon_roll', tier: 2 },
@@ -49,7 +54,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'tactical_weapon',
     name: 'Arme tactique',
-    description: 'Construction solide à partir de matériaux lourds et de composants avancés.',
+    description: re('tacticalWeapon'),
     category: 'arme',
     ingredients: { 'Composants expérimentaux': 1, 'Outils lourds': 1, 'Métaux rares': 2 },
     output: { type: 'weapon_roll', tier: 3 },
@@ -57,7 +62,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'impulse_cannon',
     name: 'Canon à impulsion',
-    description: 'Combine munitions spéciales et technologie avancée pour des dégâts ravageurs.',
+    description: re('impulseCannon'),
     category: 'arme',
     ingredients: { 'Technologies avancées': 1, 'Cristaux énergétiques': 2, 'Munitions spéciales': 2 },
     output: { type: 'weapon_roll', tier: 3 },
@@ -65,7 +70,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'exotic_weapon',
     name: 'Arme exotique artisanale',
-    description: 'Le summum du craft. Nécessite des matériaux rares et une maîtrise totale.',
+    description: re('exoticWeapon'),
     category: 'arme',
     ingredients: { 'Technologies avancées': 2, 'Composants expérimentaux': 2, 'Cristaux énergétiques': 1 },
     output: { type: 'weapon_roll', tier: 4 },
@@ -74,7 +79,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'tactical_rifle',
     name: 'Carabine tactique',
-    description: 'Récupérée sur du matériel de combat abandonné. Plus fiable qu\'une arme artisanale.',
+    description: re('tacticalRifle'),
     category: 'arme',
     ingredients: { 'Équipement tactique': 2, 'Munitions': 3 },
     output: { type: 'weapon_roll', tier: 2 },
@@ -84,7 +89,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'tactical_armor',
     name: 'Armure tactique',
-    description: 'Plaques de composants tactiques soudées sur une structure légère. Efficace en terrain hostile.',
+    description: re('tacticalArmor'),
     category: 'armure',
     ingredients: { 'Composants tactiques': 3, 'Métaux bruts': 2 },
     output: { type: 'armor_roll', tier: 2 },
@@ -92,7 +97,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'jacket_plated',
     name: 'Veste blindée',
-    description: 'Plaques métalliques cousues dans du textile épais. Simple mais solide.',
+    description: re('jacketPlated'),
     category: 'armure',
     ingredients: { 'Métaux bruts': 3, 'Composants divers': 1 },
     output: { type: 'armor_roll', tier: 1 },
@@ -100,7 +105,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'combat_armor',
     name: 'Armure de combat',
-    description: 'Construction renforcée avec des matériaux de récupération premium.',
+    description: re('combatArmor'),
     category: 'armure',
     ingredients: { "Composants d'armure": 2, 'Métaux rares': 1 },
     output: { type: 'armor_roll', tier: 2 },
@@ -108,7 +113,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'reinforced_armor',
     name: 'Armure renforcée',
-    description: 'Alliage de métaux rares et de technologie avancée. Résiste à presque tout.',
+    description: re('reinforcedArmor'),
     category: 'armure',
     ingredients: { 'Technologies avancées': 1, 'Métaux rares': 3, 'Composants électroniques': 1 },
     output: { type: 'armor_roll', tier: 3 },
@@ -116,7 +121,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'elite_suit',
     name: 'Combinaison d\'élite',
-    description: 'Le meilleur qu\'un artisan puisse produire. Exige des matériaux rarissimes.',
+    description: re('eliteSuit'),
     category: 'armure',
     ingredients: { 'Technologies avancées': 2, 'Composants expérimentaux': 2, 'Cristaux énergétiques': 1 },
     output: { type: 'armor_roll', tier: 4 },
@@ -126,7 +131,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'medkit',
     name: 'Kit médical',
-    description: 'Soigne 30 PV depuis le hub de station. Utilise-le entre deux combats.',
+    description: re('medkit'),
     category: 'consommable',
     ingredients: { 'Médicaments': 2, 'Eau purifiée': 1 },
     output: { type: 'cargo', item: 'Kit médical', quantity: 1 },
@@ -134,7 +139,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'medkit_adv',
     name: 'Kit médical premium',
-    description: 'Soigne 60 PV et restaure 2 stamina depuis le hub de station.',
+    description: re('medkitAdv'),
     category: 'consommable',
     ingredients: { 'Médicaments premium': 1, 'Plantes médicinales': 2 },
     output: { type: 'cargo', item: 'Kit médical premium', quantity: 1 },
@@ -142,7 +147,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'emp_grenade',
     name: 'Grenade EMP',
-    description: 'Étourdit l\'ennemi pendant 2 tours. À utiliser depuis l\'inventaire en combat.',
+    description: re('empGrenade'),
     category: 'consommable',
     ingredients: { 'Composants électroniques': 2, 'Ferraille': 1 },
     output: { type: 'cargo', item: 'Grenade EMP', quantity: 1 },
@@ -150,7 +155,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'stimulant',
     name: 'Stimulant de combat',
-    description: 'Restaure 3 stamina depuis le hub. Composé de plantes et de nutriments.',
+    description: re('stimulant'),
     category: 'consommable',
     ingredients: { 'Nourriture fraîche': 1, 'Plantes médicinales': 1 },
     output: { type: 'cargo', item: 'Stimulant', quantity: 2 },
@@ -158,7 +163,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'synth_fuel',
     name: 'Carburant de synthèse',
-    description: 'Donne +2 carburant immédiatement à la fabrication. Instable mais fonctionnel.',
+    description: re('synthFuel'),
     category: 'consommable',
     ingredients: { 'Eau purifiée': 3, 'Composants divers': 2 },
     output: { type: 'cargo', item: 'Carburant de synthèse', quantity: 1 },
@@ -166,7 +171,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'smoke_bomb',
     name: 'Bombe fumigène',
-    description: 'Garantit la fuite en combat. À utiliser depuis l\'inventaire en combat.',
+    description: re('smokeBomb'),
     category: 'consommable',
     ingredients: { 'Ferraille': 2, 'Composants divers': 2 },
     output: { type: 'cargo', item: 'Bombe fumigène', quantity: 1 },
@@ -176,7 +181,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'data_classified',
     name: 'Données classifiées',
-    description: 'Recompile deux lots de données ordinaires en informations à haute valeur marchande.',
+    description: re('dataClassified'),
     category: 'ressource',
     ingredients: { 'Données': 2, 'Logiciels': 1 },
     output: { type: 'cargo', item: 'Données classifiées', quantity: 1 },
@@ -184,7 +189,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'rare_metal',
     name: 'Métaux rares purifiés',
-    description: 'Raffine des métaux bruts en alliage rare utilisable dans des crafts avancés.',
+    description: re('rareMetal'),
     category: 'ressource',
     ingredients: { 'Métaux bruts': 4, 'Composants électroniques': 1 },
     output: { type: 'cargo', item: 'Métaux rares', quantity: 2 },
@@ -196,7 +201,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'void_regulator',
     name: 'Régulateur de Vide',
-    description: "Stabilise un flux énergétique instable en signal exploitable. Aucun marchand ne sait en fabriquer — ou n'ose l'admettre.",
+    description: re('voidRegulator'),
     category: 'ressource',
     ingredients: { 'Cristaux énergétiques': 2, 'Composants électroniques': 2, 'Métaux rares': 1 },
     output: { type: 'cargo', item: 'Régulateur de Vide', quantity: 1 },
@@ -204,7 +209,7 @@ export const RECIPES: Recipe[] = [
   {
     id: 'ghost_nav_chip',
     name: 'Puce de Navigation Fantôme',
-    description: "Calcule des routes que les cartes officielles ignorent. Un croisement de données classifiées et de composants qu'on ne trouve sur aucun catalogue.",
+    description: re('ghostNavChip'),
     category: 'ressource',
     ingredients: { 'Données classifiées': 1, 'Composants électroniques': 1, 'Technologies avancées': 1 },
     output: { type: 'cargo', item: 'Puce de Navigation Fantôme', quantity: 1 },
@@ -212,9 +217,14 @@ export const RECIPES: Recipe[] = [
   {
     id: 'annealed_alloy',
     name: 'Alliage Recuit',
-    description: "Un traitement thermique précis que seul un atelier bien équipé peut reproduire de façon fiable.",
+    description: re('annealedAlloy'),
     category: 'ressource',
     ingredients: { 'Métaux rares': 2, 'Métaux bruts': 3, 'Outils': 1 },
     output: { type: 'cargo', item: 'Alliage Recuit', quantity: 2 },
   },
-]
+  ]
+}
+
+export function getRecipeForItem(item: string): Recipe | undefined {
+  return getRecipes().find(r => r.output.type === 'cargo' && r.output.item === item)
+}

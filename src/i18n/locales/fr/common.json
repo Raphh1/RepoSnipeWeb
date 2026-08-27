@@ -1,0 +1,63 @@
+{
+  "buttons": {
+    "back": "← RETOUR",
+    "continue": "CONTINUER",
+    "newRun": "NOUVELLE RUN",
+    "legacy": "★ HÉRITAGE"
+  },
+  "statusbar": {
+    "hp": "PV",
+    "stamina": "STAMINA",
+    "ship": "VAISSEAU",
+    "folie": "FOLIE",
+    "folieDouble": "FOLIE (×2)",
+    "folieBlood": "FOLIE 🩸",
+    "cr": "CR",
+    "fuel": "FUEL",
+    "day": "JOUR",
+    "rep": "RÉP",
+    "equipped": "ÉQUIPÉ"
+  },
+  "gameOver": {
+    "title": "GAME OVER",
+    "defaultCause": "La run s'arrête ici.",
+    "footer": "Le vide ne retient pas les noms."
+  },
+  "victory": {
+    "title": "★ VICTOIRE ★",
+    "subtitle": "Le Nexus est restauré. Tu as survécu.",
+    "footer": "Le vide se souviendra de ce nom.",
+    "whatNextTitle": "ET MAINTENANT ?",
+    "whatNextBody": "Le Nexus est entre tes mains, mais le secteur ne s'est pas incliné pour autant. Tu peux {{continueLink}} avec ce personnage : accomplis {{objectivesLink}}, abats les derniers boss et grave ton nom dans le vide pour de bon. Ou repars de zéro.",
+    "continueLink": "continuer ta conquête spatiale",
+    "objectivesLink": "tous les objectifs",
+    "continueConquest": "⚑ CONTINUER LA CONQUÊTE →"
+  },
+  "runStats": {
+    "title": "BILAN DE LA RUN",
+    "daysSurvived": "Jours survécus",
+    "finalCredits": "Crédits finaux",
+    "reputation": "Réputation",
+    "stationsVisited": "Stations visitées",
+    "combatsWon": "Combats gagnés",
+    "combatsFled": "Combats fuis",
+    "questsCompleted": "Quêtes complétées",
+    "bossesDefeated": "Boss vaincus",
+    "prisonEscapes": "Évasions de prison",
+    "class": "Classe",
+    "objectivesCompleted": "OBJECTIFS ACCOMPLIS ({{count}})",
+    "arcsCompleted": "ARCS NARRATIFS COMPLÉTÉS"
+  },
+  "legacyBadge": "★ +{{count}} point{{plural}} d'héritage disponible{{plural}} — investis-les dans HÉRITAGE",
+  "nextUnlock": {
+    "title": "PROCHAIN DÉBLOCAGE",
+    "allUnlocked": "★ Tout est débloqué. Tu as tout vu.",
+    "remaining": "encore {{count}} point{{plural}}",
+    "available": "★ Disponible !"
+  },
+  "language": {
+    "label": "Langue",
+    "fr": "FR",
+    "en": "EN"
+  }
+}

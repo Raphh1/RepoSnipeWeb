@@ -1,0 +1,29 @@
+{
+  "back": "← BACK",
+  "title": "CRAFTING WORKSHOP",
+  "actions": "Actions:",
+  "categories": {
+    "arme": "⚔ WEAPONS",
+    "armure": "🛡 ARMOR",
+    "consommable": "💊 CONSUMABLES",
+    "ressource": "◆ RESOURCES"
+  },
+  "all": "All",
+  "available": "Available",
+  "cargo": "Hold: {{list}}",
+  "cargoEmpty": "empty",
+  "randomWeaponTier": "Tier {{tier}} Weapon (random)",
+  "randomArmorTier": "Tier {{tier}} Armor (random)",
+  "instantFuel": "+2 Fuel instantly",
+  "outputQty": "{{item}} ×{{qty}}",
+  "missing": "Missing: {{list}}",
+  "exhausted": "Exhausted",
+  "craft": "CRAFT",
+  "noRecipesAvailable": "No recipes available with your current hold. Stock up at the market.",
+  "craftedWeapon": "{{recipe}} crafted → {{item}} added to inventory",
+  "craftedArmor": "{{recipe}} crafted → {{item}} added to inventory",
+  "craftedFuel": "{{recipe}} crafted → +2 fuel",
+  "craftedCargo": "{{recipe}} crafted → {{item}} ×{{qty}} added to hold",
+  "unknownWeapon": "unknown weapon",
+  "unknownArmor": "unknown armor"
+}

@@ -1,8 +1,9 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { TypewriterText } from '../../ui/TypewriterText'
 import type { GameState, Enemy } from '../../../types'
 import type { StationEvent } from '../../../engine/stationEvents'
-import { TIER_MID, getArenaEnemyForRound } from '../../../data/enemies'
+import { getTierMid, getArenaEnemyForRound } from '../../../data/enemies'
 
 interface Props {
   gs: GameState
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function StationEventPanel({ gs, stationEvent, stationName, onReturn, startCombat, patch }: Props) {
+  const { t } = useTranslation('hubPanels')
   const [resultMsg, setResultMsg] = useState<string | null>(null)
 
   function markUsed() {
@@ -24,12 +26,13 @@ export function StationEventPanel({ gs, stationEvent, stationName, onReturn, sta
   }
 
   function handleChoice(c: StationEvent['choices'][number]) {
-    if (c.label === 'Participer (combat)') {
+    const res = c.result(gs)
+    if (res.message === 'ARENA_COMBAT') {
       markUsed()
-      startCombat(TIER_MID[Math.floor(Math.random() * TIER_MID.length)])
+      const tierMid = getTierMid()
+      startCombat(tierMid[Math.floor(Math.random() * tierMid.length)])
       return
     }
-    const res = c.result(gs)
     if (res.message === 'TOURNAMENT_START') {
       markUsed()
       patch({ tournamentRound: 1 })
@@ -65,7 +68,7 @@ export function StationEventPanel({ gs, stationEvent, stationName, onReturn, sta
             </div>
         }
       </div>
-      <button className="px-btn" onClick={onReturn}>← Retour</button>
+      <button className="px-btn" onClick={onReturn}>{t('back')}</button>
     </div>
   )
 }

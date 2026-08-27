@@ -1,0 +1,29 @@
+{
+  "back": "← RETOUR",
+  "title": "ATELIER DE FABRICATION",
+  "actions": "Actions :",
+  "categories": {
+    "arme": "⚔ ARMES",
+    "armure": "🛡 ARMURES",
+    "consommable": "💊 CONSOMMABLES",
+    "ressource": "◆ RESSOURCES"
+  },
+  "all": "Toutes",
+  "available": "Disponibles",
+  "cargo": "Soute : {{list}}",
+  "cargoEmpty": "vide",
+  "randomWeaponTier": "Arme Tier {{tier}} (aléatoire)",
+  "randomArmorTier": "Armure Tier {{tier}} (aléatoire)",
+  "instantFuel": "+2 Carburant immédiat",
+  "outputQty": "{{item}} ×{{qty}}",
+  "missing": "Manque : {{list}}",
+  "exhausted": "Épuisé",
+  "craft": "FABRIQUER",
+  "noRecipesAvailable": "Aucune recette disponible avec ta soute actuelle. Approvisionne-toi au marché.",
+  "craftedWeapon": "{{recipe}} fabriquée → {{item}} dans l'inventaire",
+  "craftedArmor": "{{recipe}} fabriquée → {{item}} dans l'inventaire",
+  "craftedFuel": "{{recipe}} fabriquée → +2 carburant",
+  "craftedCargo": "{{recipe}} fabriquée → {{item}} ×{{qty}} dans la soute",
+  "unknownWeapon": "arme inconnue",
+  "unknownArmor": "armure inconnue"
+}

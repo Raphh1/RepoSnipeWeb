@@ -1,18 +1,20 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import { buildRunSummary } from '../../engine/meta'
 import { useMetaStore } from '../../store/metaStore'
 import {
-  NEXUS_FRAGMENTS, attemptNexusFragment, canAttempt,
+  getNexusFragments, attemptNexusFragment, canAttempt,
   isFragmentAvailable, getPillarStandingLabel, getWarAvailableFragments,
-  HOLDER_BOUNTY_HUNTERS, ARC_PERDU_CLUES,
+  getHolderBountyHunters, getArcPerduClues,
   getActionSuccessChance, getChanceLabel,
   type NexusAction
 } from '../../engine/nexus'
-import { BOSS_STATIONS, STATIONS } from '../../data/stations'
-import { TIER_BOSS } from '../../data/enemies'
+import { BOSS_STATIONS, getStations } from '../../data/stations'
+import { getTierBoss } from '../../data/enemies'
 import { getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar, getLieutenantClueText } from '../../data/subBosses'
 import type { SubBossData } from '../../types'
+import { translateEnemyName } from '../../engine/goodsI18n'
 
 type ViewState = 'list' | 'detail'
 
@@ -21,17 +23,6 @@ const PILLAR_COLORS: Record<string, string> = {
   cesarion: 'var(--cyan)',
   raphazarus: 'var(--purple)',
   scotty:   'var(--gold)',
-}
-
-const ACTION_LABELS: Record<NexusAction, string> = {
-  force:      '⚔ Forcer — affronter le gardien en combat',
-  pay:        '💰 Payer 200 000 cr — 50/50, quoi qu\'il arrive',
-  alliance:   '🤝 Alliance — standing & réputation',
-  gamble:     '🎲 Parier — mise au casino (50/50)',
-  steal:      '🌑 Voler — via une visite privée (réputation)',
-  lore:       '◆ Mémoire — par la connaissance du Nexus',
-  war:        '⚔💥 Déclencher une guerre entre détenteurs',
-  manipulate: '🎭 Entourloupe — convaincre sans combat',
 }
 
 // "steal" n'est plus un bouton d'action instantané : il se déclenche tout seul
@@ -50,18 +41,10 @@ const ACTION_DANGER: Partial<Record<NexusAction, string>> = {
   manipulate: 'var(--purple)',
 }
 
-const PATH_LABELS: Record<NexusAction, string> = {
-  force:      'Par la force',
-  pay:        "Par l'argent",
-  alliance:   'Par l\'alliance',
-  gamble:     'Par le hasard',
-  steal:      'Par la ruse',
-  lore:       'Par la mémoire',
-  war:        'Par la guerre',
-  manipulate: 'Par la manipulation',
-}
-
 export function NexusScreen() {
+  const { t } = useTranslation('nexusScreen')
+  const ACTION_LABELS = t('actionLabels', { returnObjects: true }) as unknown as Record<NexusAction, string>
+  const PATH_LABELS = t('pathLabels', { returnObjects: true }) as unknown as Record<NexusAction, string>
   const gs              = useGameStore(s => s.gs!)
   const goTo            = useGameStore(s => s.goTo)
   const patch           = useGameStore(s => s.patch)
@@ -103,7 +86,7 @@ export function NexusScreen() {
         resolved: false,
       }
       patch({ ...(result.newGs ?? {}), nexusWars: [...(gs.nexusWars ?? []), war] })
-      setMsg(`⚔ GUERRE DÉCLENCHÉE — ${war.holderA} vs ${war.holderB}. Reviens dans 4 jours après ton prochain voyage. ${result.message}`)
+      setMsg(t('warTriggered', { holderA: war.holderA, holderB: war.holderB, message: result.message }))
       setMsgOk(true)
       return
     }
@@ -112,8 +95,9 @@ export function NexusScreen() {
       if (result.newGs) patch(result.newGs)
       // Combat forcé après échec de manipulation
       if (result.triggerCombat) {
-        const bossName = result.pillarBossName ?? 'Gardien du Fragment'
-        const boss = TIER_BOSS.find(b => b.name === bossName) ?? { ...TIER_BOSS[0], name: bossName }
+        const bossName = result.pillarBossName ?? t('guardianFallback')
+        const tierBoss = getTierBoss()
+        const boss = tierBoss.find(b => b.name === bossName) ?? { ...tierBoss[0], name: bossName }
         startCombat({ ...boss, isBoss: true, captureChance: 0, killChance: 30 })
         patch({ nexusPath: { ...nexusPath, [idx]: 'force' } })
       }
@@ -124,8 +108,9 @@ export function NexusScreen() {
 
     if (result.triggerCombat) {
       if (result.newGs) patch(result.newGs)
-      const bossName = result.pillarBossName ?? 'Gardien du Fragment'
-      const boss = TIER_BOSS.find(b => b.name === bossName) ?? { ...TIER_BOSS[0], name: bossName }
+      const bossName = result.pillarBossName ?? t('guardianFallback')
+      const tierBoss = getTierBoss()
+      const boss = tierBoss.find(b => b.name === bossName) ?? { ...tierBoss[0], name: bossName }
       startCombat({ ...boss, isBoss: true, captureChance: 0, killChance: 30 })
       patch({ nexusPath: { ...nexusPath, [idx]: action } })
       return
@@ -137,7 +122,7 @@ export function NexusScreen() {
     if (result.spawnsBounty && !gs.stalker) {
       const pillarMap: Record<number, string> = { 0: 'alanossa', 1: 'cesarion', 2: 'raphazarus', 3: 'scotty' }
       const pillar = pillarMap[idx]
-      const bounty = HOLDER_BOUNTY_HUNTERS[pillar]
+      const bounty = getHolderBountyHunters()[pillar]
       if (bounty) {
         patch({
           stalker: {
@@ -162,7 +147,7 @@ export function NexusScreen() {
 
   // ── VUE DÉTAIL ───────────────────────────────────────────────────────────
   if (view === 'detail') {
-    const f = NEXUS_FRAGMENTS[selected]
+    const f = getNexusFragments()[selected]
     const isOwned = collected.includes(selected)
     const isHere = isFragmentAvailable(gs, selected)
     const isWarAvailable = getWarAvailableFragments(gs).includes(selected)
@@ -176,10 +161,10 @@ export function NexusScreen() {
       <div className={`layout ${goldFlash ? 'gold-flash' : ''}`}>
         <div className="row" style={{ gap: '12px', alignItems: 'center' }}>
           <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => { setView('list'); setMsg(null) }}>
-            ← RETOUR
+            {t('back')}
           </button>
           <div className="t-sm" style={{ color, flex: 1 }}>{f.name}</div>
-          {isOwned && <div className="tag" style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }}>COLLECTÉ · {PATH_LABELS[nexusPath[selected]!] ?? '?'}</div>}
+          {isOwned && <div className="tag" style={{ borderColor: 'var(--gold)', color: 'var(--gold)' }}>{t('collected')} · {PATH_LABELS[nexusPath[selected]!] ?? t('unknownPath')}</div>}
         </div>
 
         <div className="px-box" style={{ borderColor: color }}>
@@ -189,23 +174,23 @@ export function NexusScreen() {
         <div className="px-box" style={{ padding: '8px 14px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="t-xs t-dim">Gardien</span>
+              <span className="t-xs t-dim">{t('guardian')}</span>
               <span className="t-xs" style={{ color }}>{f.pillar.charAt(0).toUpperCase() + f.pillar.slice(1)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="t-xs t-dim">Station</span>
+              <span className="t-xs t-dim">{t('station')}</span>
               <span className="t-xs">{f.station}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="t-xs t-dim">Ton standing</span>
+              <span className="t-xs t-dim">{t('yourStanding')}</span>
               <span className="t-xs" style={{ color: standing >= 20 ? 'var(--green)' : standing <= -20 ? 'var(--red)' : 'var(--text)' }}>
                 {standing > 0 ? '+' : ''}{standing} — {getPillarStandingLabel(gs, f.pillar as any)}
               </span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span className="t-xs t-dim">Position actuelle</span>
+              <span className="t-xs t-dim">{t('currentPosition')}</span>
               <span className="t-xs" style={{ color: isHere ? 'var(--green)' : 'var(--dim)' }}>
-                {isHere ? '✓ Sur place' : gs.currentStation}
+                {isHere ? t('onSite') : gs.currentStation}
               </span>
             </div>
           </div>
@@ -223,7 +208,7 @@ export function NexusScreen() {
           return (
             <div className="px-box" style={{ borderColor: sbCleared ? 'var(--green)' : 'var(--orange)' }}>
               <div className="t-xs mb4" style={{ color: sbCleared ? 'var(--green)' : 'var(--orange)', letterSpacing: '1px' }}>
-                ⚔ LIEUTENANTS ({sbProg.done}/{sbProg.total})
+                {t('lieutenants', { done: sbProg.done, total: sbProg.total })}
               </div>
               {subs.map(sb => {
                 const done = pillarDefeated.includes(sb.id)
@@ -231,11 +216,11 @@ export function NexusScreen() {
                 return (
                   <div key={sb.id} className="col gap4" style={{ marginBottom: '4px' }}>
                     <div className="t-xs" style={{ color: done ? 'var(--green)' : 'var(--dim)', lineHeight: 2 }}>
-                      {done ? '✓' : '○'} {sb.order}. {known ? sb.name : '???'} — {known ? sb.station : 'Lieu inconnu'}
+                      {done ? '✓' : '○'} {sb.order}. {known ? translateEnemyName(sb.name) : t('unknownName')} — {known ? sb.station : t('unknownLocation')}
                     </div>
                     {!done && sb.id === nextSb?.id && !known && (clueLevels[sb.id] ?? 0) > 0 && (
                       <div className="t-xs" style={{ color: 'var(--cyan)', lineHeight: 1.6, marginLeft: '14px' }}>
-                        Indice : {getLieutenantClueText(gs, sb, clueLevels[sb.id] ?? 0)}
+                        {t('clue', { text: getLieutenantClueText(gs, sb, clueLevels[sb.id] ?? 0) })}
                       </div>
                     )}
                     {!done && sb.id === nextSb?.id && !known && (
@@ -246,20 +231,20 @@ export function NexusScreen() {
                           value={guessInput[sb.id] ?? ''}
                           onChange={e => setGuessInput(prev => ({ ...prev, [sb.id]: e.target.value }))}
                         >
-                          <option value="">Deviner la station…</option>
-                          {STATIONS.map(st => <option key={st.name} value={st.name}>{st.name}</option>)}
+                          <option value="">{t('guessStation')}</option>
+                          {getStations().map(st => <option key={st.name} value={st.name}>{st.name}</option>)}
                         </select>
                         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => submitLieutenantGuess(sb)}>
-                          🔍 Deviner
+                          {t('guess')}
                         </button>
-                        {wrongGuessId === sb.id && <span className="t-xs t-red">Pas là.</span>}
+                        {wrongGuessId === sb.id && <span className="t-xs t-red">{t('notThere')}</span>}
                       </div>
                     )}
                   </div>
                 )
               })}
               {!sbCleared && (
-                <div className="t-xs t-red mt4">⛔ Ordre obligatoire — vaincre le lieutenant 1, puis le 2, etc. Impossible d'accéder à un lieutenant tant que le précédent n'est pas battu.</div>
+                <div className="t-xs t-red mt4">{t('mandatoryOrder')}</div>
               )}
             </div>
           )
@@ -268,33 +253,33 @@ export function NexusScreen() {
         {/* Statuts spéciaux */}
         {isAngered && (
           <div className="px-box" style={{ borderColor: 'var(--red)' }}>
-            <div className="t-xs t-red">⚠ ENNEMI PERMANENT — {f.pillar.charAt(0).toUpperCase() + f.pillar.slice(1)} te cherche. Seul le combat est possible. Un chasseur est probablement déjà sur ta trace.</div>
+            <div className="t-xs t-red">{t('permanentEnemy', { pillar: f.pillar.charAt(0).toUpperCase() + f.pillar.slice(1) })}</div>
           </div>
         )}
         {activeWar && (
           <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
             <div className="t-xs" style={{ color: 'var(--orange)' }}>
-              ⚔ GUERRE EN COURS — {activeWar.holderA} vs {activeWar.holderB} · Jour {activeWar.startDay} → résolution dans {Math.max(0, 4 - (gs.day - activeWar.startDay))} voyage(s)
+              {t('warInProgress', { holderA: activeWar.holderA, holderB: activeWar.holderB, day: activeWar.startDay, trips: Math.max(0, 4 - (gs.day - activeWar.startDay)) })}
             </div>
           </div>
         )}
         {isWarAvailable && !isOwned && (
           <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
-            <div className="t-xs" style={{ color: 'var(--orange)' }}>⚔ Fragment récupérable — le gardien a perdu la guerre que tu as déclenchée. Il est affaibli.</div>
+            <div className="t-xs" style={{ color: 'var(--orange)' }}>{t('warRecoverable')}</div>
           </div>
         )}
 
         {msg && (
           <div className="px-box" style={{ borderColor: msgOk ? 'var(--gold)' : 'var(--red)' }}>
             <div className="t-xs" style={{ color: msgOk ? 'var(--gold)' : 'var(--red)', lineHeight: '2' }}>{msg}</div>
-            <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={() => setMsg(null)}>OK</button>
+            <button className="px-btn px-btn--sm mt8" style={{ width: 'auto' }} onClick={() => setMsg(null)}>{t('ok')}</button>
           </div>
         )}
 
         {isOwned && (
           <div className="px-box" style={{ borderColor: 'var(--gold)', textAlign: 'center' }}>
-            <div className="t-gold">★ Fragment en ta possession</div>
-            <div className="t-xs t-dim mt4">Obtenu {PATH_LABELS[nexusPath[selected]!] ?? ''}</div>
+            <div className="t-gold">{t('inPossession')}</div>
+            <div className="t-xs t-dim mt4">{t('obtained', { path: PATH_LABELS[nexusPath[selected]!] ?? '' })}</div>
           </div>
         )}
 
@@ -302,17 +287,17 @@ export function NexusScreen() {
         {f.pillar === 'raphazarus' && !isOwned && (
           <div className="px-box" style={{ borderColor: gs.arcPerduUnlocked ? 'var(--green)' : 'var(--purple)' }}>
             <div className="t-xs mb4" style={{ color: gs.arcPerduUnlocked ? 'var(--green)' : 'var(--purple)', letterSpacing: '1px' }}>
-              {gs.arcPerduUnlocked ? '✓ L\'ARC PERDU LOCALISÉ' : '◆ RECHERCHE DE L\'ARC PERDU'}
+              {gs.arcPerduUnlocked ? t('arcLocated') : t('arcSearch')}
             </div>
             {!gs.arcPerduUnlocked && (
               <>
                 <div className="t-xs t-dim" style={{ lineHeight: 2 }}>
-                  L'Arc Perdu est introuvable. Parle aux PNJs dans les stations pour collecter des indices.
+                  {t('arcNotFound')}
                 </div>
                 <div className="t-xs mt4" style={{ color: 'var(--purple)' }}>
-                  Indices : {(gs.arcPerduClues ?? []).length}/4
+                  {t('clueCount', { count: (gs.arcPerduClues ?? []).length })}
                 </div>
-                {ARC_PERDU_CLUES.filter(c => (gs.arcPerduClues ?? []).includes(c.id)).map(c => (
+                {getArcPerduClues().filter(c => (gs.arcPerduClues ?? []).includes(c.id)).map(c => (
                   <div key={c.id} className="t-xs" style={{ color: 'var(--dim)', lineHeight: 2 }}>
                     ✓ {c.clueText}
                   </div>
@@ -321,12 +306,12 @@ export function NexusScreen() {
             )}
             {gs.arcPerduUnlocked && !gs.raphazarusActivated && (
               <div className="t-xs t-dim" style={{ lineHeight: 2 }}>
-                La station est sur ta carte. Raphazarus ne s'est pas encore manifesté.
+                {t('arcOnMap')}
               </div>
             )}
             {gs.raphazarusActivated && (
               <div className="t-xs t-red" style={{ lineHeight: 2 }}>
-                ⚠ Raphazarus est en alerte — ses guerriers te traquent sur les routes.
+                {t('raphazarusAlert')}
               </div>
             )}
           </div>
@@ -336,20 +321,20 @@ export function NexusScreen() {
         {f.pillar === 'scotty' && !isOwned && (gs.scottyGambleWins ?? 0) > 0 && (
           <div className="px-box" style={{ borderColor: 'var(--gold)' }}>
             <div className="t-xs" style={{ color: 'var(--gold)' }}>
-              🎲 Progression gambling : {gs.scottyGambleWins}/3 manches gagnées
+              {t('gamblingProgress', { wins: gs.scottyGambleWins })}
             </div>
           </div>
         )}
 
         {!isOwned && !isHere && !isWarAvailable && (
           <div className="px-box" style={{ borderColor: 'var(--dim)' }}>
-            <div className="t-xs t-dim">Tu dois être à <span className="t-bright">{f.station}</span> pour tenter d'obtenir ce fragment.</div>
+            <div className="t-xs t-dim">{t('mustBeAtBefore')} <span className="t-bright">{f.station}</span> {t('mustBeAtAfter')}</div>
           </div>
         )}
 
         {!isOwned && isHere && (
           <div className="col gap4">
-            <div className="t-xs t-dim" style={{ padding: '0 4px' }}>Méthodes disponibles :</div>
+            <div className="t-xs t-dim" style={{ padding: '0 4px' }}>{t('availableMethods')}</div>
             {actions.map(action => {
               const check = canAttempt(gs, selected, action)
               const dangerColor = ACTION_DANGER[action]
@@ -371,7 +356,7 @@ export function NexusScreen() {
                     {chanceInfo && chance !== null && chance < 100 && (
                       <span className="t-xs" style={{ marginLeft: '8px', color: chanceInfo.color }}>{chance}% — {chanceInfo.label}</span>
                     )}
-                    {isDanger && action !== 'force' && <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>⚠ conséquences permanentes</span>}
+                    {isDanger && action !== 'force' && <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>{t('permanentConsequences')}</span>}
                   </button>
                   {!check.ok && check.reason && (
                     <div className="t-xs t-dim" style={{ padding: '2px 8px' }}>↳ {check.reason}</div>
@@ -391,22 +376,21 @@ export function NexusScreen() {
   return (
     <div className="layout">
       <div className="row" style={{ alignItems: 'center', gap: '12px' }}>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
-        <div className="t-sm t-bright" style={{ flex: 1 }}>STATION NEXUS</div>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{t('back')}</button>
+        <div className="t-sm t-bright" style={{ flex: 1 }}>{t('title')}</div>
         <div className="t-xs t-dim">{collected.length}/4</div>
       </div>
 
       <div className="px-box" style={{ borderColor: 'var(--purple)' }}>
-        <div className="t-xs t-purple mb4">ARC PRINCIPAL</div>
+        <div className="t-xs t-purple mb4">{t('mainArc')}</div>
         <div className="t-xs t-dim" style={{ lineHeight: '2' }}>
-          Quatre gardiens. Quatre fragments. Quatre façons de les obtenir — ou pas.
-          Le Nexus ne s'active qu'une fois tous les fragments réunis. La manière dont tu les as obtenus définira ce que tu es.
+          {t('mainArcDesc')}
         </div>
       </div>
 
       {isComplete && (
         <div className="px-box" style={{ borderColor: 'var(--gold)', textAlign: 'center' }}>
-          <div className="t-lg t-gold mb8">★ TOUS LES FRAGMENTS RASSEMBLÉS ★</div>
+          <div className="t-lg t-gold mb8">{t('allGathered')}</div>
           <div className="t-xs t-dim mb8">
             {Object.values(nexusPath).map((p, i) => (
               <span key={i} style={{ marginRight: '12px', color: 'var(--gold)' }}>{PATH_LABELS[p as NexusAction]}</span>
@@ -417,7 +401,7 @@ export function NexusScreen() {
             useMetaStore.getState().addRunSummary(summary)
             goTo('victory')
           }}>
-            ACTIVER LA STATION NEXUS →
+            {t('activateStation')}
           </button>
         </div>
       )}
@@ -425,10 +409,10 @@ export function NexusScreen() {
       {/* Guerres actives */}
       {(gs.nexusWars ?? []).filter(w => !w.resolved).length > 0 && (
         <div className="px-box" style={{ borderColor: 'var(--orange)' }}>
-          <div className="t-xs" style={{ color: 'var(--orange)', marginBottom: '4px' }}>⚔ GUERRES EN COURS</div>
+          <div className="t-xs" style={{ color: 'var(--orange)', marginBottom: '4px' }}>{t('warsInProgress')}</div>
           {(gs.nexusWars ?? []).filter(w => !w.resolved).map((w, i) => (
             <div key={i} className="t-xs t-dim">
-              {w.holderA.charAt(0).toUpperCase() + w.holderA.slice(1)} vs {w.holderB.charAt(0).toUpperCase() + w.holderB.slice(1)} — résolution dans {Math.max(0, 4 - (gs.day - w.startDay))} voyage(s)
+              {t('warTripsLeft', { holderA: w.holderA.charAt(0).toUpperCase() + w.holderA.slice(1), holderB: w.holderB.charAt(0).toUpperCase() + w.holderB.slice(1), trips: Math.max(0, 4 - (gs.day - w.startDay)) })}
             </div>
           ))}
         </div>
@@ -437,12 +421,12 @@ export function NexusScreen() {
       {/* Fragments récupérables après guerre */}
       {getWarAvailableFragments(gs).length > 0 && (
         <div className="px-box" style={{ borderColor: 'var(--orange)', background: 'rgba(255,140,0,0.06)' }}>
-          <div className="t-xs" style={{ color: 'var(--orange)' }}>⚔ FRAGMENTS RÉCUPÉRABLES — Va sur place pour les prendre au vainqueur affaibli</div>
+          <div className="t-xs" style={{ color: 'var(--orange)' }}>{t('fragmentsRecoverable')}</div>
         </div>
       )}
 
       <div className="col gap4">
-        {NEXUS_FRAGMENTS.map((f) => {
+        {getNexusFragments().map((f) => {
           const owned = collected.includes(f.idx)
           const here  = isFragmentAvailable(gs, f.idx)
           const warAvail = getWarAvailableFragments(gs).includes(f.idx)
@@ -472,7 +456,7 @@ export function NexusScreen() {
                   color:       owned ? 'var(--gold)' : angered ? 'var(--red)' : warAvail ? 'var(--orange)' : here ? color : 'var(--dim)',
                   fontSize: '9px'
                 }}>
-                  {owned ? PATH_LABELS[nexusPath[f.idx]!] ?? 'COLLECTÉ' : angered ? 'ENNEMI' : warAvail ? '⚔ RÉCUPÉRABLE' : here ? 'DISPONIBLE' : f.station}
+                  {owned ? PATH_LABELS[nexusPath[f.idx]!] ?? t('collected') : angered ? t('enemy') : warAvail ? t('recoverable') : here ? t('available') : f.station}
                 </div>
               </div>
               <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{f.lore.slice(0, 90)}…</div>
@@ -483,24 +467,24 @@ export function NexusScreen() {
                   <>
                     <div className="t-xs" style={{ marginTop: '4px', color: angered ? 'var(--red)' : standing >= 20 ? 'var(--green)' : 'var(--dim)' }}>
                       {angered
-                        ? '🗡 Te cherche — combat uniquement'
-                        : `Standing ${f.pillar}: ${standing > 0 ? '+' : ''}${standing} — ${getPillarStandingLabel(gs, f.pillar as any)}`
+                        ? t('huntingYou')
+                        : t('standingLine', { pillar: f.pillar, value: `${standing > 0 ? '+' : ''}${standing}`, label: getPillarStandingLabel(gs, f.pillar as any) })
                       }
                     </div>
                     <div className="t-xs" style={{ marginTop: '2px', color: sbCleared ? 'var(--green)' : 'var(--orange)' }}>
                       {sbCleared
-                        ? `✓ Lieutenants éliminés (${sbProg.done}/${sbProg.total})`
-                        : `⚔ Lieutenants : ${sbProg.done}/${sbProg.total} vaincus`
+                        ? t('lieutenantsCleared', { done: sbProg.done, total: sbProg.total })
+                        : t('lieutenantsRemaining', { done: sbProg.done, total: sbProg.total })
                       }
                     </div>
                     {f.pillar === 'raphazarus' && !gs.arcPerduUnlocked && (
                       <div className="t-xs" style={{ marginTop: '2px', color: 'var(--purple)' }}>
-                        ◆ Arc Perdu : {(gs.arcPerduClues ?? []).length}/4 indices
+                        {t('arcPerduClues', { count: (gs.arcPerduClues ?? []).length })}
                       </div>
                     )}
                     {f.pillar === 'scotty' && (gs.scottyGambleWins ?? 0) > 0 && (
                       <div className="t-xs" style={{ marginTop: '2px', color: 'var(--gold)' }}>
-                        🎲 Gambling : {gs.scottyGambleWins}/3 manches
+                        {t('gambling', { wins: gs.scottyGambleWins })}
                       </div>
                     )}
                   </>

@@ -1,0 +1,12 @@
+{
+  "magnat": { "name": "Magnat du Vide", "desc": "Accumuler 12 000 cr en une seule run.", "progress": "{{credits}} / 12 000 cr" },
+  "machineGuerre": { "name": "Machine de Guerre", "desc": "Gagner 12 combats dans cette run.", "progress": "{{count}} / 12 combats" },
+  "nomade": { "name": "Nomade Stellaire", "desc": "Survivre jusqu'au jour 20.", "progress": "Jour {{day}} / 20" },
+  "diplomate": { "name": "Diplomate de l'Ombre", "desc": "Rencontrer 10 PNJs différents.", "progress": "{{count}} / 10 PNJs" },
+  "soldatFaction": { "name": "Soldat de Faction", "desc": "Accomplir 6 missions de faction.", "progress": "{{count}} / 6 missions" },
+  "artisan": { "name": "Artisan du Vide", "desc": "Crafter 6 objets.", "progress": "{{count}} / 6 crafts" },
+  "contractuel": { "name": "Contractuel", "desc": "Accomplir 8 quêtes.", "progress": "{{count}} / 8 quêtes" },
+  "legendaire": { "name": "Légende Vivante", "desc": "Atteindre 60 de réputation.", "progress": "{{rep}} / 60 rép" },
+  "chasseurBoss": { "name": "Chasseur de Têtes", "desc": "Vaincre 3 boss.", "progress": "{{count}} / 3 boss" },
+  "collectionneur": { "name": "Collectionneur", "desc": "Avoir 5 types d'objets différents dans la soute simultanément.", "progress": "{{count}} / 5 types en soute" }
+}

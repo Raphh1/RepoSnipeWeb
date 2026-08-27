@@ -1,0 +1,174 @@
+{
+  "fragments": {
+    "alanossa": {
+      "name": "Fragment d'Alanossa",
+      "lore": "La grande pirate le garde comme un trophée de guerre. Elle l'a arraché lors de la Purge de l'Ouest — au prix de la moitié de son équipage. Pour elle, il représente ce que personne ne peut lui prendre. Sauf peut-être quelqu'un qui mérite de le détenir."
+    },
+    "cesarion": {
+      "name": "Fragment Impérial",
+      "lore": "Cesarion ne cède rien. Il possède le fragment depuis avant qu'il monte sur le trône — héritage d'un père qu'il a lui-même renversé. Sa valeur n'est pas symbolique : elle est stratégique. Y toucher, c'est attaquer l'Emporium entier."
+    },
+    "raphazarus": {
+      "name": "Fragment du Général",
+      "lore": "Raphazarus a disparu avec son fragment après la Grande Guerre. 47 ans dans l'Arc Perdu — une station que personne ne sait localiser. Il attend. Il observe. Et quand tu commences à rassembler les fragments, il se réveille. Le Général ne négocie pas. Il ne pardonne pas. Il ne perd pas."
+    },
+    "scotty": {
+      "name": "Fragment de Scotty",
+      "lore": "Samy Scotty l'a obtenu aux cartes, il y a longtemps. Il le garde dans son coffre-fort personnel, entre une bouteille de whisky vieux et un pistolet chargé. Pour lui, tout a un prix — mais le prix n'est pas toujours en crédits."
+    }
+  },
+  "chanceLabels": {
+    "impossible": "Impossible",
+    "veryRisky": "Très risqué",
+    "risky": "Risqué",
+    "probable": "Probable",
+    "certain": "Quasi certain"
+  },
+  "standingLabels": {
+    "allie": "Allié",
+    "respecte": "Respecté",
+    "connu": "Connu",
+    "neutre": "Neutre",
+    "mefiant": "Méfiant",
+    "ennemi": "Ennemi"
+  },
+  "canAttempt": {
+    "subBossesBlock": "{{pillar}} refuse de te recevoir — ses lieutenants te barrent la route ({{done}}/{{total}} vaincus)",
+    "angeredEnemy": "{{pillar}} est ton ennemi juré — seul le combat est possible",
+    "allianceRivalBlock": "{{pillar}} refuse : tu es déjà allié à {{rival}}, son rival. Trahis-le d'abord, ou choisis ton camp.",
+    "methodUnavailable": "Méthode indisponible",
+    "meetAnotherHolder": "Rencontre d'abord un autre détenteur pour semer la discorde",
+    "meetAnotherHolderShort": "Rencontre d'abord un autre détenteur",
+    "alanossa": {
+      "payStandingLow": "Standing Alanossa trop négatif — elle refuse de traiter avec toi",
+      "payCreditsMissing": "Manque {{amount}} cr",
+      "allianceStandingLow": "Standing Alanossa {{value}}/28",
+      "allianceRepLow": "Réputation {{value}}/55",
+      "allianceCombatsLow": "Combats gagnés {{value}}/6",
+      "allianceProofMissing": "⚠ Élimine les lieutenants de Cesarion OU Scotty pour prouver ta valeur",
+      "warStandingLow": "Standing Alanossa insuffisant — elle ne t'écouterait pas",
+      "manipStandingLow": "Standing Alanossa insuffisant ({{value}}/20) — cette guerrière ne se laisse pas avoir facilement",
+      "manipCreditsLow": "Manque de crédits pour l'entourloupe (7000 cr) — Alanossa est chère à duper",
+      "manipExperienceLow": "Pas assez d'expérience de combat ({{value}}/4) — elle repère les faibles"
+    },
+    "cesarion": {
+      "forceUnarmed": "Cesarion refuse le combat face à quelqu'un de désarmé",
+      "payRefuse": "Cesarion refuse toute transaction directe. L'Empire ne se marchande pas — il se mérite.",
+      "allianceStandingLow": "Standing Cesarion {{value}}/45",
+      "allianceRepLow": "Rép. Emporium {{value}}/35",
+      "allianceQuestsLow": "Quêtes complétées {{value}}/3",
+      "allianceProofMissing": "⚠ Élimine les lieutenants d'Alanossa OU Raphazarus pour prouver ta loyauté à l'Empire",
+      "warStandingLow": "Standing Cesarion insuffisant — il ne t'accordera pas d'audience",
+      "manipStandingLow": "Standing Cesarion insuffisant ({{value}}/25) — il a des conseillers partout",
+      "manipCreditsLow": "Manque de crédits pour l'opération (10 000 cr) — corrompre l'Emporium coûte cher",
+      "manipQuestsLow": "Pas assez d'antécédents — Cesarion vérifie tout"
+    },
+    "raphazarus": {
+      "arcLocked": "L'Arc Perdu est introuvable — cherche des indices auprès des PNJs dans les stations",
+      "forceUnarmed": "Raphazarus refuse de combattre un adversaire désarmé — par respect, pas par pitié",
+      "forceLowHp": "Raphazarus te regarde et secoue la tête. \"Reviens quand tu seras en état de te battre.\" (PV {{hp}}/{{maxHp}})",
+      "payRefuse": "Raphazarus ne peut pas être acheté. Il a refusé des fortunes. L'argent n'a pas de sens pour un homme qui a tout perdu.",
+      "allianceStandingLow": "Standing Raphazarus {{value}}/40",
+      "allianceCombatsLow": "Combats gagnés {{value}}/8",
+      "allianceFragmentsLow": "Fragments collectés {{value}}/2",
+      "warStandingLow": "Raphazarus ne t'écoute pas — standing trop faible (15 requis)",
+      "manipStandingLow": "Raphazarus voit clair — standing {{value}}/25",
+      "manipExperienceLow": "Pas assez d'expérience au combat ({{value}}/6) — il te percera à jour",
+      "manipCreditsLow": "Fonds insuffisants pour monter l'opération (6000 cr)"
+    },
+    "scotty": {
+      "payRefuse": "Scotty refuse — il ne vend pas ce fragment, il ne le fait que gagner ou offrir. C'est une question de principe, pas d'argent.",
+      "allianceStandingLow": "Standing Scotty {{value}}/25",
+      "allianceDayLow": "Jour {{day}}/5 — il faut le temps de se faire connaître",
+      "gambleMiseRequired": "Mise requise : {{amount}} cr (manche {{round}}/3)",
+      "warStandingLow": "Scotty ne t'écouterait pas — standing trop faible",
+      "manipStandingLow": "Standing Scotty insuffisant ({{value}}/10)",
+      "manipCreditsLow": "Mise pour l'entourloupe : 4000 cr minimum"
+    }
+  },
+  "attempt": {
+    "unknownFragment": "Quelque chose a mal tourné.",
+    "alanossa": {
+      "force": "Tu l'affrontes en plein pont de commandement. Elle rit et sort sa lame. 'C'est le meilleur argument que j'aie entendu aujourd'hui.'",
+      "paySuccess": "Elle compte les crédits sans se presser. 'Deux cent mille. Personne paie ça sans raison.' Elle sourit et pose le fragment sur la table. 'J'aime les gens qui savent ce qu'ils veulent.' -200 000 cr.",
+      "payFail": "Elle prend les crédits, les compte, les glisse dans un coffre. 'Merci pour le don.' Elle ne te donne rien en retour. -200 000 cr, pour rien.",
+      "alliance": "Elle regarde les dossiers que tu lui apportes — les lieutenants d'un autre pilier, tous éliminés par tes mains. Un long silence. 'T'as fait le ménage chez les autres avant de venir chez moi. C'est soit de la loyauté, soit de la stratégie.' Elle sourit. 'J'aime les deux.' Elle pose le fragment dans ta main. 'Bienvenue dans la famille.'",
+      "war": "Tu glisses à Alanossa de fausses infos sur {{target}}. Elle écoute, mâchoires serrées. 'Il a vraiment fait ça ?' La paix entre eux est terminée. Mais les deux pourraient bien te chercher si la vérité éclate.",
+      "manipSuccess": "Tu lui joues la comédie du partenariat stratégique. Elle y croit — une guerrière, pas une politique. Le fragment change de main dans le cadre d'un 'accord de sang'. -7000 cr.",
+      "manipFail": "Elle voit clair dans ton jeu. Les guerriers sanguinaires ont un instinct que tu ne peux pas tromper. 'T'aurais dû venir les armes à la main.' Elle dégaine. -7000 cr, combat imminent."
+    },
+    "cesarion": {
+      "force": "Tu défies Cesarion dans son propre trône. Il se lève lentement. 'Je t'accorde le respect de ne pas appeler les gardes.' Il sort une lame de derrière le dossier. 'Tu vas le regretter.'",
+      "alliance": "Il examine les preuves de tes exploits — les lieutenants d'un rival, tous neutralisés. Son regard ne change pas, mais sa voix s'adoucit d'un micron. 'Tu as prouvé ta loyauté par le sang. C'est la seule monnaie que l'Empire reconnaît.' Il ouvre un coffre blindé. 'Bienvenue dans les cercles intérieurs.'",
+      "war": "Tu présentes à Cesarion des données fabriquées sur {{target}}. Il les analyse en silence. 'Intéressant. Très intéressant.' Il appelle ses conseillers. La guerre commerciale — ou pire — vient de commencer.",
+      "manipSuccess": "Tu lui présentes le fragment comme un investissement stratégique. La logique est tordue mais les chiffres tiennent — et Cesarion respecte les chiffres. 'Un partenariat inhabituel.' -10 000 cr.",
+      "manipFail": "Cesarion a des conseillers, des espions, et un instinct de guerrier impérial. Tes calculs ne passent pas. 'L'audace sans la force est une faiblesse.' Combat. -10 000 cr."
+    },
+    "raphazarus": {
+      "force": "Raphazarus se lève de son siège — lentement, comme s'il avait tout le temps du monde. Il pose son regard sur toi, celui d'un homme qui a vu des civilisations s'éteindre. 'Tu sais ce que ça fait, de perdre une guerre ?' Il dégaine. 'Tu vas l'apprendre.'",
+      "allianceLateGame": "Il te fixe longtemps. Très longtemps. 'Tu as fait ce que j'ai échoué à faire — réunir ce qui a été brisé.' Il ouvre sa main. Le fragment brille. 'Finis ce que j'ai commencé. Et ne trahis pas leur mémoire.'",
+      "allianceEarlyGame": "Il écoute ton histoire en silence. Tes combats, tes choix, tes cicatrices. Quand tu finis, il dit simplement : 'Tu n'es pas un soldat. Mais tu as la discipline d'un guerrier.' Il pose le fragment entre vous deux. 'Prouve que tu mérites ce que des milliers sont morts pour protéger.'",
+      "war": "Tu présentes à Raphazarus des informations falsifiées sur {{target}}. Le Général ne réagit pas tout de suite. Il analyse. Puis : 'Si c'est vrai, c'est une déclaration de guerre. Et je ne perds pas les guerres.' Ses vétérans commencent à se mobiliser. La tempête arrive.",
+      "manipSuccess": "Tu montes une opération complexe — faux renseignements, fausses pistes, fausse urgence. Raphazarus, pour la première fois en 47 ans, quitte l'Arc Perdu. Le fragment est resté. Tu ne restes pas longtemps non plus. -6000 cr.",
+      "manipFail": "Raphazarus a survécu à la Grande Guerre. Il a vu des manipulations plus élaborées que la tienne avant le petit-déjeuner. 'Intéressant.' Son regard se durcit. 'Maintenant, on fait ça à ma façon.' -6000 cr. Combat."
+    },
+    "scotty": {
+      "force": "'Tss. Tu pouvais juste payer.' Il siffle. Les gardes entrent par trois portes. Scotty se rassied avec son verre. 'Je regarde — c'est plus intéressant comme ça.'",
+      "alliance": "Scotty t'observe par-dessus son verre. 'T'as jamais triché, jamais mal joué.' Il ouvre son coffre. 'Dans mon métier, la loyauté dure rarement. La tienne oui.' Il te tend le fragment. 'Maintenant, bois quelque chose.'",
+      "war": "Scotty écoute ton histoire sur {{target}} avec un sourire croissant. 'Ah. Intéressant jeu.' Il sort un communicateur. 'Ce genre de rumeur fait de très bonnes affaires — pour moi.' La guerre vient de commencer, et Scotty en tirera profit d'une façon ou d'une autre.",
+      "manipSuccess": "Tu lui présentes un deal tellement tordu que même lui n'arrive pas à trouver le piège. Il accepte juste pour voir. 'T'es soit brillant soit fou.' Le fragment change de main. -4000 cr.",
+      "manipFail": "Scotty est dans les combines depuis trop longtemps. Il voit le piège avant que tu le refermes. 'Pas mal. Mais non.' Il appelle la sécurité. -4000 cr.",
+      "gambleGames": [
+        { "name": "le Menteur Stellaire", "winMsg": "Tu repères son bluff — un léger tic au coin de l'œil. 'Pas mal, gamin.'", "loseMsg": "Il retourne ses cartes. Full. Tu avais rien. 'C'est le jeu.'" },
+        { "name": "le Dé de l'Abîme", "winMsg": "Le dé roule, roule, et s'arrête sur ton chiffre. Scotty siffle. 'La chance est une pute. Mais là, elle t'aime bien.'", "loseMsg": "Le dé te trahit. Scotty ramasse tes crédits. 'Tu veux vraiment continuer ? Je t'admire.'" },
+        { "name": "la Roulette du Vide", "winMsg": "La bille atterrit dans ton secteur. Scotty se lève, applaudit. 'Trois manches. Personne a jamais gagné trois manches. Personne.' Il ouvre le coffre.", "loseMsg": "La roulette tourne. Et tourne. Et s'arrête. Pas sur ton numéro. 'Presque. C'est toujours presque.' -crédits." }
+      ],
+      "gambleWin3": "🎲 MANCHE {{round}}/3 — {{game}}. {{winMsg}} Le fragment est à toi. 'Accord de joueur, accord de gentleman.'",
+      "gambleWinNext": "🎲 MANCHE {{round}}/3 — {{game}}. {{winMsg}} Manche suivante : mise plus élevée, Scotty plus concentré.",
+      "gambleLose": "🎲 MANCHE {{round}}/3 — {{game}}. {{loseMsg}} -{{amount}} cr. Tes victoires sont réinitialisées."
+    }
+  },
+  "wars": {
+    "resolved": "⚔ GUERRE RÉSOLUE — {{winner}} a vaincu {{loser}}. Le fragment de {{loser}} est maintenant récupérable — mais {{winner}} sait que tu es derrière tout ça."
+  },
+  "fragmentStatus": {
+    "collected": "COLLECTÉ",
+    "recoverableWar": "⚔ RÉCUPÉRABLE (guerre)",
+    "available": "DISPONIBLE"
+  },
+  "subBossKill": {
+    "allDefeated": "⚠ Tu as éliminé TOUS les lieutenants de {{boss}}. Son regard est maintenant fixé sur toi — et il t'attend en personne.",
+    "oneDefeated": "⚠ La mort de son lieutenant remonte jusqu'à {{boss}}. Il sait que tu approches.",
+    "rivalRallied": "🤝 {{boss}} a mis sa rancune de côté : il s'est rapproché de {{rival}} pour te barrer la route.",
+    "rivalOpening": "💬 {{rival}}, en froid avec {{boss}}, a eu vent de ton coup. Il te fait passer un message : « On devrait parler. »",
+    "vigilance": "👁 {{boss}} renforce sa garde. La prochaine confrontation sera plus rude."
+  },
+  "bountyHunters": {
+    "alanossa": { "name": "Le Vengeur d'Alanossa", "description": "Le meilleur chasseur des Faucons. Ordres directs d'Alanossa. Il ne négocie pas." },
+    "cesarion": { "name": "L'Exécuteur Impérial", "description": "Envoyé personnel de Cesarion. Armé par l'Emporium. Formé pour une seule chose." },
+    "raphazarus": { "name": "Le Dernier Soldat", "description": "Envoyé personnel de Raphazarus. Formé pendant la Grande Guerre. Il ne s'arrête pas. Il ne négocie pas. Il ne meurt pas facilement." },
+    "scotty": { "name": "Malone le Collecteur", "description": "Scotty l'a engagé sur la prime. Malone travaille vite et proprement. Il veut juste être payé." }
+  },
+  "clues": {
+    "clueCendres": { "dialogue": "Un vieil homme couvert de cendres te fixe. 'Tu cherches le Général ? Hmph. Tout le monde le cherche. Personne le trouve.' Il crache par terre. 'Moi j'étais sous ses ordres au 3e Bataillon. La dernière fois que je l'ai vu, il partait vers le secteur Velkor avec une escorte de six vaisseaux. Six. Il en est revenu un seul.'", "clueText": "Le Général est parti vers le secteur Velkor après la Grande Guerre." },
+    "clueFantome": { "dialogue": "Elle ne parle pas. Elle n'a jamais parlé — du moins pas depuis l'incident. Mais quand tu montres la plaque du 3e Bataillon, ses yeux s'agrandissent. Elle griffonne sur un morceau de métal : 'L'Arc Perdu n'a pas été détruit. Il dérive. Coordonnées partielles : secteur 7-Kappa. Cherche le signal fantôme.'", "clueText": "L'Arc Perdu dérive dans le secteur 7-Kappa — chercher un signal fantôme." },
+    "clueForge": { "dialogue": "'Tu veux trouver Raphazarus ?' L'armurier rit — un son qui ressemble à du métal qu'on tord. 'J'ai forgé ses armes pendant vingt ans. Il m'a dit un jour : Si quelqu'un vient me chercher, dis-lui que je suis là où la lumière ne va pas. Là où les étoiles meurent.' Il te montre une carte gravée dans l'acier. 'La Nébuleuse Noire, entre Velkor et Quarantaine. C'est là.'", "clueText": "L'Arc Perdu se cache dans la Nébuleuse Noire, entre les Abysses de Velkor et Station Quarantaine." },
+    "clueExilee": { "dialogue": "'J'ai déserté le 7e Corps il y a trente ans. Raphazarus m'a laissé partir — le seul qu'il ait jamais laissé partir.' Il tremble. 'Mais il m'a dit quelque chose ce jour-là. Il a dit : Mon arc n'est pas perdu. Il est caché. Et le jour où quelqu'un le trouvera, c'est que le Nexus aura besoin de lui.' Il te donne une fréquence radio. 'Émets sur cette fréquence dans la Nébuleuse Noire. Il répondra. Ou il te tuera. Probablement les deux.'", "clueText": "Fréquence radio secrète pour contacter l'Arc Perdu dans la Nébuleuse Noire." },
+    "clueQuarantaine": { "dialogue": "'Raphazarus ?' Le médecin pâlit. 'Je l'ai soigné après la Bataille de Korsun. Il avait pris sept balles. Sept. Il s'est relevé le lendemain.' Il baisse la voix. 'Son vaisseau, l'Arc, émet un signal médical codé — protocole de la Grande Guerre. Fréquence 7-Kappa-12. Si tu captes ce signal, tu le trouveras. Mais réfléchis avant d'y aller. Il ne reçoit pas de visiteurs.'", "clueText": "Signal médical codé de la Grande Guerre — fréquence 7-Kappa-12 confirme la position." },
+    "clueVelkor": { "dialogue": "'La Nébuleuse Noire ? Oui, j'y suis allée. Une fois.' Elle montre une cicatrice qui court de sa tempe à sa mâchoire. 'Il y a quelque chose là-bas. Une station qui ne devrait pas exister. Pas sur les cartes. Pas sur les scans. Mais je l'ai VUE. Immense. Silencieuse. Et les canons étaient pointés vers moi avant que je puisse faire demi-tour.' Elle frissonne. 'Si tu veux y aller, assure-toi d'être prêt à mourir.'", "clueText": "Confirmation visuelle : une station fortifiée non répertoriée dans la Nébuleuse Noire." }
+  },
+  "clueMessages": {
+    "unlocked": "★ L'ARC PERDU LOCALISÉ — Les indices convergent. La Nébuleuse Noire, secteur 7-Kappa. L'Arc Perdu apparaît sur ta carte de navigation. Raphazarus t'attend.",
+    "collected": "Indice collecté ({{count}}/{{needed}}). {{clueText}}"
+  },
+  "clueRequirements": {
+    "credits": "{{amount}} cr requis",
+    "reputation": "Réputation {{value}}/{{needed}}",
+    "standing": "Standing Raphazarus {{value}}/{{needed}}"
+  },
+  "warriors": {
+    "eclaireur": { "name": "Éclaireur du Général", "description": "Envoyé par Raphazarus pour te traquer. Armé légèrement mais rapide." },
+    "veteran": { "name": "Vétéran de la Grande Guerre", "description": "Un survivant de la Grande Guerre envoyé par Raphazarus. Il a vu pire que toi." },
+    "assassin": { "name": "Assassin du 7e Corps", "description": "Spécialiste en élimination du 7e Corps de Raphazarus. Silencieux. Mortel." }
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "stunned": {
+    "title": "ASSOMMÉ",
+    "byEnemy": "{{name}} t'a mis hors combat.",
+    "genericFall": "Tu t'effondres.",
+    "wakeUp": "Quand tu reprends conscience, le couloir est vide.",
+    "pocketsEmpty": "Tes poches aussi.",
+    "creditsStolen": "Crédits volés",
+    "hpRemaining": "PV restants",
+    "creditsRemaining": "Crédits restants",
+    "flavor": "Tu te relèves. Lentement. Le vide t'a épargné — cette fois.",
+    "backToCell": "Retour en cellule →",
+    "riseAndContinue": "Se relever et continuer →"
+  },
+  "captured": {
+    "title": "CAPTURÉ",
+    "byEnemy": "{{name}} ne te laisse pas le choix.",
+    "genericNoChoice": "Ils ne te laissent pas le choix.",
+    "cuffs": "Menottes. Sol froid. Fouille complète.",
+    "theirsNow": "Tout ce qu'ils trouvent leur appartient maintenant.",
+    "creditsSeized": "Crédits saisis (25%)",
+    "cargoConfiscated": "Cargaison confisquée",
+    "cargoType": "{{count}} type{{plural}} de cargo",
+    "weaponSeized": "Arme saisie",
+    "initialSentence": "Peine initiale",
+    "threeDays": "3 jours",
+    "options": "Tu peux purger ta peine, payer la caution, soudoyer un garde, ou tenter une évasion.",
+    "costWarning": "Purger sa peine a un coût. La liberté aussi.",
+    "toCell": "Vers la cellule →"
+  },
+  "fled": {
+    "title": "FUITE",
+    "running": "Tu cours. Tu ne te retournes pas.",
+    "byEnemy": "{{name}} crie derrière toi. Tu n'entends plus rien.",
+    "genericAdrenaline": "L'adrénaline fait le reste.",
+    "shipStarts": "Ton vaisseau démarre avant que les portes soient fermées.",
+    "fuel": "Carburant",
+    "fuelRemaining": "{{value}} restant",
+    "fleeCount": "Fuites au compteur",
+    "flavor": "Survivre, c'est aussi une forme de victoire.",
+    "backToCell": "Retour en cellule →",
+    "continue": "Continuer →"
+  },
+  "back": "← Retour"
+}

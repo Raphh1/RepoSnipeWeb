@@ -1,0 +1,33 @@
+{
+  "bossKilled": {
+    "reward": { "title": "Prime de faction", "description": "Des représentants d'une faction locale t'ont retracé. Le boss que tu as éliminé avait une mise à prix non réclamée. Ils règlent la dette. +{{amount}} cr · +5 réputation." },
+    "threat": { "title": "Représailles attendues", "description": "Les associés du boss ont retrouvé ta trace. Un message laissé au barman local : \"Tu as tué quelqu'un qui avait des amis. On se souvient.\" Quelqu'un te surveille maintenant. -8 réputation." },
+    "mystery": { "title": "Ce que le boss cachait", "description": "Dans les effets personnels du boss, un datapad crypté. Les données portent ton nom — et une date qui précède de trois semaines ton arrivée dans le secteur. Quelqu'un te suivait avant même l'affrontement." }
+  },
+  "stalkerKilled": {
+    "reward": { "title": "Le stalker avait des ennemis", "description": "Un intermédiaire sans visage t'aborde. Bref. Discret. \"Il avait beaucoup d'ennemis. Tu nous as rendu service.\" Une bourse change de mains. +{{amount}} cr." },
+    "mystery": { "title": "Il ne travaillait pas seul", "description": "Un message anonyme, sans source traçable : \"Tu as bien géré le problème. Mais tu dois savoir — il ne travaillait pas seul. Ce qu'il cherchait sur toi, d'autres continuent à chercher. Sois prudent.\"" },
+    "info": { "title": "Qui l'avait envoyé ?", "description": "Dans les registres de voyage du stalker, une piste. Une transaction financière depuis une station que tu connais. Quelqu'un a payé pour qu'on te retrouve. Tu ne sais pas encore pourquoi." }
+  },
+  "factionLoyal": {
+    "faucons": { "title": "Message de Cael — Les Faucons", "description": "\"Les Faucons ne font pas dans les compliments. Mais le travail accompli mérite reconnaissance. Voilà ta part.\" Un paiement direct, propre. +1 200 cr." },
+    "emporium": { "title": "Commission de Pistis — L'Emporium", "description": "Un virement automatique. Froid, précis, sans commentaire. Puis un message de Pistis : \"Efficacité notée. Continuez.\" +900 cr · +3 réputation." },
+    "gardiens": { "title": "Ravitaillement de Myrra — Les Gardiens", "description": "Un colis livré en ton nom. Médicaments, une unité de carburant, et un mot de Myrra : \"Les Gardiens n'oublient pas les leurs. Reste en vie.\" +2 Médicaments · +1 carburant · +5 rép." },
+    "culte": { "title": "Paroles de Neva — Le Culte", "description": "Un extrait du Livre du Vide, chapitre non publié, envoyé personnellement par Neva. Les mots sont troublants. Tu ne sais pas encore si c'est une récompense ou un avertissement. +8 réputation." }
+  },
+  "lowRep": {
+    "consequence": { "title": "Taxe informelle", "description": "L'Emporium a mis ton profil en alerte. Une commission \"administrative\" est prélevée automatiquement sur tes prochaines transactions. -200 cr." },
+    "threat": { "title": "Mandat des Gardiens", "description": "Ton comportement a été suffisamment documenté pour justifier un mandat préventif. Les Gardiens ont officiellement enregistré ton dossier. Les stations affiliées ne t'accueilleront pas chaleureusement. -12 réputation." },
+    "info": { "title": "Réputation qui précède", "description": "Un informateur a vendu ton profil de comportement sur le réseau noir. Les acheteurs sont multiples. Certains sont curieux. D'autres ont des raisons plus concrètes. -5 réputation." }
+  },
+  "rich": {
+    "consequence": { "title": "Commission Emporium", "description": "L'Emporium surveille les flux financiers importants du secteur. Tes actifs ont déclenché une alerte. Une \"frais de supervision\" est prélevée. C'est légal selon l'Accord de Requiem. -500 cr." },
+    "reward": { "title": "Client fidèle", "description": "Un commerçant avec qui tu as régulièrement traité t'envoie une commission surprise. \"Pour la fidélité. Le secteur manque de gens fiables.\" +350 cr." },
+    "threat": { "title": "Profil financier compromis", "description": "Quelqu'un a mis ton profil financier en circulation sur le réseau noir. Montant estimé, dernières transactions, station actuelle. Des gens s'y intéressent. Des gens avec des projets. Reste vigilant. -5 réputation." }
+  },
+  "prisonEscaped": {
+    "consequence": { "title": "Mandat d'arrestation", "description": "Les Gardiens ont émis un mandat officiel suite à ton évasion. Distribué aux stations affiliées. Ta réputation dans le secteur prend un coup immédiat. -15 réputation." },
+    "reward": { "title": "Souvenir de cellule", "description": "Ton ancien codétenu t'a envoyé quelque chose. Un message : \"Tu m'as appris à tenir. Voilà ce que je peux faire pour toi.\" Des provisions cachées à l'entrée de la station. +2 Médicaments · +1 carburant." },
+    "mystery": { "title": "Ce que le gardien savait", "description": "Un gardien de prison te contact de façon anonyme. \"J'ai vu ton dossier. Il y a des choses là-dedans que tu ignores sur toi-même. Des connexions que tu n'as pas faites. Si tu veux savoir — retrouve-moi.\" Pas de station. Pas de nom." }
+  }
+}

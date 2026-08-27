@@ -1,0 +1,24 @@
+{
+  "back": "← RETOUR",
+  "title": "MÉMOIRE DU VIDE",
+  "fragmentsCount": "{{found}}/{{total}} fragments",
+  "backToArchives": "← Retour aux archives",
+  "noneFound": "Aucun fragment trouvé.",
+  "noneFoundHint": "Explore les stations. Le vide a une mémoire.",
+  "all_one": "Tous ({{count}})",
+  "all_other": "Tous ({{count}})",
+  "undiscovered": "FRAGMENTS NON DÉCOUVERTS ({{count}})",
+  "theme": {
+    "fracture": "LA FRACTURE",
+    "faucons": "LES FAUCONS",
+    "emporium": "L'EMPORIUM",
+    "gardiens": "LES GARDIENS",
+    "culte": "LE CULTE",
+    "void": "LA DÉRIVE & LE VIDE",
+    "zero": "STATION ZÉRO",
+    "rho": "L'INGÉNIEUR RHO",
+    "life": "FRAGMENTS DE VIE",
+    "outside": "LE SECTEUR",
+    "other": "DIVERS"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "easy": [
+    { "q": "Combien de jours dans une semaine ?", "choices": ["5", "7", "10", "12"] },
+    { "q": "Quelle est la couleur du ciel par temps clair ?", "choices": ["Vert", "Rouge", "Bleu", "Jaune"] },
+    { "q": "Combien font 7 × 8 ?", "choices": ["54", "56", "64", "49"] },
+    { "q": "Quel astre éclaire la Terre le jour ?", "choices": ["La Lune", "Le Soleil", "Mars", "Vénus"] },
+    { "q": "Combien de pattes a une araignée ?", "choices": ["6", "8", "10", "4"] },
+    { "q": "Quelle planète habitons-nous ?", "choices": ["Mars", "Jupiter", "La Terre", "Saturne"] },
+    { "q": "Combien de côtés a un triangle ?", "choices": ["3", "4", "5", "6"] },
+    { "q": "Quel animal aboie ?", "choices": ["Le chat", "Le chien", "La vache", "Le canard"] },
+    { "q": "Quelle est la capitale de la France ?", "choices": ["Lyon", "Marseille", "Paris", "Bordeaux"] },
+    { "q": "Combien font 100 ÷ 4 ?", "choices": ["20", "25", "40", "50"] },
+    { "q": "De quelle couleur est l'herbe ?", "choices": ["Bleue", "Verte", "Rouge", "Noire"] },
+    { "q": "Quel liquide tombe quand il pleut ?", "choices": ["Du lait", "De l'eau", "Du sable", "De l'huile"] },
+    { "q": "Combien de doigts a une main (en général) ?", "choices": ["4", "5", "6", "3"] },
+    { "q": "Quel est le contraire de \"chaud\" ?", "choices": ["Froid", "Mouillé", "Grand", "Lourd"] },
+    { "q": "Dans quel océan se trouve la France métropolitaine côté ouest ?", "choices": ["Pacifique", "Indien", "Atlantique", "Arctique"] },
+    { "q": "Combien font 12 + 13 ?", "choices": ["24", "25", "26", "23"] },
+    { "q": "Quel fruit est jaune et courbé ?", "choices": ["La pomme", "La banane", "La fraise", "Le raisin"] },
+    { "q": "Quelle saison vient après l'hiver ?", "choices": ["L'été", "L'automne", "Le printemps", "La mousson"] },
+    { "q": "Combien de minutes dans une heure ?", "choices": ["30", "45", "60", "100"] },
+    { "q": "Quel métal est attiré par un aimant ?", "choices": ["L'or", "Le fer", "Le cuivre", "L'argent"] },
+    { "q": "Quelle forme a un ballon de football ?", "choices": ["Cube", "Sphère", "Pyramide", "Cylindre"] },
+    { "q": "Combien de continents y a-t-il (modèle courant) ?", "choices": ["5", "6", "7", "9"] },
+    { "q": "Quel gaz respirons-nous pour vivre ?", "choices": ["Azote", "Oxygène", "Hélium", "Méthane"] },
+    { "q": "Quel est le premier nombre premier ?", "choices": ["0", "1", "2", "3"] },
+    { "q": "Quelle est la couleur du sang humain ?", "choices": ["Bleu", "Rouge", "Vert", "Jaune"] },
+    { "q": "Combien de roues a une voiture standard ?", "choices": ["2", "3", "4", "6"] }
+  ],
+  "impossible": [
+    { "q": "Combien de grains de sable y a-t-il exactement sur la plage de Velkor ?", "choices": ["8 412 003 991", "8 412 003 992", "8 412 003 990", "Aucune idée, évidemment"] },
+    { "q": "À quoi pensait l'interrogateur précisément il y a trois secondes ?", "choices": ["À sa retraite", "À toi", "À son petit-déjeuner", "À rien"] },
+    { "q": "Quel était le prénom du chien du voisin de ton geôlier en 2174 ?", "choices": ["Brutus", "Pixel", "Sergent", "Mochi"] },
+    { "q": "Quelle est la 9 999 999e décimale de Pi ?", "choices": ["1", "4", "7", "8"] },
+    { "q": "Combien de fois as-tu cligné des yeux depuis ta capture ?", "choices": ["142", "317", "88", "Personne ne compte ça"] },
+    { "q": "Quel nombre l'interrogateur a-t-il en tête, là, maintenant ?", "choices": ["7", "42", "13", "666"] },
+    { "q": "Quelle est la couleur préférée du grand-père de l'Empereur Cesarion ?", "choices": ["Pourpre", "Ocre", "Cyan", "Personne ne le sait"] },
+    { "q": "Quel jour de la semaine tomberait le 3e anniversaire du vaisseau qui t'a capturé ?", "choices": ["Lundi", "Jeudi", "Samedi", "Dimanche"] },
+    { "q": "Combien de poils as-tu exactement sur le bras gauche ?", "choices": ["2 209", "11 040", "7 777", "Sérieusement ?"] },
+    { "q": "Quel est le dernier mot que prononcera l'interrogateur avant de mourir ?", "choices": ["\"Maman\"", "\"Encore\"", "\"Pourquoi\"", "Indéterminable"] }
+  ]
+}

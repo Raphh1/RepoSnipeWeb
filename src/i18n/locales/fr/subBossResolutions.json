@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "kill": "Affronter",
+    "manipulate": "Manipuler",
+    "sabotage": "Saboter",
+    "ally": "Rallier",
+    "betray": "Trahir"
+  },
+  "canResolve": {
+    "manipulateWhyNot": "Manque {{amount}} cr",
+    "manipulateHintFail": "-{{cr}} cr · {{pct}}%",
+    "manipulateHintOk": "-{{cr}} cr · {{pct}}% · échec = combat",
+    "sabotageWhyNot": "2× Composants électroniques requis ({{have}}/2)",
+    "sabotageHintFail": "2× Composants · {{pct}}%",
+    "sabotageHintOk": "2× Composants électroniques · {{pct}}%",
+    "allyStandingReason": "Standing {{pillar}} {{cur}}/{{req}}",
+    "allyRepReason": "Réputation {{rep}}/40",
+    "allyHintFail": "Standing {{req}}+ & rép 40+",
+    "allyHintOk": "Le rallier à ta cause · +standing",
+    "betrayWhyNot": "Approche-le d'abord (standing {{pillar}} {{cur}}/15)",
+    "betrayHintFail": "Standing 15+ · gros butin, -standing",
+    "betrayHintOk": "Gros butin · -standing, -réputation",
+    "conditionsNotMet": "Conditions non remplies.",
+    "unavailable": "Méthode indisponible."
+  },
+  "resolve": {
+    "manipulateSuccess": "Tu montes une mise en scène taillée pour lui : « {{trait}}. » Tu exploites précisément ça. {{name}} mord à l'hameçon et se retire, persuadé d'avoir pris la bonne décision. Il ne comprendra jamais. -{{cr}} cr.",
+    "manipulateFail": "{{name}} te laisse dérouler ton mensonge… puis sourit. « Tu me prends pour un débutant ? » Il a vu clair. -{{cr}} cr, -{{hp}} PV, et il dégaine. Il faut se battre.",
+    "sabotageSuccess": "Tu bricoles ses systèmes en amont — {{mechanic}}. Quand {{name}} veut réagir, rien ne répond. Neutralisé sans un coup de feu. -2 Composants électroniques.",
+    "sabotageFail": "Le sabotage tourne mal — une alarme se déclenche. {{name}} sait maintenant que tu es venu pour lui, et il t'attend de pied ferme. -2 Composants électroniques.",
+    "allySuccess": "Tu ne le combats pas : tu lui offres mieux. « {{motivation}} » — tu lui montres que ton chemin sert ce but plus que {{boss}} ne le fera jamais. {{name}} hésite longtemps… puis te serre la main. Il passe dans ton camp, et t'ouvre les portes vers {{boss}}. +{{reward}} cr, +standing, +réputation.",
+    "betraySuccess": "Tu joues l'ami, l'allié, le camarade. {{name}} baisse sa garde — la première erreur de sa carrière, la dernière aussi. Tu prends tout : +{{loot}} cr. Mais {{boss}} saura comment son lieutenant est tombé, et le secteur entier retiendra ta méthode. -standing, -réputation."
+  }
+}

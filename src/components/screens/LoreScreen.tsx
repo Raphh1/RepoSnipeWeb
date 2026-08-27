@@ -1,35 +1,26 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
-import { LORE_FRAGMENTS, getFragment, FRAGMENT_TYPE_LABELS, FRAGMENT_TYPE_COLORS, type LoreFragmentType } from '../../data/loreFragments'
+import { getLoreFragments, getFragment, getFragmentTypeLabels, FRAGMENT_TYPE_COLORS, type LoreFragmentType } from '../../data/loreFragments'
 
 const TYPE_ORDER: LoreFragmentType[] = ['transmission', 'journal', 'datapad', 'inscription', 'rumeur']
 
-const THEME_LABELS: Record<string, string> = {
-  fracture: 'LA FRACTURE',
-  faucons:  'LES FAUCONS',
-  emporium: "L'EMPORIUM",
-  gardiens: 'LES GARDIENS',
-  culte:    'LE CULTE',
-  void:     'LA DÉRIVE & LE VIDE',
-  zero:     'STATION ZÉRO',
-  rho:      "L'INGÉNIEUR RHO",
-  life:     'FRAGMENTS DE VIE',
-  outside:  'LE SECTEUR',
-}
-
-function getTheme(id: string): string {
-  const prefix = id.split('_')[0]
-  return THEME_LABELS[prefix] ?? 'DIVERS'
-}
+const THEME_PREFIXES = ['fracture', 'faucons', 'emporium', 'gardiens', 'culte', 'void', 'zero', 'rho', 'life', 'outside']
 
 export function LoreScreen() {
+  const { t } = useTranslation('loreScreen')
   const gs   = useGameStore(s => s.gs!)
   const goTo = useGameStore(s => s.goTo)
+
+  function getTheme(id: string): string {
+    const prefix = id.split('_')[0]
+    return THEME_PREFIXES.includes(prefix) ? t(`theme.${prefix}`) : t('theme.other')
+  }
   const [selected, setSelected] = useState<string | null>(null)
   const [filter, setFilter] = useState<string>('all')
 
   const discovered = new Set(gs.discoveredLore ?? [])
-  const total = LORE_FRAGMENTS.length
+  const total = getLoreFragments().length
   const found = discovered.size
 
   const themes = Array.from(new Set(
@@ -48,13 +39,13 @@ export function LoreScreen() {
     return (
       <div className="layout">
         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => setSelected(null)}>
-          ← Retour aux archives
+          {t('backToArchives')}
         </button>
 
         <div className="px-box px-box--hi" style={{ borderColor: FRAGMENT_TYPE_COLORS[active.type] }}>
           <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <div className="tag t-xs" style={{ borderColor: FRAGMENT_TYPE_COLORS[active.type], color: FRAGMENT_TYPE_COLORS[active.type] }}>
-              {FRAGMENT_TYPE_LABELS[active.type]}
+              {getFragmentTypeLabels()[active.type]}
             </div>
             <div className="t-xs t-dim">{getTheme(active.id)}</div>
           </div>
@@ -72,11 +63,11 @@ export function LoreScreen() {
     <div className="layout">
       <div className="row" style={{ alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>
-          ← RETOUR
+          {t('back')}
         </button>
-        <div className="t-sm t-bright" style={{ flex: 1 }}>MÉMOIRE DU VIDE</div>
+        <div className="t-sm t-bright" style={{ flex: 1 }}>{t('title')}</div>
         <div className="t-xs" style={{ color: found > 0 ? 'var(--gold)' : 'var(--text-dim)' }}>
-          {found}/{total} fragments
+          {t('fragmentsCount', { found, total })}
         </div>
       </div>
 
@@ -93,8 +84,8 @@ export function LoreScreen() {
       {found === 0 ? (
         <div className="px-box" style={{ borderColor: 'var(--border)' }}>
           <div className="t-xs t-dim t-center" style={{ lineHeight: '2.5', padding: '16px 0' }}>
-            Aucun fragment trouvé.<br />
-            <span style={{ fontSize: '9px', letterSpacing: '1px' }}>Explore les stations. Le vide a une mémoire.</span>
+            {t('noneFound')}<br />
+            <span style={{ fontSize: '9px', letterSpacing: '1px' }}>{t('noneFoundHint')}</span>
           </div>
         </div>
       ) : (
@@ -106,7 +97,7 @@ export function LoreScreen() {
               style={{ width: 'auto', borderColor: filter === 'all' ? 'var(--cyan)' : undefined, color: filter === 'all' ? 'var(--cyan)' : undefined }}
               onClick={() => setFilter('all')}
             >
-              Tous ({found})
+              {t('all', { count: found })}
             </button>
             {themes.map(theme => (
               <button key={theme} className="px-btn px-btn--sm"
@@ -129,7 +120,7 @@ export function LoreScreen() {
             return (
               <div key={type}>
                 <div className="t-xs t-dim" style={{ letterSpacing: '2px', marginBottom: '6px', color: FRAGMENT_TYPE_COLORS[type] }}>
-                  {FRAGMENT_TYPE_LABELS[type]} ({group.length})
+                  {getFragmentTypeLabels()[type]} ({group.length})
                 </div>
                 <div className="col gap4">
                   {group.map(f => f && (
@@ -156,11 +147,11 @@ export function LoreScreen() {
       {/* Fragments non découverts — liste fantôme */}
       {found < total && (
         <div className="px-box" style={{ borderColor: 'var(--border)', background: 'rgba(0,0,0,0.3)', marginTop: '8px' }}>
-          <div className="t-xs t-dim mb6" style={{ letterSpacing: '1px' }}>FRAGMENTS NON DÉCOUVERTS ({total - found})</div>
+          <div className="t-xs t-dim mb6" style={{ letterSpacing: '1px' }}>{t('undiscovered', { count: total - found })}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {LORE_FRAGMENTS.filter(f => !discovered.has(f.id)).map(f => (
+            {getLoreFragments().filter(f => !discovered.has(f.id)).map(f => (
               <div key={f.id} className="tag t-xs" style={{ borderColor: 'var(--border)', color: 'var(--border-hi)', fontStyle: 'italic' }}>
-                ??? {FRAGMENT_TYPE_LABELS[f.type]}
+                ??? {getFragmentTypeLabels()[f.type]}
               </div>
             ))}
           </div>

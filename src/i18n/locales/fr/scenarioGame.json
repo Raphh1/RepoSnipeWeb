@@ -1,0 +1,89 @@
+{
+  "negoScenarios": [
+    {
+      "desc": "Le marchand t'examine, bras croisés. \"Ces prix sont standard. Tout le monde paie pareil ici.\"",
+      "choices": [
+        { "label": "\"Je cherche une relation long terme — ça vaut un effort mutuel.\"", "type": "good" },
+        { "label": "\"Je veux juste savoir si vous avez de la marge.\"", "type": "neutral" },
+        { "label": "\"C'est trop cher. Changez vos prix ou je repars.\"", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Il hésite. \"J'ai d'autres acheteurs intéressés exactement par la même chose.\"",
+      "choices": [
+        { "label": "\"Mes contacts parleront de cette transaction. Votre réputation y gagne aussi.\"", "type": "good" },
+        { "label": "\"Alors décidez vite — moi aussi j'ai d'autres options.\"", "type": "neutral" },
+        { "label": "\"Vous bluffez. Personne d'autre ne paiera ce prix.\"", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Il te regarde droit dans les yeux. \"Donnez-moi une bonne raison de vous faire un prix.\"",
+      "choices": [
+        { "label": "\"Cash, maintenant, sans paperasse ni vérifications. Propre et rapide.\"", "type": "good" },
+        { "label": "\"Parce que les deux on y gagne, non ?\"", "type": "neutral" },
+        { "label": "\"Parce que vous avez besoin de vendre et je suis là.\"", "type": "bad" }
+      ]
+    }
+  ],
+  "navScenarios": [
+    {
+      "desc": "Un champ d'astéroïdes bloque la route directe. Les débris dérivent lentement — mais certains sont rapides.",
+      "choices": [
+        { "label": "Réduire les moteurs et naviguer avec précision", "type": "good" },
+        { "label": "Contourner par le secteur nord (chemin plus long)", "type": "neutral" },
+        { "label": "Accélérer au maximum et passer en force", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Un vaisseau abandonné dérive sur ta trajectoire. Ses systèmes d'urgence clignotent encore.",
+      "choices": [
+        { "label": "Ajuster la trajectoire, s'écarter doucement", "type": "good" },
+        { "label": "Envoyer un signal de reconnaissance avant de dévier", "type": "neutral" },
+        { "label": "Maintenir le cap — le vaisseau passera", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Un signal non identifié te suit depuis plusieurs minutes. Fréquence irrégulière — probablement un chasseur.",
+      "choices": [
+        { "label": "Couper les émissions et se dissimuler dans les débris proches", "type": "good" },
+        { "label": "Envoyer une identification standard et continuer", "type": "neutral" },
+        { "label": "Ignorer et maintenir la vitesse", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Une tempête de particules solaires approche. Les capteurs indiquent une fenêtre de 90 secondes.",
+      "choices": [
+        { "label": "Activer les boucliers frontaux et ralentir", "type": "good" },
+        { "label": "Virer à tribord — route plus longue mais sûre", "type": "neutral" },
+        { "label": "Accélérer pour passer avant le front", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Une patrouille militaire scanne le secteur. Ton cargo pourrait attirer l'attention.",
+      "choices": [
+        { "label": "Couper les propulseurs et dériver lentement hors du cône de scan", "type": "good" },
+        { "label": "Répondre normalement à leur hail et espérer", "type": "neutral" },
+        { "label": "Accélérer pour sortir de la zone de scan", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "Un tunnel de débris d'une ancienne bataille croise ta route. Métal tordu, plaques flottantes.",
+      "choices": [
+        { "label": "Passer lentement, boucliers actifs, pleine attention", "type": "good" },
+        { "label": "Contourner — ça prend 20 minutes de plus", "type": "neutral" },
+        { "label": "Passer en vitesse — moins de temps dans la zone dangereuse", "type": "bad" }
+      ]
+    }
+  ],
+  "timeoutNav": "Trop lent — le vaisseau encaisse.",
+  "timeoutNego": "Temps écoulé — tu hésites trop. Il perd patience.",
+  "navMsgs": { "good": "Manœuvre réussie. Aucun dommage.", "neutral": "Chemin alternatif — résultat acceptable. -5 PV vaisseau.", "bad": "Impact. Le vaisseau tremble. -13 PV vaisseau." },
+  "negoMsgs": { "good": "Bonne approche. Il hoche la tête lentement.", "neutral": "Réponse correcte. Il reste sur la réserve.", "bad": "Mauvaise approche. Il se raidit visiblement." },
+  "navHeader": "— NAVIGATION DANGEREUSE —",
+  "negoHeader": "— MINI-JEU : NÉGOCIATION —",
+  "situation": "Situation {{current}}/3",
+  "shipDamage": "Dégâts vaisseau : -{{value}} PV",
+  "navFooter": "3 bonnes manœuvres = +500 cr · 2 bonnes = +200 cr · sinon rien",
+  "negoFooter": "Base : {{base}} cr · ×{{mult}} → {{result}} cr · 2 erreurs = échec",
+  "resultLabels": { "fail": "ÉCHEC", "excellent": "EXCELLENT", "good": "BON", "mediocre": "MÉDIOCRE" }
+}

@@ -1,0 +1,21 @@
+{
+  "nanites": { "name": "Nanites réparatrices", "description": "Des nanobots dormants dans ton organisme. +10 PV max à chaque run." },
+  "armorBoost": { "name": "Armure de fortune", "description": "Une couche de plaques céramiques soudées sous la peau. −10% dégâts reçus en combat." },
+  "staminaBoost": { "name": "Second souffle", "description": "Entraînement cardio accéléré entre les runs. +1 stamina max à chaque run." },
+  "sharpBlade": { "name": "Lame affûtée", "description": "Tu sais maintenant affûter tes armes correctement. +2 dégâts minimum avec toutes les armes." },
+  "reflexes": { "name": "Réflexes augmentés", "description": "Implant neural de vitesse de réaction. +8% chance de coup critique." },
+  "starterWeapon": { "name": "Arsenal de départ", "description": "Un contact te file une arme Tier 2 en début de run. Pas de questions." },
+  "startingFunds": { "name": "Fonds de roulement", "description": "Un vieux compte bancaire oublié. +300 crédits au démarrage de chaque run." },
+  "merchantContacts": { "name": "Contacts marchands", "description": "Ton réseau de revendeurs te fait des prix. −8% sur tous les achats en marché." },
+  "starterCargo": { "name": "Soute préparée", "description": "Quelqu'un charge ta soute avant le départ. Commence avec 2 marchandises aléatoires." },
+  "spareTank": { "name": "Réservoir de secours", "description": "Un jerricane soudé sous la coque. +2 carburant au démarrage de chaque run." },
+  "engineTuning": { "name": "Moteur optimisé", "description": "Modifications illégales sur le moteur de propulsion. +2 capacité carburant max." },
+  "travelScanner": { "name": "Scanner d'alerte", "description": "Détecte les événements de voyage avant qu'ils frappent. Tu vois les risques à l'avance." },
+  "reputation": { "name": "Réputation établie", "description": "Ta légende précède ton vaisseau. +20 réputation de départ." },
+  "nexusFragment": { "name": "Mémoire fractale", "description": "Un fragment du Nexus te suit entre les runs. Commence avec un fragment déjà collecté." },
+  "medkit": { "name": "Héritage de soins", "description": "Un kit médical de famille toujours prêt dans ta soute. +2 médicaments de départ." },
+  "lastStand": { "name": "Dernier souffle", "description": "Une seule fois par run, un coup qui devrait te tuer te laisse à 1 PV. Tu vis pour le regretter." },
+  "coupDeGrace": { "name": "Exécution froide", "description": "Quand un ennemi est sous 25% de PV, tes coups font +40% de dégâts. La mise à mort est efficace." },
+  "factionTies": { "name": "Anciens liens", "description": "Des contacts d'avant te gardent en mémoire. +30 réputation avec ta faction de départ." },
+  "scoutTraining": { "name": "Formation éclaireur", "description": "Tu arrives dans chaque run avec une zone déjà cartographiée. Commence en profondeur 2." }
+}

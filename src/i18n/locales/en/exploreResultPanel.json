@@ -1,0 +1,23 @@
+{
+  "header": "— EXPLORATION — Depth {{depth}} —",
+  "rareEvent": "★ RARE EVENT",
+  "creditsUnit": "cr",
+  "repUnit": "rep",
+  "hpUnit": "HP",
+  "fuelUnit": "fuel",
+  "fuelUnitShort": "fuel",
+  "prison": "prison",
+  "interrogation": "interrogation",
+  "lootGained": "+{{amount}} cr recovered.{{pillage}}",
+  "pillageBonus": " (×1.5 pillage)",
+  "pickUp": "Pick up (+{{amount}} cr{{mult}})",
+  "pickUpMult": " ×1.5",
+  "itemGained": "+{{qty}}x {{item}}",
+  "take": "Take ({{item}})",
+  "fuelGained": "+{{amount}} fuel.",
+  "takeFuel": "Take the fuel",
+  "alreadyArchived": "already archived",
+  "archiveFragment": "★ Archive this fragment",
+  "continueDepth": "Continue (depth {{depth}})",
+  "returnToStation": "Return to the station"
+}

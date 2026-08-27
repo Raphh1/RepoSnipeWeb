@@ -1,0 +1,46 @@
+{
+  "signs1": [
+    "Une silhouette dans la foule. Tu te retournes — personne. {{name}} est dans ce secteur.",
+    "Ton vaisseau a été touché pendant ton absence. Rien de volé. Juste la preuve qu'il pouvait.",
+    "Un barman t'avertit à voix basse. Quelqu'un posait des questions sur toi. Le signalement correspond à {{name}}.",
+    "Une balle gravée sur ton siège de pilotage. Pas de message. Ça n'en a pas besoin."
+  ],
+  "signs2": [
+    "Il était dans la station précédente. Il te suit. Tu ne lui échapperas pas comme ça.",
+    "Quelqu'un a consulté tes registres de voyage. Heure et destination. {{name}} connaît ta route.",
+    "Tu entends son nom deux fois dans la même heure. Coincidence ou message.",
+    "La porte de ton vaisseau a été forcée. La serrure refermée. Il voulait que tu saches."
+  ],
+  "signs3": [
+    "Il est dans cette station. Tu le sais. Il sait que tu le sais.",
+    "Tu l'as aperçu — une fraction de seconde avant qu'il disparaisse. Il ne cherche plus à se cacher.",
+    "Trois personnes t'ont regardé partir ce matin. L'une d'elles travaillait pour lui.",
+    "Il t'a envoyé un message. Quatre mots : \"Je t'attends quelque part.\""
+  ],
+  "presence": {
+    "t5": "Il est devenu une légende noire. Des mercenaires l'accompagnent. Il ne te laissera pas partir.",
+    "t4Closing": "Il a recruté des alliés. Ils convergent vers toi.",
+    "t4": "On parle de lui dans les stations. Il offre une prime pour savoir où tu es.",
+    "t3Closing": "Il peut surgir à tout instant. Il le sait.",
+    "t3": "Il est dans cette station. Il te regarde faire.",
+    "t2Closing": "Il connaît ta route. Il anticipe chaque mouvement.",
+    "t2": "Il est quelque part dans ce secteur. Il attend le bon moment.",
+    "t1Closing": "Il se rapproche. Tu l'as croisé une fois. Il te cherche.",
+    "t1": "Une présence dans l'ombre. Quelqu'un te suit depuis un moment."
+  },
+  "resolve": {
+    "fight": "Combat avec le stalker.",
+    "fleeSuccess": "Tu files. -1 carburant. {{name}} attend la prochaine occasion.",
+    "fleeFail": "Il est plus rapide. Combat.",
+    "talkSuccess": "Accord trouvé. {{name}} lève la menace. +20 rép.",
+    "talkFail": "Il n'est pas là pour parler. Combat.",
+    "payInsufficient": "Pas assez de crédits. Combat.",
+    "paySuccess": "-{{amount}} cr. {{name}} encaisse et disparaît. Pour l'instant."
+  },
+  "enemy": {
+    "reinforcedSuffix": " [RENFORCÉ]",
+    "allyDesc5": " Il a amené des renforts — deux mercenaires couvrent ses flancs.",
+    "allyDesc4": " Un complice est embusqué. Tu te bats sur deux fronts.",
+    "description": "Il te traquait. Il sait exactement comment tu te bats. Il ne s'arrêtera pas.{{allyDesc}}"
+  }
+}

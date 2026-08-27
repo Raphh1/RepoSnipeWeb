@@ -1,0 +1,8 @@
+{
+  "dangerLabels": ["◆ SÉCURISÉE", "◆ RISQUÉE", "◆ DANGEREUSE", "◆ ZONE DE GUERRE"],
+  "arrivalHeader": "— ARRIVÉE —",
+  "dayLabel": "Jour {{day}} ·",
+  "fuelCritical": "· ⚠ Carburant critique",
+  "skip": "Passer →",
+  "enterStation": "Entrer dans {{name}} →"
+}

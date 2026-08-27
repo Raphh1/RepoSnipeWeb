@@ -1,0 +1,63 @@
+{
+  "buttons": {
+    "back": "← BACK",
+    "continue": "CONTINUE",
+    "newRun": "NEW RUN",
+    "legacy": "★ LEGACY"
+  },
+  "statusbar": {
+    "hp": "HP",
+    "stamina": "STAMINA",
+    "ship": "SHIP",
+    "folie": "MADNESS",
+    "folieDouble": "MADNESS (×2)",
+    "folieBlood": "MADNESS 🩸",
+    "cr": "CR",
+    "fuel": "FUEL",
+    "day": "DAY",
+    "rep": "REP",
+    "equipped": "EQUIPPED"
+  },
+  "gameOver": {
+    "title": "GAME OVER",
+    "defaultCause": "The run ends here.",
+    "footer": "The void doesn't keep names."
+  },
+  "victory": {
+    "title": "★ VICTORY ★",
+    "subtitle": "The Nexus is restored. You survived.",
+    "footer": "The void will remember this name.",
+    "whatNextTitle": "WHAT NOW?",
+    "whatNextBody": "The Nexus is in your hands, but the sector hasn't bowed just yet. You can {{continueLink}} with this character: complete {{objectivesLink}}, take down the last bosses, and carve your name into the void for good. Or start fresh.",
+    "continueLink": "continue your conquest of space",
+    "objectivesLink": "every objective",
+    "continueConquest": "⚑ CONTINUE THE CONQUEST →"
+  },
+  "runStats": {
+    "title": "RUN SUMMARY",
+    "daysSurvived": "Days survived",
+    "finalCredits": "Final credits",
+    "reputation": "Reputation",
+    "stationsVisited": "Stations visited",
+    "combatsWon": "Combats won",
+    "combatsFled": "Combats fled",
+    "questsCompleted": "Quests completed",
+    "bossesDefeated": "Bosses defeated",
+    "prisonEscapes": "Prison escapes",
+    "class": "Class",
+    "objectivesCompleted": "OBJECTIVES COMPLETED ({{count}})",
+    "arcsCompleted": "NARRATIVE ARCS COMPLETED"
+  },
+  "legacyBadge": "★ +{{count}} legacy point{{plural}} available — invest them in LEGACY",
+  "nextUnlock": {
+    "title": "NEXT UNLOCK",
+    "allUnlocked": "★ Everything is unlocked. You've seen it all.",
+    "remaining": "{{count}} point{{plural}} to go",
+    "available": "★ Available!"
+  },
+  "language": {
+    "label": "Language",
+    "fr": "FR",
+    "en": "EN"
+  }
+}

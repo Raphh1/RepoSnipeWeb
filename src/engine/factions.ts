@@ -1,38 +1,46 @@
 import type { Faction, FactionId, GameState } from '../types'
+import i18n from '../i18n/config'
 
-export const FACTIONS: Faction[] = [
-  {
-    id: 'faucons', name: 'Les Faucons Noirs', color: '#2040ff',
-    description: "Pirates organisés. Discipline militaire. Alanossa à leur tête. Rejoindre c'est choisir le bord de l'ombre.",
-    bonus: "Accès aux zones pirates sans combat · +20% crédits sur butin · Armes à prix réduit",
-  },
-  {
-    id: 'emporium', name: "L'Emporium", color: '#ffd700',
-    description: "Alliance de marchands. La monnaie est leur loi. Légal en façade. Tout le reste se discute.",
-    bonus: "-15% sur tous les achats · Prix exclusifs · Réseau commercial étendu",
-  },
-  {
-    id: 'gardiens', name: 'Les Gardiens Écarlates', color: '#ff4040',
-    description: "Ordre de guerriers-paladins. Justice draconienne. Pas de nuances, pas de pitié.",
-    bonus: "+50% rép sur actes héroïques · Accès zones militaires · Équipement d'élite",
-  },
-  {
-    id: 'culte', name: 'Le Culte du Vide', color: '#a040ff',
-    description: "Mystiques de l'espace profond. Leurs rituels fonctionnent — personne ne sait pourquoi.",
-    bonus: "Événements WTF amplifiés · Artefacts accessibles · Visions de l'avenir (infos gratuites)",
-  },
-]
+const fa = (key: string) => i18n.t(key, { ns: 'factions' })
 
-export const FACTION_MAP: Record<FactionId, Faction | null> = {
-  none:     null,
-  faucons:  FACTIONS[0],
-  emporium: FACTIONS[1],
-  gardiens: FACTIONS[2],
-  culte:    FACTIONS[3],
+export function getFactions(): Faction[] {
+  return [
+  {
+    id: 'faucons', name: fa('faucons.name'), color: '#2040ff',
+    description: fa('faucons.description'),
+    bonus: fa('faucons.bonus'),
+  },
+  {
+    id: 'emporium', name: fa('emporium.name'), color: '#ffd700',
+    description: fa('emporium.description'),
+    bonus: fa('emporium.bonus'),
+  },
+  {
+    id: 'gardiens', name: fa('gardiens.name'), color: '#ff4040',
+    description: fa('gardiens.description'),
+    bonus: fa('gardiens.bonus'),
+  },
+  {
+    id: 'culte', name: fa('culte.name'), color: '#a040ff',
+    description: fa('culte.description'),
+    bonus: fa('culte.bonus'),
+  },
+  ]
+}
+
+export function getFactionMap(): Record<FactionId, Faction | null> {
+  const factions = getFactions()
+  return {
+    none:     null,
+    faucons:  factions[0],
+    emporium: factions[1],
+    gardiens: factions[2],
+    culte:    factions[3],
+  }
 }
 
 export function getFaction(id: FactionId): Faction | null {
-  return FACTION_MAP[id]
+  return getFactionMap()[id]
 }
 
 export function getBuyDiscount(gs: GameState): number {

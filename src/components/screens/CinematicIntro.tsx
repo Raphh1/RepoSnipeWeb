@@ -1,22 +1,11 @@
 import { useEffect, useState } from 'react'
-
-const LORE_LINES = [
-  "Il y a longtemps, le Nexus existait.",
-  "Une technologie. Une promesse. Une guerre.",
-  "Personne ne sait qui l'a construit.",
-  "Tout le monde sait ce qu'il a coûté.",
-  "Le secteur s'est reconstruit sur les ruines.",
-  "Les factions se disputent les miettes.",
-  "Les pilotes indépendants survivent dans les interstices.",
-  "Et quelque part, dispersés dans le vide,",
-  "quatre fragments attendent.",
-  "Le Nexus n'est pas mort.",
-  "Il attend que quelqu'un le retrouve.",
-]
+import { useTranslation } from 'react-i18next'
 
 type Phase = 'lore' | 'title-big' | 'title-small' | 'done'
 
 export function CinematicIntro({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation('cinematicIntro')
+  const loreLines = t('loreLines', { returnObjects: true }) as unknown as string[]
   const [phase, setPhase]         = useState<Phase>('lore')
   const [lineIndex, setLineIndex] = useState(0)
   const [visible, setVisible]     = useState(true)
@@ -25,7 +14,7 @@ export function CinematicIntro({ onDone }: { onDone: () => void }) {
   // Avance les lignes de lore
   useEffect(() => {
     if (phase !== 'lore' || skipped) return
-    if (lineIndex >= LORE_LINES.length) {
+    if (lineIndex >= loreLines.length) {
       const t = setTimeout(() => setPhase('title-big'), 1400)
       return () => clearTimeout(t)
     }
@@ -83,7 +72,7 @@ export function CinematicIntro({ onDone }: { onDone: () => void }) {
         transition: 'opacity 0.6s ease',
         position: 'absolute',
       }}>
-        {LORE_LINES.slice(0, lineIndex).map((line, i) => (
+        {loreLines.slice(0, lineIndex).map((line, i) => (
           <div key={i} style={{
             color: i < lineIndex - 1 ? 'rgba(160,160,220,0.5)' : '#d0d0f0',
             fontFamily: 'monospace',
@@ -112,7 +101,7 @@ export function CinematicIntro({ onDone }: { onDone: () => void }) {
         textShadow: '0 0 40px rgba(255,200,0,0.3)',
         position: titleSmall ? 'relative' : 'absolute',
       }}>
-        VOID TRADER
+        {t('title')}
       </div>
 
       {/* SOUS-TITRE apparaît quand le titre rétrécit */}
@@ -126,7 +115,7 @@ export function CinematicIntro({ onDone }: { onDone: () => void }) {
         textAlign: 'center',
         position: titleSmall ? 'relative' : 'absolute',
       }}>
-        LE VIDE VOUS ATTEND
+        {t('subtitle')}
       </div>
 
       {/* Hint skip */}
@@ -136,7 +125,7 @@ export function CinematicIntro({ onDone }: { onDone: () => void }) {
         fontSize: '9px', letterSpacing: '2px',
         fontFamily: 'monospace',
       }}>
-        cliquer pour passer
+        {t('skipHint')}
       </div>
     </div>
   )

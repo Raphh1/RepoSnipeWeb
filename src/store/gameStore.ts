@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { GameState, PlayerClass, Screen, Enemy, CombatOutcome, Quest } from '../types'
-import { CLASSES } from '../data/classes'
+import { getClasses } from '../data/classes'
 import { initCombat, processCombatAction, type CombatAction } from '../engine/combat'
 import { getArenaEnemyForRound } from '../data/enemies'
 import { initMultiCombat, processMultiAction, type MultiCombatAction } from '../engine/multiCombat'
@@ -10,7 +10,7 @@ import { checkQuestsOnArrival, completeQuest, generateChainQuest, buildTutorialQ
 import { checkMajorQuestAdvancement } from '../engine/majorQuests'
 import { applyClassTravelEffects, rollTravelEvent, spendAction } from '../engine/travelEvents'
 import { rollPillarRumor } from '../engine/pillarRumors'
-import { checkArcTriggers, ARC_DEFINITIONS, advanceArc } from '../engine/narrativeArcs'
+import { checkArcTriggers, getArcDefinitions, advanceArc } from '../engine/narrativeArcs'
 import { maybeRivalEncounter } from '../engine/npcTracker'
 import { checkStalkerTrigger, rollStalkerEvent, escalateStalker, getAvengingArrivalAmbushChance, stalkerToEnemy } from '../engine/stalker'
 import { getArrivalSituation } from '../engine/arrivalSituations'
@@ -23,14 +23,18 @@ import { drawRunModifiers, getRunCombatCreditBonus, getRunCombatRepDelta, getRun
 import { drawRunObjective, getRunObjective } from '../data/runObjectives'
 import { createChainEvent, shouldCreateChainEvent, type ChainEvent } from '../engine/chainEvents'
 import { addJournal } from '../engine/journal'
-import { resolveNexusWars, HOLDER_BOUNTY_HUNTERS, getSubBossKillConsequence } from '../engine/nexus'
+import { resolveNexusWars, getHolderBountyHunters, getSubBossKillConsequence } from '../engine/nexus'
 import { arePillarSubBossesCleared } from '../data/subBosses'
 import { shouldRaphazarusStrike, getRaphazarusWarrior } from '../engine/raphazarus'
 import { getSubBossAtStation, generateLieutenantStationAssignment } from '../data/subBosses'
 import { getDailyExpenses } from '../engine/expenses'
 import { checkBossHomeVisit, getBossHomeVisit } from '../engine/bossHomeVisits'
+import { resolveShipDown } from '../engine/shipDamage'
+import { translateEnemyName, translateWeaponName } from '../engine/goodsI18n'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+const gt = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'gameStore', ...params })
 
 
 function buildInitialState(playerClass: PlayerClass): GameState {
@@ -248,7 +252,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       ...gs,
       currentStation: station,
       fuel: Math.max(0, gs.fuel - fuelCost),
-      shipHp: Math.max(1, gs.shipHp - wear),
+      shipHp: Math.max(0, gs.shipHp - wear),
       day: gs.day + 1,
       actionsToday: 0,
       credits: Math.max(0, gs.credits - dailyCost),
@@ -301,22 +305,22 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       const result = event.effect(newGs)
       if (result.message === 'COMBAT_TRIGGER') {
         const pirate: Enemy = {
-          name: 'Pirate spatial', isBoss: false, role: 'normal',
+          name: gt('pirate.name'), isBoss: false, role: 'normal',
           maxHp: 40 + newGs.day * 2, damageMin: 8, damageMax: 20,
           lootMin: 300, lootMax: 900, captureChance: 15, killChance: 20,
-          description: 'Attaque surprise depuis les débris.',
+          description: gt('pirate.description'),
         }
         newGs = { ...newGs, combatEnemy: pirate, combatState: initCombat(pirate), screen: 'combat', stamina: newGs.maxStamina }
-        travelMsg = `⚔ ${event.title} — Combat immédiat.`
+        travelMsg = gt('combatImmediate', { title: event.title })
       } else if (result.message === 'BOUNTY_TRIGGER') {
         const hunter: Enemy = {
-          name: 'Chasseur de primes', isBoss: true, role: 'normal',
+          name: gt('bountyHunter.name'), isBoss: true, role: 'normal',
           maxHp: 85, damageMin: 15, damageMax: 30,
           lootMin: 600, lootMax: 1800, captureChance: 25, killChance: 15,
-          description: 'Ta réputation t\'a précédé. Il t\'attendait.',
+          description: gt('bountyHunter.description'),
         }
         newGs = { ...newGs, combatEnemy: hunter, combatState: initCombat(hunter), screen: 'combat', stamina: newGs.maxStamina }
-        travelMsg = `⚔ ${event.title} — Combat immédiat.`
+        travelMsg = gt('combatImmediate', { title: event.title })
       } else {
         travelMsg = result.message ?? event.description
         const { message: _m, ...rest } = result
@@ -340,7 +344,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       newGs = { ...newGs, pendingEscortQuestId: escortCompleted[0].id, screen: 'escort-minigame' }
     }
     // Quêtes simples complétées
-    const simpleQuestLines = nonEscortCompleted.map(q => `★ ${q.title}\n+${q.creditReward.toLocaleString()} cr · +${q.repReward} rép`)
+    const simpleQuestLines = nonEscortCompleted.map(q => gt('questLine', { title: q.title, credits: q.creditReward.toLocaleString(), rep: q.repReward }))
 
     // Avancement des quêtes majeures
     const { newGs: majorGs, messages: majorMsgs } = checkMajorQuestAdvancement(newGs)
@@ -353,7 +357,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
     newGs = { ...newGs, ...objGs }
     const objMsg = newlyCompleted.length > 0
-      ? `★ OBJECTIF : ${newlyCompleted.map(o => o.name).join(', ')}`
+      ? gt('objectiveComplete', { names: newlyCompleted.map(o => o.name).join(', ') })
       : null
 
     // Arcs narratifs — déclencher de nouveaux arcs
@@ -370,25 +374,25 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
         maxHp: 55 + Math.min(80, Math.abs(rival.rival.repDelta) * 2),
         damageMin: 10, damageMax: 24,
         lootMin: 200, lootMax: 800,
-        description: `Il se bat avec la rage de quelqu'un qui attendait longtemps.`,
+        description: gt('rivalDescription'),
         captureChance: 15, killChance: 20, isBoss: false, role: 'normal' as const,
       }
       newGs = { ...newGs, combatEnemy: rivalEnemy, combatState: initCombat(rivalEnemy), screen: 'combat', stamina: newGs.maxStamina }
-      travelMsg = `RIVAL — ${rival.rival.name} t'attendait à l'arrivée.`
+      travelMsg = gt('rivalAmbush', { name: translateEnemyName(rival.rival.name) })
     }
 
     // Stalker — vérifier déclenchement ou événement
     const newStalker = checkStalkerTrigger(newGs)
     if (newStalker && !newGs.stalker) {
       newGs = { ...newGs, stalker: newStalker }
-      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `⚠ Quelqu'un te suit. ${newStalker.name}.`
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('stalkerAppears', { name: translateEnemyName(newStalker.name) })
     } else if (newGs.stalker) {
       // Escalade : le stalker devient plus fort à chaque voyage
       const escalated = escalateStalker(newGs.stalker)
       const didEscalate = escalated.threatLevel > newGs.stalker.threatLevel
       newGs = { ...newGs, stalker: escalated }
       if (didEscalate) {
-        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `⚠ ${escalated.name} — menace niveau ${escalated.threatLevel}. Il devient plus dangereux.`
+        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('stalkerEscalated', { name: translateEnemyName(escalated.name), level: escalated.threatLevel })
       }
       const stalkerEvt = rollStalkerEvent(newGs, escalated)
       if (stalkerEvt) {
@@ -405,7 +409,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     if (avengingStalker?.avengingPillar && newGs.screen === 'station-arrival' && Math.random() < getAvengingArrivalAmbushChance(avengingStalker)) {
       const hunter = stalkerToEnemy(avengingStalker)
       newGs = { ...newGs, combatEnemy: hunter, combatState: initCombat(hunter), screen: 'combat', stamina: newGs.maxStamina }
-      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `☠ ${avengingStalker.name} t'attendait à l'arrivée. Il veut le fragment.`
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('avengingStalkerAmbush', { name: translateEnemyName(avengingStalker.name) })
     }
 
     // ── GUERRES ENTRE DÉTENTEURS — résolution après 4 jours ─────────────────
@@ -420,7 +424,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     // ── BOUNTY HUNTERS DES DÉTENTEURS TRAHIS ─────────────────────────────────
     if ((newGs.nexusAngered ?? []).length > 0 && !newGs.stalker) {
       const angeredPillar = (newGs.nexusAngered ?? [])[Math.floor(Math.random() * (newGs.nexusAngered ?? []).length)]
-      const bountyData = HOLDER_BOUNTY_HUNTERS[angeredPillar]
+      const bountyData = getHolderBountyHunters()[angeredPillar]
       if (bountyData && Math.random() < 0.25) {
         newGs = {
           ...newGs,
@@ -433,7 +437,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
             daysActive: 0,
           },
         }
-        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `⚠ ${bountyData.name} — ${bountyData.description}`
+        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('bountyHunterAppears', { name: translateEnemyName(bountyData.name), description: bountyData.description })
       }
     }
 
@@ -441,10 +445,10 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     if (!newGs.stalker) {
       const fRep = newGs.factionReputation
       const hostileFactions: Array<{ faction: string; name: string }> = []
-      if (fRep.faucons <= -70)  hostileFactions.push({ faction: 'faucons',  name: 'L\'Assassin des Faucons' })
-      if (fRep.emporium <= -70) hostileFactions.push({ faction: 'emporium', name: 'L\'Exécuteur de l\'Emporium' })
-      if (fRep.gardiens <= -70) hostileFactions.push({ faction: 'gardiens', name: 'Le Bras Armé des Gardiens' })
-      if (fRep.culte <= -70)    hostileFactions.push({ faction: 'culte',    name: 'Le Serviteur du Vide' })
+      if (fRep.faucons <= -70)  hostileFactions.push({ faction: 'faucons',  name: gt('hostileFactionNames.faucons') })
+      if (fRep.emporium <= -70) hostileFactions.push({ faction: 'emporium', name: gt('hostileFactionNames.emporium') })
+      if (fRep.gardiens <= -70) hostileFactions.push({ faction: 'gardiens', name: gt('hostileFactionNames.gardiens') })
+      if (fRep.culte <= -70)    hostileFactions.push({ faction: 'culte',    name: gt('hostileFactionNames.culte') })
       if (hostileFactions.length > 0 && Math.random() < 0.20) {
         const chosen = hostileFactions[Math.floor(Math.random() * hostileFactions.length)]
         newGs = {
@@ -458,7 +462,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
             daysActive: 0,
           },
         }
-        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `⚠ ${chosen.name} te traque — réputation ${chosen.faction} désastreuse.`
+        travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('factionStalkerAppears', { name: chosen.name, faction: chosen.faction })
       }
     }
 
@@ -474,9 +478,9 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
         screen: 'combat',
         stamina: newGs.maxStamina,
         pillarStanding: { ...newGs.pillarStanding, raphazarus: (newGs.pillarStanding?.raphazarus ?? 0) - 5 },
-        journal: addJournal(newGs, `${warrior.name} m'a intercepté. Raphazarus a compris que je rassemble les fragments — et il a lâché ses guerriers.`, 'combat'),
+        journal: addJournal(newGs, gt('raphazarusWarriorJournal', { name: translateEnemyName(warrior.name) }), 'combat'),
       }
-      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `☠ ${warrior.name} — Raphazarus a lancé ses guerriers à tes trousses.`
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('raphazarusWarriorAmbush', { name: translateEnemyName(warrior.name) })
     }
 
     // Situation d'arrivée (40% de chance)
@@ -534,7 +538,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     newGs = { ...newGs, pendingChainEvents: pendingChain }
 
     // Journal — entrée de voyage
-    const travelJournal = addJournal(gs, `J'ai quitté ${gs.currentStation} en direction de ${station}.`, 'travel')
+    const travelJournal = addJournal(gs, gt('travelJournal', { from: gs.currentStation, to: station }), 'travel')
     newGs = { ...newGs, journal: travelJournal }
 
     // ── SEEDING PILIERS — rumeurs jours 3-8 (5.2) ────────────────────────────
@@ -557,26 +561,33 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
             ...newGs,
             credits: newGs.credits - lost,
             reputation: newGs.reputation - 6,
-            journal: addJournal(newGs, "Trou noir. Je me suis réveillé ailleurs, du sang qui n'est pas le mien sur les mains. Des crédits ont disparu.", 'decision'),
+            journal: addJournal(newGs, gt('folieCrisis.blackoutJournal'), 'decision'),
           }
-          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `🩸 CRISE — trou noir mental. -${lost} cr · -6 rép.`
+          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('folieCrisis.blackoutMsg', { amount: lost })
         } else if (r < 0.75) {
           const dmg = rng(10, 28)
           newGs = {
             ...newGs,
             playerHp: Math.max(1, newGs.playerHp - dmg),
-            journal: addJournal(newGs, "La faim a pris le dessus avant que je puisse me nourrir proprement. Je me suis fait mal en reprenant le contrôle.", 'decision'),
+            journal: addJournal(newGs, gt('folieCrisis.hungerJournal'), 'decision'),
           }
-          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `🩸 CRISE — la faim l'emporte. -${dmg} PV.`
+          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('folieCrisis.hungerMsg', { amount: dmg })
         } else {
           newGs = {
             ...newGs,
             reputation: newGs.reputation - 10,
-            journal: addJournal(newGs, "Quelqu'un m'a vu — le regard qu'on a eu pour moi ne s'oublie pas.", 'decision'),
+            journal: addJournal(newGs, gt('folieCrisis.noticedJournal'), 'decision'),
           }
-          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + `🩸 CRISE — on a remarqué quelque chose d'étrange chez toi. -10 rép.`
+          travelMsg = (travelMsg ? travelMsg + ' | ' : '') + gt('folieCrisis.noticedMsg')
         }
       }
+    }
+
+    // Vaisseau à 0 PV — remorquage forcé (jamais un blocage définitif, cf. shipDamage.ts)
+    if (newGs.shipHp <= 0) {
+      const { towMessage, ...towPatch } = resolveShipDown(newGs)
+      newGs = { ...newGs, ...towPatch }
+      travelMsg = (travelMsg ? travelMsg + ' | ' : '') + towMessage
     }
 
     set({ gs: newGs, travelEventMessage: travelMsg, objectivePopup: objMsg, questCompletionMsg: questMsg, ...(chainNotif ? { chainEventNotification: chainNotif } : {}), ...(newWorldEvent ? { worldEventPopup: newWorldEvent } : {}) })
@@ -639,8 +650,8 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
           fuel: heads ? Math.min(gs.maxFuel, gs.fuel + 2) : gs.fuel,
           playerHp: heads ? gs.playerHp : Math.max(1, gs.playerHp - 5),
           pendingMessage: heads
-            ? "🪙 PILE — +2 carburant trouvé d'un coup."
-            : '🪙 FACE — rien trouvé, et une chute dans les débris. -5 PV.',
+            ? gt('rayaneFuelHeads')
+            : gt('rayaneFuelTails'),
         }
       }
     }
@@ -655,8 +666,8 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
         ...changes,
         fuel: Math.min(gs.maxFuel, gs.fuel + amount),
         pendingMessage: found
-          ? `Carburant trouvé ! +${amount} unité${amount > 1 ? 's' : ''}.`
-          : 'Rien trouvé cette fois. Les réserves sont sèches.',
+          ? gt('fuelFound', { amount, plural: amount > 1 ? 's' : '' })
+          : gt('fuelNotFound'),
       }
     }
   }),
@@ -794,11 +805,11 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     }
     const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
     newGs = { ...newGs, ...objGs }
-    const objMsg = newlyCompleted.length > 0 ? `★ OBJECTIF : ${newlyCompleted.map(o => o.name).join(', ')}` : null
+    const objMsg = newlyCompleted.length > 0 ? gt('objectiveComplete', { names: newlyCompleted.map(o => o.name).join(', ') }) : null
     const tutorialSuffix = quest.id === TUTORIAL_QUEST_ID
-      ? `\n\n◈ Le contact te remet le datapad promis. Il s'allume : "Le vide cache quatre Fragments du Nexus. Réunis-les et le secteur est à toi." — TRACKER NEXUS RÉVÉLÉ.`
+      ? gt('tutorialDatapad')
       : ''
-    const questMsg = `★ ${quest.title}\n+${quest.creditReward.toLocaleString()} cr · +${quest.repReward} rép${chain ? '\n📋 Suite disponible — voir Chercher du travail' : ''}${tutorialSuffix}`
+    const questMsg = gt('questLine', { title: quest.title, credits: quest.creditReward.toLocaleString(), rep: quest.repReward }) + (chain ? gt('chainAvailable') : '') + tutorialSuffix
     set({ gs: newGs, objectivePopup: objMsg, questCompletionMsg: questMsg })
   },
 
@@ -818,22 +829,24 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       if (chain) newGs = { ...newGs, pendingChainQuests: [...(newGs.pendingChainQuests ?? []), chain] }
       const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
       newGs = { ...newGs, ...objGs }
-      const objMsg = newlyCompleted.length > 0 ? `★ OBJECTIF : ${newlyCompleted.map(o => o.name).join(', ')}` : null
-      const questMsg = `★ ${quest.title}\n+${quest.creditReward.toLocaleString()} cr · +${quest.repReward} rép`
+      const objMsg = newlyCompleted.length > 0 ? gt('objectiveComplete', { names: newlyCompleted.map(o => o.name).join(', ') }) : null
+      const questMsg = gt('questLine', { title: quest.title, credits: quest.creditReward.toLocaleString(), rep: quest.repReward })
       set({ gs: newGs, objectivePopup: objMsg, questCompletionMsg: questMsg })
     } else {
       const newCargo = { ...gs.cargo }
       const cur = newCargo['Passager'] ?? 0
       if (cur <= 1) delete newCargo['Passager']
       else newCargo['Passager'] = cur - 1
+      const rawShipHp = gs.shipHp - 20
+      const towPatch = rawShipHp <= 0 ? resolveShipDown(gs) : { shipHp: rawShipHp }
       const newGs: GameState = {
         ...gs,
         cargo: newCargo,
         activeQuests: gs.activeQuests.filter(q => q.id !== quest.id),
-        shipHp: Math.max(1, gs.shipHp - 20),
+        ...towPatch,
         pendingEscortQuestId: undefined,
         screen: 'station-hub' as Screen,
-        pendingMessage: '✕ Passager perdu. −20 PV de vaisseau.',
+        pendingMessage: 'towMessage' in towPatch ? gt('passengerLostWithTow', { towMessage: towPatch.towMessage }) : gt('passengerLostNoTow'),
       }
       set({ gs: newGs })
     }
@@ -856,8 +869,8 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
         credits: heads ? gs.credits + amount : Math.max(0, gs.credits - amount),
         rayaneGambleOffer: undefined,
         pendingMessage: heads
-          ? `🪙 PILE — récompense doublée, +${amount.toLocaleString()} cr supplémentaires !`
-          : `🪙 FACE — récompense perdue, -${amount.toLocaleString()} cr.`,
+          ? gt('rayaneGambleWin', { amount: amount.toLocaleString() })
+          : gt('rayaneGambleLose', { amount: amount.toLocaleString() }),
       }
     }
   }),
@@ -931,7 +944,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
       conquestMode: true,
       screen: 'station-hub' as Screen,
       pendingCombatOutcome: null,
-      pendingMessage: 'CONQUÊTE — Le Nexus est restauré, mais l\'espace reste à conquérir. Accomplis tous les objectifs et termine ce que tu as commencé.',
+      pendingMessage: gt('conquestMessage'),
     },
   } : s),
 }), {
@@ -975,7 +988,7 @@ function handleCombatOutcome(
         nexusFragments: newFragments,
         stationPiecesRallied: newFragments.length,
         stalker: undefined,
-        journal: addJournal(gs, `${gs.stalker.name} m'a rattrapé et a repris le fragment de ${visit.bossName}. Il ne me traque plus — il a eu ce qu'il voulait.`, 'combat'),
+        journal: addJournal(gs, gt('fragmentRetaken', { name: translateEnemyName(gs.stalker.name), boss: visit.bossName }), 'combat'),
       }
     }
   }
@@ -1000,7 +1013,7 @@ function handleCombatOutcome(
         screen: 'combat',
       }
       const dyingGs = { ...gs, combatState: { ...cs, enemyHp: 0 }, pendingCombatOutcome: null }
-      const interMsg = `TOURNOI — ROUND ${nextRound}/10  |  +50 PV récupérés. Stamina pleine.`
+      const interMsg = gt('tournamentRound', { round: nextRound })
       set({ gs: dyingGs, combatVictoryPending: true, pendingVictoryData: { gs: nextGs, objMsg: interMsg } })
     } else {
       // Round 10 terminé — victoire du tournoi
@@ -1017,7 +1030,7 @@ function handleCombatOutcome(
         screen: 'combat-result' as Screen,
       }
       const dyingGs = { ...gs, combatState: { ...cs, enemyHp: 0 }, pendingCombatOutcome: null }
-      const winMsg = `TOURNOI COMPLÉTÉ ! +${loot} cr, +60 réputation, arme légendaire : ${w.name}`
+      const winMsg = gt('tournamentWin', { loot, weapon: translateWeaponName(w.name) })
       set({ gs: dyingGs, combatVictoryPending: true, pendingVictoryData: { gs: finalGs, objMsg: winMsg } })
     }
     return
@@ -1080,17 +1093,17 @@ function handleCombatOutcome(
     const { newGs: majorGs, messages: majorMsgs } = checkMajorQuestAdvancement(newGs)
     newGs = { ...newGs, ...objGs, ...majorGs, combatState: cs, combatRewardData: reward ?? null, screen: 'combat-result' as Screen }
     const objMsg = [
-      gs.pendingFuelReward > 0 ? `⛽ +${gs.pendingFuelReward} carburant récupéré de force.` : null,
-      newlyCompleted.length > 0 ? `★ ${newlyCompleted.map(o => o.name).join(', ')}` : null,
+      gs.pendingFuelReward > 0 ? gt('fuelReclaimed', { amount: gs.pendingFuelReward }) : null,
+      newlyCompleted.length > 0 ? gt('objectiveCompleteShort', { names: newlyCompleted.map(o => o.name).join(', ') }) : null,
       ...majorMsgs,
-      ...combatQuests.map(q => `★ ${q.title} — +${q.creditReward.toLocaleString()} cr, +${q.repReward} rép`),
+      ...combatQuests.map(q => gt('combatQuestLine', { title: q.title, credits: q.creditReward.toLocaleString(), rep: q.repReward })),
     ].filter(Boolean).join('\n') || null
     // Journal — victoire au combat
-    const enemyName = gs.combatEnemy?.name ?? 'un ennemi'
+    const enemyName = gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy')
     const isBoss = reward?.isBossKill
     const victoryText = isBoss
-      ? `J'ai vaincu ${enemyName} à ${gs.currentStation}. Un adversaire qui méritait le respect.`
-      : `J'ai vaincu ${enemyName} à ${gs.currentStation}.`
+      ? gt('victoryJournalBoss', { enemy: enemyName, station: gs.currentStation })
+      : gt('victoryJournalNormal', { enemy: enemyName, station: gs.currentStation })
     newGs = { ...newGs, journal: addJournal(gs, victoryText, 'combat') }
     // Sub-boss vaincu au combat
     let subBossMsg: string | null = null
@@ -1120,7 +1133,7 @@ function handleCombatOutcome(
     if (newGs.pendingCombatArcId) {
       const arcId = newGs.pendingCombatArcId
       const pendingArc = newGs.activeArcs?.find(a => a.id === arcId)
-      const arcDef = ARC_DEFINITIONS.find(d => d.id === arcId)
+      const arcDef = getArcDefinitions().find(d => d.id === arcId)
       if (pendingArc && arcDef) {
         const { arc: advancedArc, rewardGs, completed } = advanceArc(pendingArc, newGs)
         const otherArcs = (newGs.activeArcs ?? []).filter(a => a.id !== arcId)
@@ -1165,19 +1178,19 @@ function handleCombatOutcome(
       combatsFled: (gs.combatsFled ?? 0) + 1,
       pendingCombatOutcome: 'fled' as CombatOutcome,
       screen: 'combat-outcome' as Screen,
-      journal: addJournal(gs, `J'ai fui le combat contre ${gs.combatEnemy?.name ?? 'un ennemi'} à ${gs.currentStation}. Survivre, c'est aussi gagner.`, 'combat'),
+      journal: addJournal(gs, gt('fledJournal', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy'), station: gs.currentStation }), 'combat'),
     }
     set({ gs: fledGs })
   } else if (outcome === 'dead') {
     // Meta unlock : Dernier souffle — survit une fois à un coup mortel
     if (gs.lethalSurviveAvailable) {
-      const surviveLog = { id: Date.now(), text: '★ DERNIER SOUFFLE — Tu survis à 1 PV. Cela ne se reproduira pas.', type: 'player' as const }
+      const surviveLog = { id: Date.now(), text: gt('lastBreath'), type: 'player' as const }
       const surviveCs = { ...cs, log: [...cs.log, surviveLog] }
       set({ gs: { ...newGs, playerHp: 1, lethalSurviveAvailable: false, combatState: surviveCs, pendingCombatOutcome: null } })
       return
     }
-    const deathCause = `Vaincu au combat contre ${gs.combatEnemy?.name ?? 'un ennemi'}.`
-    const deathLog = { id: Date.now(), text: 'Vous êtes mort.', type: 'enemy' as const }
+    const deathCause = gt('deathCause', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy') })
+    const deathLog = { id: Date.now(), text: gt('youAreDead'), type: 'enemy' as const }
     const dyingCs = { ...cs, log: [deathLog] }
     set({ gs: { ...newGs, combatState: dyingCs }, playerDeathPending: true, pendingDeathCause: deathCause })
   } else if (outcome === 'captured') {
@@ -1192,7 +1205,7 @@ function handleCombatOutcome(
       cargo: newCargo,
       equippedWeapon: weaponSeized ? null : gs.equippedWeapon,
       pendingMessage: captureInfo,
-      journal: addJournal(gs, `J'ai été capturé après le combat contre ${gs.combatEnemy?.name ?? 'un ennemi'} à ${gs.currentStation}. 3 jours derrière les barreaux.`, 'prison'),
+      journal: addJournal(gs, gt('capturedJournal', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy'), station: gs.currentStation }), 'prison'),
     }})
   } else if (outcome === 'stunned') {
     const creditsLost = Math.floor(Math.random() * 400 + 200)
@@ -1219,14 +1232,14 @@ function handleMultiCombatOutcome(
     let newGs = { ...gs, multiCombatState: mcs, combatsWon: (gs.combatsWon ?? 0) + 1, pendingCombatOutcome: 'victory' as CombatOutcome, screen: 'station-hub' as Screen }
     const { newGs: objGs, newlyCompleted } = checkObjectives(newGs)
     newGs = { ...newGs, ...objGs, multiCombatState: mcs, pendingCombatOutcome: 'victory' as CombatOutcome }
-    const objMsg = newlyCompleted.length > 0 ? `★ ${newlyCompleted.map(o => o.name).join(', ')}` : null
+    const objMsg = newlyCompleted.length > 0 ? gt('objectiveCompleteShort', { names: newlyCompleted.map(o => o.name).join(', ') }) : null
     set({ gs: newGs, objectivePopup: objMsg })
   } else if (outcome === 'fled') {
     set({ gs: { ...gs, multiCombatState: mcs, combatsFled: (gs.combatsFled ?? 0) + 1, pendingCombatOutcome: 'fled', screen: 'station-hub' } })
   } else if (outcome === 'dead') {
     const summary = buildRunSummary(gs, false)
     useMetaStore.getState().addRunSummary(summary)
-    set({ gs: { ...gs, isDead: true, deathCause: 'Trop nombreux. Tu n\'as pas survécu.', screen: 'game-over' } })
+    set({ gs: { ...gs, isDead: true, deathCause: gt('multiCombatDeath'), screen: 'game-over' } })
   } else if (outcome === 'captured') {
     set({ gs: { ...gs, multiCombatState: mcs, isImprisoned: true, prisonDaysLeft: 3, screen: 'prison' } })
   } else if (outcome === 'stunned') {
@@ -1234,4 +1247,4 @@ function handleMultiCombatOutcome(
   }
 }
 
-export const AVAILABLE_CLASSES = CLASSES
+export const AVAILABLE_CLASSES = getClasses()

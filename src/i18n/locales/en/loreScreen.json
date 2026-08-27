@@ -1,0 +1,24 @@
+{
+  "back": "← BACK",
+  "title": "MEMORY OF THE VOID",
+  "fragmentsCount": "{{found}}/{{total}} fragments",
+  "backToArchives": "← Back to archives",
+  "noneFound": "No fragments found.",
+  "noneFoundHint": "Explore the stations. The void has a memory.",
+  "all_one": "All ({{count}})",
+  "all_other": "All ({{count}})",
+  "undiscovered": "UNDISCOVERED FRAGMENTS ({{count}})",
+  "theme": {
+    "fracture": "THE FRACTURE",
+    "faucons": "THE HAWKS",
+    "emporium": "THE EMPORIUM",
+    "gardiens": "THE GUARDIANS",
+    "culte": "THE CULT",
+    "void": "THE DRIFT & THE VOID",
+    "zero": "STATION ZERO",
+    "rho": "ENGINEER RHO",
+    "life": "LIFE FRAGMENTS",
+    "outside": "THE SECTOR",
+    "other": "MISC"
+  }
+}

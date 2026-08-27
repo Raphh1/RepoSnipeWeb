@@ -1,0 +1,767 @@
+{
+  "dangerous": {
+    "0": { "desc": "You come across an unconscious guy in an alley. Blood. A knife nearby.", "c0": "Search his pockets", "c0msg": "You find {{cr}} credits. You leave quickly.", "c1": "Treat him and leave", "c1msg": "+5 reputation. He might survive.", "c2": "Ignore him and move on", "c2msg": "You walk past. Not your problem." },
+    "1": { "desc": "Two gangs face off in the corridor. You're in the middle. Neither is looking at you yet.", "c0": "Back away quietly", "c0msg": "You back off. They start fighting each other. You slip out the other side.", "c1": "Play mediator", "c1msgWin": "They listen to you. +15 rep, a few credits as thanks.", "c1msgLose": "They don't listen. You take a few hits leaving.", "c2": "Use the chaos to loot the crates behind", "c2msg": "You slip away with {{cr}} credits. They saw nothing." },
+    "2": { "desc": "You find an abandoned travel bag. Someone left in a hurry." },
+    "4": { "desc": "A child silently hands you something. An energy crystal. They vanish before you can speak.", "c0": "Keep the crystal", "c0msg": "+1 Energy crystal. Odd.", "c1": "Look for them to return it", "c1msg": "Nowhere to be found. The crystal stays in your hand." },
+    "5": { "desc": "An empty corridor. Graffiti. A smell of burnt metal. Nothing else." },
+    "6": { "desc": "Credits scattered on the floor. Someone made a run for it." },
+    "7": { "desc": "A locked door with a broken electronic panel. The contents could be interesting.", "c0": "Force the door (-15 HP)", "c0msg": "You force it. Your shoulders will remind you tomorrow. +credits.", "c1": "Hack the panel", "c2": "Move on", "c2msg": "You move on. It probably wasn't worth anything." },
+    "8": { "desc": "Strobing lights. Voices barking orders. A raid. You're in the wrong alley at the wrong time.", "c0": "Try to flee into the crowd (30% success)", "c0msgWin": "You vanish into the chaos. A few baton hits along the way. -HP.", "c0msgLose": "They caught you. Off to the station.", "c1": "Comply — show you're clean", "c1msg": "They escort you out of the zone. An interrogation awaits.", "c2": "Resist — blind fight", "c2msg": "They overpower you. You wake up in a cell covered in bruises." },
+    "9": { "desc": "A dead-end corridor. Someone made it that way on purpose. The 'Exit' sign pointed the wrong way.", "c0": "Look for another way out", "c0msgWin": "A technical gap. You squeeze through. -HP.", "c0msgLose": "They were waiting for you. The cage closes.", "c1": "Wait — see what happens", "c1msg": "Armed people arrive. No questions asked." }
+  },
+  "peaceful": {
+    "0": { "desc": "An old, forgotten coin. Sentimental and market value." },
+    "1": { "desc": "A traveling merchant offers his services. His prices seem reasonable.", "c0": "Buy medicine (120cr)", "c0msg": "Bought. +2 Medicine.", "c0fail": "Not enough credits.", "c1": "Buy provisions (60cr)", "c1msg": "Bought. +3 Fresh food.", "c1fail": "Not enough credits.", "c2": "Pass", "c2msg": "You keep going." },
+    "2": { "desc": "Children play in a lit corridor. Someone laughs. The universe isn't always dark." },
+    "3": { "desc": "A forgotten first-aid kit behind a kiosk." },
+    "4": { "desc": "An old pilot tells you about a secret trade route. Sounds legal.", "c0": "Listen carefully", "c0msg": "+8 rep, sellable info. +a few credits.", "c1": "Thank him and leave", "c1msg": "You leave. He nods." },
+    "5": { "desc": "An open café. Real coffee. You sit for five minutes. It feels good." },
+    "6": { "desc": "A poorly secured fuel tank. No one's watching." }
+  },
+  "industrial": {
+    "0": { "desc": "A crate of spare parts. Sellable value." },
+    "1": { "desc": "Discarded manufacturing scraps. Salvageable." },
+    "2": { "desc": "A worker blocks your path. 'Restricted zone.' He looks exhausted, not aggressive.", "c0": "Negotiate passage (50cr)", "c0msg": "He lets you through. -50cr.", "c0fail": "Not enough credits. You turn back.", "c1": "Turn back", "c1msg": "You leave through the other entrance.", "c2": "Force your way through", "c2msg": "He resists. Short scuffle. -HP, -5 rep." },
+    "4": { "desc": "Machines running. Heat. Noise. Nothing useful here." },
+    "5": { "desc": "Components fallen off a line. Still good." },
+    "6": { "desc": "Unwatched fuel canisters in storage. You take two." }
+  },
+  "ruins": {
+    "0": { "desc": "An unsealed safe. Probably forgotten for years." },
+    "1": { "desc": "Ruins of a former shop. Still-active holograms display prices from another era.", "c0": "Search the rubble", "c0msgFound": "You find {{cr}} hidden credits.", "c0msgNothing": "Just dust and memories.", "c0msgTrap": "A trap. -15 HP.", "c1": "Take a hologram as a souvenir", "c1msg": "You keep it. +3 narrative rep." },
+    "2": { "desc": "Collapsed corridors. Twisted beams. The story of a catastrophe no one tells anymore." },
+    "4": { "desc": "A pre-war object. Its function is no longer clear." },
+    "5": { "desc": "You find a still-active terminal. Partial data. Someone was looking for something.", "c0": "Extract the data", "c0msg": "Sellable data. +credits, +10 rep.", "c1": "Wipe the terminal", "c1msg": "You erase everything. Sometimes it's better not to know." },
+    "6": { "desc": "The floor lets out a dull crack under your foot. A split second to understand. Then the void.", "c0": "Grab a beam as you fall (20% survival)", "c0msgWin": "You catch yourself. Your shoulder pops out of its socket. You survive. Barely.", "c0msgLose": "Darkness.", "c1": "Nothing — too fast.", "c1msg": "Darkness.", "deathCause": "Structural collapse in the ruins. The floor gave way without warning. No one will ever know." },
+    "7": { "desc": "Three shapes emerge from the shadows at once. Armed, coordinated. Someone was waiting for you to walk in here.", "c0": "Fight back violently (25% success)", "c0msgWin": "You make it out. So do they. You flee, bleeding.", "c0msgLose": "They got you. You wake up in a cell, lighter on credits.", "c1": "Surrender — don't resist", "c1msg": "You raise your hands. They take you away without a word." }
+  },
+  "military": {
+    "1": { "desc": "A soldier stares you down. His hand rests on his weapon. He's waiting for you to justify your presence.", "c0": "Show papers (50% success)", "c0msgWin": "He lets you through. +5 rep.", "c0msgLose": "He escorts you out by force. -HP.", "c1": "Retreat immediately", "c1msg": "You back off. He watches you until you're out of sight.", "c2": "Bribe him (200cr)", "c2msg": "He pockets it without a word and looks away.", "c2fail": "Not enough credits. You back off." },
+    "2": { "desc": "A partially looted armory. A few credits remain in the till." },
+    "3": { "desc": "Abandoned ammunition in a decommissioned corridor." },
+    "4": { "desc": "Empty rooms. Boots echoing somewhere. You don't linger." }
+  },
+  "luxury": {
+    "0": { "desc": "A wallet forgotten on a bench. A rich person who won't miss it." },
+    "1": { "desc": "A wealthy client approaches you. He wants discretion and service. He pays well.", "c0": "Accept the vague job (500cr)", "c0msg": "+500cr. You don't ask questions. -5 moral rep.", "c1": "Politely decline", "c1msg": "You decline. He nods and disappears." },
+    "2": { "desc": "An open bar. You help yourself discreetly. No one's watching." },
+    "3": { "desc": "A luxury pharmacy with unsecured inventory." },
+    "4": { "desc": "An underground arena tournament. Spectators. High stakes.", "c0": "Bet 200cr on yourself", "c0msgWin": "You win. +500cr, +10 rep.", "c0msgLose": "You lose. -200cr, -HP.", "c0fail": "Not enough to bet.", "c1": "Just watch", "c1msg": "Free show. You leave." }
+  },
+  "scientific": {
+    "0": { "desc": "An implant prototype in an unsealed box. Someone forgot to put it away." },
+    "1": { "desc": "A panicked scientist runs after you. 'Help me. They're coming.' He's holding something important.", "c0": "Help him flee", "c0msg": "+20 rep. He thanks you with everything he has. +credits.", "c0journal": "I helped a scientist on the run. He was afraid of something — or someone. He gave me everything for his freedom.", "c1": "Take what he's holding and leave", "c1msg": "You take the object. +credits, -15 rep.", "c2": "Ignore him", "c2msg": "You walk past. His shouts fade away." },
+    "2": { "desc": "A research grant in untraceable cash credits. In an open locker." },
+    "3": { "desc": "Empty labs. Half-finished experiments. No one to tell you what they were." },
+    "4": { "desc": "A research terminal with unencrypted data. You copy what you can." }
+  },
+  "pillar": {
+    "0": { "desc": "A messenger wearing Cesarion's colors hands you a package. 'Drop this off at Raphazarus's depot. He mustn't know it's from us.' The package is sealed.", "c0": "Deliver it discreetly", "c0hint": "+10 Cesarion, -5 Raphazarus", "c0msg": "Delivered. Cesarion now sees you as trustworthy. Raphazarus... knows nothing. For now.", "c1": "Warn Raphazarus", "c1hint": "+10 Raphazarus, -10 Cesarion", "c1msg": "Raphazarus appreciates your loyalty. Cesarion's messenger won't be back.", "c2": "Refuse — not your business", "c2msg": "You walk on. The messenger disappears into the crowd." },
+    "1": { "desc": "Eliotis left research data on an open terminal. Maxance is looking for it — he wants it destroyed before it spreads.", "c0": "Copy the data for Eliotis", "c0hint": "+8 Eliotis, -8 Maxance", "c0msg": "You secure the data. Eliotis will know you protected it.", "c1": "Give it to Maxance", "c1hint": "+8 Maxance, -8 Eliotis", "c1msg": "Maxance nods. The data disappears. Eliotis will never know.", "c2": "Destroy it — too dangerous", "c2hint": "-3 Eliotis, -3 Maxance", "c2msg": "No one gets anything. No thanks, no grudge." },
+    "2": { "desc": "Alanossa and Scotty are fighting over control of a trade corridor. Each wants you to testify in their favor before the station council.", "c0": "Support Alanossa", "c0hint": "+12 Alanossa, -6 Scotty, +5 rep", "c0msg": "Alanossa wins the vote. Scotty gives you an icy look. +5 rep.", "c1": "Support Scotty", "c1hint": "+12 Scotty, -6 Alanossa, +5 rep", "c1msg": "Scotty controls the corridor. Alanossa won't forget. +5 rep.", "c2": "Refuse to testify", "c2hint": "-3 rep", "c2msg": "Both think you're a coward. -3 rep." },
+    "3": { "desc": "An agent of Raphazarus offers you a contract: sabotage a delivery meant for Alanossa. Generous pay.", "c0": "Accept the sabotage", "c0hint": "+8 Raphazarus, -10 Alanossa, +400 cr", "c0msg": "The delivery will never arrive. +400 cr. Raphazarus is pleased.", "c1": "Warn Alanossa", "c1hint": "+10 Alanossa, -8 Raphazarus", "c1msg": "Alanossa tightens her security. Raphazarus loses an agent — and a bit of trust in you.", "c2": "Ignore both", "c2msg": "Not your problem. The delivery goes ahead. Or not." },
+    "4": { "desc": "You overhear a conversation between one of Maxance's lieutenants and a Cesarion contact. A clandestine exchange of information. They haven't seen you.", "c0": "Sell the info to Eliotis", "c0hint": "+10 Eliotis, -5 Maxance, -5 Cesarion, +200 cr", "c0msg": "Eliotis pays well for this kind of intel. +200 cr.", "c1": "Blackmail both of them", "c1hint": "+500 cr, -5 Maxance, -5 Cesarion", "c1msg": "They pay. Dearly. But they won't forget you.", "c2": "Look the other way", "c2msg": "You saw nothing. Better this way." }
+  },
+  "wanderLow": {
+    "0": {
+      "title": "An envelope for you",
+      "desc": "A kid hands you a crumpled envelope. 'Someone paid me to give you this.' He vanishes before you can answer.",
+      "c0": "Open the envelope",
+      "c0empty": "The envelope is empty. A setup? You can't tell.",
+      "c0qTitle": "Package on {{target}}",
+      "c0qDesc": "The envelope contains precise coordinates and an instruction: retrieve the package on {{target}} and bring it back here. No name, no explanation.",
+      "c0msg": "Coordinates on {{target}}. Someone wants you to retrieve something there.",
+      "c1": "Burn the envelope without opening it",
+      "c1msg": "You get rid of it. It smelled like a trap — or worse, an obligation."
+    },
+    "1": {
+      "title": "Old pilot and forgotten routes",
+      "desc": "An old pilot grabs your arm in the corridor. 'I've flown everywhere. There's a station nobody visits anymore. Good reasons — and abandoned resources.' He just wants it remembered.",
+      "c0": "Listen carefully",
+      "c0noTargetMsg": "He tells you about it. Interesting but not directly usable. +5 rep.",
+      "c0qTitle": "Check on {{target}}",
+      "c0qDesc": "The pilot described a station he believes was abandoned: {{target}}. 'Check if that's still true. If not, that changes everything.'",
+      "c0msg": "He describes {{target}} precisely. A solid lead. +5 rep.",
+      "c1": "Thank him and leave",
+      "c1msg": "He nods. You leave. He goes back to his drink."
+    },
+    "2": {
+      "title": "Merchant under pressure",
+      "desc": "A traveling merchant quickly packs up her goods when she sees you. 'The local guys are back in an hour. If you need anything, it's now or never.'",
+      "c0": "Buy medicine (120cr)",
+      "c0msg": "She packs up two boxes fast. -120cr, +2 Medicine.",
+      "c0fail": "Not enough credits. She shakes her head and packs up.",
+      "c1": "Ask why she's in a hurry",
+      "c1noTargetMsg": "She tells you about her situation. Rough. You help a little. +8 rep.",
+      "c1qTitle": "Urgent delivery",
+      "c1qDesc": "The merchant has stock stranded on {{target}}. She can't go herself. 'If you're passing through, you'd be doing me a huge favor.' Pays well.",
+      "c1msg": "She needs something delivered on {{target}}. +8 rep for listening.",
+      "c2": "Ignore and move on",
+      "c2msg": "You walk past. Not your problem."
+    },
+    "3": {
+      "title": "Merchants' dispute",
+      "desc": "Two merchants are screaming at each other. One accuses the other of falsifying delivery data. They're looking for a neutral witness — or someone to settle it.",
+      "c0": "Arbitrate seriously",
+      "c0qTitle": "Delivery for a favor owed",
+      "c0qDesc": "The merchant you sided with entrusts you with a delivery. 'I remember people who helped me.' Headed to {{target}}.",
+      "c0msgWin": "You settle it. One of them was wrong, and knows it. The winner thanks you. +12 rep.",
+      "c0msgWinQuestSuffix": " He also offers you work.",
+      "c0msgLose": "You take a side and both turn on you. Sometimes the arbiter loses too. -5 rep.",
+      "c1": "Side with the stronger one",
+      "c1msg": "He slips you a few credits discreetly. The loser holds a grudge. -8 rep.",
+      "c2": "Walk past",
+      "c2msg": "You go around. Not your circus."
+    },
+    "4": {
+      "title": "Mechanic short on parts",
+      "desc": "A mechanic calls out from his improvised workshop. 'I need someone to pick up parts from another station. I pay well, I don't have time to go myself.'",
+      "c0": "Agree to listen",
+      "c0noTargetMsg": "He has no parts to bring in. Maybe another time.",
+      "c0qTitle": "Parts for the workshop",
+      "c0qDesc": "The mechanic needs specific components from {{target}}. 'It's urgent, my client's been waiting three days.' Payment on delivery.",
+      "c0msg": "He gives you the details. Components from {{target}}. Clear job, honest pay.",
+      "c1": "No time",
+      "c1msg": "He shrugs. He'll find someone else."
+    },
+    "5": {
+      "title": "Drunk with good intel",
+      "desc": "A drunk guy in a corner mutters names, stations, numbers. He looks like he worked for someone important — and had too much to drink to keep quiet about it.",
+      "c0": "Listen carefully (and buy him a drink, 40cr)",
+      "c0failMsg": "Not enough credits to keep him talking. He falls asleep.",
+      "c0noTargetMsg": "He rambles. Nothing usable. -40cr for nothing.",
+      "c0qTitle": "Check: {{target}}",
+      "c0qDesc": "The drunk mentioned unusual activity on {{target}}. Worth checking out. 'If it's true, someone will pay a lot to know.'",
+      "c0msg": "He mentions {{target}} several times. Something's going on there. -40cr, interesting lead.",
+      "c1": "Ignore him",
+      "c1msg": "He falls asleep on his own. Probably nothing useful.",
+      "c2": "Discreetly search him (-rep)",
+      "c2msg": "A few credits in his pockets. He'll wake up none the wiser. -10 rep."
+    },
+    "6": {
+      "title": "A merchant intercepts your path",
+      "desc": "He gets up from his table before you even walk past him. 'I've got a contract to offer — transport, nothing complicated. But I want a good price and no questions.' He looks in a hurry.",
+      "c0": "Hear him out",
+      "c1": "Politely decline",
+      "c1msg": "He shrugs and sits back down. Maybe another time."
+    },
+    "7": {
+      "title": "Broker looking for a reliable pilot",
+      "desc": "A woman in a dark suit watches you from the bar. She sets down her glass and walks over. 'I hear you make good runs. I have a delicate shipment. Terms are negotiable — now, here.'",
+      "c0": "Sit down and negotiate",
+      "c1": "Not interested",
+      "c1msg": "She notes your refusal with mild surprise. +2 rep (she respects people who know how to say no)."
+    }
+  },
+  "wanderMid": {
+    "0": {
+      "title": "Bounty hunter with a list",
+      "desc": "A guy stares at you from the entrance. He's got a laminated list. He checks your face. His gaze lingers.",
+      "c0": "Flee discreetly",
+      "c0msgWin": "You blend into the crowd. He loses sight of you.",
+      "c0msgLose": "He catches up with you in an alley. Brief scuffle. You get away, so does he. -HP.",
+      "c1": "Confront him",
+      "c1msg": "He draws his weapon. Fight.",
+      "c2": "Negotiate — offer a partnership",
+      "c2noTargetMsg": "He agrees to let you go. -300cr. Bad investment.",
+      "c2qTitle": "Shared bounty — {{target}}",
+      "c2qDesc": "The hunter offered you a shared target on {{target}}. 'I take half, you take the other.' He seems serious.",
+      "c2msgWin": "He hesitates, then extends a hand. He shares a bounty on {{target}}. +5 rep.",
+      "c2msgLose": "He's not interested in partnering. -300cr to make him look elsewhere.",
+      "c3": "Bribe him directly (300cr)",
+      "c3msg": "-300cr. He puts away his list without a word. Transaction.",
+      "c3fail": "Not enough credits. He keeps watching you."
+    },
+    "1": {
+      "title": "Contact in a raincoat",
+      "desc": "A man approaches without meeting your eyes. 'I have a package. I need a courier who doesn't ask questions. Fair pay, moderate risk.' He hands you an envelope with the details.",
+      "c0": "Take the envelope and listen",
+      "c0noTargetMsg": "No usable destination. He leaves.",
+      "c0qTitle": "Discreet transport",
+      "c0qDesc": "The contact entrusted you with a sealed package to deliver on {{target}}. He won't say what's inside. 'Total discretion. Payment on arrival.'",
+      "c0msg": "Package received. Destination: {{target}}. What's inside, you don't know — and you'd rather not.",
+      "c1": "Ask what's in the package",
+      "c1msg": "He takes the envelope back. 'You're not the right profile.' He disappears.",
+      "c2": "Refuse outright",
+      "c2msg": "He leaves without pushing. People like that have options."
+    },
+    "2": {
+      "title": "Neighborhood boss",
+      "desc": "The local boss plants himself in front of you with two muscle-bound men behind. 'Toll for passage. This is my territory.' His look says he's done this a thousand times.",
+      "c0": "Pay (200cr)",
+      "c0fail": "Not enough credits. He gets more threatening.",
+      "c0qTitle": "A favor for Orva",
+      "c0qDesc": "The boss let you through and kept your name. 'If you need clean work, come find me.' He's got an operation on {{target}} that needs an outsider.",
+      "c0msg": "-200cr. He lets you through. 'Next time you might have something to do for me.'",
+      "c0msgQuestSuffix": " He gives you a lead.",
+      "c1": "Stand your ground",
+      "c1msgWin": "He backs off. He knows people who don't bend. +15 rep.",
+      "c1msgLose": "He signals his men.",
+      "c2": "Offer a job instead",
+      "c2msgNo": "He laughs. 'You've got nerve.' He lets you through for free. This time.",
+      "c2qTitle": "Settling scores",
+      "c2qDesc": "The boss accepted the trade. He gives you a target on {{target}} instead of the toll. 'Make them understand they belong to me too.'",
+      "c2msg": "He thinks it over and agrees. A job on {{target}} in exchange for the toll.",
+      "c3": "Intimidate",
+      "c3msg": "Your tone makes him step back. He lets you through. +25 rep."
+    },
+    "3": {
+      "title": "Faction defector",
+      "desc": "A woman pulls you into an alcove. She's sweating. 'My own people are hunting me. I can give you information in exchange. Real information. About a target a lot of people want.'",
+      "c0": "Listen to her",
+      "c0noTargetMsg": "She talks. Names, places. Nothing immediately usable, but +10 rep.",
+      "c0qTitle": "Bounty — target identified",
+      "c0qDesc": "The defector gave you an address on {{target}} and a name. 'This person has blood on their hands. And someone is paying to end it.' She won't say more.",
+      "c0msg": "She gives you a target on {{target}}. Precise. Documented. +10 rep.",
+      "c1": "Turn her in to the authorities (+credits, -rep)",
+      "c1msg": "+credits. She watches you leave. That look will stay with you. -20 rep, 'informant' tag.",
+      "c1journal": "I turned in a defector to the authorities. She watched me leave without a word. That look doesn't fade.",
+      "c2": "Refuse to get involved",
+      "c2msg": "She disappears into the crowd. You keep going. Maybe the right call."
+    },
+    "4": {
+      "title": "Informant with a bounty",
+      "desc": "A nervous man approaches and talks fast. 'You look capable. There's an open bounty on a target in the sector. The big houses don't hunt in this territory. You could, if you're interested.'",
+      "c0": "Listen to the details",
+      "c0noTargetMsg": "He can't give you usable details. 'Sorry, bad timing.'",
+      "c0qTitle": "Hunt — {{target}}",
+      "c0qDesc": "The informant gave you a target on {{target}}. 'Move fast. Other hunters are on the trail.' His nervousness seems genuine.",
+      "c0msg": "Target identified on {{target}}. A serious bounty if you get there first.",
+      "c1": "Ask what cut he wants",
+      "c1qTitle": "Surveillance: {{target}}",
+      "c1qDesc": "The informant first wants active presence on {{target}}. 'Confirm the target's still there. I'll split the bounty after.'",
+      "c1msgQuest": "He first proposes recon on {{target}} before revealing the real target.",
+      "c1msgNo": "He looks at you and leaves. 'You're too cautious for this job.'",
+      "c2": "Walk past",
+      "c2msg": "You walk past. He'll find someone else."
+    },
+    "5": {
+      "title": "Unsecured transit corridor",
+      "desc": "A dock technician calls out from a walkway. 'If you're leaving soon, avoid the north route — floating debris since yesterday's explosion. Be careful.' He hands you a hand-annotated sector map.",
+      "c0": "Take the map and navigate now",
+      "c1": "Thank him and move on",
+      "c1msg": "You note the info mentally. +3 rep — the locals trust you."
+    },
+    "6": {
+      "title": "Pilot in distress in the sector",
+      "desc": "The distress signal is weak but clear. Someone's stuck between two unstable zones. Your route passes through there anyway. You can attempt navigation — or ignore it.",
+      "c0": "Attempt the navigation to help",
+      "c1": "Ignore — too risky",
+      "c1msg": "You cut the signal. He'll manage. -5 rep."
+    }
+  },
+  "wanderHigh": {
+    "0": {
+      "title": "Ambush assassin — bad surprise",
+      "desc": "You see him in the reflection of a metal panel. A split second. He's got a knife. He was waiting for someone — maybe you, maybe not.",
+      "c0": "Dodge and flee",
+      "c0msgWin": "You throw yourself aside. He misses. You run. He doesn't press it.",
+      "c0msgLose": "He grazes you. Painful. You get away. -HP.",
+      "c1": "Turn and fight",
+      "c1msg": "He turns around. You fight.",
+      "c2": "Restrain and interrogate him",
+      "c2qTitle": "Client — {{target}}",
+      "c2qDesc": "The assassin talked under pressure. Someone from {{target}} ordered the hit. Maybe not you as the target — but someone nearby. The lead is hot.",
+      "c2msgWin": "He talks. A target on {{target}}. +15 rep, -HP (short struggle).",
+      "c2msgLose": "He resists. You got him but he says nothing. -HP. Nothing usable.",
+      "c2fallbackTarget": "an unknown destination"
+    },
+    "1": {
+      "title": "Faction recruitment — not really a question",
+      "desc": "Three men surround you. One wears a faction emblem. 'We're looking for competent independents. You look like one. This is an offer — but not the kind you easily refuse.'",
+      "c0": "Accept a test mission",
+      "c0noTargetMsg": "They have nothing concrete to give you here. They slip you an advance. +400cr.",
+      "c0qTitle": "Test mission — {{target}}",
+      "c0qDesc": "The recruiters gave you a demonstration mission on {{target}}. 'Show us you can do the work. Expected result: one opponent neutralized on site.'",
+      "c0msg": "A test mission on {{target}}. If you succeed, they come back with a serious offer. +400cr advance.",
+      "c1": "Negotiate — demand a bounty for information",
+      "c1msgFail": "They don't appreciate the negotiation. Short lesson. -HP.",
+      "c1qTitle": "Retrieval for the faction",
+      "c1qDesc": "The recruiters accepted the deal. They want you to retrieve something on {{target}} and you get your bounty. 'No one else but you for this.'",
+      "c1msg": "They reluctantly accept the deal. An extraction on {{target}} in exchange for a good bounty.",
+      "c2": "Firmly refuse",
+      "c2msgWin": "They stare at you for a long time. Then they step back. 'You've got backbone. We'll be back.'",
+      "c2msgLose": "The refusal goes badly. They give you a taste of it. -HP."
+    },
+    "2": {
+      "title": "Exhausted double agent",
+      "desc": "A man in a dark corridor waves you over. His eyes are those of someone who hasn't slept in a long time. 'I have information on an ongoing operation. I can't use it myself. Someone can — for a price.'",
+      "c0": "Buy the information (600cr)",
+      "c0fail": "Not enough credits. He leaves without a word.",
+      "c0noTargetMsg": "-600cr. The info is vague but relevant. +20 rep in the underworld.",
+      "c0qTitle": "Priority target — {{target}}",
+      "c0qDesc": "The double agent sold you precise info on a high-value target on {{target}}. 'Move fast before things change.' The info seems reliable.",
+      "c0msg": "-600cr. Target identified on {{target}}. High bounty if you act fast. +20 rep.",
+      "c1": "Refer him to the proper authorities",
+      "c1msg": "He nods. He knew it could end this way. +8 rep for honesty.",
+      "c2": "Try to scam him (–rep)",
+      "c2msgCaught": "He catches on before you have time. He disappears. -15 rep. These people share information.",
+      "c2msgSuccess": "+some credits. -20 rep. He'll remember."
+    },
+    "3": {
+      "title": "Mercenary down",
+      "desc": "A mercenary is leaning against the wall, a hand on his side. Blood. He looks up. 'I need help. You look like you know what you're doing. I can pay — not in credits, in information.'",
+      "c0": "Help him (use medicine)",
+      "c0noMedsMsg": "You have no medicine. He nods. 'Not your fault.'",
+      "c0qTitle": "Payback — {{target}}",
+      "c0qDesc": "The mercenary gave you the names of those who set him up on {{target}}. 'If you pass through there, return the favor.' Gratitude in return.",
+      "c0journal": "I treated a wounded mercenary in the wreckage. His name was Cador. He gave me a lead in exchange.",
+      "c0msg": "You treat him. He holds on. In exchange, he gives you a lead on {{target}}. +18 rep, -1 Medicine.",
+      "c0fallbackTarget": "a destination",
+      "c1": "Ignore him and move on",
+      "c1msg": "You walk past. He says nothing. That image will stay with you.",
+      "c2": "Search him if he passes out (–rep)",
+      "c2journal": "I searched a wounded man as he passed out. I'm not proud of that.",
+      "c2msg": "+credits. -18 rep. 'Opportunist' tag. You knew what you were doing."
+    },
+    "4": {
+      "title": "Information on Alanossa",
+      "desc": "A source contacts you from the shadows. 'I have information on Alanossa. Real movements, not rumors. It costs — but it's worth the price.'",
+      "c0": "Buy the information (700cr)",
+      "c0fail": "Not enough. She leaves.",
+      "c0qTitle": "Bounty — Alanossa",
+      "c0qDesc": "The source gave you a window of opportunity on Arc Ouest Apocalypse. 'Alanossa will be exposed. Briefly.' An exceptional bounty awaits whoever acts.",
+      "c0msg": "Alanossa on Arc Ouest Apocalypse. Short window. -700cr, +30 rep in the underworld.",
+      "c1": "Negotiate the price",
+      "c1msgFail": "She's not in the mood. She leaves. This information has a fixed price.",
+      "c1msgWin": "-400cr. She agrees to a partial summary. +15 rep.",
+      "c2": "Refuse — too risky",
+      "c2msg": "She shrugs. 'Someone else will take the bounty.'"
+    },
+    "5": {
+      "title": "Ambush — no warning signs",
+      "desc": "You're walking. There's no one around. Then there's someone. A bag over your head. Hands behind your back. Someone's done this thousands of times.",
+      "c0": "Struggle randomly (15% success)",
+      "c0msgWin": "You break free in total chaos. You run. You're bleeding. You're out. -HP.",
+      "c0msgLose": "You wake up in a cell. Wallet empty. No one knows you're here.",
+      "c1": "Stay still — don't provoke",
+      "c1msg": "They take you in. Methodical. You lose credits and your freedom."
+    },
+    "6": {
+      "title": "Booby-trapped cargo",
+      "desc": "An abandoned crate in a corridor. Too well placed. You approach. You crouch. You open it.",
+      "c0": "Open it",
+      "c0deathCause": "Booby-trapped cargo. The explosion caught you by surprise in a dangerous-zone corridor.",
+      "c0msgDeath": "White light. Noise. Nothing else.",
+      "c0msgGas": "Sleeping gas. You wake up in a cell, disoriented.",
+      "c0msgCredits": "Real credits. You don't understand. You don't try to.",
+      "c1": "Back away and don't touch it",
+      "c1msg": "You step away. Someone else might have less self-control."
+    },
+    "7": {
+      "title": "ID check — plainclothes agents",
+      "desc": "Two strangers politely block your path. 'Your papers.' No visible badge. They don't need one — their attitude is enough.",
+      "c0": "Cooperate — hand over your papers",
+      "c0msgInterrogation": "They look over your papers and signal a third man. Off to the interrogation post.",
+      "c0msgPass": "They check and let you through. A file has just been opened on you, somewhere.",
+      "c1": "Refuse and leave",
+      "c1msgWin": "They let you go. This time.",
+      "c1msgLose": "Refusing to cooperate goes badly. They pin you down before you finish your sentence.",
+      "c2": "Flee immediately",
+      "c2msgWin": "You run. They don't follow. Maybe they had other things to do.",
+      "c2msgLose": "Fleeing was the wrong call. There were others in the corridor."
+    }
+  },
+  "wanderBadRep": {
+    "0": {
+      "title": "Price on your head",
+      "desc": "A stranger has been following you since the entrance. When you turn around, he smiles. \"You've got {{repAbs}} less reputation. Someone pays well to know where you are.\" He discreetly shows a weapon.",
+      "c0": "Pay him to keep quiet (300 cr)",
+      "c0msg": "He pockets it. He disappears. For how long?",
+      "c0fail": "Not enough. He sends you a physical warning before disappearing.",
+      "c1": "Call his bluff",
+      "c1msgWin": "He backs off. It was a bluff. But now he knows you hold your ground.",
+      "c1msgLose": "It wasn't a bluff. You barely make it out but you pay dearly.",
+      "c2": "Flee into the crowd",
+      "c2msgWin": "You lose yourself in the packed corridor. He loses your trail.",
+      "c2msgLose": "He catches up with you. One hit. He drops you and disappears."
+    },
+    "1": {
+      "title": "Refused service",
+      "desc": "A proprietor recognizes you the moment you walk in. \"Sorry, we don't serve people like you here.\" He signals his goons. \"Your reputation precedes you — and not in a good way.\"",
+      "c0": "Politely insist",
+      "c0msg": "They escort you out. -5 rep. You pick up a bit of info on the way.",
+      "c1": "Invoke your past reputation (if you have any)",
+      "c1msgWin": "You bring up a few good deeds. The proprietor hesitates. He reluctantly agrees. +3 rep.",
+      "c1msgLose": "He laughs. Your 'past reputation' is worthless here. You leave humiliated. -8 rep.",
+      "c2": "Leave without a word",
+      "c2msg": "You leave. This station isn't for you. Not right now."
+    },
+    "2": {
+      "title": "Toxic transaction",
+      "desc": "A shadow dealer approaches you. He knows who you are — and figures someone with your reputation is surely after shady stuff. He offers black-market implants at a bargain price.",
+      "c0": "Buy the implant (200 cr, risky)",
+      "c0fail": "Not enough credits.",
+      "c0msgWin": "+12 max HP. The implant takes. Not bad for the black market. -200 cr.",
+      "c0msgLose": "The implant rejects. -HP, -200 cr. The dealer's already gone.",
+      "c1": "Refuse but ask for information",
+      "c1msg": "He tells you about useful contacts in the gray zone. +5 rep in the underworld.",
+      "c2": "Ignore and leave",
+      "c2msg": "You walk past. Not the day to mess with the black market."
+    },
+    "3": {
+      "title": "Old enemy",
+      "desc": "Someone stares at you from the other end of the corridor. You recognize them — or they recognize you. A face from a station you'd rather have forgotten. They walk toward you. Calm. Determined.",
+      "c0": "Face them",
+      "c0msgWin": "The confrontation turns into a cold peace. They leave. Something settled. +8 rep.",
+      "c0msgLose": "It escalates. You get away but it's ugly. -HP, -10 rep.",
+      "c1": "Try to explain yourself",
+      "c1msgWin": "They listen. Really listen. You gain something rare: a second chance. +15 rep.",
+      "c1msgLose": "They won't listen. 'You should've thought of that before.' They leave, disgusted. -5 rep.",
+      "c2": "Quickly walk off in the opposite direction",
+      "c2msg": "You avoid the confrontation. For now. But the alleys are small."
+    },
+    "4": {
+      "title": "Traveling rumors",
+      "desc": "Two people talk about you without seeing you — or pretend not to. What you hear isn't flattering. Your name is circulating in the wrong category. You choose how to react.",
+      "c0": "Correct the rumor publicly",
+      "c0msgWin": "You step in with confidence. People listen. The story changes. +12 rep.",
+      "c0msgLose": "You lose your cool. It turns into a public incident. -8 rep. You leave in shame.",
+      "c1": "Deliberately fuel the rumor (rep goes down)",
+      "c1msg": "You play into your bad reputation. Someone pays you for a dirty job. -5 rep, +credits.",
+      "c2": "Ignore and move on",
+      "c2msg": "You walk past without a word. The rumor will keep going without you."
+    }
+  },
+  "contextAware": {
+    "lowHp": {
+      "title": "You look rough",
+      "desc": "A field medic notices you passing by. 'You look like you need urgent care. I can do something — but I don't work for free.'",
+      "c0": "Accept and pay (150 cr)",
+      "c0msg": "+40 HP. Makeshift care but effective. -150 cr.",
+      "c0fail": "Not enough credits. He nods and leaves.",
+      "c1": "Ask for a humanitarian discount",
+      "c1msgWin": "+20 HP. He remembers people with a good reputation.",
+      "c1msgLose": "He smiles politely. 'Your reputation doesn't earn you any favors.' He leaves.",
+      "c2": "Refuse — you'll manage",
+      "c2msg": "He nods and leaves. The void heals no one."
+    },
+    "cargoTheft": {
+      "title": "Eyes on your hold",
+      "desc": "You notice two guys scoping out your ship from the dock. They pretend not to look. They're looking.",
+      "c0": "Approach them directly",
+      "c0msgWin": "Your reputation discourages them. They leave. +5 rep for holding your ground.",
+      "c0msgLose": "They feel entitled facing someone with your reputation. Your hold is empty when you get back. -3 rep.",
+      "c1": "Watch discreetly and catch them in the act",
+      "c1msgWin": "You wait for them. You confront them. They leave their gear behind as they run. +10 rep, +credits.",
+      "c1msgLose": "Too late. They were smarter. Your hold is empty.",
+      "c2": "Move your ship to another hangar",
+      "c2msg": "80 credits to switch docks. Expensive but safe. -80 cr."
+    },
+    "pickpocket": {
+      "title": "Quick hands",
+      "desc": "You feel something. A brush. A lightness in your pocket you shouldn't have noticed this soon.",
+      "c0": "Chase after them (50% chance to catch up)",
+      "c0msgCatch": "You catch up with them at the corner. They drop {{stolen}} cr and bolt. You get it all back.",
+      "c0msgMiss": "Too slow. {{stolen}} cr gone into the crowd.",
+      "c1": "Check your pockets first",
+      "c1msgLost": "{{lost}} cr are missing. You noticed the theft too late.",
+      "c1msgNothing": "Nothing missing. Maybe you imagined it."
+    },
+    "reputationPreceded": {
+      "title": "Your reputation preceded you",
+      "desc": "A pilot approaches you. \"I heard about you on {{station}}. Someone said you'd passed through there.\" He seems to be waiting for something.",
+      "fallbackStation": "another station",
+      "c0": "Talk about your travels",
+      "c0noTargetMsg": "You share. He listens. Your traveler's reputation is useful. +8 rep.",
+      "c0qTitle": "Package for a contact",
+      "c0qDesc": "The pilot has an urgent package to deliver on {{target}}. He doesn't have time. You do.",
+      "c0msg": "He offers you work. +8 rep for the conversation.",
+      "c1": "Ask why he's interested",
+      "c1msg": "He was looking for someone trustworthy for a message. He hands it to you. +3 rep, an encrypted note in your pocket.",
+      "c2": "Stay evasive",
+      "c2msg": "You dodge the questions. He understands. He leaves."
+    }
+  },
+  "deepLoot": "Rewarded depth. A real treasure down there.",
+  "stationWander": {
+    "laCarcasse": {
+      "0": {
+        "title": "Marek's workshop",
+        "desc": "Marek is in his workshop, hands elbow-deep in a stripped-down propulsion engine. He glances up for a second. 'You need something or are you just looking?'",
+        "c0": "Ask him if he has work",
+        "c0noTargetMsg": "He's got nothing concrete for you right now. But he notes your name. +5 rep.",
+        "c0qTitle": "Parts for Marek",
+        "c0qDesc": "Marek needs specific components from {{target}}. 'Those parts, I can't find anywhere here. You've got a ship.' Fair payment on delivery.",
+        "c0msg": "Marek has an order on {{target}}. Simple delivery, honest pay.",
+        "c1": "Ask him about La Carcasse",
+        "c1msg": "He talks while he works. Stories about La Carcasse no info board would tell. You leave with useful intel. +8 rep, some credits.",
+        "c2": "Offer to help with the repair",
+        "c2msg": "Two hours later, the engine runs. He takes a look at your ship in return. +12 rep, free repairs."
+      },
+      "1": {
+        "title": "The unlabeled meat",
+        "desc": "A vendor sells grilled meat from a cart. Smells good. No label. No questions. A kid in front of you buys three portions without a second thought.",
+        "c0": "Buy some and don't ask where it's from",
+        "c0msg": "It's good. You try not to think about it too much. +HP, -30cr.",
+        "c1": "Ask where the meat comes from",
+        "c1msg": "He looks at you. He doesn't answer. The kid looks at him too. You move on.",
+        "c2": "Report it to La Carcasse's authorities",
+        "c2msg": "La Carcasse's authorities? Good joke. There isn't really such a thing."
+      },
+      "2": {
+        "title": "The kids of the holds",
+        "desc": "A group of children blocks your path in a narrow corridor. They look like they're playing — but their formation is too precise to be a game.",
+        "c0": "Negotiate passage",
+        "c0msg": "You give them something. The formation opens up. They run this corridor better than any militia.",
+        "c1": "Go around another way",
+        "c1msgFound": "The alternate path goes through an abandoned section. You find something useful there.",
+        "c1msgNothing": "The alternate path is longer and leads nowhere interesting.",
+        "c2": "Recruit them as informants",
+        "c2msg": "They agree. Within two hours, they've sent you three useful rumors. +10 rep."
+      }
+    },
+    "lesBasFondsDeVega": {
+      "0": {
+        "title": "Boro in a corner",
+        "desc": "Boro leans against a wall in an alcove, eyes half-closed. He sees you approaching from ten meters away. He's always been more observant than he looks.",
+        "c0": "Ask what he has to sell",
+        "c0noTargetMsg": "He's got something. You buy. -200cr, +goods.",
+        "c0qTitle": "Transport for Boro",
+        "c0qDesc": "Boro has a package to move on {{target}}. 'Nothing illegal. Well, nothing too illegal.' He pays well. No receipt.",
+        "c0msg": "Boro has a transport job. {{target}}. He gives you an advance.",
+        "c1": "Ask him for information on the area",
+        "c1msg": "Boro knows everything that moves through the Undercroft. He gives you a solid lead. +6 rep, +credits.",
+        "c2": "Walk past without stopping",
+        "c2msg": "He watches you leave. He remembers who stops and who doesn't."
+      },
+      "1": {
+        "title": "The Undercroft code",
+        "desc": "You've broken something without knowing it — too direct a look, too well-used a corridor. Three people block you now. Not aggressively. Just present.",
+        "c0": "Acknowledge the mistake and offer compensation",
+        "c0msg": "You catch on fast. You pay. The situation defuses. -credits, +5 rep (you know how to behave).",
+        "c1": "Pretend you didn't understand",
+        "c1msgLose": "Willful ignorance is the worst insult possible here. -10 rep.",
+        "c1msgWin": "Either you really look innocent, or you convinced them. They step aside.",
+        "c2": "Politely ask who you offended",
+        "c2msg": "Asking directly means respecting the rules. They explain. You apologize. Situation resolved. +8 rep."
+      },
+      "2": {
+        "title": "The bottom of the bottom",
+        "desc": "A hidden staircase leads to a level even lower than the Undercroft. The neon lights don't reach down there. People live there anyway.",
+        "c0": "Go down and explore",
+        "c0msgWin": "You find an even more informal market. Things no one sells officially. +credits, +data.",
+        "c0msgLose": "The people here don't appreciate visitors. You leave with bruises. -HP.",
+        "c1": "Go back up — some places don't deserve to be found",
+        "c1msg": "Probably the right call. Probably."
+      }
+    },
+    "arcOuestApocalypse": {
+      "0": {
+        "title": "A Black Hawk sizing you up",
+        "desc": "A man in Black Hawk uniform watches you from the entrance of a corridor. He's not threatening. He's assessing. He decides something about you in under ten seconds.",
+        "c0": "Hold his gaze and keep walking",
+        "c0msg": "You pass. He nods, almost imperceptibly. You just accomplished something. +10 rep.",
+        "c1": "Approach and introduce yourself",
+        "c1noTargetMsg": "He listens. He says little. Before leaving, he slips you something. +5 rep.",
+        "c1qTitle": "Mission for the Black Hawks",
+        "c1qDesc": "A Black Hawk recognized you as capable. He wants something on {{target}}. 'No need to know why. Need to know if you're reliable.'",
+        "c1msg": "He has a mission on {{target}}. You look reliable. +8 rep.",
+        "c2": "Change direction to avoid him",
+        "c2msg": "He notes that you changed direction. He notes everything."
+      },
+      "1": {
+        "title": "Alanossa's network of children",
+        "desc": "A twelve-year-old kid hands you an envelope without a word. On the envelope: nothing. He vanishes into the crowd before you can ask a question.",
+        "c0": "Open the envelope",
+        "c0noTargetMsg": "Credits and a note: 'You're being watched. Keep behaving well.' +500cr.",
+        "c0qTitle": "Designated target",
+        "c0qDesc": "The envelope contains a photo, a name, a station: {{target}}. No explanation. The reward is real.",
+        "c0msg": "A target. A station: {{target}}. The reward is real — if you trust the source.",
+        "c1": "Don't open it and leave",
+        "c1msg": "You get rid of it in the first corridor. Someone watches you do it. They pick up the envelope."
+      },
+      "2": {
+        "title": "Cael in his corner",
+        "desc": "Cael sits alone at a table in a dark corner. He watches you approach with the patience of someone who decided long ago what he'd do if you came near.",
+        "c0": "Sit down across from him",
+        "c0qTitle": "Black Hawk operation — {{target}}",
+        "c0qDesc": "Cael has an operation underway on {{target}}. He tests you by trusting you with it. 'If you fail, I never spoke to you.' If you succeed, you have a positive debt with the Black Hawks.",
+        "c0msg": "Cael talks little. But he gives you something on {{target}}. +5 rep.",
+        "c0fallbackTarget": "a target",
+        "c1": "Don't approach — Cael isn't met by accident",
+        "c1msg": "You keep going. Probably not the right moment."
+      }
+    },
+    "lePurgatoire": {
+      "0": {
+        "title": "Neva in the shadow of corridor 4",
+        "desc": "Neva watches you from a dark alcove. She doesn't try to hide — she gives you time to decide whether to come or not.",
+        "c0": "Approach her",
+        "c0qTitle": "Presence for Neva",
+        "c0qDesc": "Neva needs you to show up on {{target}}. 'I have my reasons. You have the means to go there.' She pays for facts, not rumors.",
+        "c0msg": "Neva needs information on {{target}}. +6 rep.",
+        "c0fallbackTarget": "a destination",
+        "c1": "Nod from a distance and keep going",
+        "c1msg": "She nods. That's enough. Le Purgatoire has its codes. +4 rep."
+      },
+      "1": {
+        "title": "A former prisoner with a debt",
+        "desc": "An old man stops you. 'You've got the look of someone who's also gotten out of somewhere.' He has the eyes of someone who counted the bars. He wants to talk.",
+        "c0": "Listen to him",
+        "c0qTitle": "Return to {{target}}",
+        "c0qDesc": "The old man left something on {{target}} when he had to leave in a hurry. 'I can't go back. You can.' He tells you exactly where to look.",
+        "c0msg": "He had something to retrieve on {{target}}. He can't go himself. +8 rep.",
+        "c0fallbackTarget": "a station",
+        "c1": "Politely refuse — no time",
+        "c1msg": "He nods. 'No one has time here.' He leaves."
+      },
+      "2": {
+        "title": "The forbidden level 7",
+        "desc": "A door marked 'Level -7 — Restricted access' is ajar. Someone forced the lock from outside. Recently.",
+        "c0": "Go in and see what's there",
+        "c0msgWin": "An old detention room. Belongings left by the last prisoners. Some have value. +credits, +artifacts.",
+        "c0msgLose": "Someone's already there. They don't appreciate being disturbed. -HP.",
+        "c1": "Report the open door to Neva",
+        "c1msg": "Neva appreciates it. She knows level 7. And now she knows you're someone she can tell things to. +12 rep.",
+        "c2": "Close the door and move on",
+        "c2msg": "Someone wanted that door open. You just disrupted their plans."
+      }
+    },
+    "fortKharos": {
+      "0": {
+        "title": "Torvak on break",
+        "desc": "Torvak eats alone in the cafeteria. He eats slowly, methodically, like someone who's learned to savor moments of silence.",
+        "c0": "Sit at his table and talk to him",
+        "c0qTitle": "Justice for Torvak",
+        "c0qDesc": "Torvak has unfinished business on {{target}}. He can't go — he's on duty. 'If you pass through, return my compliment.' He tells you exactly how.",
+        "c0msg": "Torvak talks little but every word counts. He gives you a lead on {{target}}. +10 rep.",
+        "c0fallbackTarget": "a destination",
+        "c1": "Leave him be — some silences deserve respect",
+        "c1msg": "You move to another table. He glances up for a second, then back down. You just scored a point. +5 rep."
+      },
+      "1": {
+        "title": "A recruit who wants to desert",
+        "desc": "A recruit approaches you in a side corridor. She's young. She looks like she made up her mind seeing you. 'Are you leaving soon?'",
+        "c0": "Take her — she boards",
+        "c0qTitle": "Urgent extraction",
+        "c0qDesc": "You have a deserter aboard. She wants to go to {{target}}. Fort Kharos authorities might be looking. No detours.",
+        "c0journal": "I took a Fort Kharos deserter aboard. She was fleeing something heavier than me. I helped her.",
+        "c0msg": "She boards. You now have a deserter aboard and a destination on {{target}}.",
+        "c0fallbackTarget": "a station",
+        "c1": "Advise her to leave through other means",
+        "c1msg": "You give her names, routes. She thanks you. +6 rep.",
+        "c2": "Report her — you don't want trouble",
+        "c2msg": "The militia takes her. A reward lands in your pocket. -15 rep, +300cr."
+      }
+    },
+    "nexusAldara": {
+      "0": {
+        "title": "Lira cracked something",
+        "desc": "Lira approaches you with the look of someone who just did something she shouldn't have. 'I got access to a system. I saw things. I need it not to get around.'",
+        "c0": "Listen and keep it to yourself",
+        "c0qTitle": "Data extraction — {{target}}",
+        "c0qDesc": "Lira identified valuable data on {{target}}. 'I can't show up there myself. You have a ship.' She tells you exactly what to look for.",
+        "c0msg": "Lira entrusted you with something. She has a job on {{target}}. +8 rep.",
+        "c0fallbackTarget": "a station",
+        "c1": "Sell the information to her rivals",
+        "c1msg": "+credits. Lira will know. She always knows. -25 rep."
+      },
+      "1": {
+        "title": "A hacker actively fleeing",
+        "desc": "A guy runs down the corridor, terminal under his arm, eyes everywhere. He bumps into you, stares for a second, and resumes running, muttering 'sorry' without stopping.",
+        "c0": "Catch up to help him",
+        "c0qTitle": "Safe passage to {{target}}",
+        "c0qDesc": "The hacker needs to leave Nexus Aldara fast. He knows things people don't want him to know. {{target}} is the plan. Payment on arrival.",
+        "c0msg": "He needs to head to {{target}}. Fast.",
+        "c0fallbackTarget": "a destination",
+        "c1": "Ignore him — his problems aren't yours",
+        "c1msg": "He disappears down a side corridor. You hear sounds of pursuit ten seconds later."
+      }
+    },
+    "emporiumRequiem": {
+      "0": {
+        "title": "Pistis on level 9",
+        "desc": "Pistis is in a café on level 9 — where the lighting is dim and the signs more discreet. He waves you to sit before you even ask.",
+        "c0": "Sit down and see what he's got",
+        "c0noTargetMsg": "Pistis has contacts everywhere. He slips you some sellable information. +400cr, +8 rep.",
+        "c0noTargetJournal": "I met Pistis on level 9. He slipped me info without looking me in the eye. This guy has contacts everywhere.",
+        "c0qTitle": "Discreet delivery",
+        "c0qDesc": "Pistis has something to deliver on {{target}}. 'Nothing illegal. Well, nothing the law can prove.' He pays above market for discretion.",
+        "c0journal": "I met Pistis on level 9. He had a delivery. I didn't ask what it was.",
+        "c0msg": "Pistis has a delivery for {{target}}. He pays well. +8 rep.",
+        "c1": "Politely refuse — Pistis creates obligations",
+        "c1msg": "He understands. 'You'll be back.' Probably true. +3 rep (you know what you're doing)."
+      },
+      "1": {
+        "title": "An auction on level 7",
+        "desc": "A guarded door, a hum of voices behind it. Someone's selling something the official levels don't see. The door is ajar during the guard change.",
+        "c0": "Walk in with confidence",
+        "c0msgWin": "You seem to belong. An artifact sale. You leave with something valuable. +credits, +artifact.",
+        "c0msgLose": "They know you don't belong here.",
+        "c1": "Watch from the corridor",
+        "c1msg": "You identify faces, alliances, prices. Sellable information. +5 rep, +credits."
+      }
+    },
+    "laForgeNoire": {
+      "0": {
+        "title": "Rook at work",
+        "desc": "Rook is forging something. The sound is steady, almost hypnotic. He doesn't look up when you enter. He knows you're there.",
+        "c0": "Order a weapon",
+        "c0fail": "You need at least 800cr for an order from Rook.",
+        "c0msg": "He forges. An hour later: {{weapon}}. -800cr.",
+        "c1": "Bring him rare materials in exchange for work",
+        "c1qTitle": "Materials for Rook",
+        "c1qDesc": "Rook needs specific materials from {{target}}. 'I craft better with better raw materials. You bring it, I forge, you leave with something good.'",
+        "c1msg": "Rook needs materials from {{target}}.",
+        "c1fallbackTarget": "a source",
+        "c2": "Watch his work in silence",
+        "c2msg": "He forges for an hour. You watch. At the end he shows you something — a technique. +8 rep."
+      }
+    },
+    "arcPerdu": {
+      "0": {
+        "title": "Automated sentinel — no hesitation",
+        "desc": "A mechanical hum in a side corridor. A gyroscope. A cannon. It turns toward you before you understand what it is.",
+        "c0": "Dive aside (30% survival)",
+        "c0msgWin": "You avoid the worst of it. The burst grazes you. You run without looking back. -HP.",
+        "c0deathCause": "Automated sentinel in L'Arc Perdu. Pre-war system. No conscience. No mercy.",
+        "c0msgLose": "The cannon didn't hesitate. You did.",
+        "c1": "Raise your hands — maybe there's a surrender sensor",
+        "c1msgPrison": "The system surrounds and escorts you. You end up in a cell. Raphazarus's soldiers arrive later.",
+        "c1deathCause": "The sentinel had no 'surrender' mode. L'Arc Perdu wasn't built to take prisoners.",
+        "c1msgDeath": "There was no surrender protocol."
+      },
+      "1": {
+        "title": "Raphazarus's soldiers — silent patrol",
+        "desc": "Four men in heavy armor, no clear insignia. They walk without speaking. They spotted you thirty seconds ago. They're waiting for you to make a move.",
+        "c0": "Identify yourself and ask to pass",
+        "c0msgPass": "One of them signals to let you through. Not a word. A test passed, you don't know why.",
+        "c0journal": "Raphazarus's patrol let me pass. Not a word. They looked at me as if they knew something I don't.",
+        "c0msgInterrogation": "They escort you. No force. 'You have questions. So do we.'",
+        "c0msgPrison": "One of them wasn't waiting for your answer. You wake up in a cell in L'Arc Perdu.",
+        "c1": "Flee — immediately",
+        "c1msgWin": "You run through the wreckage. They don't chase far. You get away, barely. -HP.",
+        "c1msgLose": "They ran faster than you thought. The ruins hold no secrets for them.",
+        "c2": "Stay still — let them decide",
+        "c2msgInterrogation": "'You're coming with us.' No violence. Just certainty.",
+        "c2msgPass": "They pass. One of them looks at you a second too long. Then they disappear into the ruins."
+      },
+      "2": {
+        "title": "Uncharted radiation zone",
+        "desc": "A corridor deep in the ruins. The walls change color — a faint, almost beautiful glow. Something radiates in there.",
+        "c0": "Enter — explore (high risk)",
+        "c0deathCause": "Lethal radiation in an uncharted zone of L'Arc Perdu. Fatal dose within minutes.",
+        "c0msgDeath": "You move forward. The pain starts five minutes later. You don't come back out.",
+        "c0msgHurt": "You recover pre-war artifacts. And nausea that won't fade anytime soon. -HP, +2 Artifacts.",
+        "c0msgJackpot": "An armored capsule. Protected by the hull. Data from before the Great War. Priceless. +credits, +data.",
+        "c1": "Stay outside — wait for the glow to fade",
+        "c1msg": "It doesn't fade. You leave. These zones aren't visited without equipment."
+      }
+    },
+    "starQuest": {
+      "0": {
+        "title": "Ganz has a proposal",
+        "desc": "Ganz intercepts you near the casino entrance. He smiles but his eyes are calculating. He always has a proposal.",
+        "c0": "Hear him out",
+        "c0noTargetMsg": "He tests your interest. No concrete mission tonight. But he remembers you listened. +5 rep.",
+        "c0qTitle": "Presence for Ganz",
+        "c0qDesc": "Ganz wants an active presence on {{target}}. Some of his clients come from there. 'I pay for concrete.' He pays well.",
+        "c0msg": "Ganz wants {{target}} watched. Serious pay. +5 rep.",
+        "c1": "Politely decline and head to the casino",
+        "c1msg": "He laughs. 'Good idea.' He lets you through. +2 rep."
+      }
+    }
+  }
+}

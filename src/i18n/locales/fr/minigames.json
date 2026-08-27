@@ -1,0 +1,83 @@
+{
+  "asteroidDodge": {
+    "header": "— CHAMP D'ASTÉROÏDES —",
+    "controls": "← → esquiver · ESPACE tirer",
+    "warning": "⚠ Tirer sur un vaisseau ennemi = combat de pirates"
+  },
+  "cardGame": {
+    "header": "— JEU DE CARTES —",
+    "win": "★ GAIN",
+    "lose": "✗ PERDU",
+    "perfectStreak": "SÉRIE PARFAITE !",
+    "collectAndLeave": "Encaisser et partir",
+    "round": "MANCHE {{round}}/{{max}}",
+    "pot": "POT : {{pot}} cr",
+    "nextRound": "Prochaine manche : +{{amount}} cr",
+    "higher": "▲ PLUS HAUT",
+    "lower": "▼ PLUS BAS",
+    "collectAmountAndLeave": "Encaisser ({{amount}} cr) et partir"
+  },
+  "customsGame": {
+    "header": "⚠ CONTRÔLE DOUANIER ⚠",
+    "scannerApproaching": "SCANNER EN APPROCHE",
+    "introPrefix": "Un garde s'approche avec un scanner. Tu peux cacher",
+    "introSuffix": "item(s) supplémentaire(s). Clique sur les items suspects pour les dissimuler.",
+    "hidden": "▼ CACHÉ",
+    "suspect": "⚠ SUSPECT",
+    "legal": "○ LÉGAL",
+    "footer": "Items avec ⚠ seront confisqués si visibles. Items cachés passent sans contrôle.",
+    "scanNow": "Lancer le scan maintenant"
+  },
+  "hackSequence": {
+    "header": "— INTRUSION SYSTÈME —",
+    "targetSequence": "SÉQUENCE CIBLE",
+    "time": "TEMPS",
+    "accessGranted": "✓ ACCÈS OBTENU",
+    "connectionLost": "✗ CONNEXION PERDUE"
+  },
+  "reactFlash": {
+    "defaultLabel": "RÉFLEXES",
+    "instructions": "MÉMORISE LA COULEUR — CLIQUE LA BONNE AVANT LA FIN DU DÉLAI",
+    "hits_one": "{{hits}}/3 bon réflexe",
+    "hits_other": "{{hits}}/3 bons réflexes",
+    "damageMult": "×{{mult}} dégâts",
+    "ready": "PRÊT...",
+    "choose": "CHOISISSEZ !",
+    "perfectReaction": "✓ RÉACTION PARFAITE",
+    "missed": "✗ RATÉ",
+    "difficulty": "Difficulté : {{filled}}{{empty}}",
+    "colors": {
+      "ROUGE": "ROUGE",
+      "BLEU": "BLEU",
+      "VERT": "VERT"
+    }
+  },
+  "escort": {
+    "header": "— TRANSIT MÉTÉORITIQUE —",
+    "escort": "Escorte :",
+    "destroyed_one": "🚀 {{count}} détruit",
+    "destroyed_other": "🚀 {{count}} détruits",
+    "instructions": "Souris · ZQSD · Flèches pour naviguer — Clic ou Espace pour tirer sur les vaisseaux ennemis (les détruire libère l'espace, pas de combat déclenché) — Survie {{duration}}s pour livrer le passager",
+    "passengerDelivered": "★ PASSAGER LIVRÉ",
+    "smoothTransit": "Le transit s'est passé sans pertes majeures.",
+    "reward": "+{{credits}} cr · +{{rep}} rép",
+    "passengerLost": "✕ PASSAGER PERDU",
+    "tookTooManyHits": "Le vaisseau a encaissé trop de météorites. Le passager n'a pas survécu.",
+    "questFailed": "Quête échouée · −20 PV de vaisseau",
+    "continueArrow": "CONTINUER →"
+  },
+  "quickDraw": {
+    "defaultLabel": "TIR DE PRÉCISION",
+    "instructions": "CLIQUE SUR LA CIBLE AVANT QU'ELLE DISPARAISSE",
+    "hits_one": "{{hits}}/3 cible touchée",
+    "hits_other": "{{hits}}/3 cibles touchées"
+  },
+  "stopTheBar": {
+    "defaultLabel": "FORÇAGE DE SERRURE",
+    "instructions": "STOPPE LA BARRE DANS LA ZONE VERTE",
+    "perfect": "★ PARFAIT",
+    "success": "◆ RÉUSSI",
+    "miss": "✗ RATÉ",
+    "stopButton": "► STOP !"
+  }
+}

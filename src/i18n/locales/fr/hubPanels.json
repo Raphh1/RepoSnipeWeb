@@ -1,0 +1,13 @@
+{
+  "back": "← Retour",
+  "questOffer": {
+    "header": "— CHERCHER DU TRAVAIL —",
+    "gossip": "RUMEUR DU COIN",
+    "reward": "Récompense : {{credits}} cr · +{{rep}} rép",
+    "forced": "Tu as refusé trop de fois. Prends ce contrat ou pars.",
+    "accept": "Accepter",
+    "change_one": "Changer ({{count}} restant)",
+    "change_other": "Changer ({{count}} restants)",
+    "noWork": "Aucun travail disponible ici pour l'instant."
+  }
+}

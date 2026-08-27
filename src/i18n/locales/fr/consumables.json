@@ -1,0 +1,18 @@
+{
+  "medHp": "+30 PV. {{current}}/{{max}}",
+  "medPremium": "PV complètement restaurés.",
+  "plants": "+15 PV, +30 Stamina. Goût horrible, effet réel.",
+  "food": "+{{hp}} PV, +20 Stamina.",
+  "water": "Stamina complètement restaurée.",
+  "drugsGood": "Effet puissant. +40 PV, stamina max. Ça dure pas.",
+  "drugsBadDose": "Mauvaise dose. -{{amount}} PV. Tu te remets lentement.",
+  "drugsHallucinations": "Hallucinations. Tu te réveilles avec moins de crédits.",
+  "drugsNothing": "Rien. Ou peut-être quelque chose. Difficile à dire.",
+  "expPermanentHp": "Implant réussi. +15 PV max permanent.",
+  "expPermanentStamina": "Stimulant permanent. +20 Stamina max.",
+  "expRejection": "Rejet. -{{amount}} PV. Ton corps n'a pas aimé.",
+  "expTransformation": "Étrange transformation. Ta présence inspire quelque chose. +rép.",
+  "artifact": "L'artefact révèle sa valeur. +{{cr}} cr, +5 rép.",
+  "combatStim": "+20 Stamina max (temporaire).",
+  "genericUse": "{{item}} utilisé. Aucun effet notable."
+}

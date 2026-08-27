@@ -1,7 +1,9 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const roll = (chance: number) => Math.random() * 100 < chance
+const te = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'travelEvents', ...params })
 
 export interface TravelEvent {
   title: string
@@ -9,89 +11,99 @@ export interface TravelEvent {
   effect: (gs: GameState) => Partial<GameState> & { message?: string }
 }
 
-const POSITIVE_EVENTS: TravelEvent[] = [
-  { title: "Épave abandonnée",       description: "Tu croises une épave à la dérive. Quelques crédits récupérables.",
-    effect: gs => ({ credits: gs.credits + rng(150, 500), message: `Épave pillée. +${rng(150,500)} cr.` }) },
-  { title: "Passager clandestin",    description: "Quelqu'un s'est glissé dans tes soutes. Il paie son passage sans broncher.",
-    effect: gs => ({ credits: gs.credits + rng(200, 600), message: `Passager clandestin — il paie. +${rng(200,600)} cr.` }) },
-  { title: "Signal d'urgence",       description: "Tu réponds à un signal. Le vaisseau en détresse t'est reconnaissant.",
-    effect: gs => ({ credits: gs.credits + rng(300, 800), reputation: gs.reputation + 10, message: "+crédits, +10 rép." }) },
-  { title: "Route secrète",          description: "Tu connais un raccourci. -1 carburant sur ce voyage.",
-    effect: gs => ({ fuel: Math.min(gs.maxFuel, gs.fuel + 1), message: "Raccourci trouvé. +1 carburant récupéré." }) },
-  { title: "Contrebandier ami",      description: "Un ami contrebandier croise ta route et te laisse du matériel.",
-    effect: gs => ({ cargo: { ...gs.cargo, 'Médicaments': (gs.cargo['Médicaments'] ?? 0) + 2 }, message: "+2 Médicaments offerts." }) },
-  { title: "Données commerciales",   description: "Tu interceptes des données sur les prix du marché. Utile.",
-    effect: gs => ({ credits: gs.credits + rng(100, 300), message: "Données monnayées. +crédits." }) },
-]
+function getPositiveEvents(): TravelEvent[] {
+  return [
+  { title: te('positive.wreck.title'),       description: te('positive.wreck.description'),
+    effect: gs => { const amount = rng(150, 500); return { credits: gs.credits + amount, message: te('positive.wreck.message', { amount }) } } },
+  { title: te('positive.stowaway.title'),    description: te('positive.stowaway.description'),
+    effect: gs => { const amount = rng(200, 600); return { credits: gs.credits + amount, message: te('positive.stowaway.message', { amount }) } } },
+  { title: te('positive.distress.title'),       description: te('positive.distress.description'),
+    effect: gs => ({ credits: gs.credits + rng(300, 800), reputation: gs.reputation + 10, message: te('positive.distress.message') }) },
+  { title: te('positive.shortcut.title'),          description: te('positive.shortcut.description'),
+    effect: gs => ({ fuel: Math.min(gs.maxFuel, gs.fuel + 1), message: te('positive.shortcut.message') }) },
+  { title: te('positive.smugglerFriend.title'),      description: te('positive.smugglerFriend.description'),
+    effect: gs => ({ cargo: { ...gs.cargo, 'Médicaments': (gs.cargo['Médicaments'] ?? 0) + 2 }, message: te('positive.smugglerFriend.message') }) },
+  { title: te('positive.tradeData.title'),   description: te('positive.tradeData.description'),
+    effect: gs => ({ credits: gs.credits + rng(100, 300), message: te('positive.tradeData.message') }) },
+  ]
+}
 
-const NEGATIVE_EVENTS: TravelEvent[] = [
-  { title: "Panne moteur",           description: "Ton moteur tousse. Réparation d'urgence. -carburant et -PV vaisseau.",
-    effect: gs => ({ fuel: Math.max(0, gs.fuel - 1), shipHp: Math.max(1, gs.shipHp - rng(8, 20)), message: "Panne. -1 carburant, -PV vaisseau." }) },
-  { title: "Tempête ionique",        description: "Une tempête ionique endomage les systèmes.",
-    effect: gs => ({ shipHp: Math.max(1, gs.shipHp - rng(10, 25)), message: "Tempête ionique. -PV vaisseau." }) },
-  { title: "Vol de carburant",       description: "Des drones voleurs ont sifonné ta réserve.",
-    effect: gs => ({ fuel: Math.max(0, gs.fuel - 1), message: "Drones voleurs. -1 carburant." }) },
-  { title: "Fausse route",           description: "Tu t'es perdu dans un champ d'astéroïdes. Du temps perdu.",
-    effect: gs => ({ day: gs.day + 1, message: "+1 jour perdu dans le champ d'astéroïdes." }) },
-  { title: "Cargo endommagé",        description: "Un impact de météorite endomage la soute.",
+function getNegativeEvents(): TravelEvent[] {
+  return [
+  { title: te('negative.engineFailure.title'),           description: te('negative.engineFailure.description'),
+    effect: gs => ({ fuel: Math.max(0, gs.fuel - 1), shipHp: Math.max(0, gs.shipHp - rng(8, 20)), message: te('negative.engineFailure.message') }) },
+  { title: te('negative.ionStorm.title'),        description: te('negative.ionStorm.description'),
+    effect: gs => ({ shipHp: Math.max(0, gs.shipHp - rng(10, 25)), message: te('negative.ionStorm.message') }) },
+  { title: te('negative.fuelTheft.title'),       description: te('negative.fuelTheft.description'),
+    effect: gs => ({ fuel: Math.max(0, gs.fuel - 1), message: te('negative.fuelTheft.message') }) },
+  { title: te('negative.wrongTurn.title'),           description: te('negative.wrongTurn.description'),
+    effect: gs => ({ day: gs.day + 1, message: te('negative.wrongTurn.message') }) },
+  { title: te('negative.cargoHit.title'),        description: te('negative.cargoHit.description'),
     effect: gs => {
       const keys = Object.keys(gs.cargo)
-      if (keys.length === 0) return { message: "Impact inoffensif — soute vide." }
+      if (keys.length === 0) return { message: te('negative.cargoHit.messageEmpty') }
       const lost = keys[Math.floor(Math.random() * keys.length)]
       const newCargo = { ...gs.cargo }
       newCargo[lost] = Math.max(0, (newCargo[lost] ?? 0) - 1)
       if (newCargo[lost] === 0) delete newCargo[lost]
-      return { cargo: newCargo, message: `Impact — 1x ${lost} détruit.` }
+      return { cargo: newCargo, message: te('negative.cargoHit.messageLost', { item: lost }) }
     }
   },
-]
-
-const PIRATE_EVENT: TravelEvent = {
-  title: "Attaque de pirates",
-  description: "Un vaisseau pirate sort du champ d'astéroïdes. Il vise tes réacteurs.",
-  effect: gs => ({ message: "COMBAT_TRIGGER" })
+  ]
 }
 
-const BOUNTY_EVENT: TravelEvent = {
-  title: "Chasseur de primes",
-  description: "Ta réputation négative attire un chasseur de primes.",
-  effect: gs => ({ message: "BOUNTY_TRIGGER" })
+function getPirateEvent(): TravelEvent {
+  return {
+    title: te('pirateAttack.title'),
+    description: te('pirateAttack.description'),
+    effect: gs => ({ message: "COMBAT_TRIGGER" })
+  }
+}
+
+function getBountyEvent(): TravelEvent {
+  return {
+    title: te('bountyHunter.title'),
+    description: te('bountyHunter.description'),
+    effect: gs => ({ message: "BOUNTY_TRIGGER" })
+  }
 }
 
 export function rollTravelEvent(gs: GameState): TravelEvent | null {
   // Seigneur de guerre : pirates auto-résolus
   if (gs.class.autoKillsPirates && Math.random() < 0.3) {
     return {
-      title: "Pirates intimidés",
-      description: "Des pirates s'approchent... et reconnaissent ton vaisseau. Ils font demi-tour.",
-      effect: (gs) => ({ reputation: gs.reputation + 5, message: "Pirates en fuite. +5 rép." })
+      title: te('pirateIntimidated.title'),
+      description: te('pirateIntimidated.description'),
+      effect: (gs) => ({ reputation: gs.reputation + 5, message: te('pirateIntimidated.message') })
     }
   }
 
   // Chasseur de primes si réputation très négative
   if (gs.reputation <= -100 && Math.random() < 0.15) {
-    return BOUNTY_EVENT
+    return getBountyEvent()
   }
 
   // Pirates
   const pirateMult = gs.class.piratesDoubled ? 2 : 1
   if (Math.random() < 0.15 * pirateMult) {
-    return PIRATE_EVENT
+    return getPirateEvent()
   }
 
   // Événement positif
   if (Math.random() < 0.25) {
-    const ev = POSITIVE_EVENTS[Math.floor(Math.random() * POSITIVE_EVENTS.length)]
+    const positiveEvents = getPositiveEvents()
+    const ev = positiveEvents[Math.floor(Math.random() * positiveEvents.length)]
     // Classe Maudit : 50% chance que l'événement positif fizzle
     if (gs.class.cursedEvents && Math.random() < 0.5) {
-      return { title: ev.title, description: ev.description + " Mais la malchance frappe.", effect: gs => ({ message: "Maudit — l'événement positif tourne mal." }) }
+      return { title: ev.title, description: ev.description + te('cursedSuffix'), effect: gs => ({ message: te('cursedMessage') }) }
     }
     return ev
   }
 
   // Événement négatif
   if (Math.random() < 0.20) {
-    return NEGATIVE_EVENTS[Math.floor(Math.random() * NEGATIVE_EVENTS.length)]
+    const negativeEvents = getNegativeEvents()
+    return negativeEvents[Math.floor(Math.random() * negativeEvents.length)]
   }
 
   return null

@@ -1,6 +1,11 @@
+import i18n from '../i18n/config'
+
 // Révélations de lore spécifiques à chaque PNJ nommé.
 // Clé = id du PNJ (voir NAMED_NPCS dans npcTracker.ts).
 // 65% de chance d'utiliser ces lignes à la place des lignes génériques de rôle.
+// NOTE : ce const NPC_LORE et getNpcLore() ne sont pas utilisés dans le jeu —
+// NpcEncounterPanel.tsx a sa propre copie locale (légèrement différente) qui
+// est celle réellement affichée. Pas traduit pour l'instant (code mort).
 
 export const NPC_LORE: Record<string, string[]> = {
   marek: [
@@ -64,23 +69,9 @@ export const NPC_LORE: Record<string, string[]> = {
 }
 
 // Rumeurs de piliers — injectées dans les dialogues génériques selon le jour de run
-export const PILLAR_RUMORS: string[] = [
-  // Alanossa
-  "'Arc Ouest Apocalypse.' Un vieux pilote crache par terre. 'Alanossa contrôle chaque gramme de carburant qui rentre ou sort. Tu veux passer ? T'as intérêt à avoir une bonne raison — ou une bonne réputation.'",
-  "'J'ai vu Alanossa une fois.' La femme parle sans lever les yeux. 'Petite. Calme. Le genre de calme qui t'indique que la personne a arrêté d'avoir peur il y a longtemps.'",
-  // Cesarion
-  "'Cesarion dirige l'Emporium depuis quinze ans.' L'homme remplit son verre. 'Pas le genre à agiter des armes. Il achète les gens avant qu'ils deviennent des problèmes. Intelligent, ou dangereux — difficile de distinguer.'",
-  "'Si tu cherches à commercer en règle dans ce secteur, tôt ou tard tu passes devant Cesarion.' Le marchand hausse les épaules. 'Il est juste. Mais il oublie rien.'",
-  // Eliotis
-  "'Les Archives de Velkor.' Le vieil homme dit ça doucement. 'Eliotis y passe ses journées. Il dit qu'il cherche des réponses sur le Nexus. Les autres disent qu'il cherche quelque chose de bien plus ancien. Peut-être les deux.'",
-  "'J'ai bossé pour Eliotis pendant deux ans.' Elle range ses outils. 'Il sait des choses. Des choses vieilles. Il les partage pas facilement — mais il les partage avec ceux qui méritent de les entendre.'",
-  // Scotty
-  "'Scotty.' Le pilote rit. 'Tout le monde le connait dans les zones profondes. Un fantôme. Apparaît quand il veut, disparaît pareil. Il sait des chemins qui existent pas sur les cartes officielles.'",
-  "'On m'a dit de trouver Scotty si j'avais besoin d'un passage discret.' Le contrebandier baisse la voix. 'Je l'ai cherché six semaines. C'est lui qui m'a trouvé. Ça m'a refroidi.'",
-]
-
 export function getPillarRumor(): string {
-  return PILLAR_RUMORS[Math.floor(Math.random() * PILLAR_RUMORS.length)]
+  const rumors = i18n.t('pillarRumors', { ns: 'npcLore', returnObjects: true }) as string[]
+  return rumors[Math.floor(Math.random() * rumors.length)]
 }
 
 export function getNpcLore(id: string): string[] | null {

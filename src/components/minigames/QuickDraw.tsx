@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   difficulty: 1 | 2 | 3
@@ -9,7 +10,9 @@ interface Props {
 const ROUNDS = 3
 const WINDOW_MS = [950, 680, 450]
 
-export function QuickDraw({ difficulty, label = 'TIR DE PRÉCISION', onResult }: Props) {
+export function QuickDraw({ difficulty, label, onResult }: Props) {
+  const { t } = useTranslation('minigames')
+  const displayLabel = label ?? t('quickDraw.defaultLabel')
   const windowMs = WINDOW_MS[difficulty - 1]
 
   const [started, setStarted] = useState(false)
@@ -73,10 +76,10 @@ export function QuickDraw({ difficulty, label = 'TIR DE PRÉCISION', onResult }:
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— {label} —</div>
+      <div className="t-xs t-dim t-center">— {displayLabel} —</div>
 
       <div className="px-box">
-        <div className="t-xs t-dim mb8">CLIQUE SUR LA CIBLE AVANT QU'ELLE DISPARAISSE</div>
+        <div className="t-xs t-dim mb8">{t('quickDraw.instructions')}</div>
 
         <div
           onClick={handleClick}
@@ -118,16 +121,16 @@ export function QuickDraw({ difficulty, label = 'TIR DE PRÉCISION', onResult }:
 
           {!started && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--dim)', fontSize: '10px', letterSpacing: '2px' }}>
-              PRÊT...
+              {t('reactFlash.ready')}
             </div>
           )}
 
           {done && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               <div style={{ fontSize: '20px', color: mult >= 1.5 ? 'var(--gold)' : mult >= 1.0 ? 'var(--green)' : 'var(--red)' }}>
-                {hitCount}/3 cibles touchées
+                {t('quickDraw.hits', { hits: hitCount })}
               </div>
-              <div className="t-xs t-dim">×{mult.toFixed(2)} dégâts</div>
+              <div className="t-xs t-dim">{t('reactFlash.damageMult', { mult: mult.toFixed(2) })}</div>
             </div>
           )}
 
@@ -145,7 +148,7 @@ export function QuickDraw({ difficulty, label = 'TIR DE PRÉCISION', onResult }:
         </div>
 
         <div className="t-xs t-dim" style={{ textAlign: 'right' }}>
-          Difficulté : {'■'.repeat(difficulty)}{'□'.repeat(3 - difficulty)}
+          {t('reactFlash.difficulty', { filled: '■'.repeat(difficulty), empty: '□'.repeat(3 - difficulty) })}
         </div>
       </div>
     </div>

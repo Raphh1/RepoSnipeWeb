@@ -1,4 +1,5 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
 
 export type FactionKey = 'faucons' | 'emporium' | 'gardiens' | 'culte'
 
@@ -20,13 +21,15 @@ export function getRepLevel(rep: number): RepLevel {
   return 'hostile'
 }
 
-export const REP_LABELS: Record<RepLevel, string> = {
-  hostile:  'HOSTILE',
-  froide:   'FROIDE',
-  neutre:   'NEUTRE',
-  amicale:  'AMICALE',
-  honoree:  'HONORÉE',
-  exaltee:  'EXALTÉE',
+export function getRepLabels(): Record<RepLevel, string> {
+  return {
+    hostile: i18n.t('repLabels.hostile', { ns: 'factionsScreen' }),
+    froide:  i18n.t('repLabels.froide', { ns: 'factionsScreen' }),
+    neutre:  i18n.t('repLabels.neutre', { ns: 'factionsScreen' }),
+    amicale: i18n.t('repLabels.amicale', { ns: 'factionsScreen' }),
+    honoree: i18n.t('repLabels.honoree', { ns: 'factionsScreen' }),
+    exaltee: i18n.t('repLabels.exaltee', { ns: 'factionsScreen' }),
+  }
 }
 
 export const REP_COLORS: Record<RepLevel, string> = {
@@ -95,11 +98,13 @@ export function getCulteArtefactMult(gs: GameState): number {
   return 1.0
 }
 
-export const FACTION_BONUS_DESC: Record<FactionKey, string[]> = {
-  faucons:  ['+10% loot combat (Amicale)', '+20% loot (Honorée)', '+30% loot (Exaltée)'],
-  emporium: ['−5% achats (Amicale)', '−10% achats (Honorée)', '−15% achats (Exaltée)'],
-  gardiens: ['−5% risque combat (Amicale)', '−10% risque (Honorée)', '−15% risque (Exaltée)'],
-  culte:    ['Artefacts ×1.2 en vente (Amicale)', '×1.5 (Honorée)', '×2.0 (Exaltée)'],
+export function getFactionBonusDesc(): Record<FactionKey, string[]> {
+  return {
+    faucons: i18n.t('factionBonusDesc.faucons', { ns: 'factionsScreen', returnObjects: true }) as unknown as string[],
+    emporium: i18n.t('factionBonusDesc.emporium', { ns: 'factionsScreen', returnObjects: true }) as unknown as string[],
+    gardiens: i18n.t('factionBonusDesc.gardiens', { ns: 'factionsScreen', returnObjects: true }) as unknown as string[],
+    culte: i18n.t('factionBonusDesc.culte', { ns: 'factionsScreen', returnObjects: true }) as unknown as string[],
+  }
 }
 
 export const FACTION_MISSION_REP: Record<FactionKey, number> = {

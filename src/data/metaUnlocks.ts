@@ -1,19 +1,23 @@
 import type { MetaUnlock } from '../types/meta'
+import i18n from '../i18n/config'
 
-export const META_UNLOCKS: MetaUnlock[] = [
+const mu = (key: string) => i18n.t(key, { ns: 'metaUnlocks' })
+
+export function getMetaUnlocks(): MetaUnlock[] {
+  return [
   // ── SURVIE ───────────────────────────────────────────────────────────────
   {
     id: 'nanites',
-    name: 'Nanites réparatrices',
-    description: 'Des nanobots dormants dans ton organisme. +10 PV max à chaque run.',
+    name: mu('nanites.name'),
+    description: mu('nanites.description'),
     cost: 3,
     category: 'survie',
     effect: { startHpBonus: 10 },
   },
   {
     id: 'armor_boost',
-    name: 'Armure de fortune',
-    description: 'Une couche de plaques céramiques soudées sous la peau. −10% dégâts reçus en combat.',
+    name: mu('armorBoost.name'),
+    description: mu('armorBoost.description'),
     cost: 6,
     category: 'survie',
     requires: 'nanites',
@@ -21,8 +25,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'stamina_boost',
-    name: 'Second souffle',
-    description: 'Entraînement cardio accéléré entre les runs. +1 stamina max à chaque run.',
+    name: mu('staminaBoost.name'),
+    description: mu('staminaBoost.description'),
     cost: 4,
     category: 'survie',
     effect: { startStaminaBonus: 1 },
@@ -31,16 +35,16 @@ export const META_UNLOCKS: MetaUnlock[] = [
   // ── COMBAT ───────────────────────────────────────────────────────────────
   {
     id: 'sharp_blade',
-    name: 'Lame affûtée',
-    description: 'Tu sais maintenant affûter tes armes correctement. +2 dégâts minimum avec toutes les armes.',
+    name: mu('sharpBlade.name'),
+    description: mu('sharpBlade.description'),
     cost: 4,
     category: 'combat',
     effect: { attackBonus: 2 },
   },
   {
     id: 'reflexes',
-    name: 'Réflexes augmentés',
-    description: 'Implant neural de vitesse de réaction. +8% chance de coup critique.',
+    name: mu('reflexes.name'),
+    description: mu('reflexes.description'),
     cost: 6,
     category: 'combat',
     requires: 'sharp_blade',
@@ -48,8 +52,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'starter_weapon',
-    name: 'Arsenal de départ',
-    description: 'Un contact te file une arme Tier 2 en début de run. Pas de questions.',
+    name: mu('starterWeapon.name'),
+    description: mu('starterWeapon.description'),
     cost: 7,
     category: 'combat',
     requires: 'sharp_blade',
@@ -59,16 +63,16 @@ export const META_UNLOCKS: MetaUnlock[] = [
   // ── COMMERCE ─────────────────────────────────────────────────────────────
   {
     id: 'starting_funds',
-    name: 'Fonds de roulement',
-    description: 'Un vieux compte bancaire oublié. +300 crédits au démarrage de chaque run.',
+    name: mu('startingFunds.name'),
+    description: mu('startingFunds.description'),
     cost: 3,
     category: 'commerce',
     effect: { startCreditsBonus: 300 },
   },
   {
     id: 'merchant_contacts',
-    name: 'Contacts marchands',
-    description: 'Ton réseau de revendeurs te fait des prix. −8% sur tous les achats en marché.',
+    name: mu('merchantContacts.name'),
+    description: mu('merchantContacts.description'),
     cost: 6,
     category: 'commerce',
     requires: 'starting_funds',
@@ -76,8 +80,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'starter_cargo',
-    name: 'Soute préparée',
-    description: 'Quelqu\'un charge ta soute avant le départ. Commence avec 2 marchandises aléatoires.',
+    name: mu('starterCargo.name'),
+    description: mu('starterCargo.description'),
     cost: 4,
     category: 'commerce',
     effect: { startCargoBonus: true },
@@ -86,16 +90,16 @@ export const META_UNLOCKS: MetaUnlock[] = [
   // ── VOYAGE ───────────────────────────────────────────────────────────────
   {
     id: 'spare_tank',
-    name: 'Réservoir de secours',
-    description: 'Un jerricane soudé sous la coque. +2 carburant au démarrage de chaque run.',
+    name: mu('spareTank.name'),
+    description: mu('spareTank.description'),
     cost: 3,
     category: 'voyage',
     effect: { startFuelBonus: 2 },
   },
   {
     id: 'engine_tuning',
-    name: 'Moteur optimisé',
-    description: 'Modifications illégales sur le moteur de propulsion. +2 capacité carburant max.',
+    name: mu('engineTuning.name'),
+    description: mu('engineTuning.description'),
     cost: 5,
     category: 'voyage',
     requires: 'spare_tank',
@@ -103,8 +107,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'travel_scanner',
-    name: 'Scanner d\'alerte',
-    description: 'Détecte les événements de voyage avant qu\'ils frappent. Tu vois les risques à l\'avance.',
+    name: mu('travelScanner.name'),
+    description: mu('travelScanner.description'),
     cost: 6,
     category: 'voyage',
     effect: { seesTravelEvents: true },
@@ -113,24 +117,24 @@ export const META_UNLOCKS: MetaUnlock[] = [
   // ── SPÉCIAL ──────────────────────────────────────────────────────────────
   {
     id: 'reputation',
-    name: 'Réputation établie',
-    description: 'Ta légende précède ton vaisseau. +20 réputation de départ.',
+    name: mu('reputation.name'),
+    description: mu('reputation.description'),
     cost: 4,
     category: 'special',
     effect: { startReputationBonus: 20 },
   },
   {
     id: 'nexus_fragment',
-    name: 'Mémoire fractale',
-    description: 'Un fragment du Nexus te suit entre les runs. Commence avec un fragment déjà collecté.',
+    name: mu('nexusFragment.name'),
+    description: mu('nexusFragment.description'),
     cost: 9,
     category: 'special',
     effect: { startNexusFragment: true },
   },
   {
     id: 'medkit',
-    name: 'Héritage de soins',
-    description: 'Un kit médical de famille toujours prêt dans ta soute. +2 médicaments de départ.',
+    name: mu('medkit.name'),
+    description: mu('medkit.description'),
     cost: 3,
     category: 'special',
     effect: { startMedkitBonus: 2 },
@@ -139,8 +143,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   // ── UNLOCKS AVANCÉS ──────────────────────────────────────────────────────
   {
     id: 'last_stand',
-    name: 'Dernier souffle',
-    description: 'Une seule fois par run, un coup qui devrait te tuer te laisse à 1 PV. Tu vis pour le regretter.',
+    name: mu('lastStand.name'),
+    description: mu('lastStand.description'),
     cost: 8,
     category: 'survie',
     requires: 'armor_boost',
@@ -148,8 +152,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'coup_de_grace',
-    name: 'Exécution froide',
-    description: 'Quand un ennemi est sous 25% de PV, tes coups font +40% de dégâts. La mise à mort est efficace.',
+    name: mu('coupDeGrace.name'),
+    description: mu('coupDeGrace.description'),
     cost: 7,
     category: 'combat',
     requires: 'reflexes',
@@ -157,8 +161,8 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'faction_ties',
-    name: 'Anciens liens',
-    description: 'Des contacts d\'avant te gardent en mémoire. +30 réputation avec ta faction de départ.',
+    name: mu('factionTies.name'),
+    description: mu('factionTies.description'),
     cost: 6,
     category: 'special',
     requires: 'reputation',
@@ -166,11 +170,12 @@ export const META_UNLOCKS: MetaUnlock[] = [
   },
   {
     id: 'scout_training',
-    name: 'Formation éclaireur',
-    description: 'Tu arrives dans chaque run avec une zone déjà cartographiée. Commence en profondeur 2.',
+    name: mu('scoutTraining.name'),
+    description: mu('scoutTraining.description'),
     cost: 5,
     category: 'voyage',
     requires: 'travel_scanner',
     effect: { startZoneDepthBonus: 2 },
   },
-]
+  ]
+}

@@ -1,5 +1,8 @@
 import type { GameState, SubBossData, SubBossResolution } from '../types'
 import { shiftPillar } from './memoryEvents'
+import i18n from '../i18n/config'
+
+const sr = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'subBossResolutions', ...params })
 
 // ── RÉSOLUTIONS NON-LÉTALES DES LIEUTENANTS ───────────────────────────────────
 // Chaque lieutenant (sous-boss) peut être neutralisé autrement que par le combat.
@@ -13,13 +16,14 @@ export interface SubBossResolutionResult {
   triggerCombat?: boolean   // échec qui bascule en combat forcé
 }
 
-export const RESOLUTION_META: Record<SubBossResolution, { icon: string; label: string }> = {
-  kill:      { icon: '⚔', label: 'Affronter' },
-  negotiate: { icon: '🗣', label: 'Négocier' },
-  manipulate:{ icon: '🎭', label: 'Manipuler' },
-  sabotage:  { icon: '💣', label: 'Saboter' },
-  ally:      { icon: '🤝', label: 'Rallier' },
-  betray:    { icon: '🗡', label: 'Trahir' },
+export function getResolutionMeta(): Record<SubBossResolution, { icon: string; label: string }> {
+  return {
+    kill:      { icon: '⚔', label: sr('meta.kill') },
+    manipulate:{ icon: '🎭', label: sr('meta.manipulate') },
+    sabotage:  { icon: '💣', label: sr('meta.sabotage') },
+    ally:      { icon: '🤝', label: sr('meta.ally') },
+    betray:    { icon: '🗡', label: sr('meta.betray') },
+  }
 }
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
@@ -34,7 +38,6 @@ function markDefeated(gs: GameState, sb: SubBossData): Partial<GameState> {
 }
 
 // Coûts / seuils qui montent avec l'ordre du lieutenant (1 = garde avancé, 4 = bras droit).
-const NEGOTIATE_REP   = (o: number) => 20 + o * 10          // 30 / 40 / 50 / 60
 const MANIPULATE_CR   = (o: number) => 1500 + o * 500       // 2000 / 2500 / 3000 / 3500
 const MANIPULATE_PCT  = (o: number) => [55, 45, 35, 30][o - 1] ?? 35
 const SABOTAGE_PCT    = (o: number) => [85, 75, 65, 55][o - 1] ?? 65
@@ -48,36 +51,33 @@ export function canResolveSubBoss(
 ): { ok: boolean; reason?: string; hint: string } {
   const o = sb.order
   switch (action) {
-    case 'negotiate': {
-      const req = NEGOTIATE_REP(o)
-      if (gs.reputation < req) return { ok: false, reason: `Réputation ${gs.reputation}/${req}`, hint: `Rép. ${req}+ requise` }
-      return { ok: true, hint: `Rép. ${req}+ · sans effusion de sang` }
-    }
     case 'manipulate': {
       const cr = MANIPULATE_CR(o)
-      if (gs.credits < cr) return { ok: false, reason: `Manque ${(cr - gs.credits).toLocaleString()} cr`, hint: `-${cr.toLocaleString()} cr · ${MANIPULATE_PCT(o)}%` }
-      return { ok: true, hint: `-${cr.toLocaleString()} cr · ${MANIPULATE_PCT(o)}% · échec = combat` }
+      const pct = MANIPULATE_PCT(o)
+      if (gs.credits < cr) return { ok: false, reason: sr('canResolve.manipulateWhyNot', { amount: (cr - gs.credits).toLocaleString() }), hint: sr('canResolve.manipulateHintFail', { cr: cr.toLocaleString(), pct }) }
+      return { ok: true, hint: sr('canResolve.manipulateHintOk', { cr: cr.toLocaleString(), pct }) }
     }
     case 'sabotage': {
       const have = gs.cargo['Composants électroniques'] ?? 0
-      if (have < 2) return { ok: false, reason: `2× Composants électroniques requis (${have}/2)`, hint: `2× Composants · ${SABOTAGE_PCT(o)}%` }
-      return { ok: true, hint: `2× Composants électroniques · ${SABOTAGE_PCT(o)}%` }
+      const pct = SABOTAGE_PCT(o)
+      if (have < 2) return { ok: false, reason: sr('canResolve.sabotageWhyNot', { have }), hint: sr('canResolve.sabotageHintFail', { pct }) }
+      return { ok: true, hint: sr('canResolve.sabotageHintOk', { pct }) }
     }
     case 'ally': {
       const req = ALLY_STANDING(o)
       const st = getStanding(gs, sb)
       if (st < req || gs.reputation < 40) {
         const m: string[] = []
-        if (st < req) m.push(`Standing ${cap(sb.pillar)} ${st}/${req}`)
-        if (gs.reputation < 40) m.push(`Réputation ${gs.reputation}/40`)
-        return { ok: false, reason: m.join(' · '), hint: `Standing ${req}+ & rép 40+` }
+        if (st < req) m.push(sr('canResolve.allyStandingReason', { pillar: cap(sb.pillar), cur: st, req }))
+        if (gs.reputation < 40) m.push(sr('canResolve.allyRepReason', { rep: gs.reputation }))
+        return { ok: false, reason: m.join(' · '), hint: sr('canResolve.allyHintFail', { req }) }
       }
-      return { ok: true, hint: `Le rallier à ta cause · +standing` }
+      return { ok: true, hint: sr('canResolve.allyHintOk') }
     }
     case 'betray': {
       const st = getStanding(gs, sb)
-      if (st < 15) return { ok: false, reason: `Approche-le d'abord (standing ${cap(sb.pillar)} ${st}/15)`, hint: `Standing 15+ · gros butin, -standing` }
-      return { ok: true, hint: `Gros butin · -standing, -réputation` }
+      if (st < 15) return { ok: false, reason: sr('canResolve.betrayWhyNot', { pillar: cap(sb.pillar), cur: st }), hint: sr('canResolve.betrayHintFail') }
+      return { ok: true, hint: sr('canResolve.betrayHintOk') }
     }
     default:
       return { ok: false, hint: '' }
@@ -90,25 +90,12 @@ export function resolveSubBoss(
   gs: GameState, sb: SubBossData, action: SubBossResolution,
 ): SubBossResolutionResult {
   const check = canResolveSubBoss(gs, sb, action)
-  if (!check.ok) return { success: false, message: check.reason ?? 'Conditions non remplies.', patch: {} }
+  if (!check.ok) return { success: false, message: check.reason ?? sr('canResolve.conditionsNotMet'), patch: {} }
 
   const o = sb.order
   const boss = cap(sb.pillar)
 
   switch (action) {
-    // ── NÉGOCIER : voie diplomatique, gâtée par la réputation. Pas de sang. ──
-    case 'negotiate': {
-      return {
-        success: true,
-        message: `Tu poses tes armes et tu parles. ${sb.name} t'écoute — méfiant. « ${sb.motivation} » Tu trouves les mots : un compromis qui le laisse sauver la face. Il s'écarte. « Va. Mais ne reviens pas me chercher des noises. » Le passage vers ${boss} est ouvert, sans un mort. (+standing ${boss}, +réputation)`,
-        patch: {
-          ...markDefeated(gs, sb),
-          pillarStanding: shiftPillar(gs, pillarKey(sb), +6),
-          reputation: gs.reputation + 4,
-        },
-      }
-    }
-
     // ── MANIPULER : ruse coûteuse. Échec = il te démasque et attaque. ──
     case 'manipulate': {
       const cr = MANIPULATE_CR(o)
@@ -116,7 +103,7 @@ export function resolveSubBoss(
       if (ok) {
         return {
           success: true,
-          message: `Tu montes une mise en scène taillée pour lui : « ${sb.personality.split('.')[0]}. » Tu exploites précisément ça. ${sb.name} mord à l'hameçon et se retire, persuadé d'avoir pris la bonne décision. Il ne comprendra jamais. -${cr.toLocaleString()} cr.`,
+          message: sr('resolve.manipulateSuccess', { trait: sb.personality.split('.')[0], name: sb.name, cr: cr.toLocaleString() }),
           patch: {
             ...markDefeated(gs, sb),
             credits: gs.credits - cr,
@@ -127,7 +114,7 @@ export function resolveSubBoss(
       const hpLoss = Math.floor(Math.random() * 20) + 15
       return {
         success: false,
-        message: `${sb.name} te laisse dérouler ton mensonge… puis sourit. « Tu me prends pour un débutant ? » Il a vu clair. -${cr.toLocaleString()} cr, -${hpLoss} PV, et il dégaine. Il faut se battre.`,
+        message: sr('resolve.manipulateFail', { name: sb.name, cr: cr.toLocaleString(), hp: hpLoss }),
         patch: {
           credits: gs.credits - cr,
           playerHp: Math.max(1, gs.playerHp - hpLoss),
@@ -146,13 +133,13 @@ export function resolveSubBoss(
       if (ok) {
         return {
           success: true,
-          message: `Tu bricoles ses systèmes en amont — ${sb.combatMechanic.split(':')[0].toLowerCase()}. Quand ${sb.name} veut réagir, rien ne répond. Neutralisé sans un coup de feu. -2 Composants électroniques.`,
+          message: sr('resolve.sabotageSuccess', { mechanic: sb.combatMechanic.split(':')[0].toLowerCase(), name: sb.name }),
           patch: { ...markDefeated(gs, sb), cargo: newCargo },
         }
       }
       return {
         success: false,
-        message: `Le sabotage tourne mal — une alarme se déclenche. ${sb.name} sait maintenant que tu es venu pour lui, et il t'attend de pied ferme. -2 Composants électroniques.`,
+        message: sr('resolve.sabotageFail', { name: sb.name }),
         patch: { cargo: newCargo, pillarStanding: shiftPillar(gs, pillarKey(sb), -6) },
       }
     }
@@ -162,7 +149,7 @@ export function resolveSubBoss(
       const reward = ALLY_REWARD_CR(o)
       return {
         success: true,
-        message: `Tu ne le combats pas : tu lui offres mieux. « ${sb.motivation} » — tu lui montres que ton chemin sert ce but plus que ${boss} ne le fera jamais. ${sb.name} hésite longtemps… puis te serre la main. Il passe dans ton camp, et t'ouvre les portes vers ${boss}. +${reward.toLocaleString()} cr, +standing, +réputation.`,
+        message: sr('resolve.allySuccess', { motivation: sb.motivation, boss, name: sb.name, reward: reward.toLocaleString() }),
         patch: {
           ...markDefeated(gs, sb),
           credits: gs.credits + reward,
@@ -178,7 +165,7 @@ export function resolveSubBoss(
       const loot = sb.enemy.lootMax
       return {
         success: true,
-        message: `Tu joues l'ami, l'allié, le camarade. ${sb.name} baisse sa garde — la première erreur de sa carrière, la dernière aussi. Tu prends tout : +${loot.toLocaleString()} cr. Mais ${boss} saura comment son lieutenant est tombé, et le secteur entier retiendra ta méthode. -standing, -réputation.`,
+        message: sr('resolve.betraySuccess', { name: sb.name, loot: loot.toLocaleString(), boss }),
         patch: {
           ...markDefeated(gs, sb),
           credits: gs.credits + loot,
@@ -190,6 +177,6 @@ export function resolveSubBoss(
     }
 
     default:
-      return { success: false, message: 'Méthode indisponible.', patch: {} }
+      return { success: false, message: sr('canResolve.unavailable'), patch: {} }
   }
 }

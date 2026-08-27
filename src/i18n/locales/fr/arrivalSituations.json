@@ -1,0 +1,71 @@
+{
+  "repHigh": {
+    "title": "Accueil de légende",
+    "description": "Ton nom précède ton vaisseau. La foule aux sas d'arrivée te regarde avec quelque chose entre la crainte et l'admiration.",
+    "c0": { "label": "Accepter les hommages", "msg": "+crédits offerts. +5 rép." },
+    "c1": { "label": "Passer discrètement", "msg": "Tu passes. Ils murmurent derrière toi." }
+  },
+  "repLow": {
+    "title": "Accueil hostile",
+    "description": "Des agents de sécurité t'attendent. Ils ont une liste. Ton nom est dessus.",
+    "c0": { "label": "Coopérer — payer l'amende", "pay": "-{{fine}} cr. Ils te laissent passer à contrecœur.", "fail": "Pas assez de crédits. Prison." },
+    "c1": { "label": "Forcer le passage (combat)", "msg": "Combat." },
+    "c2": { "label": "Fuir immédiatement", "msg": "Tu ressors par où tu es entré. -1 carburant." }
+  },
+  "laCarcasse": {
+    "title": "Arrivée à La Carcasse",
+    "description": "L'odeur de métal rouillé et de carburant frelaté. Un gamin court vers toi. 'Tu cherches du boulot ? J'connais quelqu'un.'",
+    "c0": { "label": "Écouter le gamin", "msg": "Une info utile. +crédits." },
+    "c1": { "label": "Ignorer", "msg": "Tu passes. Il disparaît dans la ferraille." }
+  },
+  "portMeridien": {
+    "title": "Arrivée à Port Méridien",
+    "description": "Propre, organisé, sous surveillance. Un agent de contrôle tampon ton laissez-passer sans te regarder.",
+    "c0": { "label": "Déclarer tes marchandises honnêtement", "msg": "+5 rép. Aucun problème." },
+    "c1": { "label": "Passer sans déclarer", "caught": "Contrôle aléatoire. Prison.", "safe": "Ça passe. Cette fois." }
+  },
+  "lesBasFondsDeVega": {
+    "title": "Arrivée aux Bas-Fonds",
+    "description": "Pas de contrôle. Pas de questions. Juste des regards qui évaluent ta valeur marchande.",
+    "c0": { "label": "Se fondre dans la masse", "msg": "Tu rentres. Personne te touche." },
+    "c1": { "label": "Chercher un contact immédiatement", "msg": "Premier contact rentable. +crédits." }
+  },
+  "arcOuestApocalypse": {
+    "title": "Territoire d'Alanossa",
+    "description": "Un canon de vaisseau te suit depuis l'espace. Radio : 'Identifie-toi. Maintenant.'",
+    "c0": { "label": "S'identifier normalement", "recognized": "Ils reconnaissent ton nom. +5 rép.", "unknown": "Tu passes sous contrôle. Ils ne t'aiment pas mais ils te laissent." },
+    "c1": { "label": "Ignorer — continuer droit", "safe": "Ils laissent passer. Méfiance totale.", "combat": "Combat avec sentinelles." }
+  },
+  "fortKharos": {
+    "title": "Arrivée à Fort Kharos",
+    "description": "Code de sécurité requis. Le garde t'inspecte de la tête aux pieds.",
+    "c0": { "label": "Code visiteur standard", "msg": "Accès autorisé. Sous surveillance." },
+    "c1": { "label": "Présenter tes titres militaires (Vétéran/Seigneur de guerre)", "msg": "Accueil de professionnel. +15 rép, quelques crédits." }
+  },
+  "lePurgatoire": {
+    "title": "Arrivée au Purgatoire",
+    "description": "Les portes s'ouvrent sur une atmosphère pesante. Un ancien détenu t'observe depuis le fond.",
+    "c0": { "label": "Entrer et observer", "msg": "Tu entres. L'ambiance est lourde mais gérable." },
+    "c1": { "label": "Saluer les anciens (si tu as été en prison)", "msg": "+10 rép. La solidarité des condamnés." }
+  },
+  "emporiumRequiem": {
+    "title": "Arrivée à l'Emporium",
+    "description": "Fastueux. Artificiel. Un agent commercial te tend une carte de bienvenue dorée.",
+    "c0": { "label": "Accepter le programme VIP (500 cr)", "msg": "-500 cr mais accès premium. Net positif probable." },
+    "c1": { "label": "Décliner — accès standard", "msg": "Accès standard. Pas de dorure." }
+  },
+  "interrogation": {
+    "title": "INTERROGATOIRE",
+    "description": "Une salle blanche. Une lampe dans les yeux. Des questions. Beaucoup de questions.",
+    "c0": { "label": "Garder le silence", "success": "Ils lâchent. Tu ressors avec ta réputation intacte. +10 rép.", "fail": "Ils n'apprécient pas le silence. -PV. Mais rien de révélé." },
+    "c1": { "label": "Tout avouer", "msg": "-20 rép, -crédits. Ils te libèrent. Un peu humilié." },
+    "c2": { "label": "Négocier une sortie", "success": "Ta réputation et des crédits changent de mains. Tu sors proprement.", "fail": "Pas assez d'influence. Cellule." },
+    "c3": { "label": "Tenter une évasion", "success": "Tu t'en sors. -PV. +15 rép (audace).", "fail": "Raté. -PV, prison + 3 jours." }
+  },
+  "trafficking": {
+    "title": "Une offre qui ne se refuse pas",
+    "description": "Pendant l'escale, un homme en costume sombre t'aborde sans bruit. « On m'a dit que tu transportes… de la marchandise vivante. Je paie bien. Très bien. {{offer}} crédits, cash, et personne ne pose de questions. » Ton passager n'a rien entendu. Pour l'instant.",
+    "c0": { "label": "Vendre ton passager (+{{offer}} cr · trafic)", "msg": "L'homme glisse les crédits et disparaît avec sa « marchandise ». +{{offer}} cr. -30 rép. Tu ne dormiras pas bien." },
+    "c1": { "label": "Refuser — un passager n'est pas une marchandise", "msg": "Tu refuses net. L'homme hausse les épaules et s'évapore. +8 rép — quelqu'un t'a vu refuser." }
+  }
+}

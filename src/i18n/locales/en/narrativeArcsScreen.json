@@ -1,0 +1,14 @@
+{
+  "header": "NARRATIVE ARCS",
+  "arcLabel": "— NARRATIVE ARC —",
+  "step": "Step {{current}}/{{max}}",
+  "continue": "Continue",
+  "blockedTitle": "⚠ REQUIREMENTS NOT MET",
+  "completed": "★ Arc complete!",
+  "back": "← Back",
+  "empty": "No narrative arc available yet. Explore the sector further.",
+  "available": "AVAILABLE",
+  "currentStep": "Current step: {{title}}",
+  "seeDetails": "→ Click to see details",
+  "completedSection": "COMPLETED"
+}

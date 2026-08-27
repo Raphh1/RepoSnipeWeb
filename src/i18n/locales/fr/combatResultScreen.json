@@ -1,0 +1,31 @@
+{
+  "cannibal": {
+    "title": "CANNIBALE",
+    "line1": "Tu as goûté.",
+    "line2": "Il y a une ligne que personne ne franchit deux fois de la même façon.",
+    "line3": "Tu viens de la franchir.",
+    "line4": "Ton corps s'en souvient.",
+    "line5": "Ta tête aussi — différemment.",
+    "line6": "Ta vie ne sera plus jamais la même.",
+    "footer": "La faim reviendra. Elle revient toujours."
+  },
+  "continueArrow": "Continuer →",
+  "victoryHeader": "— VICTOIRE —",
+  "bossKilled": "★ BOSS ÉLIMINÉ",
+  "enemyDefeated": "◆ ENNEMI VAINCU",
+  "loot": "BUTIN",
+  "creditsRecovered": "Crédits récupérés",
+  "reputation": "Réputation",
+  "weaponFound": "Arme trouvée",
+  "armorFound": "Armure trouvée",
+  "currentStatus": "ÉTAT ACTUEL",
+  "hp": "PV",
+  "credits": "Crédits",
+  "madness": "Folie",
+  "cannibalPrompt": "{{name}} est à terre. Quelque chose en toi — quelque chose de très ancien — remarque que tu as faim.",
+  "tasteButton": "Goûter {{name}}",
+  "hungerPrompt": "La faim est là. {{name}} est là.",
+  "consumeButton": "Consommer (−50 folie)",
+  "ok": "OK",
+  "backToCell": "Retour en cellule →"
+}

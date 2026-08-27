@@ -1,0 +1,18 @@
+{
+  "medHp": "+30 HP. {{current}}/{{max}}",
+  "medPremium": "HP fully restored.",
+  "plants": "+15 HP, +30 Stamina. Awful taste, real effect.",
+  "food": "+{{hp}} HP, +20 Stamina.",
+  "water": "Stamina fully restored.",
+  "drugsGood": "Powerful effect. +40 HP, max stamina. Doesn't last.",
+  "drugsBadDose": "Bad dose. -{{amount}} HP. You recover slowly.",
+  "drugsHallucinations": "Hallucinations. You wake up with fewer credits.",
+  "drugsNothing": "Nothing. Or maybe something. Hard to tell.",
+  "expPermanentHp": "Successful implant. +15 permanent max HP.",
+  "expPermanentStamina": "Permanent stimulant. +20 max Stamina.",
+  "expRejection": "Rejection. -{{amount}} HP. Your body didn't like it.",
+  "expTransformation": "Strange transformation. Your presence inspires something. +rep.",
+  "artifact": "The artifact reveals its worth. +{{cr}} cr, +5 rep.",
+  "combatStim": "+20 max Stamina (temporary).",
+  "genericUse": "{{item}} used. No notable effect."
+}

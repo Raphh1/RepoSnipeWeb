@@ -1,0 +1,68 @@
+{
+  "back": "← RETOUR",
+  "title": "RÉPUTATION",
+  "factionTag": "FACTION : {{faction}}",
+  "tabs": { "general": "GÉNÉRALE", "pillars": "PILIERS", "factions": "FACTIONS" },
+  "repLabels": { "hostile": "HOSTILE", "froide": "FROIDE", "neutre": "NEUTRE", "amicale": "AMICALE", "honoree": "HONORÉE", "exaltee": "EXALTÉE" },
+  "factionBonusDesc": {
+    "faucons": ["+10% loot combat (Amicale)", "+20% loot (Honorée)", "+30% loot (Exaltée)"],
+    "emporium": ["−5% achats (Amicale)", "−10% achats (Honorée)", "−15% achats (Exaltée)"],
+    "gardiens": ["−5% risque combat (Amicale)", "−10% risque (Honorée)", "−15% risque (Exaltée)"],
+    "culte": ["Artefacts ×1.2 en vente (Amicale)", "×1.5 (Honorée)", "×2.0 (Exaltée)"]
+  },
+  "general": {
+    "globalRep": "RÉPUTATION GLOBALE",
+    "moralTraits": "TRAITS MORAUX",
+    "noTraits": "Aucun trait acquis. Tes choix définiront ta réputation.",
+    "stats": "STATISTIQUES",
+    "day": "Jour",
+    "bossesDefeated": "Boss vaincus",
+    "stationsVisited": "Stations visitées",
+    "npcsMet": "NPC rencontrés",
+    "questsCompleted": "Quêtes complétées",
+    "factionMissions": "Missions de faction"
+  },
+  "moralTags": {
+    "cannibal": "Cannibale",
+    "trafiquant": "Trafiquant",
+    "délateur": "Délateur",
+    "opportuniste": "Opportuniste",
+    "pacifiste": "Pacifiste",
+    "sanguinaire": "Sanguinaire",
+    "héros": "Héros",
+    "mercenaire": "Mercenaire"
+  },
+  "pillars": {
+    "enemy": "ENNEMI",
+    "allie": "ALLIÉ",
+    "respecte": "RESPECTÉ",
+    "connu": "CONNU",
+    "inconnu": "INCONNU",
+    "angeredNote": "Ce détenteur est devenu ton ennemi permanent.",
+    "explanation": "Le standing détermine les actions disponibles pour obtenir les fragments du Nexus. Un standing élevé débloque des approches diplomatiques. Un standing bas force des approches plus risquées."
+  },
+  "factions": {
+    "missionsTitle": "Missions de faction",
+    "missionsDone": "{{count}} missions accomplies",
+    "currentMission": "Mission en cours :",
+    "destination": "→ Destination : {{station}}",
+    "reward": "Récompense : {{credits}} cr · +{{rep}} rép · +20 rép faction",
+    "completeToTakeNext": "Complète la mission pour prendre la suivante.",
+    "explanation": "Les missions de faction exigent de voyager et de se battre pour la cause. Chaque mission accomplie augmente ton rang et affaiblit les factions rivales.",
+    "noActionsToday": "Plus d'actions aujourd'hui",
+    "questLogFull": "Journal de quêtes plein (5/5)",
+    "takeMission": "▶ Prendre une mission de faction",
+    "memberTag": "MEMBRE",
+    "hostile": "HOSTILE",
+    "neutral": "NEUTRE",
+    "exalted": "EXALTÉE",
+    "activeBonus": "★ Bonus actif : {{bonus}}",
+    "nextBonuses": "Prochains bonus : {{bonuses}}",
+    "stationReq": "Station : {{station}}",
+    "meetNpcReq": "Rencontrer {{npc}} sur place",
+    "joinFaction": "Rejoindre {{faction}}",
+    "conditionsNotMet": "Conditions non remplies",
+    "alreadyMember": "Déjà membre d'une autre faction.",
+    "pariahWarning": "⚠ Modificateur PARIA actif — aucune faction ne veut de toi cette run."
+  }
+}

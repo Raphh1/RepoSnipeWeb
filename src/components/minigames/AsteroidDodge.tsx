@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const W = 320
 const H = 420
@@ -57,6 +58,7 @@ const STARS = Array.from({ length: 40 }, (_, i) => ({
 }))
 
 export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
+  const { t } = useTranslation('minigames')
   const canvasRef    = useRef<HTMLCanvasElement>(null)
   const shipXRef     = useRef(W / 2)
   const asteroidsRef = useRef<Asteroid[]>([])
@@ -400,7 +402,7 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
 
   return (
     <div className="layout" style={{ alignItems: 'center' }}>
-      <div className="t-xs t-dim t-center" style={{ letterSpacing: '2px' }}>— CHAMP D'ASTÉROÏDES —</div>
+      <div className="t-xs t-dim t-center" style={{ letterSpacing: '2px' }}>{t('asteroidDodge.header')}</div>
 
       <div style={{ position: 'relative', width: W, maxWidth: '100%' }}>
         <canvas
@@ -420,8 +422,8 @@ export function AsteroidDodge({ dangerLevel = 1, onResult }: Props) {
             <div style={{ fontSize: '72px', color: 'var(--cyan)', fontFamily: 'monospace', lineHeight: 1, textShadow: '0 0 20px var(--cyan)' }}>
               {countdown}
             </div>
-            <div className="t-xs t-dim mt8">← → esquiver · ESPACE tirer</div>
-            <div className="t-xs t-dim mt4" style={{ color: 'var(--red)' }}>⚠ Tirer sur un vaisseau ennemi = combat de pirates</div>
+            <div className="t-xs t-dim mt8">{t('asteroidDodge.controls')}</div>
+            <div className="t-xs t-dim mt4" style={{ color: 'var(--red)' }}>{t('asteroidDodge.warning')}</div>
           </div>
         )}
       </div>

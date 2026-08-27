@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   difficulty: 1 | 2 | 3
@@ -13,7 +14,9 @@ const ROUNDS = 3
 const WINDOW_MS = [1200, 850, 600]
 const FLASH_MS  = 380
 
-export function ReactFlash({ difficulty, label = 'RÉFLEXES', onResult }: Props) {
+export function ReactFlash({ difficulty, label, onResult }: Props) {
+  const { t } = useTranslation('minigames')
+  const displayLabel = label ?? t('reactFlash.defaultLabel')
   const windowMs = WINDOW_MS[difficulty - 1]
 
   type Phase = 'waiting' | 'flash' | 'respond' | 'feedback'
@@ -83,10 +86,10 @@ export function ReactFlash({ difficulty, label = 'RÉFLEXES', onResult }: Props)
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— {label} —</div>
+      <div className="t-xs t-dim t-center">— {displayLabel} —</div>
 
       <div className="px-box">
-        <div className="t-xs t-dim mb8">MÉMORISE LA COULEUR — CLIQUE LA BONNE AVANT LA FIN DU DÉLAI</div>
+        <div className="t-xs t-dim mb8">{t('reactFlash.instructions')}</div>
 
         {/* Signal / résultat */}
         <div style={{
@@ -108,21 +111,21 @@ export function ReactFlash({ difficulty, label = 'RÉFLEXES', onResult }: Props)
           {done ? (
             <div style={{ textAlign: 'center' }}>
               <div style={{ fontSize: '18px', color: mult >= 1.5 ? 'var(--gold)' : mult >= 1.0 ? 'var(--green)' : 'var(--red)' }}>
-                {hits}/3 bons réflexes
+                {t('reactFlash.hits', { hits })}
               </div>
-              <div className="t-xs t-dim" style={{ marginTop: '4px' }}>×{mult.toFixed(2)} dégâts</div>
+              <div className="t-xs t-dim" style={{ marginTop: '4px' }}>{t('reactFlash.damageMult', { mult: mult.toFixed(2) })}</div>
             </div>
           ) : phase === 'waiting' ? (
-            <span className="t-xs t-dim" style={{ letterSpacing: '2px' }}>PRÊT...</span>
+            <span className="t-xs t-dim" style={{ letterSpacing: '2px' }}>{t('reactFlash.ready')}</span>
           ) : phase === 'flash' && signal ? (
             <span style={{ fontSize: '26px', fontWeight: 'bold', letterSpacing: '6px', color: COLOR_HEX[signal] }}>
-              {signal}
+              {t(`reactFlash.colors.${signal}`)}
             </span>
           ) : phase === 'respond' ? (
-            <span className="t-xs" style={{ color: 'var(--cyan)', letterSpacing: '3px' }}>CHOISISSEZ !</span>
+            <span className="t-xs" style={{ color: 'var(--cyan)', letterSpacing: '3px' }}>{t('reactFlash.choose')}</span>
           ) : (
             <span style={{ fontSize: '16px', color: lastResult ? 'var(--green)' : 'var(--red)' }}>
-              {lastResult ? '✓ RÉACTION PARFAITE' : '✗ RATÉ'}
+              {lastResult ? t('reactFlash.perfectReaction') : t('reactFlash.missed')}
             </span>
           )}
         </div>
@@ -144,7 +147,7 @@ export function ReactFlash({ difficulty, label = 'RÉFLEXES', onResult }: Props)
                   transition: 'opacity 0.15s',
                 }}
               >
-                {c}
+                {t(`reactFlash.colors.${c}`)}
               </button>
             ))}
           </div>
@@ -163,7 +166,7 @@ export function ReactFlash({ difficulty, label = 'RÉFLEXES', onResult }: Props)
             ))}
           </div>
           <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>
-            Difficulté : {'■'.repeat(difficulty)}{'□'.repeat(3 - difficulty)}
+            {t('reactFlash.difficulty', { filled: '■'.repeat(difficulty), empty: '□'.repeat(3 - difficulty) })}
           </span>
         </div>
       </div>

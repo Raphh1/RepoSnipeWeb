@@ -1,0 +1,28 @@
+{
+  "alanossa": {
+    "inviteLine": "Alanossa blocks your path before you reach the hub. 'You're not like the others who hang around here.' She sizes you up for a moment. 'Come. I don't show my quarters to just anyone.'",
+    "tourLine": "Her private quarters smell of metal and gunpowder. Trophies everywhere — weapons of fallen rivals, plates from ships she's sunk. No pointless decoration. Everything here was earned, nothing bought.",
+    "notYetLine": "She looks at you for a long moment, arms crossed. 'You're solid. Not solid enough yet for me to show you everything.' She points to the exit, no hostility in it. Current standing: {{standing}}/{{threshold}}.",
+    "revealLine": "She stops in front of a chest with no visible lock — just sitting there, like a dare. 'No one touches it because no one would dare.' She shrugs. 'You dared plenty of things to get this far. Might as well be for something.' She turns her back. The message is clear."
+  },
+  "cesarion": {
+    "inviteLine": "An aide intercepts you, protocol flawless. 'The Emperor has noted your service record. He grants you a private audience — in his personal quarters, not the throne room.'",
+    "tourLine": "Cesarion walks you through a gallery of personal archives — treaties, decrees, portraits of predecessors he's pushed from power. 'Every object here tells a story of how one keeps what one has taken.' He never lingers long on anything.",
+    "notYetLine": "He watches you with the coldness of an accountant reviewing a balance sheet. 'Your service is noted. Insufficient for what comes next.' Current standing: {{standing}}/{{threshold}}.",
+    "revealLine": "He stops in front of an armored safe, hidden behind a painting. 'The Empire's trust isn't declared — it's calculated. Your file is... conclusive.' He opens the safe with a sharp gesture and steps aside, without another word."
+  },
+  "raphazarus": {
+    "inviteLine": "Raphazarus waits for you on the deck, alone. 'Come. There are places on this station I show no one.' His voice is calm — that of a man with nothing left to prove.",
+    "tourLine": "He guides you through a silent memorial — the names of his entire battalion, engraved one by one. Personal effects of soldiers dead for decades, still in their place. 'They deserved better than to be forgotten. I do what I can.'",
+    "notYetLine": "He stops, looks at you for a long time. 'You still carry too much doubt for me to entrust you with this.' Not a reproach — just an observation. Current standing: {{standing}}/{{threshold}}.",
+    "revealLine": "He stops in front of a plain military crate, unlocked, sitting between two commemorative plaques. 'Forty-seven years I've kept it here. No one has ever searched this close to it as you have.' He doesn't open it himself. 'Go ahead.'"
+  },
+  "scotty": {
+    "inviteLine": "A waiter in a suit guides you to a discreet door at the back of the casino. Scotty is waiting, two drinks already poured. 'The VIP room. Reserved for people I actually enjoy wasting time with.'",
+    "tourLine": "He shows you his private collection — not his winnings, his best hands. A framed card, a cracked die, a photo of a table he blew up single-handedly. 'Every object here is a story I never tell the same way twice.'",
+    "notYetLine": "He clinks glasses with you but keeps his practiced smile up. 'You're alright. Not yet the kind I show the real stuff to.' Current standing: {{standing}}/{{threshold}}.",
+    "revealLine": "He discreetly pushes a section of the wall — a compartment even his bodyguards don't know about. 'You never tried to con me. Rare, in my line of work.' He waves for you to take the fragment. 'Consider it... a debt I choose to pay.'"
+  },
+  "revealSuffix": " What {{bossName}} doesn't know yet: {{hunterName}} will find out soon, and will be sent to retrieve it. You won't be safe anywhere until you lose them or defeat them.",
+  "unknownHunter": "someone"
+}

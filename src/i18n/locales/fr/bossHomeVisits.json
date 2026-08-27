@@ -1,0 +1,28 @@
+{
+  "alanossa": {
+    "inviteLine": "Alanossa te bloque le passage avant que tu n'atteignes le hub. 'T'es pas comme les autres qui traînent ici.' Elle te jauge un instant. 'Viens. Je montre pas mes quartiers à n'importe qui.'",
+    "tourLine": "Ses quartiers privés sentent le métal et la poudre. Des trophées partout — armes de rivaux tombés, plaques de vaisseaux qu'elle a coulés. Aucune décoration inutile. Tout ici a été gagné, rien n'a été acheté.",
+    "notYetLine": "Elle te regarde longuement, les bras croisés. 'T'es solide. Pas encore assez pour que je te montre tout.' Elle désigne la sortie sans hostilité. Standing actuel : {{standing}}/{{threshold}}.",
+    "revealLine": "Elle s'arrête devant un coffre sans serrure apparente — juste posé là, comme un défi. 'Personne y touche parce que personne oserait.' Elle hausse les épaules. 'T'as osé plein de trucs pour arriver jusqu'ici. Autant que ce soit pour quelque chose.' Elle tourne le dos. Le message est clair."
+  },
+  "cesarion": {
+    "inviteLine": "Un aide de camp t'intercepte, protocole impeccable. 'L'Empereur a noté vos états de service. Il vous accorde une audience privée — dans ses appartements, pas la salle du trône.'",
+    "tourLine": "Cesarion te fait traverser une galerie d'archives personnelles — traités, décrets, portraits de prédécesseurs qu'il a écartés du pouvoir. 'Chaque objet ici raconte comment on garde ce qu'on a pris.' Il ne s'arrête jamais longtemps sur rien.",
+    "notYetLine": "Il t'observe avec la froideur d'un comptable qui vérifie un bilan. 'Vos services sont notés. Insuffisants pour la suite.' Standing actuel : {{standing}}/{{threshold}}.",
+    "revealLine": "Il s'arrête devant un coffre blindé, dissimulé derrière un tableau. 'La confiance de l'Empire ne se décrète pas — elle se calcule. Votre dossier est... concluant.' Il ouvre le coffre d'un geste sec et s'écarte, sans un mot de plus."
+  },
+  "raphazarus": {
+    "inviteLine": "Raphazarus t'attend sur le pont, seul. 'Viens. Il y a des endroits de cette station que je ne montre à personne.' Sa voix est calme — celle d'un homme qui n'a plus rien à prouver.",
+    "tourLine": "Il te guide à travers un mémorial silencieux — les noms de son bataillon entier, gravés un par un. Des objets personnels de soldats morts depuis des décennies, toujours à leur place. 'Ils méritaient mieux que d'être oubliés. Je fais ce que je peux.'",
+    "notYetLine": "Il s'arrête, te regarde longtemps. 'Tu portes encore trop de doutes pour que je te confie ça.' Ce n'est pas un reproche — juste un constat. Standing actuel : {{standing}}/{{threshold}}.",
+    "revealLine": "Il s'arrête devant une simple caisse militaire, non verrouillée, posée entre deux plaques commémoratives. 'Quarante-sept ans que je le garde ici. Personne ne l'a jamais cherché d'aussi près que toi.' Il ne l'ouvre pas lui-même. 'Vas-y.'"
+  },
+  "scotty": {
+    "inviteLine": "Un serveur en costume te guide vers une porte discrète au fond du casino. Scotty t'attend, deux verres déjà servis. 'La salle VIP. Réservée aux gens que j'aime vraiment perdre du temps avec.'",
+    "tourLine": "Il te montre sa collection privée — pas ses gains, ses meilleures parties. Une carte encadrée, un dé fêlé, une photo d'une table qu'il a fait sauter à lui seul. 'Chaque objet ici, c'est une histoire que je raconte jamais deux fois pareil.'",
+    "notYetLine": "Il trinque avec toi mais garde son sourire de façade. 'T'es sympa. Pas encore du genre à qui je montre les vraies affaires.' Standing actuel : {{standing}}/{{threshold}}.",
+    "revealLine": "Il pousse discrètement un pan du mur — un compartiment que même ses gardes du corps ignorent. 'T'as jamais essayé de me rouler. Rare, dans mon métier.' Il te fait signe de prendre le fragment. 'Considère ça comme... une dette que je choisis de payer.'"
+  },
+  "revealSuffix": " Ce que {{bossName}} ne sait pas encore : {{hunterName}} le saura bientôt, et sera envoyé pour le récupérer. Tu ne seras en sécurité nulle part avant de le semer ou de le vaincre.",
+  "unknownHunter": "quelqu'un"
+}

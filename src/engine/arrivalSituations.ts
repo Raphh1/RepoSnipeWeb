@@ -1,6 +1,8 @@
 import type { GameState } from '../types'
+import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
+const as = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'arrivalSituations', ...params })
 
 export interface ArrivalSituation {
   title: string
@@ -18,38 +20,38 @@ export interface ArrivalChoice {
 function getReputationArrival(gs: GameState): ArrivalSituation | null {
   if (gs.reputation >= 200) {
     return {
-      title: "Accueil de légende",
-      description: "Ton nom précède ton vaisseau. La foule aux sas d'arrivée te regarde avec quelque chose entre la crainte et l'admiration.",
+      title: as('repHigh.title'),
+      description: as('repHigh.description'),
       choices: [
         {
-          label: "Accepter les hommages",
-          result: gs => ({ gs: { credits: gs.credits + rng(200, 500), reputation: gs.reputation + 5 }, message: "+crédits offerts. +5 rép." })
+          label: as('repHigh.c0.label'),
+          result: gs => ({ gs: { credits: gs.credits + rng(200, 500), reputation: gs.reputation + 5 }, message: as('repHigh.c0.msg') })
         },
-        { label: "Passer discrètement", result: gs => ({ gs: {}, message: "Tu passes. Ils murmurent derrière toi." }) }
+        { label: as('repHigh.c1.label'), result: gs => ({ gs: {}, message: as('repHigh.c1.msg') }) }
       ]
     }
   }
   if (gs.reputation <= -100) {
     return {
-      title: "Accueil hostile",
-      description: "Des agents de sécurité t'attendent. Ils ont une liste. Ton nom est dessus.",
+      title: as('repLow.title'),
+      description: as('repLow.description'),
       choices: [
         {
-          label: "Coopérer — payer l'amende",
+          label: as('repLow.c0.label'),
           result: gs => {
             const fine = rng(200, 500)
             return gs.credits >= fine
-              ? { gs: { credits: gs.credits - fine }, message: `-${fine} cr. Ils te laissent passer à contrecœur.` }
-              : { gs: { isImprisoned: true, prisonDaysLeft: 2 }, message: "Pas assez de crédits. Prison.", triggerPrison: true }
+              ? { gs: { credits: gs.credits - fine }, message: as('repLow.c0.pay', { fine }) }
+              : { gs: { isImprisoned: true, prisonDaysLeft: 2 }, message: as('repLow.c0.fail'), triggerPrison: true }
           }
         },
         {
-          label: "Forcer le passage (combat)",
-          result: gs => ({ gs: {}, message: "Combat.", triggerCombat: true })
+          label: as('repLow.c1.label'),
+          result: gs => ({ gs: {}, message: as('repLow.c1.msg'), triggerCombat: true })
         },
         {
-          label: "Fuir immédiatement",
-          result: gs => ({ gs: { fuel: Math.max(0, gs.fuel - 1) }, message: "Tu ressors par où tu es entré. -1 carburant." })
+          label: as('repLow.c2.label'),
+          result: gs => ({ gs: { fuel: Math.max(0, gs.fuel - 1) }, message: as('repLow.c2.msg') })
         }
       ]
     }
@@ -58,141 +60,145 @@ function getReputationArrival(gs: GameState): ArrivalSituation | null {
 }
 
 // Situations d'arrivée spécifiques par station
-const STATION_ARRIVALS: Record<string, ArrivalSituation> = {
+function getStationArrivals(): Record<string, ArrivalSituation> {
+  return {
   'La Carcasse': {
-    title: "Arrivée à La Carcasse",
-    description: "L'odeur de métal rouillé et de carburant frelaté. Un gamin court vers toi. 'Tu cherches du boulot ? J'connais quelqu'un.'",
+    title: as('laCarcasse.title'),
+    description: as('laCarcasse.description'),
     choices: [
       {
-        label: "Écouter le gamin",
-        result: gs => ({ gs: { reputation: gs.reputation + 3, credits: gs.credits + rng(50, 200) }, message: "Une info utile. +crédits." })
+        label: as('laCarcasse.c0.label'),
+        result: gs => ({ gs: { reputation: gs.reputation + 3, credits: gs.credits + rng(50, 200) }, message: as('laCarcasse.c0.msg') })
       },
-      { label: "Ignorer", result: gs => ({ gs: {}, message: "Tu passes. Il disparaît dans la ferraille." }) }
+      { label: as('laCarcasse.c1.label'), result: gs => ({ gs: {}, message: as('laCarcasse.c1.msg') }) }
     ]
   },
   'Port Méridien': {
-    title: "Arrivée à Port Méridien",
-    description: "Propre, organisé, sous surveillance. Un agent de contrôle tampon ton laissez-passer sans te regarder.",
+    title: as('portMeridien.title'),
+    description: as('portMeridien.description'),
     choices: [
       {
-        label: "Déclarer tes marchandises honnêtement",
-        result: gs => ({ gs: { reputation: gs.reputation + 5 }, message: "+5 rép. Aucun problème." })
+        label: as('portMeridien.c0.label'),
+        result: gs => ({ gs: { reputation: gs.reputation + 5 }, message: as('portMeridien.c0.msg') })
       },
       {
-        label: "Passer sans déclarer",
+        label: as('portMeridien.c1.label'),
         result: gs => Math.random() < 0.3
-          ? { gs: { reputation: gs.reputation - 15, isImprisoned: true, prisonDaysLeft: 1 }, message: "Contrôle aléatoire. Prison.", triggerPrison: true }
-          : { gs: {}, message: "Ça passe. Cette fois." }
+          ? { gs: { reputation: gs.reputation - 15, isImprisoned: true, prisonDaysLeft: 1 }, message: as('portMeridien.c1.caught'), triggerPrison: true }
+          : { gs: {}, message: as('portMeridien.c1.safe') }
       }
     ]
   },
   'Les Bas-Fonds de Vega': {
-    title: "Arrivée aux Bas-Fonds",
-    description: "Pas de contrôle. Pas de questions. Juste des regards qui évaluent ta valeur marchande.",
+    title: as('lesBasFondsDeVega.title'),
+    description: as('lesBasFondsDeVega.description'),
     choices: [
       {
-        label: "Se fondre dans la masse",
-        result: gs => ({ gs: {}, message: "Tu rentres. Personne te touche." })
+        label: as('lesBasFondsDeVega.c0.label'),
+        result: gs => ({ gs: {}, message: as('lesBasFondsDeVega.c0.msg') })
       },
       {
-        label: "Chercher un contact immédiatement",
-        result: gs => ({ gs: { credits: gs.credits + rng(100, 400) }, message: "Premier contact rentable. +crédits." })
+        label: as('lesBasFondsDeVega.c1.label'),
+        result: gs => ({ gs: { credits: gs.credits + rng(100, 400) }, message: as('lesBasFondsDeVega.c1.msg') })
       }
     ]
   },
   'Arc Ouest Apocalypse': {
-    title: "Territoire d'Alanossa",
-    description: "Un canon de vaisseau te suit depuis l'espace. Radio : 'Identifie-toi. Maintenant.'",
+    title: as('arcOuestApocalypse.title'),
+    description: as('arcOuestApocalypse.description'),
     choices: [
       {
-        label: "S'identifier normalement",
+        label: as('arcOuestApocalypse.c0.label'),
         result: gs => gs.reputation >= 30
-          ? { gs: { reputation: gs.reputation + 5 }, message: "Ils reconnaissent ton nom. +5 rép." }
-          : { gs: {}, message: "Tu passes sous contrôle. Ils ne t'aiment pas mais ils te laissent." }
+          ? { gs: { reputation: gs.reputation + 5 }, message: as('arcOuestApocalypse.c0.recognized') }
+          : { gs: {}, message: as('arcOuestApocalypse.c0.unknown') }
       },
       {
-        label: "Ignorer — continuer droit",
+        label: as('arcOuestApocalypse.c1.label'),
         result: gs => Math.random() < 0.4
-          ? { gs: {}, message: "Ils laissent passer. Méfiance totale." }
-          : { gs: {}, message: "Combat avec sentinelles.", triggerCombat: true }
+          ? { gs: {}, message: as('arcOuestApocalypse.c1.safe') }
+          : { gs: {}, message: as('arcOuestApocalypse.c1.combat'), triggerCombat: true }
       }
     ]
   },
   'Fort Kharos': {
-    title: "Arrivée à Fort Kharos",
-    description: "Code de sécurité requis. Le garde t'inspecte de la tête aux pieds.",
+    title: as('fortKharos.title'),
+    description: as('fortKharos.description'),
     choices: [
       {
-        label: "Code visiteur standard",
-        result: gs => ({ gs: {}, message: "Accès autorisé. Sous surveillance." })
+        label: as('fortKharos.c0.label'),
+        result: gs => ({ gs: {}, message: as('fortKharos.c0.msg') })
       },
       {
-        label: "Présenter tes titres militaires (Vétéran/Seigneur de guerre)",
+        label: as('fortKharos.c1.label'),
         available: gs => gs.class.name === 'Vétéran' || gs.class.name === 'Seigneur de guerre',
-        result: gs => ({ gs: { reputation: gs.reputation + 15, credits: gs.credits + rng(200, 500) }, message: "Accueil de professionnel. +15 rép, quelques crédits." })
+        result: gs => ({ gs: { reputation: gs.reputation + 15, credits: gs.credits + rng(200, 500) }, message: as('fortKharos.c1.msg') })
       }
     ]
   },
   'Le Purgatoire': {
-    title: "Arrivée au Purgatoire",
-    description: "Les portes s'ouvrent sur une atmosphère pesante. Un ancien détenu t'observe depuis le fond.",
+    title: as('lePurgatoire.title'),
+    description: as('lePurgatoire.description'),
     choices: [
       {
-        label: "Entrer et observer",
-        result: gs => ({ gs: {}, message: "Tu entres. L'ambiance est lourde mais gérable." })
+        label: as('lePurgatoire.c0.label'),
+        result: gs => ({ gs: {}, message: as('lePurgatoire.c0.msg') })
       },
       {
-        label: "Saluer les anciens (si tu as été en prison)",
+        label: as('lePurgatoire.c1.label'),
         available: gs => gs.prisonEscapes > 0 || (gs.isImprisoned === false && gs.interrogationsSurvived > 0),
-        result: gs => ({ gs: { reputation: gs.reputation + 10, credits: gs.credits + rng(100, 300) }, message: "+10 rép. La solidarité des condamnés." })
+        result: gs => ({ gs: { reputation: gs.reputation + 10, credits: gs.credits + rng(100, 300) }, message: as('lePurgatoire.c1.msg') })
       }
     ]
   },
   'Emporium Requiem': {
-    title: "Arrivée à l'Emporium",
-    description: "Fastueux. Artificiel. Un agent commercial te tend une carte de bienvenue dorée.",
+    title: as('emporiumRequiem.title'),
+    description: as('emporiumRequiem.description'),
     choices: [
       {
-        label: "Accepter le programme VIP (500 cr)",
+        label: as('emporiumRequiem.c0.label'),
         available: gs => gs.credits >= 500,
-        result: gs => ({ gs: { credits: gs.credits - 500 + rng(300, 1200), reputation: gs.reputation + 10 }, message: "-500 cr mais accès premium. Net positif probable." })
+        result: gs => ({ gs: { credits: gs.credits - 500 + rng(300, 1200), reputation: gs.reputation + 10 }, message: as('emporiumRequiem.c0.msg') })
       },
       {
-        label: "Décliner — accès standard",
-        result: gs => ({ gs: {}, message: "Accès standard. Pas de dorure." })
+        label: as('emporiumRequiem.c1.label'),
+        result: gs => ({ gs: {}, message: as('emporiumRequiem.c1.msg') })
       }
     ]
   },
+  }
 }
 
 // Interrogatoire
-export const INTERROGATION: ArrivalSituation = {
-  title: "INTERROGATOIRE",
-  description: "Une salle blanche. Une lampe dans les yeux. Des questions. Beaucoup de questions.",
+function buildInterrogation(): ArrivalSituation {
+  return {
+  title: as('interrogation.title'),
+  description: as('interrogation.description'),
   choices: [
     {
-      label: "Garder le silence",
+      label: as('interrogation.c0.label'),
       result: gs => Math.random() < 0.5
-        ? { gs: { interrogationsSurvived: gs.interrogationsSurvived + 1, reputation: gs.reputation + 10 }, message: "Ils lâchent. Tu ressors avec ta réputation intacte. +10 rép." }
-        : { gs: { playerHp: Math.max(1, gs.playerHp - rng(10, 25)), interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: "Ils n'apprécient pas le silence. -PV. Mais rien de révélé." }
+        ? { gs: { interrogationsSurvived: gs.interrogationsSurvived + 1, reputation: gs.reputation + 10 }, message: as('interrogation.c0.success') }
+        : { gs: { playerHp: Math.max(1, gs.playerHp - rng(10, 25)), interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: as('interrogation.c0.fail') }
     },
     {
-      label: "Tout avouer",
-      result: gs => ({ gs: { reputation: gs.reputation - 20, credits: Math.max(0, gs.credits - rng(200, 600)), interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: "-20 rép, -crédits. Ils te libèrent. Un peu humilié." })
+      label: as('interrogation.c1.label'),
+      result: gs => ({ gs: { reputation: gs.reputation - 20, credits: Math.max(0, gs.credits - rng(200, 600)), interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: as('interrogation.c1.msg') })
     },
     {
-      label: "Négocier une sortie",
+      label: as('interrogation.c2.label'),
       result: gs => gs.reputation > 30
-        ? { gs: { credits: Math.max(0, gs.credits - rng(100, 300)), interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: "Ta réputation et des crédits changent de mains. Tu sors proprement." }
-        : { gs: { isImprisoned: true, prisonDaysLeft: 2, interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: "Pas assez d'influence. Cellule.", triggerPrison: true }
+        ? { gs: { credits: Math.max(0, gs.credits - rng(100, 300)), interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: as('interrogation.c2.success') }
+        : { gs: { isImprisoned: true, prisonDaysLeft: 2, interrogationsSurvived: gs.interrogationsSurvived + 1 }, message: as('interrogation.c2.fail'), triggerPrison: true }
     },
     {
-      label: "Tenter une évasion",
+      label: as('interrogation.c3.label'),
       result: gs => Math.random() < 0.40
-        ? { gs: { playerHp: Math.max(1, gs.playerHp - rng(10, 20)), interrogationsSurvived: gs.interrogationsSurvived + 1, prisonEscapes: gs.prisonEscapes + 1, reputation: gs.reputation + 15 }, message: "Tu t'en sors. -PV. +15 rép (audace)." }
-        : { gs: { playerHp: Math.max(1, gs.playerHp - rng(20, 40)), isImprisoned: true, prisonDaysLeft: 3 }, message: "Raté. -PV, prison + 3 jours.", triggerPrison: true }
+        ? { gs: { playerHp: Math.max(1, gs.playerHp - rng(10, 20)), interrogationsSurvived: gs.interrogationsSurvived + 1, prisonEscapes: gs.prisonEscapes + 1, reputation: gs.reputation + 15 }, message: as('interrogation.c3.success') }
+        : { gs: { playerHp: Math.max(1, gs.playerHp - rng(20, 40)), isImprisoned: true, prisonDaysLeft: 3 }, message: as('interrogation.c3.fail'), triggerPrison: true }
     }
   ]
+  }
 }
 
 // Trafic d'êtres humains — on ne peut PAS vendre son passager au marché, mais
@@ -201,12 +207,13 @@ function getTraffickingArrival(gs: GameState): ArrivalSituation | null {
   if ((gs.cargo['Passager'] ?? 0) <= 0) return null
   if (Math.random() > 0.5) return null   // pas à chaque escale
   const offer = rng(3500, 6500) + gs.day * 120
+  const offerStr = offer.toLocaleString()
   return {
-    title: "Une offre qui ne se refuse pas",
-    description: `Pendant l'escale, un homme en costume sombre t'aborde sans bruit. « On m'a dit que tu transportes… de la marchandise vivante. Je paie bien. Très bien. ${offer.toLocaleString()} crédits, cash, et personne ne pose de questions. » Ton passager n'a rien entendu. Pour l'instant.`,
+    title: as('trafficking.title'),
+    description: as('trafficking.description', { offer: offerStr }),
     choices: [
       {
-        label: `Vendre ton passager (+${offer.toLocaleString()} cr · trafic)`,
+        label: as('trafficking.c0.label', { offer: offerStr }),
         result: gs => {
           const cargo = { ...gs.cargo }
           const cur = cargo['Passager'] ?? 0
@@ -222,13 +229,13 @@ function getTraffickingArrival(gs: GameState): ArrivalSituation | null {
               moralTags: [...(gs.moralTags ?? []).filter(t => t !== 'trafiquant'), 'trafiquant'],
               pastDecisions: [...(gs.pastDecisions ?? []), 'sold-passenger'],
             },
-            message: `L'homme glisse les crédits et disparaît avec sa « marchandise ». +${offer.toLocaleString()} cr. -30 rép. Tu ne dormiras pas bien.`,
+            message: as('trafficking.c0.msg', { offer: offerStr }),
           }
         },
       },
       {
-        label: "Refuser — un passager n'est pas une marchandise",
-        result: gs => ({ gs: { reputation: gs.reputation + 8 }, message: "Tu refuses net. L'homme hausse les épaules et s'évapore. +8 rép — quelqu'un t'a vu refuser." }),
+        label: as('trafficking.c1.label'),
+        result: gs => ({ gs: { reputation: gs.reputation + 8 }, message: as('trafficking.c1.msg') }),
       },
     ],
   }
@@ -244,10 +251,10 @@ export function getArrivalSituation(gs: GameState, forced = false): ArrivalSitua
   const repSituation = getReputationArrival(gs)
   if (repSituation && (forced || Math.random() < 0.5)) return repSituation
 
-  return STATION_ARRIVALS[gs.currentStation] ?? null
+  return getStationArrivals()[gs.currentStation] ?? null
 }
 
 // Situation après une défaite en combat (interrogatoire ou capture)
 export function getCaptureConsequence(gs: GameState): ArrivalSituation {
-  return INTERROGATION
+  return buildInterrogation()
 }

@@ -1,0 +1,149 @@
+{
+  "alanossa": {
+    "title": "Blood Debt",
+    "intro": "A rumor is going around: Alanossa is looking for someone. Not for a job offer.",
+    "completionMessage": "Alanossa is defeated. An era ends. The void keeps this name.",
+    "steps": {
+      "0": {
+        "title": "The Rumor",
+        "desc": "In a bar on La Carcasse, someone slips you a message. 'Alanossa heard your name. He wants to talk to you. Not in a friendly way.'",
+        "c0": "Ignore it and move on",
+        "c0msg": "You put the message away. Ignoring Alanossa is a choice.",
+        "c1": "Investigate Alanossa's intentions",
+        "c1msg": "You ask around. The answers confirm it: Alanossa wants to settle something. +10 rep (boldness)."
+      },
+      "1": {
+        "title": "The Messenger",
+        "desc": "One of Alanossa's lieutenants finds you at the dock. 'The boss invites you to Arc Ouest Apocalypse. Alone. Unarmed. These terms aren't negotiable.'",
+        "c0": "Accept the terms",
+        "c0msg": "You accept. The messenger leaves. You head for Arc Ouest Apocalypse.",
+        "c1": "Refuse and propose neutral ground",
+        "c1msg": "Alanossa reluctantly agrees. He respects that. +15 rep.",
+        "c2": "Disappear — change sector",
+        "c2msg": "You bolt. Alanossa won't forget it. The arc is on hold."
+      },
+      "2": {
+        "title": "The Confrontation",
+        "conditionHint": "Alanossa won't receive anyone who hasn't proven themselves — defeat his four lieutenants across the sector first before you can confront, convince, or negotiate with him.",
+        "desc": "You stand before Alanossa. His eyes assess you differently now — you broke four of his lieutenants to get here. 'You have something that belongs to me. Or someone protecting you. Or maybe you're just good. Let's see which of these reasons explains why you're still alive.'",
+        "c0": "Negotiate — propose an arrangement",
+        "c0msg": "-3000 cr. Alanossa accepts. Tacit agreement. +30 rep.",
+        "c1": "Challenge Alanossa to combat",
+        "c1msg": "Combat with Alanossa.",
+        "c2": "Reveal valuable information",
+        "c2msg": "The info interests him. He lets you go with something extra. +50 rep."
+      }
+    }
+  },
+  "raphazarus": {
+    "title": "The Prophet of the Void",
+    "intro": "The clues finally converge. L'Arc Perdu isn't a legend — it really drifts somewhere in the Black Nebula. What you're about to find there is like nothing you've been told.",
+    "completionMessage": "You met Raphazarus at L'Arc Perdu. The Cult of the Void awaits you — or fears you. Raphazarus can be confronted there if you want to settle this for good.",
+    "steps": {
+      "0": {
+        "title": "The Approach",
+        "desc": "You finally pick up the signal — the real one, not a bar rumor. A station that shouldn't exist, motionless in the dark. The closer you get, the more you understand why no one ever really returns convinced of what they saw.",
+        "c0": "Scan the station before approaching",
+        "c0msg": "The scans say almost nothing. The station absorbs more than it reflects. What you see doesn't match what the instruments measure. +8 rep (caution).",
+        "c1": "Rush in — questions can wait",
+        "c1msg": "You don't wait. L'Arc Perdu grows in your sights, silent, as if it were waiting for you too."
+      },
+      "1": {
+        "title": "The First Disciple",
+        "desc": "A woman greets you at the airlock. Dark robe, distant gaze. 'I was told you'd come. Few make it — most abandon the trail before, or never really believe it. Raphazarus is waiting. This is an invitation — not a summons.'",
+        "c0": "Enter — finally see the truth for yourself",
+        "c0msg": "You follow the disciple into the station's depths.",
+        "c1": "Question the disciple — who is Raphazarus, really?",
+        "c1msg": "She barely smiles. 'Everyone wants to know who he is. You'll see. Words aren't enough.' She says nothing more. +5 rep.",
+        "c2": "Hesitate — this is still hard to believe",
+        "c2msg": "'That's normal,' she says. 'Almost no one believes it before seeing him face to face. He's still waiting for you.'"
+      },
+      "2": {
+        "title": "Facing Raphazarus",
+        "conditionHint": "Head to L'Arc Perdu to meet Raphazarus.",
+        "desc": "He's older than you thought. His eyes fix on something behind you. 'The void knows you. I've watched you for a long time. I'm not offering you a job — I'm offering you a purpose.' He waits for your answer.",
+        "c0": "Join the Cult of the Void",
+        "c0msg": "You join the Cult. He places a hand on your shoulder. 'The void has chosen you.' +60 rep. You're now a member of the Cult of the Void.",
+        "c1": "Join the Cult (already committed elsewhere — double allegiance)",
+        "c1msg": "You're playing a dangerous game. Raphazarus accepts — he knows you have other allegiances. Double agent. +30 rep.",
+        "c2": "Refuse — this isn't your path",
+        "c2msg": "You decline. He doesn't insist. 'The void doesn't forget refusals. But it forgives honesty.' He lets you leave.",
+        "c3": "Negotiate — protection in exchange for information",
+        "c3msg": "A deal is struck. +40 rep, +2000 cr. He owes you something. And you owe him."
+      }
+    }
+  },
+  "vael": {
+    "title": "The Abyss Investigation",
+    "intro": "A station was destroyed. Les Abysses de Velkor. But survivors talk of something else — a disappearance before the disaster.",
+    "completionMessage": "The truth about Velkor is known. What comes of it is your choice.",
+    "steps": {
+      "0": {
+        "title": "The Survivors",
+        "desc": "At Les Abysses de Velkor, an old researcher approaches you. 'Before the incident, someone stole our research. Someone from the inside. I have a name. I need a messenger.'",
+        "c0": "Accept the investigation",
+        "c0msg": "You accept. She gives you a name and an address.",
+        "c1": "Ask for an advance (500 cr)",
+        "c1msg": "+500 cr advance. The investigation begins."
+      },
+      "1": {
+        "title": "The Trail",
+        "desc": "The name leads to Nexus Aldara. There, the trail goes cold. Someone erased the data. But not well enough.",
+        "c0": "Hack the terminal to recover the data",
+        "c0msg": "[HACKER] Data recovered. +20 rep. You know who.",
+        "c1": "Pay an informant (400 cr)",
+        "c1msgWin": "-400 cr. The info is good. The trail continues.",
+        "c1msgFail": "Not enough credits.",
+        "c2": "Look for witnesses in the station",
+        "c2msg": "Several testimonies. The truth emerges. +10 rep."
+      },
+      "2": {
+        "title": "The Truth",
+        "desc": "The culprit: a research director. He's alive, hidden in the fringes. He's waiting for you — he knew you'd come. 'I did what I had to do. The research would've been destroyed otherwise. I saved it.'",
+        "c0": "Turn him in to the authorities",
+        "c0msg": "Justice served. +50 rep. The researcher pays you.",
+        "c1": "Let him go — maybe he's telling the truth",
+        "c1msg": "He disappears with his research. +20 rep, +1500 cr (his gratitude).",
+        "c2": "Take the research and sell it",
+        "c2msg": "+4000 cr. -20 rep. The data is sold to the highest bidder."
+      }
+    }
+  },
+  "factionwar": {
+    "title": "The Faction War",
+    "intro": "The Black Hawks and the Scarlet Guardians have declared war on each other. The whole sector will feel the consequences.",
+    "completionMessage": "The faction war is over. Your role in it will remain in the archives.",
+    "steps": {
+      "0": {
+        "title": "The Spark",
+        "desc": "An incident at Fort Kharos: a Scarlet Guardian was assassinated. The Black Hawks are accused. Both factions mobilize. Trade routes are cut off.",
+        "c0": "Side with the Black Hawks",
+        "c0msg": "You join the Black Hawks. The arc progresses on their side.",
+        "c1": "Side with the Scarlet Guardians",
+        "c1msg": "You join the Guardians. The arc progresses on their side.",
+        "c2": "Stay neutral and profit",
+        "c2msg": "You sell information to both sides. +credits. Risky long-term."
+      },
+      "1": {
+        "title": "The Battle",
+        "desc": "Both factions clash across the sector. Ships burn. Stations are under blockade. You're asked to pick a side for a decisive mission.",
+        "c0": "Lead the mission (fight your faction's enemy)",
+        "c0msg": "Mission accomplished. +60 rep. The battle turns.",
+        "c1": "Betray and sell the plan to the enemy",
+        "c1msg": "+3000 cr. -40 rep. You're a double agent now.",
+        "c2": "Propose mediation between the two factions",
+        "c2msg": "Both factions listen to you. +100 rep. The war slows down."
+      },
+      "2": {
+        "title": "The Resolution",
+        "desc": "The war is coming to an end. A deal is possible — or total victory for one side. You have the power to decide.",
+        "c0": "Crush the enemy faction (total victory)",
+        "c0msg": "Total victory. +100 rep, +2000 cr. One side dominates now.",
+        "c1": "Force a peace treaty",
+        "c1msg": "Treaty signed. +150 rep. You're recognized as an architect of peace. Faction leader.",
+        "c2": "Seize control of a faction amid the confusion",
+        "c2msg": "You take the reins. +80 rep, +3000 cr. You're in charge now."
+      }
+    }
+  }
+}

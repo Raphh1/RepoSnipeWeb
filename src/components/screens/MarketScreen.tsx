@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import { playBuy, playSell } from '../../engine/sfx'
 import { getStation, FUEL_STATIONS } from '../../data/stations'
@@ -8,6 +9,7 @@ import { getCulteArtefactMult, getFactionSurchargeAtStation, getStationFactionNa
 import { getRunBuyMult } from '../../data/runModifiers'
 import { getFullBuyMult, getFullSellMult, getMarketContext, getPillarDiscount } from '../../engine/marketPricing'
 import { getBlackMarketOffers, isBlackMarketAvailable, buyBlackMarketOffer } from '../../engine/blackMarket'
+import { translateGood, translateWeaponName, translateArmorName } from '../../engine/goodsI18n'
 
 const BASE_PRICES: Record<string, number> = {
   'Médicaments': 250, 'Médicaments premium': 580, 'Métaux bruts': 130,
@@ -69,6 +71,8 @@ export const ITEM_CARGO_MAX: Record<string, number> = {
 const BAZAR_BUY_LIMIT = 3
 
 export function MarketScreen() {
+  const { t } = useTranslation('marketScreen')
+  const { t: tc } = useTranslation('common')
   const gs        = useGameStore(s => s.gs!)
   const goTo      = useGameStore(s => s.goTo)
   const buyCargo          = useGameStore(s => s.buyCargo)
@@ -112,9 +116,9 @@ export function MarketScreen() {
   const factionRepLevel = controllingFaction ? getRepLevel(getFactionRep(gs, controllingFaction)) : null
 
   const priceTag = stationSeed <= 0.88
-    ? { label: '▼ STATION BON MARCHÉ', color: 'var(--green)' }
+    ? { label: t('priceTagCheap'), color: 'var(--green)' }
     : stationSeed >= 1.12
-    ? { label: '▲ STATION CHÈRE', color: 'var(--red)' }
+    ? { label: t('priceTagExpensive'), color: 'var(--red)' }
     : null
 
   const bazarDaysUntilReset = isBazar
@@ -125,19 +129,19 @@ export function MarketScreen() {
     <div className="layout">
       {/* Header */}
       <div className="row" style={{ alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
-        <div className="t-sm t-bright" style={{ flex: 1 }}>MARCHÉ — {station.name}</div>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{tc('buttons.back')}</button>
+        <div className="t-sm t-bright" style={{ flex: 1 }}>{t('title', { station: station.name })}</div>
         <div className="t-xs t-gold">{gs.credits.toLocaleString()} cr</div>
         <div className="t-xs" style={{ color: totalCargo >= maxCargo ? 'var(--red)' : 'var(--dim)' }}>
-          Soute {totalCargo}/{maxCargo}
+          {t('cargo', { current: totalCargo, max: maxCargo })}
         </div>
-        {isBazar && <div className="t-xs t-dim" style={{ fontSize: '9px', letterSpacing: '1px' }}>STOCK RESET J+{bazarDaysUntilReset}</div>}
+        {isBazar && <div className="t-xs t-dim" style={{ fontSize: '9px', letterSpacing: '1px' }}>{t('stockReset', { days: bazarDaysUntilReset })}</div>}
         {priceTag && <div className="t-xs" style={{ color: priceTag.color, fontWeight: 'bold', fontSize: '9px', letterSpacing: '1px' }}>{priceTag.label}</div>}
-        {factionSurcharge > 0 && <div className="t-xs" style={{ color: 'var(--red)', fontWeight: 'bold', fontSize: '9px', letterSpacing: '1px' }}>⚠ +{factionSurcharge}% {controllingFactionName?.toUpperCase()}</div>}
-        {discount > 0 && <div className="tag tag--green t-xs">-{discount}% FACTION</div>}
+        {factionSurcharge > 0 && <div className="t-xs" style={{ color: 'var(--red)', fontWeight: 'bold', fontSize: '9px', letterSpacing: '1px' }}>{t('factionSurcharge', { pct: factionSurcharge, faction: controllingFactionName?.toUpperCase() })}</div>}
+        {discount > 0 && <div className="tag tag--green t-xs">{t('factionDiscount', { pct: discount })}</div>}
         <button className="px-btn px-btn--sm" style={{ width: 'auto', color: 'var(--cyan)', borderColor: 'var(--cyan)' }}
           onClick={() => goTo('inventory')}>
-          ⚔ Inventaire
+          {t('inventory')}
         </button>
       </div>
 
@@ -183,10 +187,10 @@ export function MarketScreen() {
             padding: '8px 14px',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <span style={{ fontSize: '9px', color: soutePleine ? 'var(--red)' : 'var(--gold)', letterSpacing: '2px' }}>▼ ACHETER</span>
+            <span style={{ fontSize: '9px', color: soutePleine ? 'var(--red)' : 'var(--gold)', letterSpacing: '2px' }}>{t('buySection')}</span>
             {soutePleine
-              ? <span style={{ fontSize: '9px', color: 'var(--red)', letterSpacing: '1px', fontWeight: 'bold' }}>⚠ SOUTE PLEINE — VENDEZ D'ABORD</span>
-              : <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>disponible : {gs.credits.toLocaleString()} cr</span>
+              ? <span style={{ fontSize: '9px', color: 'var(--red)', letterSpacing: '1px', fontWeight: 'bold' }}>{t('cargoFull')}</span>
+              : <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>{t('available', { credits: gs.credits.toLocaleString() })}</span>
             }
           </div>
           {soutePleine && (
@@ -195,10 +199,10 @@ export function MarketScreen() {
               background: 'rgba(60,0,0,0.25)', padding: '10px 14px', textAlign: 'center',
             }}>
               <div style={{ fontSize: '11px', color: 'var(--red)', letterSpacing: '2px', fontWeight: 'bold', marginBottom: '4px' }}>
-                SOUTE PLEINE ({totalCargo}/{maxCargo})
+                {t('cargoFullTitle', { current: totalCargo, max: maxCargo })}
               </div>
               <div style={{ fontSize: '9px', color: 'var(--dim)' }}>
-                Tu ne peux pas acheter tant que la soute n'est pas libérée. Vends des marchandises d'abord.
+                {t('cargoFullBody')}
               </div>
             </div>
           )}
@@ -238,13 +242,13 @@ export function MarketScreen() {
                   <div className="row" style={{ justifyContent: 'space-between' }}>
                     <span className="t-xs">
                       {station.exclusiveGoods?.includes(item) && <span style={{ color: 'var(--gold)', marginRight: '5px', fontSize: '9px' }}>★</span>}
-                      {item}
+                      {translateGood(item)}
                       {isBazar && <span className="t-dim" style={{ marginLeft: '6px', fontSize: '9px' }}>({bazarCount}/{BAZAR_BUY_LIMIT})</span>}
                       {!isBazar && itemMax !== undefined && <span className="t-dim" style={{ marginLeft: '6px', fontSize: '9px' }}>({gs.cargo[item] ?? 0}/{itemMax})</span>}
                     </span>
                     <span className="t-gold t-xs">
-                      {banned ? <span className="t-red">INTERDIT</span>
-                        : (atMax || bazarMax) ? <span style={{ color: 'var(--dim)' }}>MAX</span>
+                      {banned ? <span className="t-red">{t('forbidden')}</span>
+                        : (atMax || bazarMax) ? <span style={{ color: 'var(--dim)' }}>{t('max')}</span>
                         : `${price} cr`}
                     </span>
                   </div>
@@ -257,7 +261,7 @@ export function MarketScreen() {
                 <button className="px-btn px-btn--green" disabled={gs.credits < price}
                   onClick={() => { playBuy(); useGameStore.getState().buyFuel(1, price) }}>
                   <div className="row" style={{ justifyContent: 'space-between' }}>
-                    <span className="t-xs">⛽ Carburant +1 ({gs.fuel}/{gs.maxFuel})</span>
+                    <span className="t-xs">{t('buyFuel', { current: gs.fuel, max: gs.maxFuel })}</span>
                     <span className="t-cyan t-xs">{price} cr</span>
                   </div>
                 </button>
@@ -275,21 +279,21 @@ export function MarketScreen() {
             padding: '8px 14px',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <span style={{ fontSize: '9px', color: 'var(--green)', letterSpacing: '2px' }}>▲ VENDRE</span>
-            {soutePct > 0 && <span className="tag tag--green t-xs">Soute +{soutePct}%</span>}
+            <span style={{ fontSize: '9px', color: 'var(--green)', letterSpacing: '2px' }}>{t('sellSection')}</span>
+            {soutePct > 0 && <span className="tag tag--green t-xs">{t('cargoBonus', { pct: soutePct })}</span>}
             <span className="t-xs t-dim" style={{ marginLeft: 'auto' }}>
-              {Object.keys(gs.cargo).length === 0 ? 'soute vide' : `${Object.keys(gs.cargo).length} type(s)`}
+              {Object.keys(gs.cargo).length === 0 ? t('cargoEmptyCount') : t('cargoTypeCount', { count: Object.keys(gs.cargo).length })}
             </span>
           </div>
           <div className="col list-zebra" style={{ border: '2px solid var(--green)', padding: '6px', gap: '4px' }}>
             {Object.keys(gs.cargo).length === 0 && (
               <div className="px-box t-dim t-xs" style={{ border: 'none', background: 'transparent' }}>
-                Aucune marchandise dans la soute.
+                {t('cargoEmpty')}
               </div>
             )}
             {(gs.cargo['Passager'] ?? 0) > 0 && (
               <div className="px-box t-xs" style={{ border: 'none', background: 'transparent', color: 'var(--orange)' }}>
-                ⚠ Un passager n'est pas une marchandise — impossible de le vendre ici.
+                {t('passengerWarning')}
               </div>
             )}
             {Object.entries(gs.cargo).filter(([item]) => item !== 'Passager').map(([item, qty]) => {
@@ -302,9 +306,9 @@ export function MarketScreen() {
                 <button key={item} className="px-btn" style={{ borderColor: '#206040', color: 'var(--green)' }}
                   onClick={() => { playSell(); sellCargo(item, sellPrice) }}>
                   <div className="row" style={{ justifyContent: 'space-between' }}>
-                    <span className="t-xs">{item} ×{qty}</span>
+                    <span className="t-xs">{t('itemQty', { item: translateGood(item), qty })}</span>
                     <span className="t-green t-xs">
-                      +{total} cr{medBonus > 0 ? ` (+${medBonus} Médecin)` : ''}
+                      {t('sellTotal', { total })}{medBonus > 0 ? t('sellMedicBonus', { bonus: medBonus }) : ''}
                     </span>
                   </div>
                 </button>
@@ -319,8 +323,8 @@ export function MarketScreen() {
         const bmOffers = getBlackMarketOffers(gs)
         return (
           <div className="px-box" style={{ borderColor: 'var(--red)', background: 'rgba(60,0,0,0.15)' }}>
-            <div className="t-xs mb8" style={{ color: 'var(--red)', letterSpacing: '2px' }}>⛔ MARCHÉ NOIR</div>
-            <div className="t-xs t-dim mb8" style={{ lineHeight: 1.6 }}>Marchandises illégales. Pas de garanties. Pas de retours.</div>
+            <div className="t-xs mb8" style={{ color: 'var(--red)', letterSpacing: '2px' }}>{t('blackMarketTitle')}</div>
+            <div className="t-xs t-dim mb8" style={{ lineHeight: 1.6 }}>{t('blackMarketDesc')}</div>
             <div className="col gap4">
               {bmOffers.map(offer => (
                 <button key={offer.id} className="px-btn" style={{ borderColor: 'rgba(200,50,50,0.4)', textAlign: 'left' }}
@@ -331,12 +335,12 @@ export function MarketScreen() {
                   }}>
                   <div className="row" style={{ justifyContent: 'space-between' }}>
                     <span className="t-xs" style={{ color: offer.type === 'weapon' ? 'var(--orange)' : offer.type === 'armor' ? 'var(--blue)' : 'var(--red)' }}>
-                      {offer.name}
+                      {offer.type === 'weapon' ? translateWeaponName(offer.name) : offer.type === 'armor' ? translateArmorName(offer.name) : offer.name}
                     </span>
                     <span className="t-xs t-red">{offer.price.toLocaleString()} cr</span>
                   </div>
                   <div className="t-xs t-dim" style={{ lineHeight: 1.6, marginTop: '2px' }}>{offer.description}</div>
-                  {offer.itemQty && <div className="t-xs t-dim">Quantité : ×{offer.itemQty}</div>}
+                  {offer.itemQty && <div className="t-xs t-dim">{t('blackMarketQty', { qty: offer.itemQty })}</div>}
                 </button>
               ))}
             </div>

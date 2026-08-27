@@ -1,26 +1,27 @@
 import { useState } from 'react'
-import { CLASSES } from '../../data/classes'
+import { useTranslation } from 'react-i18next'
+import { getClasses } from '../../data/classes'
 import { useGameStore } from '../../store/gameStore'
 import { useMetaStore } from '../../store/metaStore'
-import { drawRunModifiers, RUN_MODIFIERS, type RunModifier } from '../../data/runModifiers'
-import { drawRunObjective, type RunObjective } from '../../data/runObjectives'
+import { getRunModifiers, getRunModifierById } from '../../data/runModifiers'
+import { drawRunObjective, getRunObjective } from '../../data/runObjectives'
 import { MetaScreen } from './MetaScreen'
 
-function drawHardModifiers(): RunModifier[] {
-  const debuffs = RUN_MODIFIERS.filter(m => m.tag === 'debuff')
+// Toutes ces fonctions de tirage ne renvoient que des identifiants stables
+// (nom de classe / id de modificateur / id d'objectif), jamais les objets
+// traduits eux-mêmes — sinon un useState(...) qui les stocke figerait la
+// description/le texte dans la langue active au moment du tirage, et ne
+// suivrait plus un changement de langue en cours de partie.
+function drawHardModifierIds(): string[] {
+  const debuffs = getRunModifiers().filter(m => m.tag === 'debuff')
   const shuffled = [...debuffs].sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, 3)
+  return shuffled.slice(0, 3).map(m => m.id)
 }
 
 const TIER_COLOR: Record<string, string> = {
   bad:      'var(--red)',
   balanced: 'var(--text)',
   good:     'var(--gold)',
-}
-const TIER_LABEL: Record<string, string> = {
-  bad:      '☠ DIFFICILE',
-  balanced: '◆ ÉQUILIBRÉ',
-  good:     '★ AVANTAGEUX',
 }
 const TAG_COLOR: Record<string, string> = {
   buff:   'var(--green)',
@@ -32,49 +33,65 @@ const TAG_COLOR: Record<string, string> = {
 const CLASS_WEIGHTS: Record<string, number> = {
   'Seigneur de guerre': 0.18,
 }
-function pickRandom() {
-  const weighted = CLASSES.map(c => ({ c, w: CLASS_WEIGHTS[c.name] ?? 1 }))
+function pickRandomClassName(): string {
+  const weighted = getClasses().map(c => ({ name: c.name, w: CLASS_WEIGHTS[c.name] ?? 1 }))
   const total = weighted.reduce((s, x) => s + x.w, 0)
   let r = Math.random() * total
-  for (const { c, w } of weighted) {
+  for (const { name, w } of weighted) {
     r -= w
-    if (r <= 0) return c
+    if (r <= 0) return name
   }
-  return weighted[weighted.length - 1].c
+  return weighted[weighted.length - 1].name
 }
 
-function drawConditions(): { mods: RunModifier[]; obj: RunObjective } {
-  return { mods: drawRunModifiers(2), obj: drawRunObjective() }
+function drawConditionIds(): { modIds: string[]; objId: string } {
+  const shuffled = [...getRunModifiers()].sort(() => Math.random() - 0.5)
+  return { modIds: shuffled.slice(0, 2).map(m => m.id), objId: drawRunObjective().id }
 }
 
 export function ClassSelect() {
+  const { t } = useTranslation('classSelect')
+  const TIER_LABEL: Record<string, string> = {
+    bad:      t('tier.bad'),
+    balanced: t('tier.balanced'),
+    good:     t('tier.good'),
+  }
   const selectClass   = useGameStore(s => s.selectClass)
   const unlockedIds   = useMetaStore(s => s.meta.unlockedIds)
   const metaPts       = useMetaStore(s => s.availablePoints())
 
-  const [drawn, setDrawn]               = useState(pickRandom)
+  const [drawnName, setDrawnName]       = useState(pickRandomClassName)
   const [rerolls, setRerolls]           = useState(2)
-  const [conditions, setConditions]     = useState(drawConditions)
+  const [conditionIds, setConditionIds] = useState(drawConditionIds)
   const [condRerolls, setCondRerolls]   = useState(1)
   const [difficulty, setDifficulty]     = useState<'easy' | 'normal' | 'hard'>('normal')
-  const [hardMods]                      = useState<RunModifier[]>(drawHardModifiers)
+  const [hardModIds]                    = useState<string[]>(drawHardModifierIds)
   const [showMeta, setShowMeta]         = useState(false)
   const [selectedMeta, setSelectedMeta] = useState<string[]>(() => unlockedIds)
 
-  const activeMods: RunModifier[] =
+  // Recalculés à chaque rendu à partir des ids stockés — jamais depuis un
+  // objet mis en cache — pour que le texte suive un changement de langue.
+  const drawn = getClasses().find(c => c.name === drawnName)!
+  const hardMods = hardModIds.map(id => getRunModifierById(id)).filter((m): m is NonNullable<typeof m> => !!m)
+  const conditions = {
+    mods: conditionIds.modIds.map(id => getRunModifierById(id)).filter((m): m is NonNullable<typeof m> => !!m),
+    obj: getRunObjective(conditionIds.objId)!,
+  }
+
+  const activeMods =
     difficulty === 'easy' ? [] :
     difficulty === 'hard' ? hardMods :
     conditions.mods
 
   function reroll() {
     if (rerolls <= 0) return
-    setDrawn(pickRandom())
+    setDrawnName(pickRandomClassName())
     setRerolls(r => r - 1)
   }
 
   function rerollConditions() {
     if (condRerolls <= 0) return
-    setConditions(drawConditions())
+    setConditionIds(drawConditionIds())
     setCondRerolls(r => r - 1)
   }
 
@@ -100,7 +117,7 @@ export function ClassSelect() {
 
         <div className="t-center" style={{ padding: '16px 0 8px' }}>
           <div className="t-xl t-gold" style={{ letterSpacing: '4px' }}>VOID TRADER</div>
-          <div className="t-dim t-xs mt4">LE VIDE A CHOISI POUR TOI</div>
+          <div className="t-dim t-xs mt4">{t('subtitle')}</div>
         </div>
 
         {/* Carte de classe */}
@@ -113,31 +130,31 @@ export function ClassSelect() {
           <div className="t-xs" style={{ lineHeight: '2', color: 'var(--text)' }}>{drawn.description}</div>
           <div className="t-xs t-dim mt8">{drawn.bonusDesc}</div>
           <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-            {drawn.dailyDebt        && <div className="t-xs t-red">⚠ -{drawn.dailyDebt} cr par jour</div>}
-            {drawn.travelCreditCost && <div className="t-xs t-red">⚠ -{drawn.travelCreditCost} cr par voyage</div>}
-            {drawn.cargoDegrades    && <div className="t-xs t-red">⚠ 30% chance de perdre un cargo en voyage</div>}
-            {drawn.cursedEvents     && <div className="t-xs t-red">⚠ Événements positifs 50% de chance de fizzle</div>}
-            {drawn.piratesDoubled   && <div className="t-xs t-red">⚠ Pirates deux fois plus fréquents</div>}
-            {drawn.cannotBuyWeapons && <div className="t-xs t-red">⚠ Ne peut pas acheter d'armes</div>}
-            {drawn.peacefulBan      && <div className="t-xs t-red">⚠ Banné des stations paisibles</div>}
+            {drawn.dailyDebt        && <div className="t-xs t-red">{t('warnings.dailyDebt', { amount: drawn.dailyDebt })}</div>}
+            {drawn.travelCreditCost && <div className="t-xs t-red">{t('warnings.travelCreditCost', { amount: drawn.travelCreditCost })}</div>}
+            {drawn.cargoDegrades    && <div className="t-xs t-red">{t('warnings.cargoDegrades')}</div>}
+            {drawn.cursedEvents     && <div className="t-xs t-red">{t('warnings.cursedEvents')}</div>}
+            {drawn.piratesDoubled   && <div className="t-xs t-red">{t('warnings.piratesDoubled')}</div>}
+            {drawn.cannotBuyWeapons && <div className="t-xs t-red">{t('warnings.cannotBuyWeapons')}</div>}
+            {drawn.peacefulBan      && <div className="t-xs t-red">{t('warnings.peacefulBan')}</div>}
           </div>
           <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <StatRow label="Crédits"   value={`${drawn.startCredits.toLocaleString()} cr`} color="var(--gold)" />
-            <StatRow label="Carburant" value={`${drawn.startFuel}/${drawn.maxFuel}`}        color="var(--cyan)" />
-            <StatRow label="PV"        value={`${drawn.startHp}`}                           color="var(--green)" />
-            <StatRow label="Stamina"   value={`${drawn.startStamina}`}                      color="var(--cyan)" />
-            <StatRow label="Station"   value={drawn.startStation}                            color="var(--text-dim)" />
+            <StatRow label={t('stats.credits')}   value={`${drawn.startCredits.toLocaleString()} cr`} color="var(--gold)" />
+            <StatRow label={t('stats.fuel')} value={`${drawn.startFuel}/${drawn.maxFuel}`}        color="var(--cyan)" />
+            <StatRow label={t('stats.hp')}        value={`${drawn.startHp}`}                           color="var(--green)" />
+            <StatRow label={t('stats.stamina')}   value={`${drawn.startStamina}`}                      color="var(--cyan)" />
+            <StatRow label={t('stats.station')}   value={drawn.startStation}                            color="var(--text-dim)" />
           </div>
         </div>
 
         {/* Conditions de run */}
         <div className="px-box" style={{ borderColor: 'var(--border-hi)', marginTop: '12px' }}>
           <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-            <div className="t-xs" style={{ letterSpacing: '2px', color: 'var(--text-dim)' }}>◆ CONDITIONS DE RUN</div>
+            <div className="t-xs" style={{ letterSpacing: '2px', color: 'var(--text-dim)' }}>{t('runConditionsHeader')}</div>
             {difficulty === 'normal' && (
               <button className="px-btn px-btn--sm" style={{ width: 'auto', fontSize: '9px', opacity: condRerolls > 0 ? 1 : 0.4 }}
                 disabled={condRerolls <= 0} onClick={rerollConditions}>
-                Relancer ({condRerolls})
+                {t('rerollCount', { count: condRerolls })}
               </button>
             )}
           </div>
@@ -145,9 +162,9 @@ export function ClassSelect() {
           {/* Sélecteur de difficulté */}
           <div className="row gap4 mb10">
             {([
-              { id: 'easy',   label: 'Facile',    desc: 'Sans modificateurs',   color: 'var(--green)' },
-              { id: 'normal', label: 'Normal',     desc: '2 modificateurs',      color: 'var(--text)' },
-              { id: 'hard',   label: 'Difficile',  desc: '3 malus uniquement',   color: 'var(--red)' },
+              { id: 'easy',   label: t('difficulty.easy.label'),   desc: t('difficulty.easy.desc'),   color: 'var(--green)' },
+              { id: 'normal', label: t('difficulty.normal.label'), desc: t('difficulty.normal.desc'), color: 'var(--text)' },
+              { id: 'hard',   label: t('difficulty.hard.label'),   desc: t('difficulty.hard.desc'),   color: 'var(--red)' },
             ] as const).map(d => (
               <button key={d.id} className="px-btn px-btn--sm" style={{
                 flex: 1, textAlign: 'center',
@@ -162,14 +179,14 @@ export function ClassSelect() {
 
           {/* Modificateurs */}
           {difficulty === 'easy'
-            ? <div className="t-xs t-dim t-center" style={{ padding: '8px 0' }}>Aucun modificateur — partie sans contraintes supplémentaires.</div>
+            ? <div className="t-xs t-dim t-center" style={{ padding: '8px 0' }}>{t('noModifiers')}</div>
             : <div className="col gap4 mb10">
                 {activeMods.map(mod => (
                   <div key={mod.id} className="px-box" style={{ borderColor: TAG_COLOR[mod.tag], padding: '8px 12px', background: 'rgba(0,0,0,0.3)' }}>
                     <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                       <div className="t-xs t-bright" style={{ color: mod.color }}>{mod.name}</div>
                       <div className="tag t-xs" style={{ borderColor: TAG_COLOR[mod.tag], color: TAG_COLOR[mod.tag], fontSize: '8px' }}>
-                        {mod.tag === 'buff' ? '▲ BUFF' : mod.tag === 'debuff' ? '▼ MALUS' : '◆ MIXTE'}
+                        {mod.tag === 'buff' ? t('tag.buff') : mod.tag === 'debuff' ? t('tag.debuff') : t('tag.mixed')}
                       </div>
                     </div>
                     <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{mod.desc}</div>
@@ -180,11 +197,11 @@ export function ClassSelect() {
 
           {/* Objectif secret */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
-            <div className="t-xs t-dim mb6" style={{ letterSpacing: '1px' }}>★ OBJECTIF SECRET</div>
+            <div className="t-xs t-dim mb6" style={{ letterSpacing: '1px' }}>{t('secretObjective')}</div>
             <div className="px-box" style={{ borderColor: 'var(--purple)', padding: '8px 12px', background: 'rgba(160,64,255,0.05)' }}>
               <div className="t-xs t-bright mb4" style={{ color: 'var(--purple)' }}>{conditions.obj.name}</div>
               <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{conditions.obj.desc}</div>
-              <div className="t-xs mt4" style={{ color: 'var(--gold)' }}>Récompense : +{conditions.obj.metaPointReward} pts héritage</div>
+              <div className="t-xs mt4" style={{ color: 'var(--gold)' }}>{t('objectiveReward', { pts: conditions.obj.metaPointReward })}</div>
             </div>
           </div>
         </div>
@@ -192,21 +209,21 @@ export function ClassSelect() {
         {/* Boutons */}
         <div className="col gap4 mt12">
           <button className="px-btn px-btn--primary" onClick={() => selectClass(drawn, activeMods, selectedMeta)}>
-            COMMENCER → {drawn.name.toUpperCase()}
+            {t('start', { name: drawn.name.toUpperCase() })}
           </button>
           <button className="px-btn" onClick={reroll} disabled={rerolls <= 0}
             style={{ color: rerolls > 0 ? 'var(--text-dim)' : undefined }}>
-            {rerolls > 0 ? `Relancer la classe (${rerolls} restant${rerolls > 1 ? 's' : ''})` : 'Plus de relancements'}
+            {rerolls > 0 ? t('rerollClass', { count: rerolls }) : t('noRerollsLeft')}
           </button>
           <button className="px-btn" style={{ borderColor: 'var(--purple)', color: 'var(--purple)' }} onClick={() => setShowMeta(true)}>
-            ★ HÉRITAGE — sélectionner les améliorations pour cette run
-            {metaPts > 0 && <span className="t-xs" style={{ marginLeft: '8px', color: 'var(--gold)' }}>· {metaPts} pts à dépenser</span>}
-            {selectedMeta.length > 0 && <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>({selectedMeta.length} actif{selectedMeta.length > 1 ? 's' : ''})</span>}
+            {t('legacyButton')}
+            {metaPts > 0 && <span className="t-xs" style={{ marginLeft: '8px', color: 'var(--gold)' }}>{t('ptsToSpend', { pts: metaPts })}</span>}
+            {selectedMeta.length > 0 && <span className="t-xs t-dim" style={{ marginLeft: '8px' }}>{t('activeCount', { count: selectedMeta.length })}</span>}
           </button>
         </div>
 
         <div className="t-center t-xs t-dim mt12">
-          <span className="blink">_</span> LE VIDE VOUS ATTEND
+          <span className="blink">_</span> {t('footer')}
         </div>
       </div>
     </div>

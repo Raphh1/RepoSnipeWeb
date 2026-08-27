@@ -1,0 +1,45 @@
+{
+  "stunned": {
+    "title": "STUNNED",
+    "byEnemy": "{{name}} knocked you out.",
+    "genericFall": "You collapse.",
+    "wakeUp": "When you regain consciousness, the corridor is empty.",
+    "pocketsEmpty": "So are your pockets.",
+    "creditsStolen": "Credits stolen",
+    "hpRemaining": "HP remaining",
+    "creditsRemaining": "Credits remaining",
+    "flavor": "You get up. Slowly. The void spared you — this time.",
+    "backToCell": "Back to cell →",
+    "riseAndContinue": "Get up and continue →"
+  },
+  "captured": {
+    "title": "CAPTURED",
+    "byEnemy": "{{name}} leaves you no choice.",
+    "genericNoChoice": "They leave you no choice.",
+    "cuffs": "Cuffs. Cold floor. Full search.",
+    "theirsNow": "Everything they find is theirs now.",
+    "creditsSeized": "Credits seized (25%)",
+    "cargoConfiscated": "Cargo confiscated",
+    "cargoType": "{{count}} cargo type{{plural}}",
+    "weaponSeized": "Weapon seized",
+    "initialSentence": "Initial sentence",
+    "threeDays": "3 days",
+    "options": "You can serve your sentence, pay bail, bribe a guard, or attempt an escape.",
+    "costWarning": "Serving your sentence has a cost. So does freedom.",
+    "toCell": "To the cell →"
+  },
+  "fled": {
+    "title": "FLED",
+    "running": "You run. You don't look back.",
+    "byEnemy": "{{name}} shouts behind you. You can't hear anything anymore.",
+    "genericAdrenaline": "Adrenaline does the rest.",
+    "shipStarts": "Your ship starts before the doors close.",
+    "fuel": "Fuel",
+    "fuelRemaining": "{{value}} remaining",
+    "fleeCount": "Escapes on record",
+    "flavor": "Surviving is also a form of victory.",
+    "backToCell": "Back to cell →",
+    "continue": "Continue →"
+  },
+  "back": "← Back"
+}

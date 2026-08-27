@@ -1,0 +1,12 @@
+{
+  "header": "— EN STATION —",
+  "creditsUnit": "cr",
+  "repUnit": "rép",
+  "hpUnit": "PV",
+  "fuelUnit": "carburant",
+  "fuelUnitShort": "fuel",
+  "prison": "prison",
+  "questAdded": "\n[QUÊTE AJOUTÉE : {{title}}]",
+  "wanderAgain": "Traîner encore",
+  "backToHub": "← Retour au hub"
+}

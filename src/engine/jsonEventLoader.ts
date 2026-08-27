@@ -2,23 +2,39 @@ import type { GameState } from '../types'
 import { interpretOutcome } from './outcomeInterpreter'
 import type { WanderEvent, ExploreChoice, ExploreResult } from './exploration'
 
-import wanderRaw    from '../Content/wander.json'
-import explorationRaw from '../Content/exploration.json'
-import ambianceRaw  from '../Content/ambiance.json'
+import wanderFrRaw   from '../Content/wander.fr.json'
+import wanderEnRaw   from '../Content/wander.en.json'
+import explorationFrRaw from '../Content/exploration.fr.json'
+import explorationEnRaw from '../Content/exploration.en.json'
+import ambianceFrRaw from '../Content/ambiance.fr.json'
+import ambianceEnRaw from '../Content/ambiance.en.json'
+import i18n from '../i18n/config'
 
 // ── Types JSON ───────────────────────────────────────────────────────────────
 
 interface JsonChoice { label: string; flavor: string; outcome: string }
 interface JsonEvent  { setup: string; choices: JsonChoice[] }
 
-const wander     = wanderRaw     as Record<string, JsonEvent[]>
-const exploration = explorationRaw as Record<string, JsonEvent[]>
-const ambiance    = ambianceRaw   as Record<string, string[]>
+const wanderFr    = wanderFrRaw    as Record<string, JsonEvent[]>
+const wanderEn     = wanderEnRaw    as Record<string, JsonEvent[]>
+const explorationFr = explorationFrRaw as Record<string, JsonEvent[]>
+const explorationEn = explorationEnRaw as Record<string, JsonEvent[]>
+const ambianceFr  = ambianceFrRaw as Record<string, string[]>
+const ambianceEn  = ambianceEnRaw as Record<string, string[]>
+
+function getWander(): Record<string, JsonEvent[]> {
+  return i18n.language === 'en' ? wanderEn : wanderFr
+}
+
+function getExploration(): Record<string, JsonEvent[]> {
+  return i18n.language === 'en' ? explorationEn : explorationFr
+}
 
 // ── Ambiance ─────────────────────────────────────────────────────────────────
 
 export function getAmbiance(stationName: string): string | null {
-  const lines = ambiance[stationName]
+  const ambiance = i18n.language === 'en' ? ambianceEn : ambianceFr
+  const lines = ambiance[stationName] ?? ambianceFr[stationName]
   if (!lines || lines.length === 0) return null
   return lines[Math.floor(Math.random() * lines.length)]
 }
@@ -56,10 +72,22 @@ function convertToWander(events: JsonEvent[]): Array<(gs: GameState) => WanderEv
 // danger 2 → mid + high + generic
 // danger 3 → high + generic
 
-export const JSON_WANDER_LOW:     Array<(gs: GameState) => WanderEvent> = convertToWander([...(wander.low ?? []),  ...(wander.generic ?? [])])
-export const JSON_WANDER_MID:     Array<(gs: GameState) => WanderEvent> = convertToWander([...(wander.low ?? []),  ...(wander.mid ?? []), ...(wander.generic ?? [])])
-export const JSON_WANDER_HIGH:    Array<(gs: GameState) => WanderEvent> = convertToWander([...(wander.mid ?? []),  ...(wander.high ?? []), ...(wander.generic ?? [])])
-export const JSON_WANDER_EXTREME: Array<(gs: GameState) => WanderEvent> = convertToWander([...(wander.high ?? []), ...(wander.generic ?? [])])
+export function getJsonWanderLow(): Array<(gs: GameState) => WanderEvent> {
+  const wander = getWander()
+  return convertToWander([...(wander.low ?? []), ...(wander.generic ?? [])])
+}
+export function getJsonWanderMid(): Array<(gs: GameState) => WanderEvent> {
+  const wander = getWander()
+  return convertToWander([...(wander.low ?? []), ...(wander.mid ?? []), ...(wander.generic ?? [])])
+}
+export function getJsonWanderHigh(): Array<(gs: GameState) => WanderEvent> {
+  const wander = getWander()
+  return convertToWander([...(wander.mid ?? []), ...(wander.high ?? []), ...(wander.generic ?? [])])
+}
+export function getJsonWanderExtreme(): Array<(gs: GameState) => WanderEvent> {
+  const wander = getWander()
+  return convertToWander([...(wander.high ?? []), ...(wander.generic ?? [])])
+}
 
 // ── Exploration events → ExploreResult type 'event' ──────────────────────────
 
@@ -83,11 +111,11 @@ function convertToExploreScene(events: JsonEvent[]): Array<() => ExploreResult> 
 }
 
 // Pools par type de station — utilisables dans les SCENES_* de exploration.ts
-export const JSON_EXPLORE_DANGEROUS:  Array<() => ExploreResult> = convertToExploreScene(exploration.dangerous  ?? [])
-export const JSON_EXPLORE_PEACEFUL:   Array<() => ExploreResult> = convertToExploreScene(exploration.peaceful   ?? [])
-export const JSON_EXPLORE_INDUSTRIAL: Array<() => ExploreResult> = convertToExploreScene(exploration.industrial ?? [])
-export const JSON_EXPLORE_SCIENTIFIC: Array<() => ExploreResult> = convertToExploreScene(exploration.scientific ?? [])
-export const JSON_EXPLORE_RUINS:      Array<() => ExploreResult> = convertToExploreScene(exploration.ruins      ?? [])
-export const JSON_EXPLORE_MILITARY:   Array<() => ExploreResult> = convertToExploreScene(exploration.military   ?? [])
-export const JSON_EXPLORE_LUXURY:     Array<() => ExploreResult> = convertToExploreScene(exploration.luxury     ?? [])
-export const JSON_EXPLORE_GENERIC:    Array<() => ExploreResult> = convertToExploreScene(exploration.generic    ?? [])
+export function getJsonExploreDangerous():  Array<() => ExploreResult> { return convertToExploreScene(getExploration().dangerous  ?? []) }
+export function getJsonExplorePeaceful():   Array<() => ExploreResult> { return convertToExploreScene(getExploration().peaceful   ?? []) }
+export function getJsonExploreIndustrial(): Array<() => ExploreResult> { return convertToExploreScene(getExploration().industrial ?? []) }
+export function getJsonExploreScientific(): Array<() => ExploreResult> { return convertToExploreScene(getExploration().scientific ?? []) }
+export function getJsonExploreRuins():      Array<() => ExploreResult> { return convertToExploreScene(getExploration().ruins      ?? []) }
+export function getJsonExploreMilitary():   Array<() => ExploreResult> { return convertToExploreScene(getExploration().military   ?? []) }
+export function getJsonExploreLuxury():     Array<() => ExploreResult> { return convertToExploreScene(getExploration().luxury     ?? []) }
+export function getJsonExploreGeneric():    Array<() => ExploreResult> { return convertToExploreScene(getExploration().generic    ?? []) }

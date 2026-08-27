@@ -1,0 +1,55 @@
+{
+  "back": "← RETOUR",
+  "title": "WIKI",
+  "tabs": {
+    "classes": "CLASSES",
+    "stations": "STATIONS",
+    "armes": "ARMES",
+    "armures": "ARMURES",
+    "factions": "FACTIONS",
+    "marchandises": "MARCHANDISES"
+  },
+  "tier": {
+    "bad": "DIFFICILE",
+    "good": "AVANTAGEUX",
+    "balanced": "ÉQUILIBRÉ"
+  },
+  "classStart": "Départ : {{station}} · {{credits}} cr · Fuel {{fuel}}/{{maxFuel}} · {{hp}} PV",
+  "danger": {
+    "safe": "SÛR",
+    "risky": "RISQUÉ",
+    "dangerous": "DANGEREUX",
+    "war": "GUERRE"
+  },
+  "type": "Type : {{type}} · {{visited}}",
+  "visited": "✓ Visitée",
+  "notVisited": "Non visitée",
+  "goods": "Goods : {{list}}",
+  "weaponTier": "Tier {{tier}}",
+  "damage": "Dégâts : {{min}}–{{max}} · Crit : {{crit}}%",
+  "selfDamage": "⚠ Self-dmg {{value}}%",
+  "defense": "Défense : {{value}}%",
+  "hpBonus": " · +{{value}} PV",
+  "armorEffect": {
+    "regen": "Régén +{{value}} PV/tour",
+    "thorns": "Épines {{value}}% renvoyés",
+    "immunity": "Absorbe 1 coup fatal",
+    "staminaBoost": "+{{value}} stamina/tour"
+  },
+  "memberTag": "MEMBRE",
+  "cargoTag": "EN CARGO ×{{count}}",
+  "goods_medicaments": "Soigne 30 PV. Classe Médecin : vendus 50% plus cher.",
+  "goods_medicamentsPremium": "Soigne tous les PV.",
+  "goods_metauxBruts": "Matière première industrielle.",
+  "goods_nourritureSynthetique": "+10 PV, +20 stamina si consommé.",
+  "goods_nourritureFraiche": "+20 PV, +20 stamina si consommé.",
+  "goods_composantsElectroniques": "Base de nombreux marchés technologiques.",
+  "goods_armesIllegales": "Hauts profits, hauts risques.",
+  "goods_droguesDeSynthese": "Effets aléatoires si consommé. Profits élevés.",
+  "goods_donneesVolees": "Très demandées à Nexus Aldara.",
+  "goods_metauxRares": "Nécessaires aux armures Tier 4+.",
+  "goods_cristauxEnergetiques": "Carburant de haute qualité.",
+  "goods_artefacts": "Peuvent être consommés pour un effet aléatoire.",
+  "goods_implants": "Demandés partout. Ne pas avaler.",
+  "goods_or": "Valeur universelle. Toujours rentable."
+}

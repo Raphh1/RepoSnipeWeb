@@ -1,0 +1,174 @@
+{
+  "fragments": {
+    "alanossa": {
+      "name": "Alanossa's Fragment",
+      "lore": "The great pirate keeps it as a war trophy. She tore it away during the Western Purge — at the cost of half her crew. To her, it represents what no one can take from her. Except perhaps someone who deserves to hold it."
+    },
+    "cesarion": {
+      "name": "Imperial Fragment",
+      "lore": "Cesarion yields nothing. He's had the fragment since before he took the throne — inherited from a father he himself overthrew. Its value isn't symbolic: it's strategic. Touching it means attacking the entire Emporium."
+    },
+    "raphazarus": {
+      "name": "The General's Fragment",
+      "lore": "Raphazarus vanished with his fragment after the Great War. 47 years in the Lost Arc — a station no one can locate. He waits. He watches. And when you start gathering the fragments, he wakes up. The General doesn't negotiate. He doesn't forgive. He doesn't lose."
+    },
+    "scotty": {
+      "name": "Scotty's Fragment",
+      "lore": "Samy Scotty won it at cards, long ago. He keeps it in his personal vault, between a bottle of aged whisky and a loaded pistol. To him, everything has a price — but the price isn't always in credits."
+    }
+  },
+  "chanceLabels": {
+    "impossible": "Impossible",
+    "veryRisky": "Very risky",
+    "risky": "Risky",
+    "probable": "Likely",
+    "certain": "Near certain"
+  },
+  "standingLabels": {
+    "allie": "Ally",
+    "respecte": "Respected",
+    "connu": "Known",
+    "neutre": "Neutral",
+    "mefiant": "Wary",
+    "ennemi": "Enemy"
+  },
+  "canAttempt": {
+    "subBossesBlock": "{{pillar}} refuses to see you — their lieutenants bar the way ({{done}}/{{total}} defeated)",
+    "angeredEnemy": "{{pillar}} is your sworn enemy — only combat is possible",
+    "allianceRivalBlock": "{{pillar}} refuses: you're already allied with {{rival}}, their rival. Betray them first, or pick a side.",
+    "methodUnavailable": "Method unavailable",
+    "meetAnotherHolder": "First meet another holder to sow discord",
+    "meetAnotherHolderShort": "First meet another holder",
+    "alanossa": {
+      "payStandingLow": "Standing with Alanossa too negative — she refuses to deal with you",
+      "payCreditsMissing": "{{amount}} cr short",
+      "allianceStandingLow": "Alanossa standing {{value}}/28",
+      "allianceRepLow": "Reputation {{value}}/55",
+      "allianceCombatsLow": "Combats won {{value}}/6",
+      "allianceProofMissing": "⚠ Eliminate Cesarion's OR Scotty's lieutenants to prove your worth",
+      "warStandingLow": "Standing with Alanossa insufficient — she wouldn't listen to you",
+      "manipStandingLow": "Standing with Alanossa insufficient ({{value}}/20) — this warrior isn't easily fooled",
+      "manipCreditsLow": "Not enough credits for the scheme (7000 cr) — fooling Alanossa is expensive",
+      "manipExperienceLow": "Not enough combat experience ({{value}}/4) — she spots the weak"
+    },
+    "cesarion": {
+      "forceUnarmed": "Cesarion refuses to fight someone unarmed",
+      "payRefuse": "Cesarion refuses any direct transaction. The Empire isn't bargained for — it's earned.",
+      "allianceStandingLow": "Cesarion standing {{value}}/45",
+      "allianceRepLow": "Emporium reputation {{value}}/35",
+      "allianceQuestsLow": "Quests completed {{value}}/3",
+      "allianceProofMissing": "⚠ Eliminate Alanossa's OR Raphazarus's lieutenants to prove your loyalty to the Empire",
+      "warStandingLow": "Standing with Cesarion insufficient — he won't grant you an audience",
+      "manipStandingLow": "Standing with Cesarion insufficient ({{value}}/25) — he has advisors everywhere",
+      "manipCreditsLow": "Not enough credits for the operation (10,000 cr) — bribing the Emporium is expensive",
+      "manipQuestsLow": "Not enough track record — Cesarion checks everything"
+    },
+    "raphazarus": {
+      "arcLocked": "The Lost Arc can't be found — seek clues from NPCs at stations",
+      "forceUnarmed": "Raphazarus refuses to fight an unarmed opponent — out of respect, not pity",
+      "forceLowHp": "Raphazarus looks at you and shakes his head. \"Come back when you're fit to fight.\" (HP {{hp}}/{{maxHp}})",
+      "payRefuse": "Raphazarus cannot be bought. He's refused fortunes. Money means nothing to a man who's lost everything.",
+      "allianceStandingLow": "Raphazarus standing {{value}}/40",
+      "allianceCombatsLow": "Combats won {{value}}/8",
+      "allianceFragmentsLow": "Fragments collected {{value}}/2",
+      "warStandingLow": "Raphazarus won't listen to you — standing too low (15 required)",
+      "manipStandingLow": "Raphazarus sees right through it — standing {{value}}/25",
+      "manipExperienceLow": "Not enough combat experience ({{value}}/6) — he'll see through you",
+      "manipCreditsLow": "Insufficient funds to set up the operation (6000 cr)"
+    },
+    "scotty": {
+      "payRefuse": "Scotty refuses — he doesn't sell this fragment, only wins or gives it. It's a matter of principle, not money.",
+      "allianceStandingLow": "Scotty standing {{value}}/25",
+      "allianceDayLow": "Day {{day}}/5 — it takes time to become known",
+      "gambleMiseRequired": "Required stake: {{amount}} cr (round {{round}}/3)",
+      "warStandingLow": "Scotty wouldn't listen to you — standing too low",
+      "manipStandingLow": "Standing with Scotty insufficient ({{value}}/10)",
+      "manipCreditsLow": "Stake for the scheme: 4000 cr minimum"
+    }
+  },
+  "attempt": {
+    "unknownFragment": "Something went wrong.",
+    "alanossa": {
+      "force": "You confront her right on the command deck. She laughs and draws her blade. 'Best argument I've heard all day.'",
+      "paySuccess": "She counts the credits, unhurried. 'Two hundred thousand. Nobody pays that without a reason.' She smiles and sets the fragment on the table. 'I like people who know what they want.' -200,000 cr.",
+      "payFail": "She takes the credits, counts them, slides them into a vault. 'Thanks for the donation.' She gives you nothing in return. -200,000 cr, for nothing.",
+      "alliance": "She looks over the files you bring her — another pillar's lieutenants, all eliminated by your hand. A long silence. 'You cleaned house elsewhere before coming to me. That's either loyalty or strategy.' She smiles. 'I like both.' She places the fragment in your hand. 'Welcome to the family.'",
+      "war": "You slip Alanossa false information about {{target}}. She listens, jaw tight. 'He really did that?' The peace between them is over. But both might come looking for you if the truth gets out.",
+      "manipSuccess": "You play the strategic-partnership act. She buys it — a warrior, not a politician. The fragment changes hands as part of a 'blood pact.' -7000 cr.",
+      "manipFail": "She sees right through your game. Bloodthirsty warriors have an instinct you can't fool. 'You should've come with weapons drawn.' She draws hers. -7000 cr, combat imminent."
+    },
+    "cesarion": {
+      "force": "You challenge Cesarion right on his throne. He rises slowly. 'I grant you the respect of not calling the guards.' He draws a blade from behind the backrest. 'You'll regret this.'",
+      "alliance": "He examines the proof of your exploits — a rival's lieutenants, all neutralized. His expression doesn't change, but his voice softens by a hair. 'You've proven your loyalty in blood. That's the only currency the Empire recognizes.' He opens an armored vault. 'Welcome to the inner circles.'",
+      "war": "You present Cesarion with fabricated data about {{target}}. He analyzes it in silence. 'Interesting. Very interesting.' He calls his advisors. The trade war — or worse — has just begun.",
+      "manipSuccess": "You present the fragment as a strategic investment. The logic is twisted but the numbers hold — and Cesarion respects numbers. 'An unusual partnership.' -10,000 cr.",
+      "manipFail": "Cesarion has advisors, spies, and an imperial warrior's instinct. Your calculations don't fly. 'Boldness without strength is weakness.' Combat. -10,000 cr."
+    },
+    "raphazarus": {
+      "force": "Raphazarus rises from his seat — slowly, as if he had all the time in the world. He fixes you with the gaze of a man who has watched civilizations die out. 'Do you know what it feels like to lose a war?' He draws his weapon. 'You're about to find out.'",
+      "allianceLateGame": "He stares at you for a long time. A very long time. 'You did what I failed to do — reunite what was broken.' He opens his hand. The fragment gleams. 'Finish what I started. And don't betray their memory.'",
+      "allianceEarlyGame": "He listens to your story in silence. Your battles, your choices, your scars. When you finish, he simply says: 'You're not a soldier. But you have a warrior's discipline.' He sets the fragment between you two. 'Prove you deserve what thousands died to protect.'",
+      "war": "You present Raphazarus with falsified information about {{target}}. The General doesn't react right away. He analyzes. Then: 'If this is true, it's a declaration of war. And I don't lose wars.' His veterans start mobilizing. The storm is coming.",
+      "manipSuccess": "You set up a complex operation — false intelligence, false leads, false urgency. Raphazarus, for the first time in 47 years, leaves the Lost Arc. The fragment stayed behind. You don't stay long either. -6000 cr.",
+      "manipFail": "Raphazarus survived the Great War. He's seen manipulations more elaborate than yours before breakfast. 'Interesting.' His gaze hardens. 'Now, we do it my way.' -6000 cr. Combat."
+    },
+    "scotty": {
+      "force": "'Tsk. You could've just paid.' He whistles. Guards come through three doors. Scotty sits back with his drink. 'I'll watch — it's more interesting this way.'",
+      "alliance": "Scotty watches you over his glass. 'Never cheated, never played dirty.' He opens his vault. 'In my business, loyalty rarely lasts. Yours did.' He hands you the fragment. 'Now, have a drink.'",
+      "war": "Scotty listens to your story about {{target}} with a growing smile. 'Ah. Interesting game.' He pulls out a communicator. 'This kind of rumor makes for very good business — for me.' The war has just begun, and Scotty will profit from it one way or another.",
+      "manipSuccess": "You present him a deal so twisted even he can't find the catch. He accepts just to see. 'You're either brilliant or insane.' The fragment changes hands. -4000 cr.",
+      "manipFail": "Scotty's been running scams too long. He spots the trap before you can spring it. 'Not bad. But no.' He calls security. -4000 cr.",
+      "gambleGames": [
+        { "name": "the Stellar Liar", "winMsg": "You spot his bluff — a slight twitch at the corner of his eye. 'Not bad, kid.'", "loseMsg": "He turns over his cards. Full house. You had nothing. 'That's the game.'" },
+        { "name": "the Abyss Dice", "winMsg": "The die rolls, rolls, and lands on your number. Scotty whistles. 'Luck's a fickle bitch. But right now, she likes you.'", "loseMsg": "The die betrays you. Scotty scoops up your credits. 'You really want to keep going? I admire that.'" },
+        { "name": "the Void Roulette", "winMsg": "The ball lands in your sector. Scotty stands, applauds. 'Three rounds. Nobody's ever won three rounds. Nobody.' He opens the vault.", "loseMsg": "The roulette spins. And spins. And stops. Not on your number. 'So close. It's always close.' -credits." }
+      ],
+      "gambleWin3": "🎲 ROUND {{round}}/3 — {{game}}. {{winMsg}} The fragment is yours. 'A gambler's deal, a gentleman's deal.'",
+      "gambleWinNext": "🎲 ROUND {{round}}/3 — {{game}}. {{winMsg}} Next round: higher stakes, Scotty more focused.",
+      "gambleLose": "🎲 ROUND {{round}}/3 — {{game}}. {{loseMsg}} -{{amount}} cr. Your wins are reset."
+    }
+  },
+  "wars": {
+    "resolved": "⚔ WAR RESOLVED — {{winner}} defeated {{loser}}. {{loser}}'s fragment is now recoverable — but {{winner}} knows you're behind all this."
+  },
+  "fragmentStatus": {
+    "collected": "COLLECTED",
+    "recoverableWar": "⚔ RECOVERABLE (war)",
+    "available": "AVAILABLE"
+  },
+  "subBossKill": {
+    "allDefeated": "⚠ You eliminated ALL of {{boss}}'s lieutenants. Their gaze is now fixed on you — and they await you in person.",
+    "oneDefeated": "⚠ Word of their lieutenant's death reaches {{boss}}. They know you're coming.",
+    "rivalRallied": "🤝 {{boss}} set aside their grudge: they've drawn closer to {{rival}} to block your path.",
+    "rivalOpening": "💬 {{rival}}, on cold terms with {{boss}}, has heard about your move. They send you a message: \"We should talk.\"",
+    "vigilance": "👁 {{boss}} tightens their guard. The next confrontation will be tougher."
+  },
+  "bountyHunters": {
+    "alanossa": { "name": "Alanossa's Avenger", "description": "The Falcons' best hunter. Direct orders from Alanossa. Doesn't negotiate." },
+    "cesarion": { "name": "The Imperial Executioner", "description": "Cesarion's personal envoy. Armed by the Emporium. Trained for one thing." },
+    "raphazarus": { "name": "The Last Soldier", "description": "Raphazarus's personal envoy. Trained during the Great War. He doesn't stop. He doesn't negotiate. He doesn't die easily." },
+    "scotty": { "name": "Malone the Collector", "description": "Scotty hired him for the bounty. Malone works fast and clean. He just wants to get paid." }
+  },
+  "clues": {
+    "clueCendres": { "dialogue": "An old man covered in ash stares at you. 'Looking for the General? Hmph. Everyone's looking for him. Nobody finds him.' He spits on the ground. 'I served under him in the 3rd Battalion. Last I saw him, he was heading to the Velkor sector with an escort of six ships. Six. Only one came back.'", "clueText": "The General headed toward the Velkor sector after the Great War." },
+    "clueFantome": { "dialogue": "She doesn't speak. Hasn't spoken since the incident, at least. But when you show her the 3rd Battalion's badge, her eyes widen. She scrawls on a piece of metal: 'The Lost Arc wasn't destroyed. It drifts. Partial coordinates: sector 7-Kappa. Look for the ghost signal.'", "clueText": "The Lost Arc drifts in sector 7-Kappa — look for a ghost signal." },
+    "clueForge": { "dialogue": "'You want to find Raphazarus?' The armorer laughs — a sound like twisting metal. 'I forged his weapons for twenty years. He told me once: If anyone comes looking for me, tell them I'm where the light doesn't reach. Where the stars die.' She shows you a map etched in steel. 'The Black Nebula, between Velkor and Quarantine. That's where.'", "clueText": "The Lost Arc hides in the Black Nebula, between the Velkor Abyss and Quarantine Station." },
+    "clueExilee": { "dialogue": "'I deserted the 7th Corps thirty years ago. Raphazarus let me go — the only one he ever let go.' He trembles. 'But he told me something that day. He said: My Arc isn't lost. It's hidden. And the day someone finds it, it means the Nexus needs it.' He hands you a radio frequency. 'Broadcast on this frequency in the Black Nebula. He'll answer. Or he'll kill you. Probably both.'", "clueText": "Secret radio frequency to contact the Lost Arc in the Black Nebula." },
+    "clueQuarantaine": { "dialogue": "'Raphazarus?' The war doctor pales. 'I treated him after the Battle of Korsun. He'd taken seven bullets. Seven. He was back on his feet the next day.' He lowers his voice. 'His ship, the Arc, emits a coded medical signal — Great War protocol. Frequency 7-Kappa-12. If you pick up that signal, you'll find him. But think before you go. He doesn't take visitors.'", "clueText": "Coded medical signal from the Great War — frequency 7-Kappa-12 confirms the position." },
+    "clueVelkor": { "dialogue": "'The Black Nebula? Yes, I've been. Once.' She shows a scar running from her temple to her jaw. 'There's something out there. A station that shouldn't exist. Not on the charts. Not on the scans. But I SAW it. Massive. Silent. And the guns were trained on me before I could turn around.' She shivers. 'If you're going, make sure you're ready to die.'", "clueText": "Visual confirmation: an unlisted fortified station in the Black Nebula." }
+  },
+  "clueMessages": {
+    "unlocked": "★ THE LOST ARC LOCATED — The clues converge. The Black Nebula, sector 7-Kappa. The Lost Arc appears on your navigation map. Raphazarus awaits you.",
+    "collected": "Clue collected ({{count}}/{{needed}}). {{clueText}}"
+  },
+  "clueRequirements": {
+    "credits": "{{amount}} cr required",
+    "reputation": "Reputation {{value}}/{{needed}}",
+    "standing": "Raphazarus standing {{value}}/{{needed}}"
+  },
+  "warriors": {
+    "eclaireur": { "name": "The General's Scout", "description": "Sent by Raphazarus to track you down. Lightly armed but fast." },
+    "veteran": { "name": "Great War Veteran", "description": "A Great War survivor sent by Raphazarus. He's seen worse than you." },
+    "assassin": { "name": "7th Corps Assassin", "description": "An elimination specialist from Raphazarus's 7th Corps. Silent. Deadly." }
+  }
+}

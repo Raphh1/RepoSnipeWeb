@@ -1,0 +1,89 @@
+{
+  "negoScenarios": [
+    {
+      "desc": "The merchant looks you over, arms crossed. \"These prices are standard. Everyone pays the same here.\"",
+      "choices": [
+        { "label": "\"I'm looking for a long-term relationship — that's worth mutual effort.\"", "type": "good" },
+        { "label": "\"I just want to know if you have any margin.\"", "type": "neutral" },
+        { "label": "\"That's too expensive. Change your prices or I'm leaving.\"", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "He hesitates. \"I have other buyers interested in exactly the same thing.\"",
+      "choices": [
+        { "label": "\"My contacts will talk about this deal. Your reputation benefits too.\"", "type": "good" },
+        { "label": "\"Then decide quickly — I have other options too.\"", "type": "neutral" },
+        { "label": "\"You're bluffing. Nobody else will pay that price.\"", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "He looks you straight in the eyes. \"Give me one good reason to cut you a deal.\"",
+      "choices": [
+        { "label": "\"Cash, right now, no paperwork or checks. Clean and fast.\"", "type": "good" },
+        { "label": "\"Because we both win, right?\"", "type": "neutral" },
+        { "label": "\"Because you need to sell and I'm here.\"", "type": "bad" }
+      ]
+    }
+  ],
+  "navScenarios": [
+    {
+      "desc": "An asteroid field blocks the direct route. The debris drifts slowly — but some pieces are fast.",
+      "choices": [
+        { "label": "Throttle down and navigate with precision", "type": "good" },
+        { "label": "Go around through the north sector (longer route)", "type": "neutral" },
+        { "label": "Full throttle and push through", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "An abandoned ship drifts across your path. Its emergency systems are still blinking.",
+      "choices": [
+        { "label": "Adjust course, gently steer clear", "type": "good" },
+        { "label": "Send a recon signal before diverting", "type": "neutral" },
+        { "label": "Hold course — the ship will pass", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "An unidentified signal has been following you for several minutes. Irregular frequency — probably a hunter.",
+      "choices": [
+        { "label": "Cut emissions and hide in nearby debris", "type": "good" },
+        { "label": "Send a standard ID and continue", "type": "neutral" },
+        { "label": "Ignore it and maintain speed", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "A solar particle storm approaches. Sensors indicate a 90-second window.",
+      "choices": [
+        { "label": "Raise forward shields and slow down", "type": "good" },
+        { "label": "Turn to starboard — longer but safer route", "type": "neutral" },
+        { "label": "Accelerate to outrun the front", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "A military patrol is scanning the sector. Your cargo could draw attention.",
+      "choices": [
+        { "label": "Cut thrusters and drift slowly out of the scan cone", "type": "good" },
+        { "label": "Respond normally to their hail and hope for the best", "type": "neutral" },
+        { "label": "Accelerate to clear the scan zone", "type": "bad" }
+      ]
+    },
+    {
+      "desc": "A debris tunnel from an old battle crosses your path. Twisted metal, floating plates.",
+      "choices": [
+        { "label": "Pass slowly, shields up, full attention", "type": "good" },
+        { "label": "Go around — costs 20 extra minutes", "type": "neutral" },
+        { "label": "Push through fast — less time in the danger zone", "type": "bad" }
+      ]
+    }
+  ],
+  "timeoutNav": "Too slow — the ship takes the hit.",
+  "timeoutNego": "Time's up — you hesitated too long. He loses patience.",
+  "navMsgs": { "good": "Successful maneuver. No damage.", "neutral": "Alternate path — acceptable outcome. -5 ship HP.", "bad": "Impact. The ship shudders. -13 ship HP." },
+  "negoMsgs": { "good": "Good approach. He nods slowly.", "neutral": "Correct answer. He stays guarded.", "bad": "Bad approach. He visibly stiffens." },
+  "navHeader": "— DANGEROUS NAVIGATION —",
+  "negoHeader": "— MINIGAME: NEGOTIATION —",
+  "situation": "Situation {{current}}/3",
+  "shipDamage": "Ship damage: -{{value}} HP",
+  "navFooter": "3 good maneuvers = +500 cr · 2 good = +200 cr · otherwise nothing",
+  "negoFooter": "Base: {{base}} cr · ×{{mult}} → {{result}} cr · 2 mistakes = failure",
+  "resultLabels": { "fail": "FAILURE", "excellent": "EXCELLENT", "good": "GOOD", "mediocre": "MEDIOCRE" }
+}

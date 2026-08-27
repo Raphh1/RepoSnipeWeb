@@ -1,0 +1,12 @@
+{
+  "header": "— AT THE STATION —",
+  "creditsUnit": "cr",
+  "repUnit": "rep",
+  "hpUnit": "HP",
+  "fuelUnit": "fuel",
+  "fuelUnitShort": "fuel",
+  "prison": "prison",
+  "questAdded": "\n[QUEST ADDED: {{title}}]",
+  "wanderAgain": "Hang around some more",
+  "backToHub": "← Back to hub"
+}

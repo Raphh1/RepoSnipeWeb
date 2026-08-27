@@ -1,0 +1,17 @@
+{
+  "fortuneInitiale": { "name": "Fortune Initiale", "desc": "Quelqu'un a préparé le terrain. +800 cr · +2 carburant au départ." },
+  "vaisseauPrepare": { "name": "Vaisseau Préparé", "desc": "Révisé avant le départ. +50 PV vaisseau max." },
+  "contactsEtablis": { "name": "Contacts Établis", "desc": "Tu as des amis là où ça compte. 3 PNJs te connaissent et te font confiance." },
+  "medecinDeBord": { "name": "Médecin de Bord", "desc": "Infirmerie bien fournie. +5 Médicaments · +10 HP max au départ." },
+  "endurance": { "name": "Endurance Forgée", "desc": "Corps entraîné, esprit stable. +2 stamina max." },
+  "detteInitiale": { "name": "En Dette", "desc": "Tu pars avec une ardoise. Crédits réduits de 80% · +200 cr de dette quotidienne." },
+  "traque": { "name": "Traqué", "desc": "Quelqu'un veut ta peau. -30 réputation · stalker actif dès le départ." },
+  "videPoches": { "name": "Vide-Poches", "desc": "Tu pars sans rien. Crédits de départ ÷2." },
+  "vaisseauEpave": { "name": "Épave Volante", "desc": "Vaisseau décrépit. PV vaisseau → 35. Mais la soute est chargée." },
+  "survivantEndurci": { "name": "Survivant Endurci", "desc": "HP max -25%, mais crédits de départ +1500." },
+  "contratDeSang": { "name": "Contrat de Sang", "desc": "+200 cr par victoire de combat. -5 rép par victoire." },
+  "economieDeGuerre": { "name": "Économie de Guerre", "desc": "Achats ×1.5. Récompenses de quêtes ×2." },
+  "paria": { "name": "Paria", "desc": "Aucune faction ne t'acceptera. Mais les prix à l'achat sont -20%." },
+  "boucher": { "name": "Boucher", "desc": "Loot de combat ×1.5. Chaque victoire coûte -3 rép." },
+  "karmaNegatif": { "name": "Karma Négatif", "desc": "Chaque voyage coûte +1 carburant supplémentaire." }
+}

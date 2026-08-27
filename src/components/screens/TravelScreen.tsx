@@ -1,36 +1,41 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import { getAccessibleStations, getFuelCost, getStation, findPath, PEACEFUL_STATIONS, FUEL_STATIONS } from '../../data/stations'
 import { getWorldEventFuelBonus, getClosedStations, getActiveEvents } from '../../engine/worldEvents'
 import { getEnemyByTier, scaleEnemy } from '../../data/enemies'
 import { AsteroidDodge } from '../minigames/AsteroidDodge'
+import { resolveShipDown } from '../../engine/shipDamage'
+import { translateGood } from '../../engine/goodsI18n'
 
 function NextHops({ stationName, currentName }: { stationName: string; currentName: string }) {
+  const { t } = useTranslation('travelScreen')
   const hops = getAccessibleStations(stationName).filter(s => s.name !== currentName)
   if (hops.length === 0) return null
   return (
     <div className="t-xs t-dim mt6" style={{ borderTop: '1px solid var(--border-dim)', paddingTop: '6px' }}>
-      <span style={{ color: 'var(--border-hi)', marginRight: '4px' }}>Connexions →</span>
+      <span style={{ color: 'var(--border-hi)', marginRight: '4px' }}>{t('connections')}</span>
       {hops.map((h, i) => (
         <span key={h.name}>
           {i > 0 && <span style={{ opacity: 0.4, margin: '0 4px' }}>·</span>}
           <span style={{ color: FUEL_STATIONS.has(h.name) ? 'var(--green)' : 'var(--text-dim)' }}
-            title={FUEL_STATIONS.has(h.name) ? 'Vend du carburant' : undefined}>
+            title={FUEL_STATIONS.has(h.name) ? t('sellsFuel') : undefined}>
             {FUEL_STATIONS.has(h.name) ? '⛽ ' : ''}{h.name}
           </span>
-          <span style={{ color: 'var(--cyan)', opacity: 0.7, marginLeft: '3px', fontSize: '9px' }}>(coût {getFuelCost(stationName, h.name)})</span>
+          <span style={{ color: 'var(--cyan)', opacity: 0.7, marginLeft: '3px', fontSize: '9px' }}>{t('cost', { amount: getFuelCost(stationName, h.name) })}</span>
         </span>
       ))}
     </div>
   )
 }
 
-const DANGER_LABEL = ['◆ SÛR', '◆ RISQUÉ', '◆ DANGEREUX', '◆ ZONE DE GUERRE']
 const DANGER_CLS   = ['danger-0', 'danger-1', 'danger-2', 'danger-3']
 
 interface Pending { station: string; fuelCost: number; danger: number }
 
 export function TravelScreen() {
+  const { t } = useTranslation('travelScreen')
+  const DANGER_LABEL = t('dangerLabels', { returnObjects: true }) as unknown as string[]
   const gs          = useGameStore(s => s.gs!)
   const travel      = useGameStore(s => s.travel)
   const patch       = useGameStore(s => s.patch)
@@ -68,14 +73,17 @@ export function TravelScreen() {
         dangerLevel={pending.danger}
         onResult={(shipDamage, creditBonus, engaged) => {
           // Appliquer les dégâts vaisseau / bonus
-          if (shipDamage > 0) patch({ shipHp: Math.max(1, gs.shipHp - shipDamage) })
+          if (shipDamage > 0) {
+            const rawShipHp = gs.shipHp - shipDamage
+            patch(rawShipHp <= 0 ? resolveShipDown(gs) : { shipHp: rawShipHp })
+          }
           if (creditBonus > 0) patch({ credits: gs.credits + creditBonus })
           const dest = pending
           setPending(null)
           if (engaged) {
             // Le joueur a ouvert le feu : des pirates l'interceptent. Voyage avorté.
             const tier = Math.min(4, Math.max(1, dest.danger || 1)) as 1 | 2 | 3 | 4
-            const pirate = scaleEnemy({ ...getEnemyByTier(tier), name: 'Pirate intercepteur' }, Math.floor(gs.day / 15))
+            const pirate = scaleEnemy({ ...getEnemyByTier(tier), name: t('pirateInterceptor') }, Math.floor(gs.day / 15))
             startCombat(pirate)
           } else {
             travel(dest.station, dest.fuelCost)
@@ -88,15 +96,15 @@ export function TravelScreen() {
   return (
     <div className="layout">
       <div className="row" style={{ alignItems: 'center', gap: '16px' }}>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
-        <div className="t-sm t-bright">DESTINATION</div>
-        <div className="t-xs t-dim">Carburant : <span className="t-cyan">{gs.fuel}/{gs.maxFuel}</span></div>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{t('back')}</button>
+        <div className="t-sm t-bright">{t('title')}</div>
+        <div className="t-xs t-dim">{t('fuel')} <span className="t-cyan">{gs.fuel}/{gs.maxFuel}</span></div>
       </div>
 
       {/* Bandeau de route planifiée */}
       {waypoint && waypointPath.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,215,0,0.06)', border: '1px solid rgba(255,215,0,0.4)', padding: '8px 12px' }}>
-          <span style={{ fontSize: '9px', color: '#ffd700', letterSpacing: '1px', flexShrink: 0 }}>◎ ROUTE</span>
+          <span style={{ fontSize: '9px', color: '#ffd700', letterSpacing: '1px', flexShrink: 0 }}>{t('route')}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', flex: 1 }}>
             {waypointPath.map((name, i) => (
               <span key={name} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -112,12 +120,12 @@ export function TravelScreen() {
             ))}
           </div>
           {waypointPath.length === 1 && waypoint === gs.currentStation && (
-            <span style={{ fontSize: '8px', color: 'var(--green)' }}>Destination atteinte !</span>
+            <span style={{ fontSize: '8px', color: 'var(--green)' }}>{t('destinationReached')}</span>
           )}
           <button
             style={{ background: 'none', border: 'none', color: 'var(--dim)', cursor: 'pointer', fontSize: '11px', padding: '0 4px', flexShrink: 0 }}
             onClick={() => setWaypoint(null)}
-            title="Effacer la route"
+            title={t('clearRoute')}
           >✕</button>
         </div>
       )}
@@ -136,7 +144,7 @@ export function TravelScreen() {
           ))}
           {fuelBonus > 0 && (
             <div className="t-xs t-red" style={{ paddingLeft: '4px' }}>
-              ⚠ Surcoût carburant actif : +{fuelBonus} par trajet
+              {t('fuelSurcharge', { amount: fuelBonus })}
             </div>
           )}
         </div>
@@ -144,7 +152,7 @@ export function TravelScreen() {
 
       <div className="col gap4">
         {accessible.length === 0 && (
-          <div className="px-box t-dim t-sm">Aucune destination accessible depuis ici.</div>
+          <div className="px-box t-dim t-sm">{t('noDestination')}</div>
         )}
         {accessible.map(station => {
           const baseCost = getFuelCost(gs.currentStation, station.name)
@@ -155,7 +163,7 @@ export function TravelScreen() {
 
           // Hackeur voit les prix
           const priceHint = gs.class.seesPrices
-            ? ` · Prix : ${station.goods.slice(0, 2).join(', ')}...`
+            ? t('priceHint', { list: station.goods.slice(0, 2).map(translateGood).join(', ') })
             : ''
 
           function handleTravel() {
@@ -184,24 +192,24 @@ export function TravelScreen() {
                 <div style={{ textAlign: 'right', minWidth: '110px' }}>
                   <div className={`t-xs ${DANGER_CLS[station.danger]}`}>{DANGER_LABEL[station.danger]}</div>
                   <div className="t-xs mt4" style={{ color: canGo ? 'var(--cyan)' : 'var(--red)' }}>
-                    {cost} CARBURANT{fuelBonus > 0 ? <span className="t-red"> (+{fuelBonus})</span> : ''}
+                    {cost} {t('fuelUnit')}{fuelBonus > 0 ? <span className="t-red"> (+{fuelBonus})</span> : ''}
                   </div>
                   {FUEL_STATIONS.has(station.name) && (
-                    <div className="t-xs mt4" style={{ color: 'var(--green)' }}>⛽ VEND DU CARBURANT</div>
+                    <div className="t-xs mt4" style={{ color: 'var(--green)' }}>{t('sellsFuelBadge')}</div>
                   )}
-                  {banned && <div className="t-xs t-red mt4">BANNI</div>}
-                  {isClosed && <div className="t-xs t-red mt4">⚠ BLOQUÉ</div>}
+                  {banned && <div className="t-xs t-red mt4">{t('banned')}</div>}
+                  {isClosed && <div className="t-xs t-red mt4">{t('blocked')}</div>}
                 </div>
               </div>
               <div className="t-xs t-dim mt8">
-                {station.goods.slice(0, 4).join(' · ')}
+                {station.goods.slice(0, 4).map(translateGood).join(' · ')}
               </div>
               {/* Badge route */}
-              {isNextOnPath && <div style={{ fontSize: '8px', color: '#ffd700', marginTop: '4px', letterSpacing: '1px' }}>◎ PROCHAINE ÉTAPE DE LA ROUTE</div>}
-              {isWaypoint && !isNextOnPath && <div style={{ fontSize: '8px', color: '#ffd700', marginTop: '4px', letterSpacing: '1px' }}>◎ DESTINATION FINALE</div>}
+              {isNextOnPath && <div style={{ fontSize: '8px', color: '#ffd700', marginTop: '4px', letterSpacing: '1px' }}>{t('nextStep')}</div>}
+              {isWaypoint && !isNextOnPath && <div style={{ fontSize: '8px', color: '#ffd700', marginTop: '4px', letterSpacing: '1px' }}>{t('finalDestination')}</div>}
               {/* Quêtes actives vers cette station */}
               {gs.activeQuests.filter(q => q.targetStation === station.name).map(q => (
-                <div key={q.id} className="t-xs t-gold mt4">★ Quête active : {q.title}</div>
+                <div key={q.id} className="t-xs t-gold mt4">{t('activeQuest', { title: q.title })}</div>
               ))}
               <NextHops stationName={station.name} currentName={gs.currentStation} />
             </button>

@@ -1,0 +1,15 @@
+{
+  "creditsGain": "+{{amount}} cr",
+  "creditsLoss": "-{{amount}} cr",
+  "repGain": "+{{amount}} rép",
+  "repLoss": "-{{amount}} rép",
+  "hpGain": "+{{amount}} PV",
+  "hpLoss": "-{{amount}} PV",
+  "staminaSmall": "+20 stamina",
+  "staminaFull": "Stamina restaurée",
+  "itemGained": "+1 {{item}}",
+  "weaponRecovered": "Arme récupérée : {{name}}",
+  "weapon": "Arme : {{name}}",
+  "shipRepair": "Vaisseau +{{amount}} PV",
+  "addictionIncreased": "Dépendance accrue"
+}

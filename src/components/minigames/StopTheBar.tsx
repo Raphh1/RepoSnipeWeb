@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type StopResult = 'perfect' | 'good' | 'miss'
 
@@ -8,7 +9,9 @@ interface StopTheBarProps {
   onResult: (result: StopResult) => void
 }
 
-export function StopTheBar({ difficulty, label = 'FORÇAGE DE SERRURE', onResult }: StopTheBarProps) {
+export function StopTheBar({ difficulty, label, onResult }: StopTheBarProps) {
+  const { t } = useTranslation('minigames')
+  const displayLabel = label ?? t('stopTheBar.defaultLabel')
   const posRef = useRef(0)
   const dirRef = useRef(1)
   const [pos, setPos]         = useState(0)
@@ -23,13 +26,13 @@ export function StopTheBar({ difficulty, label = 'FORÇAGE DE SERRURE', onResult
 
   useEffect(() => {
     if (stopped) return
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       posRef.current += dirRef.current * speed
       if (posRef.current >= 100) { posRef.current = 100; dirRef.current = -1 }
       if (posRef.current <= 0)   { posRef.current = 0;   dirRef.current = 1 }
       setPos(posRef.current)
     }, 16)
-    return () => clearInterval(t)
+    return () => clearInterval(timer)
   }, [stopped, speed])
 
   function stop() {
@@ -48,14 +51,14 @@ export function StopTheBar({ difficulty, label = 'FORÇAGE DE SERRURE', onResult
   }
 
   const RESULT_COLOR = { perfect: 'var(--gold)', good: 'var(--green)', miss: 'var(--red)' }
-  const RESULT_LABEL = { perfect: '★ PARFAIT', good: '◆ RÉUSSI', miss: '✗ RATÉ' }
+  const RESULT_LABEL = { perfect: t('stopTheBar.perfect'), good: t('stopTheBar.success'), miss: t('stopTheBar.miss') }
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— {label} —</div>
+      <div className="t-xs t-dim t-center">— {displayLabel} —</div>
 
       <div className="px-box">
-        <div className="t-xs t-dim mb8">STOPPE LA BARRE DANS LA ZONE VERTE</div>
+        <div className="t-xs t-dim mb8">{t('stopTheBar.instructions')}</div>
         <div style={{ position: 'relative', height: '32px', background: 'var(--bg)', border: '2px solid var(--border)', marginBottom: '8px' }}>
           {/* Zone verte */}
           <div style={{
@@ -73,13 +76,13 @@ export function StopTheBar({ difficulty, label = 'FORÇAGE DE SERRURE', onResult
           }} />
         </div>
         <div className="t-xs t-dim" style={{ textAlign: 'right' }}>
-          Difficulté : {'■'.repeat(difficulty)}{'□'.repeat(3 - difficulty)}
+          {t('reactFlash.difficulty', { filled: '■'.repeat(difficulty), empty: '□'.repeat(3 - difficulty) })}
         </div>
       </div>
 
       {!stopped && (
         <button className="px-btn px-btn--primary" onClick={stop} style={{ fontSize: '12px', padding: '18px', textAlign: 'center' }}>
-          ► STOP !
+          {t('stopTheBar.stopButton')}
         </button>
       )}
 

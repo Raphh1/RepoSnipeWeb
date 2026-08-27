@@ -1,9 +1,11 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
-import { STATIONS, getAccessibleStations, PEACEFUL_STATIONS, findPath, FUEL_STATIONS } from '../../data/stations'
+import { getStations, getAccessibleStations, PEACEFUL_STATIONS, findPath, FUEL_STATIONS } from '../../data/stations'
 import { STATION_POSITIONS } from '../../data/stationPositions'
 import { STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getClosedStations, getWorldEventFuelBonus, getActiveEvents } from '../../engine/worldEvents'
+import { translateGood } from '../../engine/goodsI18n'
 
 const TYPE_COLORS: Record<string, string> = {
   peaceful:    '#40ff80',
@@ -23,13 +25,11 @@ const FACTION_COLORS: Record<string, string> = {
   eliotis:    '#40d0ff',
 }
 
-const DANGER_LABEL = ['Sûre', 'Risquée', 'Dangereuse', 'Zone de guerre']
-
 // Paires d'arêtes déduplicées à partir de fuelCostFrom
 function buildEdges() {
   const seen = new Set<string>()
   const result: Array<{ from: string; to: string; cost: number }> = []
-  for (const station of STATIONS) {
+  for (const station of getStations()) {
     for (const [from, cost] of Object.entries(station.fuelCostFrom)) {
       const key = [from, station.name].sort().join('||')
       if (!seen.has(key) && STATION_POSITIONS[from] && STATION_POSITIONS[station.name]) {
@@ -44,6 +44,8 @@ function buildEdges() {
 const EDGES = buildEdges()
 
 export function MapScreen() {
+  const { t } = useTranslation('mapScreen')
+  const dangerLabels = t('dangerLabels', { returnObjects: true }) as unknown as string[]
   const gs          = useGameStore(s => s.gs!)
   const goTo        = useGameStore(s => s.goTo)
   const setWaypoint = useGameStore(s => s.setWaypoint)
@@ -200,7 +202,7 @@ export function MapScreen() {
   // ── TOOLTIP ─────────────────────────────────────────────────────────────
 
   const activeStationName = hovered ?? selected
-  const hovStation = activeStationName ? STATIONS.find(s => s.name === activeStationName) ?? null : null
+  const hovStation = activeStationName ? getStations().find(s => s.name === activeStationName) ?? null : null
 
   // ── RENDER ──────────────────────────────────────────────────────────────
 
@@ -213,11 +215,11 @@ export function MapScreen() {
       }}>
         <div style={{ fontSize: '48px', animation: 'rotateHint 1.6s ease-in-out infinite' }}>📱</div>
         <style>{`@keyframes rotateHint { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }`}</style>
-        <div style={{ fontSize: '11px', color: 'var(--text-bright)', letterSpacing: '1px' }}>TOURNE TON TÉLÉPHONE</div>
+        <div style={{ fontSize: '11px', color: 'var(--text-bright)', letterSpacing: '1px' }}>{t('portraitBlock.title')}</div>
         <div style={{ fontSize: '9px', color: 'var(--dim)', lineHeight: '1.8', maxWidth: '280px' }}>
-          La carte du secteur a besoin d'espace horizontal. Passe en mode paysage pour naviguer, zoomer et poser des waypoints au doigt.
+          {t('portraitBlock.desc')}
         </div>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{t('back')}</button>
       </div>
     )
   }
@@ -227,30 +229,30 @@ export function MapScreen() {
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', padding: '12px 20px', borderBottom: '2px solid var(--border)', flexShrink: 0 }}>
-        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>← RETOUR</button>
-        <span style={{ fontSize: '10px', letterSpacing: '3px', color: 'var(--dim)' }}>CARTE DU SECTEUR</span>
-        <span style={{ fontSize: '9px', color: 'var(--cyan)', marginLeft: '8px' }}>Molette ou pincement pour zoomer · Glisser pour naviguer · Tap/clic pour poser un waypoint</span>
+        <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{t('back')}</button>
+        <span style={{ fontSize: '10px', letterSpacing: '3px', color: 'var(--dim)' }}>{t('title')}</span>
+        <span style={{ fontSize: '9px', color: 'var(--cyan)', marginLeft: '8px' }}>{t('hint')}</span>
         {events.length > 0 && (
           <span style={{ fontSize: '8px', color: 'var(--orange)', marginLeft: 'auto', letterSpacing: '1px' }}>
-            ⚠ {events.length} ÉVÉNEMENT{events.length > 1 ? 'S' : ''} ACTIF{events.length > 1 ? 'S' : ''}
-            {fuelBonus > 0 ? ` · +${fuelBonus}⛽ par trajet` : ''}
+            {t('eventsActive', { count: events.length, plural: events.length > 1 ? 'S' : '' })}
+            {fuelBonus > 0 ? t('fuelBonus', { value: fuelBonus }) : ''}
           </span>
         )}
         {/* Waypoint actif */}
         {waypoint && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,215,0,0.08)', border: '1px solid #ffd700', padding: '4px 10px', marginLeft: '8px' }}>
             <span style={{ fontSize: '9px', color: '#ffd700', letterSpacing: '1px' }}>
-              ◎ ROUTE → {waypoint}
+              {t('routeTo', { station: waypoint })}
               {waypointPath.length > 2 && (
                 <span style={{ color: 'var(--dim)', marginLeft: '6px' }}>
-                  ({waypointPath.length - 1} saut{waypointPath.length - 1 > 1 ? 's' : ''})
+                  {t('hops', { count: waypointPath.length - 1, plural: waypointPath.length - 1 > 1 ? 's' : '' })}
                 </span>
               )}
             </span>
             <button
               style={{ background: 'none', border: 'none', color: 'var(--dim)', cursor: 'pointer', fontSize: '11px', padding: '0 2px', lineHeight: 1 }}
               onClick={() => setWaypoint(null)}
-              title="Effacer la route"
+              title={t('clearRoute')}
             >✕</button>
           </div>
         )}
@@ -259,7 +261,7 @@ export function MapScreen() {
           {Object.entries(TYPE_COLORS).map(([t, c]) => (
             <span key={t} style={{ fontSize: '8px', color: c, letterSpacing: '1px' }}>● {t}</span>
           ))}
-          <span style={{ fontSize: '8px', color: '#40ff80', letterSpacing: '1px' }}>⛽ carburant</span>
+          <span style={{ fontSize: '8px', color: '#40ff80', letterSpacing: '1px' }}>{t('fuelLegend')}</span>
         </div>
       </div>
 
@@ -336,7 +338,7 @@ export function MapScreen() {
           })}
 
           {/* ── NŒUDS ──────────────────────────────────────────────────────── */}
-          {STATIONS.map(station => {
+          {getStations().map(station => {
             const pos     = STATION_POSITIONS[station.name]
             if (!pos) return null
             if (station.name === "L'Arc Perdu" && !gs.arcPerduUnlocked) return null
@@ -464,7 +466,7 @@ export function MapScreen() {
               {hovStation.type}
             </span>
             <span style={{ fontSize: '8px', color: ['#40ff80','#ffee40','#ff8040','#ff4444'][hovStation.danger] }}>
-              {DANGER_LABEL[hovStation.danger]}
+              {dangerLabels[hovStation.danger]}
             </span>
             {STATION_FACTION_CONTROL[hovStation.name] && (
               <span style={{ fontSize: '8px', color: FACTION_COLORS[STATION_FACTION_CONTROL[hovStation.name]] ?? 'var(--dim)', border: '1px solid currentColor', padding: '1px 5px' }}>
@@ -473,25 +475,25 @@ export function MapScreen() {
             )}
           </div>
           {closedStations.has(hovStation.name) && (
-            <div style={{ fontSize: '8px', color: 'var(--red)', marginBottom: '4px' }}>⚠ FERMÉE PAR ÉVÉNEMENT MONDIAL</div>
+            <div style={{ fontSize: '8px', color: 'var(--red)', marginBottom: '4px' }}>{t('tooltip.closedByEvent')}</div>
           )}
           {bannedNow.has(hovStation.name) && (
-            <div style={{ fontSize: '8px', color: 'var(--red)', marginBottom: '4px' }}>⛔ ACCÈS BANNI</div>
+            <div style={{ fontSize: '8px', color: 'var(--red)', marginBottom: '4px' }}>{t('tooltip.accessBanned')}</div>
           )}
           {questStations.has(hovStation.name) && (
-            <div style={{ fontSize: '8px', color: 'var(--gold)', marginBottom: '4px' }}>★ QUÊTE ACTIVE</div>
+            <div style={{ fontSize: '8px', color: 'var(--gold)', marginBottom: '4px' }}>{t('tooltip.activeQuest')}</div>
           )}
           {accessibleNow.has(hovStation.name) && (
             <div style={{ fontSize: '8px', color: 'var(--cyan)', marginBottom: '4px' }}>
-              ⛽ {(hovStation.fuelCostFrom[gs.currentStation] ?? 0) + fuelBonus} carburant depuis ici
+              {t('tooltip.fuelFromHere', { cost: (hovStation.fuelCostFrom[gs.currentStation] ?? 0) + fuelBonus })}
             </div>
           )}
           {FUEL_STATIONS.has(hovStation.name) && (
-            <div style={{ fontSize: '8px', color: '#40ff80', marginBottom: '4px' }}>⛽ VEND DU CARBURANT (ravitaillement possible)</div>
+            <div style={{ fontSize: '8px', color: '#40ff80', marginBottom: '4px' }}>{t('tooltip.sellsFuel')}</div>
           )}
           {hovStation.goods.length > 0 && (
             <div style={{ fontSize: '8px', color: 'var(--dim)', borderTop: '1px solid var(--border)', paddingTop: '6px', marginTop: '4px' }}>
-              {hovStation.goods.slice(0, 4).join(' · ')}
+              {hovStation.goods.slice(0, 4).map(translateGood).join(' · ')}
             </div>
           )}
           {gs.activeQuests.filter(q => q.targetStation === hovStation.name).map(q => (

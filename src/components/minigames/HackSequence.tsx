@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const HEX_POOL = ['0F','1A','2B','3C','4D','5E','6F','7A','8B','9C','A0','B1','C2','D3','E4','F5','1C','2D','3E','4F']
 
@@ -17,6 +18,7 @@ interface HackSequenceProps {
 }
 
 export function HackSequence({ difficulty, onResult }: HackSequenceProps) {
+  const { t } = useTranslation('minigames')
   const codeCount = 3 + difficulty           // 4, 5 ou 6 codes
   const timeLimit = 14 - difficulty * 2      // 12, 10, 8 secondes
 
@@ -37,8 +39,8 @@ export function HackSequence({ difficulty, onResult }: HackSequenceProps) {
       setTimeout(() => onResult(false), 900)
       return
     }
-    const t = setInterval(() => setTimeLeft(v => v - 1), 1000)
-    return () => clearInterval(t)
+    const timer = setInterval(() => setTimeLeft(v => v - 1), 1000)
+    return () => clearInterval(timer)
   }, [timeLeft, done])
 
   function clickTile(tile: { code: string; id: number }) {
@@ -63,10 +65,10 @@ export function HackSequence({ difficulty, onResult }: HackSequenceProps) {
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— INTRUSION SYSTÈME —</div>
+      <div className="t-xs t-dim t-center">{t('hackSequence.header')}</div>
 
       <div className="px-box">
-        <div className="t-xs t-dim mb8">SÉQUENCE CIBLE</div>
+        <div className="t-xs t-dim mb8">{t('hackSequence.targetSequence')}</div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {sequence.map((code, i) => (
             <span key={i} className="t-xs" style={{
@@ -82,7 +84,7 @@ export function HackSequence({ difficulty, onResult }: HackSequenceProps) {
 
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <span className="t-xs t-dim">TEMPS</span>
+          <span className="t-xs t-dim">{t('hackSequence.time')}</span>
           <span className="t-xs" style={{ color: timeLeft <= 4 ? 'var(--red)' : 'var(--cyan)' }}>{timeLeft}s</span>
         </div>
         <div className="bar">
@@ -116,7 +118,7 @@ export function HackSequence({ difficulty, onResult }: HackSequenceProps) {
       {done && (
         <div className="px-box t-center" style={{ borderColor: done === 'success' ? 'var(--green)' : 'var(--red)' }}>
           <div className="t-sm" style={{ color: done === 'success' ? 'var(--green)' : 'var(--red)' }}>
-            {done === 'success' ? '✓ ACCÈS OBTENU' : '✗ CONNEXION PERDUE'}
+            {done === 'success' ? t('hackSequence.accessGranted') : t('hackSequence.connectionLost')}
           </div>
         </div>
       )}
