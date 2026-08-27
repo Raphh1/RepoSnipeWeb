@@ -9,7 +9,7 @@ import { getCulteArtefactMult, getFactionSurchargeAtStation, getStationFactionNa
 import { getRunBuyMult } from '../../data/runModifiers'
 import { getFullBuyMult, getFullSellMult, getMarketContext, getPillarDiscount } from '../../engine/marketPricing'
 import { getBlackMarketOffers, isBlackMarketAvailable, buyBlackMarketOffer } from '../../engine/blackMarket'
-import { translateGood, translateWeaponName, translateArmorName } from '../../engine/goodsI18n'
+import { translateGood, translateWeaponName, translateArmorName, translateStationName } from '../../engine/goodsI18n'
 
 const BASE_PRICES: Record<string, number> = {
   'Médicaments': 250, 'Médicaments premium': 580, 'Métaux bruts': 130,
@@ -130,7 +130,7 @@ export function MarketScreen() {
       {/* Header */}
       <div className="row" style={{ alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => goTo('station-hub')}>{tc('buttons.back')}</button>
-        <div className="t-sm t-bright" style={{ flex: 1 }}>{t('title', { station: station.name })}</div>
+        <div className="t-sm t-bright" style={{ flex: 1 }}>{t('title', { station: translateStationName(station.name) })}</div>
         <div className="t-xs t-gold">{gs.credits.toLocaleString()} cr</div>
         <div className="t-xs" style={{ color: totalCargo >= maxCargo ? 'var(--red)' : 'var(--dim)' }}>
           {t('cargo', { current: totalCargo, max: maxCargo })}

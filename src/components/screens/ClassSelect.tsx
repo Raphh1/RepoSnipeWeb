@@ -6,6 +6,7 @@ import { useMetaStore } from '../../store/metaStore'
 import { getRunModifiers, getRunModifierById } from '../../data/runModifiers'
 import { drawRunObjective, getRunObjective } from '../../data/runObjectives'
 import { MetaScreen } from './MetaScreen'
+import { translateClassName, translateStationName } from '../../engine/goodsI18n'
 
 // Toutes ces fonctions de tirage ne renvoient que des identifiants stables
 // (nom de classe / id de modificateur / id d'objectif), jamais les objets
@@ -126,7 +127,7 @@ export function ClassSelect() {
             <span style={{ fontSize: '28px' }}>{drawn.icon}</span>
             <span className="t-xs" style={{ color: TIER_COLOR[drawn.tier] }}>{TIER_LABEL[drawn.tier]}</span>
           </div>
-          <div className="t-lg t-bright mb4" style={{ color: drawn.color }}>{drawn.name}</div>
+          <div className="t-lg t-bright mb4" style={{ color: drawn.color }}>{translateClassName(drawn.name)}</div>
           <div className="t-xs" style={{ lineHeight: '2', color: 'var(--text)' }}>{drawn.description}</div>
           <div className="t-xs t-dim mt8">{drawn.bonusDesc}</div>
           <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -143,7 +144,7 @@ export function ClassSelect() {
             <StatRow label={t('stats.fuel')} value={`${drawn.startFuel}/${drawn.maxFuel}`}        color="var(--cyan)" />
             <StatRow label={t('stats.hp')}        value={`${drawn.startHp}`}                           color="var(--green)" />
             <StatRow label={t('stats.stamina')}   value={`${drawn.startStamina}`}                      color="var(--cyan)" />
-            <StatRow label={t('stats.station')}   value={drawn.startStation}                            color="var(--text-dim)" />
+            <StatRow label={t('stats.station')}   value={translateStationName(drawn.startStation)}      color="var(--text-dim)" />
           </div>
         </div>
 
@@ -209,7 +210,7 @@ export function ClassSelect() {
         {/* Boutons */}
         <div className="col gap4 mt12">
           <button className="px-btn px-btn--primary" onClick={() => selectClass(drawn, activeMods, selectedMeta)}>
-            {t('start', { name: drawn.name.toUpperCase() })}
+            {t('start', { name: translateClassName(drawn.name).toUpperCase() })}
           </button>
           <button className="px-btn" onClick={reroll} disabled={rerolls <= 0}
             style={{ color: rerolls > 0 ? 'var(--text-dim)' : undefined }}>

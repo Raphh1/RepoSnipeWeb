@@ -6,7 +6,7 @@ import { getWorldEventFuelBonus, getClosedStations, getActiveEvents } from '../.
 import { getEnemyByTier, scaleEnemy } from '../../data/enemies'
 import { AsteroidDodge } from '../minigames/AsteroidDodge'
 import { resolveShipDown } from '../../engine/shipDamage'
-import { translateGood } from '../../engine/goodsI18n'
+import { translateGood, translateStationName } from '../../engine/goodsI18n'
 
 function NextHops({ stationName, currentName }: { stationName: string; currentName: string }) {
   const { t } = useTranslation('travelScreen')
@@ -20,7 +20,7 @@ function NextHops({ stationName, currentName }: { stationName: string; currentNa
           {i > 0 && <span style={{ opacity: 0.4, margin: '0 4px' }}>·</span>}
           <span style={{ color: FUEL_STATIONS.has(h.name) ? 'var(--green)' : 'var(--text-dim)' }}
             title={FUEL_STATIONS.has(h.name) ? t('sellsFuel') : undefined}>
-            {FUEL_STATIONS.has(h.name) ? '⛽ ' : ''}{h.name}
+            {FUEL_STATIONS.has(h.name) ? '⛽ ' : ''}{translateStationName(h.name)}
           </span>
           <span style={{ color: 'var(--cyan)', opacity: 0.7, marginLeft: '3px', fontSize: '9px' }}>{t('cost', { amount: getFuelCost(stationName, h.name) })}</span>
         </span>
@@ -113,7 +113,7 @@ export function TravelScreen() {
                   color: name === gs.currentStation ? 'var(--cyan)' : name === waypoint ? '#ffd700' : name === nextOnPath ? '#ffd700' : 'var(--dim)',
                   fontWeight: name === nextOnPath || name === waypoint ? 'bold' : 'normal',
                 }}>
-                  {name}
+                  {translateStationName(name)}
                 </span>
                 {i < waypointPath.length - 1 && <span style={{ color: 'var(--border)', fontSize: '9px' }}>→</span>}
               </span>
@@ -183,7 +183,7 @@ export function TravelScreen() {
               style={isNextOnPath || isWaypoint ? { borderColor: '#ffd700', boxShadow: '0 0 8px rgba(255,215,0,0.25)' } : undefined}>
               <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <div className="t-sm t-bright mb4">{station.name}</div>
+                  <div className="t-sm t-bright mb4">{translateStationName(station.name)}</div>
                   <div className="t-xs t-dim" style={{ lineHeight: '1.8', maxWidth: '500px' }}>
                     {station.description}
                   </div>

@@ -5,7 +5,7 @@ import { getStations, getAccessibleStations, PEACEFUL_STATIONS, findPath, FUEL_S
 import { STATION_POSITIONS } from '../../data/stationPositions'
 import { STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getClosedStations, getWorldEventFuelBonus, getActiveEvents } from '../../engine/worldEvents'
-import { translateGood } from '../../engine/goodsI18n'
+import { translateGood, translateStationName } from '../../engine/goodsI18n'
 
 const TYPE_COLORS: Record<string, string> = {
   peaceful:    '#40ff80',
@@ -433,7 +433,10 @@ export function MapScreen() {
                   textAnchor="middle"
                   style={{ fontFamily: 'monospace', pointerEvents: 'none', fontWeight: isCurrent ? 'bold' : 'normal' }}
                 >
-                  {station.name.length > 18 ? station.name.slice(0, 16) + '…' : station.name}
+                  {(() => {
+                    const label = translateStationName(station.name)
+                    return label.length > 18 ? label.slice(0, 16) + '…' : label
+                  })()}
                 </text>
               </g>
             )
@@ -459,7 +462,7 @@ export function MapScreen() {
           boxShadow: `0 0 12px ${TYPE_COLORS[hovStation.type] ?? 'transparent'}44`,
         }}>
           <div style={{ fontSize: '10px', color: TYPE_COLORS[hovStation.type], letterSpacing: '1px', marginBottom: '6px' }}>
-            {hovStation.name}
+            {translateStationName(hovStation.name)}
           </div>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '8px', color: 'var(--dim)', border: '1px solid var(--border)', padding: '1px 5px' }}>

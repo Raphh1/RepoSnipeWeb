@@ -6,7 +6,7 @@ import { getStationsSellingItem, getStation } from '../../data/stations'
 import { BOSS_TRIGGER_TYPES, CRAFTED_DELIVERY_ITEMS } from '../../engine/quests'
 import { getRecipeForItem } from '../../data/recipes'
 import type { MajorQuestCondition, QuestType, GameState } from '../../types'
-import { translateGood, translateEnemyName } from '../../engine/goodsI18n'
+import { translateGood, translateEnemyName, translateStationName } from '../../engine/goodsI18n'
 
 function stageDestination(cond: MajorQuestCondition, t: TFunction): string | null {
   switch (cond.type) {
@@ -142,7 +142,7 @@ export function QuestsScreen() {
                       const isHere = gs.currentStation === dest
                       return (
                         <div className="t-xs mb8" style={{ color: isHere ? 'var(--green)' : 'var(--gold)', fontWeight: 'bold' }}>
-                          {isHere ? t('youAreHere') : t('destination', { station: dest })}
+                          {isHere ? t('youAreHere') : t('destination', { station: translateStationName(dest) })}
                         </div>
                       )
                     })()}
@@ -173,7 +173,7 @@ export function QuestsScreen() {
                 </div>
 
                 <div className="t-xs t-dim mt8">
-                  {t('givenByPrefix')} <span className="t-bright">{mq.giver}</span> {t('givenByMiddle')} <span style={{ color: 'var(--cyan)' }}>{mq.giverStation}</span>
+                  {t('givenByPrefix')} <span className="t-bright">{mq.giver}</span> {t('givenByMiddle')} <span style={{ color: 'var(--cyan)' }}>{translateStationName(mq.giverStation)}</span>
                 </div>
               </div>
             )
@@ -191,10 +191,10 @@ export function QuestsScreen() {
           const hasPassenger = (gs.cargo['Passager'] ?? 0) > 0
 
           let statusColor = 'var(--text-dim)'
-          let statusText  = `→ ${q.targetStation}`
+          let statusText  = `→ ${translateStationName(q.targetStation)}`
           if (q.type === 'extraction') {
             if (!hasItem) statusText = t('toAcquire', { item: q.targetItem ? translateGood(q.targetItem) : q.targetItem })
-            else if (hasItem && !isAtGiver) statusText = t('bringBackTo', { station: q.giverStation })
+            else if (hasItem && !isAtGiver) statusText = t('bringBackTo', { station: translateStationName(q.giverStation) })
             else if (hasItem && isAtGiver) { statusText = t('readyHere'); statusColor = 'var(--green)' }
           } else if (isAtTarget) {
             statusText = t('completeHere')
@@ -212,7 +212,7 @@ export function QuestsScreen() {
 
               <div className="t-xs t-dim" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <div>
-                  {t('givenByPrefix')} <span className="t-bright">{q.giver}</span> {t('givenByMiddle')} <span className="t-cyan">{q.giverStation}</span>
+                  {t('givenByPrefix')} <span className="t-bright">{q.giver}</span> {t('givenByMiddle')} <span className="t-cyan">{translateStationName(q.giverStation)}</span>
                 </div>
                 <div style={{ color: statusColor }}>{statusText}</div>
                 <div className="t-dim" style={{ fontStyle: 'italic', fontSize: '7px' }}>
@@ -233,7 +233,7 @@ export function QuestsScreen() {
                       }
                       {sellers.length > 0 && (
                         <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
-                          {t('buyableAt', { list: sellers.slice(0, 4).join(', ') + (sellers.length > 4 ? '…' : '') })}
+                          {t('buyableAt', { list: sellers.slice(0, 4).map(translateStationName).join(', ') + (sellers.length > 4 ? '…' : '') })}
                         </div>
                       )}
                       {!hasItem && sellers.length === 0 && CRAFTED_DELIVERY_ITEMS.includes(q.targetItem!) && (() => {
@@ -264,7 +264,7 @@ export function QuestsScreen() {
                       {hasItem ? <span className="t-green">{t('inCargo')}</span> : <span className="t-dim">{t('notRetrievedYet')}</span>}
                       {sellers.length > 0 && !hasItem && (
                         <div style={{ marginTop: '3px', color: 'var(--cyan)', fontSize: '8px' }}>
-                          {t('buyableAt', { list: sellers.slice(0, 4).join(', ') + (sellers.length > 4 ? '…' : '') })}
+                          {t('buyableAt', { list: sellers.slice(0, 4).map(translateStationName).join(', ') + (sellers.length > 4 ? '…' : '') })}
                         </div>
                       )}
                     </div>

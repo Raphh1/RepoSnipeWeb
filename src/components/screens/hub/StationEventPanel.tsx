@@ -4,6 +4,7 @@ import { TypewriterText } from '../../ui/TypewriterText'
 import type { GameState, Enemy } from '../../../types'
 import type { StationEvent } from '../../../engine/stationEvents'
 import { getTierMid, getArenaEnemyForRound } from '../../../data/enemies'
+import { translateStationName } from '../../../engine/goodsI18n'
 
 interface Props {
   gs: GameState
@@ -52,7 +53,7 @@ export function StationEventPanel({ gs, stationEvent, stationName, onReturn, sta
 
   return (
     <div className="layout">
-      <div className="t-xs t-dim t-center">— {stationName.toUpperCase()} —</div>
+      <div className="t-xs t-dim t-center">— {translateStationName(stationName).toUpperCase()} —</div>
       <div className="px-box px-box--hi">
         <div className="t-sm t-bright mb8">
           <TypewriterText text={stationEvent.description} speed={16} />

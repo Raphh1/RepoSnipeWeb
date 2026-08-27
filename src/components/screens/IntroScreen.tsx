@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
 import { TypewriterText } from '../ui/TypewriterText'
+import { translateClassName, translateStationName } from '../../engine/goodsI18n'
 
 const CLASS_INTRO_KEYS: Record<string, string> = {
   Vagabond: 'vagabond',
@@ -53,7 +54,7 @@ export function IntroScreen() {
         <div className="row" style={{ alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
           <span style={{ fontSize: '20px' }}>{gs.class.icon}</span>
           <div>
-            <div className="t-sm t-bright">{gs.class.name}</div>
+            <div className="t-sm t-bright">{translateClassName(gs.class.name)}</div>
             <div className="t-xs" style={{ color: accentColor }}>{gs.class.tier === 'bad' ? t('difficultTag') : gs.class.tier === 'good' ? t('advancedTag') : t('balancedTag')}</div>
           </div>
         </div>
@@ -75,7 +76,7 @@ export function IntroScreen() {
 
       <div className="px-box" style={{ background: 'rgba(0,0,0,0.3)' }}>
         <div className="t-xs t-dim" style={{ lineHeight: '2' }}>
-          {t('startInfo', { station: gs.currentStation, credits: gs.credits.toLocaleString(), fuel: gs.fuel, maxFuel: gs.maxFuel })}
+          {t('startInfo', { station: translateStationName(gs.currentStation), credits: gs.credits.toLocaleString(), fuel: gs.fuel, maxFuel: gs.maxFuel })}
         </div>
       </div>
 

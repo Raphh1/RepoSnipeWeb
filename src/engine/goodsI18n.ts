@@ -390,8 +390,101 @@ const NAME_KEY_MAP: Record<string, string> = {
   'Sœur Acide': 'stalkers.soeurAcide',
 }
 
+const CLASS_NAME_KEY_MAP: Record<string, string> = {
+  'Vagabond': 'Vagabond',
+  'Ferrailleur': 'Ferrailleur',
+  'Endetté': 'Endetté',
+  'Accro': 'Accro',
+  'Rayane': 'Rayane',
+  'Maudit': 'Maudit',
+  'Marchand': 'Marchand',
+  'Mécanicien': 'Mécanicien',
+  'Explorateur': 'Explorateur',
+  'Médecin': 'Médecin',
+  'Contrebandier': 'Contrebandier',
+  'Vétéran': 'Vétéran',
+  'Héritier': 'Héritier',
+  'Hackeur': 'Hackeur',
+  'Seigneur de guerre': 'Seigneur de guerre',
+}
+
+export function translateClassName(name: string): string {
+  const key = CLASS_NAME_KEY_MAP[name]
+  if (!key) return name
+  return i18n.t(`names.${key}`, { ns: 'classes', defaultValue: name })
+}
+
 export function translateEnemyName(name: string): string {
   const key = NAME_KEY_MAP[name]
   if (!key) return name
   return i18n.t(`names.${key}`, { ns: 'enemies', defaultValue: name })
+}
+
+const STATION_NAME_KEY_MAP: Record<string, string> = {
+  'La Carcasse': 'laCarcasse',
+  'Port Méridien': 'portMeridien',
+  'Les Bas-Fonds de Vega': 'lesBasFondsDeVega',
+  'Fort Kharos': 'fortKharos',
+  'Nexus Aldara': 'nexusAldara',
+  'Arc Ouest Apocalypse': 'arcOuestApocalypse',
+  'Le Purgatoire': 'lePurgatoire',
+  'Le Nid des Faucons': 'leNidDesFaucons',
+  'Fort Ossian': 'fortOssian',
+  'Colonie Perséphone': 'colonnePersephone',
+  'Station Rocaille': 'stationRocaille',
+  'La Forge Noire': 'laForgeNoire',
+  "L'Entrepôt Zéro": 'entrepotZero',
+  'Emporium Requiem': 'emporiumRequiem',
+  'Star Quest': 'starQuest',
+  'La Citadelle Écarlate': 'laCitadelleEcarlate',
+  'Les Abysses de Velkor': 'lesAbyssesDeVelkor',
+  'Scotty Golden North': 'scottyGoldenNorth',
+  "La Couronne d'Eos": 'laCouronneDEos',
+  'Le Perchoir': 'lePerchoir',
+  'Station Ombre': 'stationOmbre',
+  'Relais Noir': 'relaisNoir',
+  'La Tanière': 'laTaniere',
+  'Fort de Cendres': 'fortDeCendres',
+  "L'Œil du Faucon": 'loeilDuFaucon',
+  'Repaire Vega-Sud': 'repaireVegaSud',
+  'Bastion Mineur': 'bastionMineur',
+  'Poste Vigie': 'posteVigie',
+  "L'Arsenal Écarlate": 'arsenalEcarlate',
+  'La Forteresse Exilée': 'forteresseExilee',
+  'Comptoir Sud': 'comptoirSud',
+  'Annexe Commerciale': 'annexeCommerciale',
+  'Relais de Transit': 'relaisDeTransit',
+  'Résidence Orbitale': 'residenceOrbitale',
+  "Club Privé Éos": 'clubPriveEos',
+  'Les Cendres': 'lesCendres',
+  'Station Quarantaine': 'stationQuarantaine',
+  'Le Berceau': 'leBerceau',
+  "L'Épave Vivante": 'epaveVivante',
+  'Station Fantôme': 'stationFantome',
+  "L'Oasis de Fer": 'oasisDeFer',
+  'La Balise': 'laBalise',
+  'Confluent': 'confluent',
+  'Port de Nuit': 'portDeNuit',
+  'Le Grand Bazar': 'leGrandBazar',
+  'Station Zéphyr': 'stationZephyr',
+  "L'Observatoire": 'observatoire',
+  'Station Limite': 'stationLimite',
+  'Les Cavernes de Mira': 'cavernesDeMira',
+  'La Raffinerie': 'laRaffinerie',
+  "L'Arc Perdu": 'arcPerdu',
+  'La Tribosphère': 'laTribosphere',
+  'Paradoxa Eterna': 'paradoxaEterna',
+  "L'Arène de Korsun": 'areneDeKorsun',
+  'Port des Brumes': 'portDesBrumes',
+  'Forge Alpha': 'forgeAlpha',
+  'Le Sanctuaire des Dérives': 'sanctuaireDesDerives',
+  'Sanctum Machina': 'sanctumMachina',
+  'La Bulle': 'laBulle',
+  'La Forge des Damnés': 'laForgeDesDamnes',
+}
+
+export function translateStationName(name: string): string {
+  const key = STATION_NAME_KEY_MAP[name]
+  if (!key) return name
+  return i18n.t(`names.${key}`, { ns: 'stations', defaultValue: name })
 }

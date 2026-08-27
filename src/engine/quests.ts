@@ -1,6 +1,7 @@
 import type { GameState, Quest, QuestType } from '../types'
 import { getAccessibleStations, getStation } from '../data/stations'
 import { getRunQuestRewardMult } from '../data/runModifiers'
+import { translateGood, translateStationName } from './goodsI18n'
 import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
@@ -61,11 +62,11 @@ export function buildTutorialQuest(startStation: string): Quest {
 
   return {
     id: TUTORIAL_QUEST_ID,
-    title: i18n.t('tutorial.title', { ns: 'quests', item }),
+    title: i18n.t('tutorial.title', { ns: 'quests', item: translateGood(item) }),
     giver: 'Vieux Doss',
     giverStation: startStation,
     type: 'delivery',
-    description: i18n.t('tutorial.description', { ns: 'quests', station: startStation, target: targetName, item }),
+    description: i18n.t('tutorial.description', { ns: 'quests', station: translateStationName(startStation), target: translateStationName(targetName), item: translateGood(item) }),
     targetStation: targetName,
     targetItem: item,
     creditReward: 800,
@@ -155,61 +156,61 @@ export function generateQuest(gs: GameState): Quest | null {
       const item   = isCrafted ? pick(CRAFTED_DELIVERY_ITEMS) : pick(DELIVERY_ITEMS)
       const reward = isCrafted ? scale(rng(1400, 3200)) : scale(rng(600, 2200))
       const desc   = isCrafted
-        ? i18n.t('craftedDeliveryDesc', { ns: 'quests', giver, item, target: target.name })
-        : pickDesc('delivery', { item, giver, target: target.name })
-      return { id, title: i18n.t('titles.delivery', { ns: 'quests', item }), giver, giverStation: gs.currentStation, type,
+        ? i18n.t('craftedDeliveryDesc', { ns: 'quests', giver, item: translateGood(item), target: translateStationName(target.name) })
+        : pickDesc('delivery', { item: translateGood(item), giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.delivery', { ns: 'quests', item: translateGood(item) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: isCrafted ? 15 : 10, dayMult }
     }
     case 'kill': {
-      const boss   = BOSS_NAMES[target.name] ?? i18n.t('bossFallbackKill', { ns: 'quests', target: target.name })
+      const boss   = BOSS_NAMES[target.name] ?? i18n.t('bossFallbackKill', { ns: 'quests', target: translateStationName(target.name) })
       const reward = scale(rng(1500, 5000))
-      const desc   = pickDesc('kill', { boss, giver, target: target.name })
+      const desc   = pickDesc('kill', { boss, giver, target: translateStationName(target.name) })
       return { id, title: i18n.t('titles.kill', { ns: 'quests', boss }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 25, dayMult }
     }
     case 'revenge': {
       const reward = scale(rng(900, 2800))
-      const desc   = pickDesc('revenge', { giver, target: target.name })
-      return { id, title: i18n.t('titles.revenge', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('revenge', { giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.revenge', { ns: 'quests', target: translateStationName(target.name) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 18, dayMult }
     }
     case 'escort': {
       const reward = scale(rng(1400, 3500))
-      const desc   = pickDesc('escort', { giver, target: target.name })
-      return { id, title: i18n.t('titles.escort', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('escort', { giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.escort', { ns: 'quests', target: translateStationName(target.name) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: 'Passager', creditReward: reward, repReward: 15, dayMult }
     }
     case 'sabotage': {
       const reward = scale(rng(1800, 4500))
-      const desc   = pickDesc('sabotage', { giver, target: target.name })
-      return { id, title: i18n.t('titles.sabotage', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('sabotage', { giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.sabotage', { ns: 'quests', target: translateStationName(target.name) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: -5, dayMult }
     }
     case 'heist': {
       const item   = pick(HEIST_ITEMS)
       const reward = scale(rng(2200, 5500))
-      const desc   = pickDesc('heist', { item, giver, target: target.name })
-      return { id, title: i18n.t('titles.heist', { ns: 'quests', item }), giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('heist', { item: translateGood(item), giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.heist', { ns: 'quests', item: translateGood(item) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 5, dayMult }
     }
     case 'extraction': {
       const item   = pick(EXTRACTION_ITEMS)
       const reward = scale(rng(1100, 3200))
-      const desc   = pickDesc('extraction', { item, giver, target: target.name })
-      return { id, title: i18n.t('titles.extraction', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('extraction', { item: translateGood(item), giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.extraction', { ns: 'quests', target: translateStationName(target.name) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, targetItem: item, creditReward: reward, repReward: 12, dayMult }
     }
     case 'bounty': {
-      const boss   = BOSS_NAMES[target.name] ?? i18n.t('bossFallbackBounty', { ns: 'quests', target: target.name })
+      const boss   = BOSS_NAMES[target.name] ?? i18n.t('bossFallbackBounty', { ns: 'quests', target: translateStationName(target.name) })
       const reward = scale(rng(3000, 7000))
-      const desc   = pickDesc('bounty', { boss, giver, target: target.name })
+      const desc   = pickDesc('bounty', { boss, giver, target: translateStationName(target.name) })
       return { id, title: i18n.t('titles.bounty', { ns: 'quests', boss }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 35, dayMult }
     }
     case 'patrol': {
       const reward = scale(rng(500, 1800))
-      const desc   = pickDesc('patrol', { giver, target: target.name })
-      return { id, title: i18n.t('titles.patrol', { ns: 'quests', target: target.name }), giver, giverStation: gs.currentStation, type,
+      const desc   = pickDesc('patrol', { giver, target: translateStationName(target.name) })
+      return { id, title: i18n.t('titles.patrol', { ns: 'quests', target: translateStationName(target.name) }), giver, giverStation: gs.currentStation, type,
         description: desc, targetStation: target.name, creditReward: reward, repReward: 6, dayMult }
     }
   }
@@ -435,36 +436,36 @@ export function generateFactionMission(gs: GameState, factionId: string): Quest 
 
   switch (type) {
     case 'kill': {
-      const boss   = BOSS_NAMES[target] ?? i18n.t('bossFallbackKill', { ns: 'quests', target })
+      const boss   = BOSS_NAMES[target] ?? i18n.t('bossFallbackKill', { ns: 'quests', target: translateStationName(target) })
       const reward = scale(rng(2500, 6000))
       return { id, factionId, title: i18n.t('faction.titles.kill', { ns: 'quests', boss }), giver, giverStation: gs.currentStation, type,
-        description: i18n.t('faction.descs.kill', { ns: 'quests', boss, target }),
+        description: i18n.t('faction.descs.kill', { ns: 'quests', boss, target: translateStationName(target) }),
         targetStation: target, creditReward: reward, repReward: 15, dayMult }
     }
     case 'sabotage': {
       const reward = scale(rng(2000, 5000))
-      return { id, factionId, title: i18n.t('faction.titles.sabotage', { ns: 'quests', target }), giver, giverStation: gs.currentStation, type,
-        description: i18n.t('faction.descs.sabotage', { ns: 'quests', target }),
+      return { id, factionId, title: i18n.t('faction.titles.sabotage', { ns: 'quests', target: translateStationName(target) }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.sabotage', { ns: 'quests', target: translateStationName(target) }),
         targetStation: target, creditReward: reward, repReward: 10, dayMult }
     }
     case 'delivery': {
       const item   = pick(DELIVERY_ITEMS)
       const reward = scale(rng(1500, 4000))
-      return { id, factionId, title: i18n.t('faction.titles.delivery', { ns: 'quests', item, target }), giver, giverStation: gs.currentStation, type,
-        description: i18n.t('faction.descs.delivery', { ns: 'quests', item, target }),
+      return { id, factionId, title: i18n.t('faction.titles.delivery', { ns: 'quests', item: translateGood(item), target: translateStationName(target) }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.delivery', { ns: 'quests', item: translateGood(item), target: translateStationName(target) }),
         targetStation: target, targetItem: item, creditReward: reward, repReward: 10, dayMult }
     }
     case 'heist': {
       const item   = pick(HEIST_ITEMS)
       const reward = scale(rng(3000, 7000))
-      return { id, factionId, title: i18n.t('faction.titles.heist', { ns: 'quests', item, target }), giver, giverStation: gs.currentStation, type,
-        description: i18n.t('faction.descs.heist', { ns: 'quests', item, target }),
+      return { id, factionId, title: i18n.t('faction.titles.heist', { ns: 'quests', item: translateGood(item), target: translateStationName(target) }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.heist', { ns: 'quests', item: translateGood(item), target: translateStationName(target) }),
         targetStation: target, targetItem: item, creditReward: reward, repReward: 10, dayMult }
     }
     case 'escort': {
       const reward = scale(rng(2000, 5000))
-      return { id, factionId, title: i18n.t('faction.titles.escort', { ns: 'quests', target }), giver, giverStation: gs.currentStation, type,
-        description: i18n.t('faction.descs.escort', { ns: 'quests', target }),
+      return { id, factionId, title: i18n.t('faction.titles.escort', { ns: 'quests', target: translateStationName(target) }), giver, giverStation: gs.currentStation, type,
+        description: i18n.t('faction.descs.escort', { ns: 'quests', target: translateStationName(target) }),
         targetStation: target, targetItem: 'Passager', creditReward: reward, repReward: 12, dayMult }
     }
     default: return null
@@ -509,15 +510,15 @@ export function generateNpcQuest(gs: GameState, npcName: string, npcRole: string
   const id = Math.random().toString(36).slice(2, 8)
 
   const flavor = i18n.t(`npcQuest.flavors.${npcRole}`, { ns: 'quests' })
-  const itemOrPackage = item ?? i18n.t('npcQuest.itemFallbackPackage', { ns: 'quests' })
-  const itemOrThing    = item ?? i18n.t('npcQuest.itemFallbackThing', { ns: 'quests' })
-  const itemOrObject   = item ?? i18n.t('npcQuest.itemFallbackObject', { ns: 'quests' })
+  const itemOrPackage = item ? translateGood(item) : i18n.t('npcQuest.itemFallbackPackage', { ns: 'quests' })
+  const itemOrThing    = item ? translateGood(item) : i18n.t('npcQuest.itemFallbackThing', { ns: 'quests' })
+  const itemOrObject   = item ? translateGood(item) : i18n.t('npcQuest.itemFallbackObject', { ns: 'quests' })
   const itemByType: Partial<Record<QuestType, string>> = {
     delivery: itemOrPackage, extraction: itemOrThing, heist: itemOrObject,
   }
 
   const description = i18n.t(`npcQuest.descs.${type}`, {
-    ns: 'quests', npcName, flavor, target: target.name, item: itemByType[type] ?? item ?? '',
+    ns: 'quests', npcName, flavor, target: translateStationName(target.name), item: itemByType[type] ?? (item ? translateGood(item) : ''),
   })
 
   return {

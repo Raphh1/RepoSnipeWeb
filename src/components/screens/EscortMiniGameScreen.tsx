@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useGameStore } from '../../store/gameStore'
+import { translateStationName } from '../../engine/goodsI18n'
 
 const GAME_DURATION = 25
 const PLAYER_W = 20
@@ -303,7 +304,7 @@ export function EscortMiniGameScreen() {
       {quest && (
         <div className="t-xs t-dim t-center">
           {t('escort.escort')} <span className="t-cyan">{quest.title}</span>
-          <span className="t-dim" style={{ marginLeft: '8px' }}>→ {quest.targetStation}</span>
+          <span className="t-dim" style={{ marginLeft: '8px' }}>→ {translateStationName(quest.targetStation)}</span>
         </div>
       )}
 

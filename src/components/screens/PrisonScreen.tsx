@@ -6,6 +6,7 @@ import { addJournal } from '../../engine/journal'
 import { tickWorldEventsMultipleDays } from '../../engine/worldEvents'
 import i18n from '../../i18n/config'
 import type { GameState, WeaponData, ArmorData } from '../../types'
+import { translateStationName } from '../../engine/goodsI18n'
 
 type EscapePhase = 'menu' | 'playing' | 'between' | 'caught' | 'escape-final-roll' | 'success' | 'execution'
 
@@ -191,7 +192,7 @@ export function PrisonScreen() {
 
     const itemPatch = buildItemRestore(gs, 0.5)
     const journalText = t('journalServeTime', {
-      days, plural: days > 1 ? 's' : '', station: gs.currentStation,
+      days, plural: days > 1 ? 's' : '', station: translateStationName(gs.currentStation),
       longNote: days >= 5 ? t('journalLongTrue') : t('journalLongFalse'),
       expiredNote: expiredCount > 0 ? t('journalExpired', { count: expiredCount, plural: expiredCount > 1 ? 's' : '' }) : '',
     })
@@ -239,7 +240,7 @@ export function PrisonScreen() {
       isImprisoned: false, prisonDaysLeft: 0,
       playerHp: Math.max(1, Math.floor(gs.playerMaxHp * 0.60)),
       reputation: gs.reputation - 8,
-      journal: addJournal(gs, t('cautionJournal', { station: gs.currentStation, amount: caution.toLocaleString() }), 'prison'),
+      journal: addJournal(gs, t('cautionJournal', { station: translateStationName(gs.currentStation), amount: caution.toLocaleString() }), 'prison'),
       ...itemPatch,
     })
     setMsg(t('cautionMsg', { amount: caution, fraction: getItemFractionText(0.5) }))
@@ -256,7 +257,7 @@ export function PrisonScreen() {
         isImprisoned: false, prisonDaysLeft: 0,
         playerHp: Math.max(1, Math.floor(gs.playerMaxHp * 0.50)),
         prisonEscapes: gs.prisonEscapes + 1,
-        journal: addJournal(gs, t('bribeJournal', { station: gs.currentStation }), 'prison'),
+        journal: addJournal(gs, t('bribeJournal', { station: translateStationName(gs.currentStation) }), 'prison'),
         ...itemPatch,
       })
       setMsg(t('bribeSuccessMsg', { amount: 400, hp: Math.floor(gs.playerMaxHp * 0.50), fraction: getItemFractionText(0.5) }))
@@ -333,7 +334,7 @@ export function PrisonScreen() {
         playerHp: Math.max(1, gs.playerHp - 10),
         prisonEscapes: gs.prisonEscapes + 1,
         reputation: gs.reputation + 25,
-        journal: addJournal(gs, t('escapeJournal', { station: gs.currentStation }), 'prison'),
+        journal: addJournal(gs, t('escapeJournal', { station: translateStationName(gs.currentStation) }), 'prison'),
         ...itemPatch,
       })
       setEscapePhase('success')

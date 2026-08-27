@@ -58,5 +58,22 @@
   "seigneurDeGuerre": {
     "description": "Feared everywhere. Welcome nowhere peaceful. Pirates avoid you. So do merchants.",
     "bonusDesc": "Pirates auto-eliminated · Combat intimidation · +50% attack · ⚠ Peaceful stations refuse you"
+  },
+  "names": {
+    "Vagabond": "Vagrant",
+    "Ferrailleur": "Scrapper",
+    "Endetté": "Debtor",
+    "Accro": "Addict",
+    "Rayane": "Rayane",
+    "Maudit": "Cursed",
+    "Marchand": "Merchant",
+    "Mécanicien": "Mechanic",
+    "Explorateur": "Explorer",
+    "Médecin": "Medic",
+    "Contrebandier": "Smuggler",
+    "Vétéran": "Veteran",
+    "Héritier": "Heir",
+    "Hackeur": "Hacker",
+    "Seigneur de guerre": "Warlord"
   }
 }

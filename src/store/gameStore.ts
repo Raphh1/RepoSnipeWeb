@@ -30,7 +30,7 @@ import { getSubBossAtStation, generateLieutenantStationAssignment } from '../dat
 import { getDailyExpenses } from '../engine/expenses'
 import { checkBossHomeVisit, getBossHomeVisit } from '../engine/bossHomeVisits'
 import { resolveShipDown } from '../engine/shipDamage'
-import { translateEnemyName, translateWeaponName } from '../engine/goodsI18n'
+import { translateEnemyName, translateWeaponName, translateStationName } from '../engine/goodsI18n'
 import i18n from '../i18n/config'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
@@ -538,7 +538,7 @@ export const useGameStore = create<Store>()(persist((set, get) => ({
     newGs = { ...newGs, pendingChainEvents: pendingChain }
 
     // Journal — entrée de voyage
-    const travelJournal = addJournal(gs, gt('travelJournal', { from: gs.currentStation, to: station }), 'travel')
+    const travelJournal = addJournal(gs, gt('travelJournal', { from: translateStationName(gs.currentStation), to: translateStationName(station) }), 'travel')
     newGs = { ...newGs, journal: travelJournal }
 
     // ── SEEDING PILIERS — rumeurs jours 3-8 (5.2) ────────────────────────────
@@ -1102,8 +1102,8 @@ function handleCombatOutcome(
     const enemyName = gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy')
     const isBoss = reward?.isBossKill
     const victoryText = isBoss
-      ? gt('victoryJournalBoss', { enemy: enemyName, station: gs.currentStation })
-      : gt('victoryJournalNormal', { enemy: enemyName, station: gs.currentStation })
+      ? gt('victoryJournalBoss', { enemy: enemyName, station: translateStationName(gs.currentStation) })
+      : gt('victoryJournalNormal', { enemy: enemyName, station: translateStationName(gs.currentStation) })
     newGs = { ...newGs, journal: addJournal(gs, victoryText, 'combat') }
     // Sub-boss vaincu au combat
     let subBossMsg: string | null = null
@@ -1178,7 +1178,7 @@ function handleCombatOutcome(
       combatsFled: (gs.combatsFled ?? 0) + 1,
       pendingCombatOutcome: 'fled' as CombatOutcome,
       screen: 'combat-outcome' as Screen,
-      journal: addJournal(gs, gt('fledJournal', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy'), station: gs.currentStation }), 'combat'),
+      journal: addJournal(gs, gt('fledJournal', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy'), station: translateStationName(gs.currentStation) }), 'combat'),
     }
     set({ gs: fledGs })
   } else if (outcome === 'dead') {
@@ -1205,7 +1205,7 @@ function handleCombatOutcome(
       cargo: newCargo,
       equippedWeapon: weaponSeized ? null : gs.equippedWeapon,
       pendingMessage: captureInfo,
-      journal: addJournal(gs, gt('capturedJournal', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy'), station: gs.currentStation }), 'prison'),
+      journal: addJournal(gs, gt('capturedJournal', { enemy: gs.combatEnemy?.name ? translateEnemyName(gs.combatEnemy.name) : gt('unknownEnemy'), station: translateStationName(gs.currentStation) }), 'prison'),
     }})
   } else if (outcome === 'stunned') {
     const creditsLost = Math.floor(Math.random() * 400 + 200)

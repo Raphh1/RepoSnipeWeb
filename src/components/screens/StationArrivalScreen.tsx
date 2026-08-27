@@ -4,6 +4,7 @@ import { useGameStore } from '../../store/gameStore'
 import { getStation } from '../../data/stations'
 import { getAmbiance } from '../../engine/jsonEventLoader'
 import { TypewriterText } from '../ui/TypewriterText'
+import { translateClassName, translateStationName } from '../../engine/goodsI18n'
 
 const DANGER_COLOR = ['var(--green)', 'var(--yellow)', 'var(--orange)', 'var(--red)']
 
@@ -43,7 +44,7 @@ export function StationArrivalScreen() {
             {t('arrivalHeader')}
           </div>
           <div style={{ fontSize: '18px', color: 'var(--text-bright)', letterSpacing: '3px', marginBottom: '10px' }}>
-            {station.name}
+            {translateStationName(station.name)}
           </div>
           <div className="t-xs" style={{ color: dangerColor, letterSpacing: '2px' }}>
             {DANGER_LABEL[station.danger]}
@@ -74,7 +75,7 @@ export function StationArrivalScreen() {
 
         {/* Jour + classe */}
         <div className="t-xs t-dim" style={{ textAlign: 'center', marginBottom: '24px' }}>
-          {t('dayLabel', { day: gs.day })} <span style={{ color: gs.class.color }}>{gs.class.name}</span>
+          {t('dayLabel', { day: gs.day })} <span style={{ color: gs.class.color }}>{translateClassName(gs.class.name)}</span>
           {gs.fuel <= 1 && <span className="t-red"> {t('fuelCritical')}</span>}
         </div>
 
@@ -89,7 +90,7 @@ export function StationArrivalScreen() {
           {showFull && (
             <button className="px-btn px-btn--primary" style={{ flex: 1, textAlign: 'center' }}
               onClick={() => goTo('station-hub')}>
-              {t('enterStation', { name: station.name })}
+              {t('enterStation', { name: translateStationName(station.name) })}
             </button>
           )}
         </div>

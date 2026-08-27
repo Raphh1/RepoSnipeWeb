@@ -1,6 +1,7 @@
 import type { SubBossData, Enemy, GameState } from '../types'
 import { getStation } from './stations'
 import i18n from '../i18n/config'
+import { translateStationName } from '../engine/goodsI18n'
 
 const sb = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'subBosses', ...params })
 
@@ -412,7 +413,7 @@ export function getLieutenantClueText(gs: GameState, sb: SubBossData, level: num
   if (level < LIEUTENANT_CLUE_REVEAL_LEVEL) {
     return getStation(resolvedStation).description
   }
-  return i18n.t('clueLocationText', { ns: 'subBosses', name: sb.name, station: resolvedStation })
+  return i18n.t('clueLocationText', { ns: 'subBosses', name: sb.name, station: translateStationName(resolvedStation) })
 }
 
 export interface LieutenantClueEvent {

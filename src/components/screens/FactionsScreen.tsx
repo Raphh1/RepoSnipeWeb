@@ -10,6 +10,7 @@ import {
 import { generateFactionMission } from '../../engine/quests'
 import { canJoinFactionThisRun } from '../../data/runModifiers'
 import type { GameState } from '../../types'
+import { translateStationName } from '../../engine/goodsI18n'
 
 const FACTION_REQUIREMENTS: Record<string, { station: string; npcId: string; npcName: string }> = {
   faucons:  { station: 'Arc Ouest Apocalypse',  npcId: 'cael',   npcName: 'Cael' },
@@ -209,7 +210,7 @@ function FactionsTab({ gs }: { gs: GameState }) {
               <div className="px-box" style={{ padding: '8px 12px', borderColor: 'var(--cyan)' }}>
                 <div className="t-xs t-bright mb2">{activeFactionQuest.title}</div>
                 <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{activeFactionQuest.description}</div>
-                <div className="t-xs t-gold mt4">{t('factions.destination', { station: activeFactionQuest.targetStation })}</div>
+                <div className="t-xs t-gold mt4">{t('factions.destination', { station: translateStationName(activeFactionQuest.targetStation) })}</div>
                 <div className="t-xs t-dim mt2">{t('factions.reward', { credits: activeFactionQuest.creditReward.toLocaleString(), rep: activeFactionQuest.repReward })}</div>
               </div>
               <div className="t-xs t-dim">{t('factions.completeToTakeNext')}</div>
@@ -281,7 +282,7 @@ function FactionsTab({ gs }: { gs: GameState }) {
                 <div className="col gap4">
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                     <div className="t-xs" style={{ color: atStation ? 'var(--green)' : 'var(--text-dim)' }}>
-                      {atStation ? '✓' : '○'} {t('factions.stationReq', { station: req.station })}
+                      {atStation ? '✓' : '○'} {t('factions.stationReq', { station: translateStationName(req.station) })}
                     </div>
                     <div className="t-xs" style={{ color: metNpc ? 'var(--green)' : 'var(--text-dim)' }}>
                       {metNpc ? '✓' : '○'} {t('factions.meetNpcReq', { npc: req.npcName })}

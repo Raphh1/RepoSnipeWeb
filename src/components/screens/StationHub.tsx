@@ -18,7 +18,7 @@ import { StopTheBar, type StopResult } from '../minigames/StopTheBar'
 import { CardGame } from '../minigames/CardGame'
 import { ScenarioGame } from '../minigames/ScenarioGame'
 import { CustomsGame } from '../minigames/CustomsGame'
-import { translateGood, translateWeaponName, translateArmorName, translateEnemyName } from '../../engine/goodsI18n'
+import { translateGood, translateWeaponName, translateArmorName, translateEnemyName, translateClassName, translateStationName } from '../../engine/goodsI18n'
 import { stalkerToEnemy, getStalkerAmbushChance, getStalkerPresenceText } from '../../engine/stalker'
 import { isFactionBlockedAtStation, getStationFactionName, STATION_FACTION_CONTROL } from '../../engine/factionRep'
 import { getArrivalSituation, type ArrivalSituation } from '../../engine/arrivalSituations'
@@ -431,7 +431,7 @@ export function StationHub() {
 
     return (
       <div className="layout">
-        <div className="t-xs t-dim t-center">{t('delivery.header', { station: q.targetStation })}</div>
+        <div className="t-xs t-dim t-center">{t('delivery.header', { station: translateStationName(q.targetStation) })}</div>
         <div className="px-box px-box--hi">
           <div className="row" style={{ justifyContent: 'space-between', marginBottom: '8px' }}>
             <div className="t-sm t-bright">{q.title}</div>
@@ -869,7 +869,7 @@ export function StationHub() {
       {/* ── SITUATION D'ARRIVÉE (interactive — reste séparée) ──────────────── */}
       {arrivalSit && !arrivalResult && (
         <div className="px-box" style={{ borderColor: 'var(--orange)', background: 'rgba(20,10,0,0.7)' }}>
-          <div className="t-xs mb4" style={{ color: 'var(--orange)', letterSpacing: '2px' }}>{t('arrival.header', { station: gs.currentStation.toUpperCase() })}</div>
+          <div className="t-xs mb4" style={{ color: 'var(--orange)', letterSpacing: '2px' }}>{t('arrival.header', { station: translateStationName(gs.currentStation).toUpperCase() })}</div>
           <div className="t-sm t-bright mb8">{arrivalSit.title}</div>
           <div className="t-xs" style={{ lineHeight: '2.2', marginBottom: '14px' }}>{arrivalSit.description}</div>
           <div className="col gap4">
@@ -960,8 +960,8 @@ export function StationHub() {
                 {gs.pendingDaySummary.actionsUsed >= 3
                   ? t('daySummary.fullDay')
                   : gs.pendingDaySummary.actionsUsed > 0
-                  ? t('daySummary.partialDay', { used: gs.pendingDaySummary.actionsUsed, station: gs.pendingDaySummary.station })
-                  : t('daySummary.noAction', { station: gs.pendingDaySummary.station })}
+                  ? t('daySummary.partialDay', { used: gs.pendingDaySummary.actionsUsed, station: translateStationName(gs.pendingDaySummary.station) })
+                  : t('daySummary.noAction', { station: translateStationName(gs.pendingDaySummary.station) })}
               </div>
             </div>
           )}
@@ -1092,7 +1092,7 @@ export function StationHub() {
             onClick={() => { spendAction(); startCombat(stalkerToEnemy(gs.stalker!)) }}
             disabled={gs.actionsToday >= 3}
           >
-            ⚔ L'affronter — coûte 1 action
+            {t('confrontStalker')}
           </button>
         </div>
       )}
@@ -1128,7 +1128,7 @@ export function StationHub() {
       {/* Station info */}
       <div className="px-box">
         <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-          <div className="t-lg t-bright">{station.name}</div>
+          <div className="t-lg t-bright">{translateStationName(station.name)}</div>
           <div className={`tag t-xs ${DANGER_CLS[station.danger]}`}>{DANGER_LABEL[station.danger]}</div>
         </div>
         <div className="t-xs t-dim" style={{ lineHeight: '2' }}>{station.description}</div>
@@ -1138,7 +1138,7 @@ export function StationHub() {
           </div>
         ) : null })()}
         <div className="t-xs t-dim mt4">
-          Jour {gs.day} · {gs.actionsToday}/3 actions · <span style={{ color: gs.class.color }}>{gs.class.name}</span>
+          {t('dayActionsLine', { day: gs.day, actions: gs.actionsToday })} <span style={{ color: gs.class.color }}>{translateClassName(gs.class.name)}</span>
           {gs.equippedWeapon && <> · <span className="t-orange">{translateWeaponName(gs.equippedWeapon.name)}</span></>}
           {gs.equippedArmor  && <> · <span style={{ color: 'var(--blue)' }}>{translateArmorName(gs.equippedArmor.name)}</span></>}
         </div>
@@ -1146,7 +1146,7 @@ export function StationHub() {
         {gs.nexusTrackerUnlocked === false ? (
           <div className="row mt4" style={{ gap: '6px', alignItems: 'center' }}>
             <span className="t-xs t-dim" style={{ fontStyle: 'italic' }}>
-              ◈ Termine ta première mission pour révéler ce que cache le vide…
+              {t('nexusTrackerTeaser')}
             </span>
           </div>
         ) : (
@@ -1357,7 +1357,7 @@ export function StationHub() {
             {alreadyDone ? (
               <div className="t-xs t-green">{t('lieutenant.defeated')}</div>
             ) : !prevDone ? (
-              <div className="t-xs t-red">{t('lieutenant.orderRequired', { order: subBoss.order - 1, name: prevSubBoss ? translateEnemyName(prevSubBoss.name) : undefined, station: prevSubBoss?.station })}</div>
+              <div className="t-xs t-red">{t('lieutenant.orderRequired', { order: subBoss.order - 1, name: prevSubBoss ? translateEnemyName(prevSubBoss.name) : undefined, station: prevSubBoss?.station ? translateStationName(prevSubBoss.station) : undefined })}</div>
             ) : subBossResult ? (
               <div className="px-box" style={{ borderColor: subBossResult.success ? 'var(--green)' : 'var(--red)' }}>
                 <div className="t-xs" style={{ color: subBossResult.success ? 'var(--green)' : 'var(--orange)', lineHeight: 2 }}>
@@ -2017,7 +2017,7 @@ export function StationHub() {
               {isDeliveryReady && <span style={{ color: 'var(--green)', fontSize: '8px' }}>{t('questSidebar.deliverTag')}</span>}
             </div>
             <div style={{ fontSize: '9px', color: 'var(--text)', lineHeight: '1.6', marginBottom: '2px' }}>{q.title}</div>
-            <div style={{ fontSize: '8px', color: 'var(--dim)' }}>→ {q.targetStation}</div>
+            <div style={{ fontSize: '8px', color: 'var(--dim)' }}>→ {translateStationName(q.targetStation)}</div>
             {isPatrolHere && patrolProg < 3 && (
               <div style={{ marginTop: '4px', borderLeft: '2px solid var(--cyan)', paddingLeft: '6px', fontSize: '8px', color: 'var(--dim)' }}>
                 {t('questSidebar.patrolProgress', { progress: patrolProg })}
@@ -2040,7 +2040,7 @@ export function StationHub() {
                 <div style={{ color: 'var(--gold)', marginBottom: '6px' }}>{q.title}</div>
                 <div style={{ color: 'var(--dim)', marginBottom: '6px', lineHeight: '1.6', fontSize: '8px' }}>{q.description}</div>
                 <div style={{ color: 'var(--text)' }}>{t('questSidebar.giver')} <span style={{ color: 'var(--cyan)' }}>{q.giver}</span></div>
-                <div style={{ color: 'var(--text)' }}>→ {q.targetStation}</div>
+                <div style={{ color: 'var(--text)' }}>→ {translateStationName(q.targetStation)}</div>
                 {q.targetItem && <div style={{ color: 'var(--cyan)' }}>{t('questSidebar.item', { item: translateGood(q.targetItem) })}</div>}
                 <div style={{ color: 'var(--gold)', marginTop: '4px' }}>{t('questSidebar.reward', { credits: q.creditReward, rep: q.repReward })}</div>
                 {q.dayMult && <div style={{ color: 'var(--orange)', marginTop: '2px' }}>{t('questSidebar.timeLimit')}</div>}
@@ -2056,7 +2056,7 @@ export function StationHub() {
         if (total <= 0) return null
         return (
           <div style={{ marginTop: '8px', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>
-            <div style={{ fontSize: '8px', letterSpacing: '2px', color: 'var(--red)', marginBottom: '4px' }}>DÉPENSES /JOUR : {total} cr</div>
+            <div style={{ fontSize: '8px', letterSpacing: '2px', color: 'var(--red)', marginBottom: '4px' }}>{t('expensesPerDay', { total })}</div>
             {breakdown.map(b => (
               <div key={b.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '8px', color: 'var(--dim)', lineHeight: 1.8 }}>
                 <span>{b.label}</span>

@@ -14,7 +14,7 @@ import { BOSS_STATIONS, getStations } from '../../data/stations'
 import { getTierBoss } from '../../data/enemies'
 import { getSubBossProgress, arePillarSubBossesCleared, getSubBossesForPillar, getLieutenantClueText } from '../../data/subBosses'
 import type { SubBossData } from '../../types'
-import { translateEnemyName } from '../../engine/goodsI18n'
+import { translateEnemyName, translateStationName } from '../../engine/goodsI18n'
 
 type ViewState = 'list' | 'detail'
 
@@ -179,7 +179,7 @@ export function NexusScreen() {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="t-xs t-dim">{t('station')}</span>
-              <span className="t-xs">{f.station}</span>
+              <span className="t-xs">{translateStationName(f.station)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="t-xs t-dim">{t('yourStanding')}</span>
@@ -190,7 +190,7 @@ export function NexusScreen() {
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="t-xs t-dim">{t('currentPosition')}</span>
               <span className="t-xs" style={{ color: isHere ? 'var(--green)' : 'var(--dim)' }}>
-                {isHere ? t('onSite') : gs.currentStation}
+                {isHere ? t('onSite') : translateStationName(gs.currentStation)}
               </span>
             </div>
           </div>
@@ -216,7 +216,7 @@ export function NexusScreen() {
                 return (
                   <div key={sb.id} className="col gap4" style={{ marginBottom: '4px' }}>
                     <div className="t-xs" style={{ color: done ? 'var(--green)' : 'var(--dim)', lineHeight: 2 }}>
-                      {done ? '✓' : '○'} {sb.order}. {known ? translateEnemyName(sb.name) : t('unknownName')} — {known ? sb.station : t('unknownLocation')}
+                      {done ? '✓' : '○'} {sb.order}. {known ? translateEnemyName(sb.name) : t('unknownName')} — {known ? translateStationName(sb.station) : t('unknownLocation')}
                     </div>
                     {!done && sb.id === nextSb?.id && !known && (clueLevels[sb.id] ?? 0) > 0 && (
                       <div className="t-xs" style={{ color: 'var(--cyan)', lineHeight: 1.6, marginLeft: '14px' }}>
@@ -232,7 +232,7 @@ export function NexusScreen() {
                           onChange={e => setGuessInput(prev => ({ ...prev, [sb.id]: e.target.value }))}
                         >
                           <option value="">{t('guessStation')}</option>
-                          {getStations().map(st => <option key={st.name} value={st.name}>{st.name}</option>)}
+                          {getStations().map(st => <option key={st.name} value={st.name}>{translateStationName(st.name)}</option>)}
                         </select>
                         <button className="px-btn px-btn--sm" style={{ width: 'auto' }} onClick={() => submitLieutenantGuess(sb)}>
                           {t('guess')}
@@ -328,7 +328,7 @@ export function NexusScreen() {
 
         {!isOwned && !isHere && !isWarAvailable && (
           <div className="px-box" style={{ borderColor: 'var(--dim)' }}>
-            <div className="t-xs t-dim">{t('mustBeAtBefore')} <span className="t-bright">{f.station}</span> {t('mustBeAtAfter')}</div>
+            <div className="t-xs t-dim">{t('mustBeAtBefore')} <span className="t-bright">{translateStationName(f.station)}</span> {t('mustBeAtAfter')}</div>
           </div>
         )}
 
@@ -456,7 +456,7 @@ export function NexusScreen() {
                   color:       owned ? 'var(--gold)' : angered ? 'var(--red)' : warAvail ? 'var(--orange)' : here ? color : 'var(--dim)',
                   fontSize: '9px'
                 }}>
-                  {owned ? PATH_LABELS[nexusPath[f.idx]!] ?? t('collected') : angered ? t('enemy') : warAvail ? t('recoverable') : here ? t('available') : f.station}
+                  {owned ? PATH_LABELS[nexusPath[f.idx]!] ?? t('collected') : angered ? t('enemy') : warAvail ? t('recoverable') : here ? t('available') : translateStationName(f.station)}
                 </div>
               </div>
               <div className="t-xs t-dim" style={{ lineHeight: '1.8' }}>{f.lore.slice(0, 90)}…</div>

@@ -161,6 +161,10 @@
   "locationHint": "Un joueur attentif reconnaîtra peut-être déjà l'endroit. Sinon, un autre indice viendra plus tard — consultable dans le Nexus.",
   "continueButton": "Continuer",
   "continueArrow": "Continuer →",
+  "confrontStalker": "⚔ L'affronter — coûte 1 action",
+  "dayActionsLine": "Jour {{day}} · {{actions}}/3 actions ·",
+  "nexusTrackerTeaser": "◈ Termine ta première mission pour révéler ce que cache le vide…",
+  "expensesPerDay": "DÉPENSES /JOUR : {{total}} cr",
   "negoOutcome": {
     "header": "— NÉGOCIATION TERMINÉE —",
     "result": "Résultat : {{label}}",

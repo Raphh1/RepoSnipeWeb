@@ -2,6 +2,7 @@ import type { GameState, NexusWar } from '../types'
 import { shiftPillar } from './memoryEvents'
 import { arePillarSubBossesCleared, getSubBossProgress } from '../data/subBosses'
 import i18n from '../i18n/config'
+import { translateStationName } from './goodsI18n'
 
 const nx = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'nexus', ...params })
 
@@ -428,7 +429,7 @@ export function getFragmentStatusLabel(gs: GameState, idx: number): string {
   if ((gs.nexusFragments ?? []).includes(idx)) return nx('fragmentStatus.collected')
   if (getWarAvailableFragments(gs).includes(idx)) return nx('fragmentStatus.recoverableWar')
   if (gs.currentStation === getNexusFragments()[idx].station) return nx('fragmentStatus.available')
-  return getNexusFragments()[idx].station
+  return translateStationName(getNexusFragments()[idx].station)
 }
 
 export function getPillarStandingLabel(gs: GameState, pillar: keyof NonNullable<GameState['pillarStanding']>): string {

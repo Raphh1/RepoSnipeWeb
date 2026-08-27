@@ -161,6 +161,10 @@
   "locationHint": "An attentive player might already recognize the place. Otherwise, another clue will come later — check the Nexus.",
   "continueButton": "Continue",
   "continueArrow": "Continue →",
+  "confrontStalker": "⚔ Confront them — costs 1 action",
+  "dayActionsLine": "Day {{day}} · {{actions}}/3 actions ·",
+  "nexusTrackerTeaser": "◈ Finish your first mission to reveal what the void is hiding…",
+  "expensesPerDay": "EXPENSES /DAY: {{total}} cr",
   "negoOutcome": {
     "header": "— NEGOTIATION OVER —",
     "result": "Result: {{label}}",

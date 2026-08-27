@@ -1,5 +1,6 @@
 import { useGameStore } from '../../store/gameStore'
 import type { JournalEntry } from '../../types'
+import { translateStationName } from '../../engine/goodsI18n'
 
 const CATEGORY_COLORS: Record<JournalEntry['category'], string> = {
   combat:   'var(--red)',
@@ -54,7 +55,7 @@ export function JournalScreen() {
                   <span className="tag" style={{ borderColor: color, color, fontSize: '8px', letterSpacing: '1px' }}>
                     {CATEGORY_LABELS[entry.category]}
                   </span>
-                  <span className="t-xs t-dim">{entry.station}</span>
+                  <span className="t-xs t-dim">{translateStationName(entry.station)}</span>
                 </div>
                 <span className="t-xs t-dim">Jour {entry.day}</span>
               </div>

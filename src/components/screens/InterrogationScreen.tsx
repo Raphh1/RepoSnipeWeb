@@ -4,6 +4,7 @@ import { useGameStore } from '../../store/gameStore'
 import { addDecision, shiftPillar } from '../../engine/memoryEvents'
 import { addJournal } from '../../engine/journal'
 import { drawInterrogation, INTERROGATION_PASS_SCORE, INTERROGATION_TOTAL, type InterrogationQuestion } from '../../data/interrogationQuestions'
+import { translateStationName } from '../../engine/goodsI18n'
 
 type Phase = 'intro' | 'choices' | 'quiz' | 'result'
 
@@ -300,7 +301,7 @@ export function InterrogationScreen() {
             if (roll < 0.65) {
               free(
                 t('choices.bribeSuccess', { amount: bribeAmount }),
-                { credits: gs.credits - bribeAmount, journal: addJournal(gs, t('choices.bribeSuccessJournal', { station: gs.currentStation, amount: bribeAmount }), 'decision') }
+                { credits: gs.credits - bribeAmount, journal: addJournal(gs, t('choices.bribeSuccessJournal', { station: translateStationName(gs.currentStation), amount: bribeAmount }), 'decision') }
               )
             } else {
               patch({ credits: gs.credits - bribeAmount })

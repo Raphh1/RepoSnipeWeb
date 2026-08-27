@@ -6,7 +6,7 @@ import { getWeapons } from '../../data/weapons'
 import { getArmors } from '../../data/armors'
 import { getFactions } from '../../engine/factions'
 import { getClasses } from '../../data/classes'
-import { translateGood, translateWeaponName, translateArmorName } from '../../engine/goodsI18n'
+import { translateGood, translateWeaponName, translateArmorName, translateClassName, translateStationName } from '../../engine/goodsI18n'
 
 type WikiTab = 'classes' | 'stations' | 'armes' | 'armures' | 'factions' | 'marchandises'
 
@@ -57,7 +57,7 @@ export function WikiScreen() {
         {tab === 'classes' && getClasses().map(c => (
           <div key={c.name} className="px-box">
             <div className="row" style={{ justifyContent: 'space-between', marginBottom: '6px' }}>
-              <div className="t-sm" style={{ color: c.color }}>{c.icon} {c.name}</div>
+              <div className="t-sm" style={{ color: c.color }}>{c.icon} {translateClassName(c.name)}</div>
               <div className="tag t-xs" style={{ color: c.tier === 'bad' ? 'var(--red)' : c.tier === 'good' ? 'var(--gold)' : 'var(--text-dim)', borderColor: 'currentColor' }}>
                 {t(`tier.${c.tier === 'bad' ? 'bad' : c.tier === 'good' ? 'good' : 'balanced'}`)}
               </div>
@@ -65,7 +65,7 @@ export function WikiScreen() {
             <div className="t-xs t-dim mb4">{c.description}</div>
             <div className="t-xs" style={{ color: 'var(--cyan)' }}>{c.bonusDesc}</div>
             <div className="t-xs t-dim mt4">
-              {t('classStart', { station: c.startStation, credits: c.startCredits, fuel: c.startFuel, maxFuel: c.maxFuel, hp: c.startHp })}
+              {t('classStart', { station: translateStationName(c.startStation), credits: c.startCredits, fuel: c.startFuel, maxFuel: c.maxFuel, hp: c.startHp })}
             </div>
           </div>
         ))}
@@ -75,7 +75,7 @@ export function WikiScreen() {
           return (
             <div key={s.name} className={`px-box ${!visited ? '' : 'px-box--hi'}`} style={{ opacity: visited ? 1 : 0.5 }}>
               <div className="row" style={{ justifyContent: 'space-between', marginBottom: '4px' }}>
-                <div className="t-sm t-bright">{s.name}</div>
+                <div className="t-sm t-bright">{translateStationName(s.name)}</div>
                 <div className={`tag t-xs danger-${s.danger}`}>{t(`danger.${DANGER_KEYS[s.danger]}`)}</div>
               </div>
               <div className="t-xs t-dim mb4">{s.description}</div>

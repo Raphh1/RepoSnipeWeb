@@ -1,6 +1,7 @@
 import type { WeaponData, ArmorData, GameState } from '../types'
 import { grantArmor } from './armors'
 import i18n from '../i18n/config'
+import { translateStationName } from '../engine/goodsI18n'
 
 const eq = (key: string, params?: Record<string, unknown>) => i18n.t(key, { ns: 'equipmentQuests', ...params })
 
@@ -223,7 +224,7 @@ export function canStartQuest(gs: GameState, quest: EquipmentQuest): { ok: boole
         if ((gs.combatsWon ?? 0) < req.min) missing.push(eq('missing.combatsWon', { value: gs.combatsWon ?? 0, needed: req.min }))
         break
       case 'visitStation':
-        if (!gs.visitedStations.includes(req.station)) missing.push(eq('missing.visitStation', { station: req.station }))
+        if (!gs.visitedStations.includes(req.station)) missing.push(eq('missing.visitStation', { station: translateStationName(req.station) }))
         break
       case 'bossKill':
         if (!gs.stationBossesBeaten.includes(req.bossName)) missing.push(eq('missing.bossKill', { boss: req.bossName }))

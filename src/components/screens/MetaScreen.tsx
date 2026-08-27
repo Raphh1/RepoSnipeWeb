@@ -3,6 +3,7 @@ import { useMetaStore } from '../../store/metaStore'
 import { useGameStore } from '../../store/gameStore'
 import { getMetaUnlocks } from '../../data/metaUnlocks'
 import type { MetaCategory } from '../../types/meta'
+import { translateClassName } from '../../engine/goodsI18n'
 
 const CAT_COLORS: Record<MetaCategory, string> = {
   survie:   'var(--red)',
@@ -150,7 +151,7 @@ export function MetaScreen({ onBack, selectedForRun, onToggleRun }: Props) {
               <div key={i} className="px-box" style={{ borderColor: run.victory ? 'var(--gold)' : 'var(--border)', padding: '6px 12px' }}>
                 <div className="row" style={{ justifyContent: 'space-between' }}>
                   <span className="t-xs" style={{ color: run.victory ? 'var(--gold)' : 'var(--text)' }}>
-                    {run.victory ? t('victory') : t('death')} — {run.className}
+                    {run.victory ? t('victory') : t('death')} — {translateClassName(run.className)}
                   </span>
                   <span className="t-xs t-dim">{run.date}</span>
                 </div>

@@ -2,6 +2,7 @@ import type { GameState } from '../types'
 import type { WanderEvent } from './exploration'
 import { getAccessibleStations } from '../data/stations'
 import i18n from '../i18n/config'
+import { translateStationName } from './goodsI18n'
 
 const rng = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min
 const pick = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)]
@@ -53,16 +54,16 @@ export const MEMORY_EVENT_DEFS: MemoryEventDef[] = [
           const t = pickTarget(gs)
           const q = t ? {
             id: Math.random().toString(36).slice(2,8),
-            title: me('cadorReturns.questTitle', { station: t.name }),
+            title: me('cadorReturns.questTitle', { station: translateStationName(t.name) }),
             giver: me('cadorReturns.questGiver'),
             giverStation: gs.currentStation,
             type: 'bounty' as const,
-            description: me('cadorReturns.questDesc', { station: t.name }),
+            description: me('cadorReturns.questDesc', { station: translateStationName(t.name) }),
             targetStation: t.name,
             creditReward: 4500,
             repReward: 30,
           } : undefined
-          return { gs: { reputation: gs.reputation + 10 }, message: me('cadorReturns.c0Msg', { targetSuffix: t ? me('cadorReturns.c0TargetSuffix', { station: t.name }) : '' }), quest: q }
+          return { gs: { reputation: gs.reputation + 10 }, message: me('cadorReturns.c0Msg', { targetSuffix: t ? me('cadorReturns.c0TargetSuffix', { station: translateStationName(t.name) }) : '' }), quest: q }
         }},
         { label: me('cadorReturns.c1'), result: (gs) => ({
           gs: { credits: gs.credits + rng(300, 700) },
@@ -171,16 +172,16 @@ export const MEMORY_EVENT_DEFS: MemoryEventDef[] = [
           if (!t) return { gs: { credits: gs.credits + rng(200, 500) }, message: me('escapeLegend.c2NoTarget') }
           const q = {
             id: Math.random().toString(36).slice(2,8),
-            title: me('escapeLegend.questTitle', { station: t.name }),
+            title: me('escapeLegend.questTitle', { station: translateStationName(t.name) }),
             giver: me('escapeLegend.questGiver'),
             giverStation: gs.currentStation,
             type: 'extraction' as const,
-            description: me('escapeLegend.questDesc', { station: t.name }),
+            description: me('escapeLegend.questDesc', { station: translateStationName(t.name) }),
             targetStation: t.name,
             creditReward: 5000,
             repReward: 20,
           }
-          return { gs: { credits: gs.credits + rng(300, 600) }, message: me('escapeLegend.c2Msg', { station: t.name }), quest: q }
+          return { gs: { credits: gs.credits + rng(300, 600) }, message: me('escapeLegend.c2Msg', { station: translateStationName(t.name) }), quest: q }
         }}
       ]
     })
@@ -199,11 +200,11 @@ export const MEMORY_EVENT_DEFS: MemoryEventDef[] = [
           const t = pickTarget(gs)
           const q = t ? {
             id: Math.random().toString(36).slice(2,8),
-            title: me('pistisRecommends.questTitle', { station: t.name }),
+            title: me('pistisRecommends.questTitle', { station: translateStationName(t.name) }),
             giver: me('pistisRecommends.questGiver'),
             giverStation: gs.currentStation,
             type: 'delivery' as const,
-            description: me('pistisRecommends.questDesc', { station: t.name }),
+            description: me('pistisRecommends.questDesc', { station: translateStationName(t.name) }),
             targetStation: t.name,
             creditReward: 3800,
             repReward: 15,
@@ -232,11 +233,11 @@ export const MEMORY_EVENT_DEFS: MemoryEventDef[] = [
           const t = pickTarget(gs)
           const q = t ? {
             id: Math.random().toString(36).slice(2,8),
-            title: me('caelMessage.questTitle', { station: t.name }),
+            title: me('caelMessage.questTitle', { station: translateStationName(t.name) }),
             giver: me('caelMessage.questGiver'),
             giverStation: gs.currentStation,
             type: 'sabotage' as const,
-            description: me('caelMessage.questDesc', { station: t.name }),
+            description: me('caelMessage.questDesc', { station: translateStationName(t.name) }),
             targetStation: t.name,
             creditReward: 6000,
             repReward: -5,
@@ -265,11 +266,11 @@ export const MEMORY_EVENT_DEFS: MemoryEventDef[] = [
           const t = pickTarget(gs)
           const q = t ? {
             id: Math.random().toString(36).slice(2,8),
-            title: me('opportunistRep.questTitle', { station: t.name }),
+            title: me('opportunistRep.questTitle', { station: translateStationName(t.name) }),
             giver: me('opportunistRep.questGiver'),
             giverStation: gs.currentStation,
             type: 'heist' as const,
-            description: me('opportunistRep.questDesc', { station: t.name }),
+            description: me('opportunistRep.questDesc', { station: translateStationName(t.name) }),
             targetStation: t.name,
             creditReward: 3500,
             repReward: -8,

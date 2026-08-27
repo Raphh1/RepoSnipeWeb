@@ -58,5 +58,22 @@
   "seigneurDeGuerre": {
     "description": "Craint partout. Bienvenu nulle part de paisible. Les pirates t'évitent. Les marchands aussi.",
     "bonusDesc": "Pirates auto-éliminés · Intimidation combat · +50% attaque · ⚠ Stations paisibles refusent"
+  },
+  "names": {
+    "Vagabond": "Vagabond",
+    "Ferrailleur": "Ferrailleur",
+    "Endetté": "Endetté",
+    "Accro": "Accro",
+    "Rayane": "Rayane",
+    "Maudit": "Maudit",
+    "Marchand": "Marchand",
+    "Mécanicien": "Mécanicien",
+    "Explorateur": "Explorateur",
+    "Médecin": "Médecin",
+    "Contrebandier": "Contrebandier",
+    "Vétéran": "Vétéran",
+    "Héritier": "Héritier",
+    "Hackeur": "Hackeur",
+    "Seigneur de guerre": "Seigneur de guerre"
   }
 }
